@@ -58,9 +58,7 @@ export interface ServiceFormData {
   services: string[];
 }
 
-// Add to your existing types in src/types/property.ts
-
-// User Types
+// User Types - UPDATED WITH VERIFICATION FIELDS
 export interface User {
   id: string;
   name: string;
@@ -71,6 +69,24 @@ export interface User {
   listings: string[];
   createdAt: Date;
   type: 'buyer' | 'seller' | 'service_provider' | 'admin';
+  
+  // ✅ ADD THESE NEW FIELDS TO MATCH BACKEND
+  _id?: string;
+  fullName?: string;
+  userType?: 'farmer' | 'landowner' | 'buyer' | 'service provider';
+  county?: string;
+  isVerified?: boolean;
+  
+  // ✅ ADD VERIFICATION OBJECT
+  verification?: {
+    phoneVerified: boolean;
+    idVerified: boolean;
+    selfieVerified: boolean;
+    ownershipVerified: boolean;
+    businessVerified: boolean;
+    trustScore: number;
+    verificationLevel: 'basic' | 'verified' | 'premium';
+  };
 }
 
 // Update the AuthContextType interface
@@ -79,8 +95,8 @@ export interface AuthContextType {
   login: (phone: string, name: string) => void;
   logout: () => void;
   updateProfile: (userData: Partial<User>) => void;
-  register: (userData: UserFormData) => Promise<User>; // ADD THIS LINE
-  loading: boolean; // ADD THIS LINE
+  register: (userData: UserFormData) => Promise<User>;
+  loading: boolean;
 }
 
 // Update the UserFormData interface
@@ -89,7 +105,7 @@ export interface UserFormData {
   phone: string;
   email?: string;
   type: 'buyer' | 'seller' | 'service_provider';
-  county: string; // ADD THIS LINE
+  county: string;
   constituency?: string;
   ward?: string;
 }
