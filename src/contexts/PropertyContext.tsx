@@ -5,7 +5,7 @@ import { API_ENDPOINTS, apiRequest } from '../config/api';
 interface PropertyContextType {
   properties: Property[];
   serviceListings: ServiceListing[];
-  addProperty: (propertyData: PropertyFormData) => void;
+  addProperty: (propertyData: PropertyFormData) => Promise<void>;
   addService: (serviceData: ServiceFormData) => void;
   getPropertiesByCounty: (county: string) => Property[];
   getServicesByType: (type: 'equipment' | 'agrovet' | 'professional_services', county?: string) => ServiceListing[];
@@ -41,28 +41,10 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({ children }) 
     setLoading(true);
     try {
       const response = await apiRequest(API_ENDPOINTS.properties.getAll);
-      setProperties(response.data || []);
+      setProperties(response.data || response || []);
     } catch (error) {
       console.error('Error fetching properties:', error);
-      // Fallback to sample data if API fails
-      setProperties([
-        {
-          id: '1',
-          title: '5 Acre Farmland in Kiambu',
-          description: 'Beautiful fertile land suitable for farming, with water access and good road network.',
-          price: 2500000,
-          size: 5,
-          sizeUnit: 'acres',
-          county: 'Kiambu',
-          constituency: 'Kikuyu',
-          contact: '0712345678',
-          images: [],
-          verified: true,
-          listedBy: 'John Kamau',
-          createdAt: new Date('2024-01-15'),
-          type: 'sale'
-        }
-      ]);
+      // Keep existing properties if API fails
     } finally {
       setLoading(false);
     }
@@ -71,9 +53,28 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({ children }) 
   const addProperty = async (propertyData: PropertyFormData) => {
     setLoading(true);
     try {
-      // TODO: Replace with real API call once we test the form
-      console.log('Would create property:', propertyData);
+      // ✅ FIXED: Actually call the backend API
+      const response = await apiRequest(API_ENDPOINTS.properties.create, {
+        method: 'POST',
+        body: JSON.stringify({
+          ...propertyData,
+          price: parseInt(propertyData.price),
+          size: parseInt(propertyData.size),
+          // Add any other required fields your backend expects
+        })
+      });
+
+      // ✅ Refresh the properties list to include the new one
+      await refreshProperties();
       
+      // ✅ Show success message
+      alert('Property listed successfully! It will appear after verification.');
+      
+    } catch (error) {
+      console.error('Error creating property:', error);
+      alert('Error creating property. Please try again.');
+      
+      // ✅ Fallback: Add locally if API fails (for demo)
       const newProperty: Property = {
         id: Math.random().toString(36).substr(2, 9),
         ...propertyData,
@@ -86,12 +87,7 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({ children }) 
       };
       
       setProperties(prev => [newProperty, ...prev]);
-      
-      // Show success message
-      alert('Property listed successfully! (Backend integration coming soon)');
-    } catch (error) {
-      console.error('Error creating property:', error);
-      alert('Error creating property. Please try again.');
+      alert('Property listed locally (backend connection failed)');
     } finally {
       setLoading(false);
     }
