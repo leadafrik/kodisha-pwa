@@ -1,0 +1,161 @@
+import React from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { useProperties } from '../contexts/PropertyContext';
+import { Link, useNavigate } from 'react-router-dom';
+
+const Profile: React.FC = () => {
+  const { user, logout } = useAuth();
+  const { properties, serviceListings } = useProperties();
+  const navigate = useNavigate();
+
+  if (!user) {
+    navigate('/login');
+    return null;
+  }
+
+  const userProperties = properties.filter(p => p.listedBy === 'Current User');
+  const userServices = serviceListings.filter(s => s.contact === user.phone);
+
+  const getVerificationBadge = () => {
+    switch (user.verificationStatus) {
+      case 'verified':
+        return <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">✅ Verified</span>;
+      case 'pending':
+        return <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">⏳ Pending</span>;
+      default:
+        return <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold">❌ Not Verified</span>;
+    }
+  };
+
+  const getUserTypeLabel = () => {
+    switch (user.type) {
+      case 'buyer':
+        return '🏠 Land Buyer/Renter';
+      case 'seller':
+        return '🏞️ Land Seller';
+      case 'service_provider':
+        return '🚜 Service Provider';
+      default:
+        return '👤 User';
+    }
+  };
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">{user.name}</h1>
+            <div className="flex items-center gap-4 mb-4">
+              {getVerificationBadge()}
+              <span className="text-gray-600">{getUserTypeLabel()}</span>
+            </div>
+            <p className="text-gray-600">📞 {user.phone}</p>
+            {user.email && <p className="text-gray-600">📧 {user.email}</p>}
+          </div>
+          <button
+            onClick={logout}
+            className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition duration-300"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white rounded-xl shadow-md p-6 text-center">
+          <div className="text-3xl font-bold text-green-600 mb-2">{userProperties.length}</div>
+          <div className="text-gray-600">Land Listings</div>
+        </div>
+        <div className="bg-white rounded-xl shadow-md p-6 text-center">
+          <div className="text-3xl font-bold text-blue-600 mb-2">{userServices.length}</div>
+          <div className="text-gray-600">Service Listings</div>
+        </div>
+        <div className="bg-white rounded-xl shadow-md p-6 text-center">
+          <div className="text-3xl font-bold text-purple-600 mb-2">
+            {user.verificationStatus === 'verified' ? 'Verified' : 'Not Verified'}
+          </div>
+          <div className="text-gray-600">Account Status</div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">Quick Actions</h2>
+        <div className="grid md:grid-cols-2 gap-4">
+          <Link
+            to="/list-property"
+            className="bg-green-600 text-white p-6 rounded-xl hover:bg-green-700 transition duration-300 text-center"
+          >
+            <div className="text-2xl mb-2">🏞️</div>
+            <div className="font-semibold text-lg">List Land</div>
+            <div className="text-green-100 text-sm">Sell or rent out your land</div>
+          </Link>
+          <Link
+            to="/list-service"
+            className="bg-blue-600 text-white p-6 rounded-xl hover:bg-blue-700 transition duration-300 text-center"
+          >
+            <div className="text-2xl mb-2">🚜</div>
+            <div className="font-semibold text-lg">List Service</div>
+            <div className="text-blue-100 text-sm">Offer equipment or services</div>
+          </Link>
+        </div>
+      </div>
+
+      {/* Recent Listings */}
+      <div className="grid md:grid-cols-2 gap-8">
+        {/* Land Listings */}
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">Your Land Listings</h3>
+          {userProperties.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <div className="text-4xl mb-2">🏞️</div>
+              <p>No land listings yet</p>
+              <Link to="/list-property" className="text-green-600 font-semibold mt-2 inline-block">
+                List your first property →
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {userProperties.slice(0, 3).map(property => (
+                <div key={property.id} className="border rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-800">{property.title}</h4>
+                  <p className="text-green-600 font-bold">KSh {property.price.toLocaleString()}</p>
+                  <p className="text-gray-600 text-sm">{property.county} County</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Service Listings */}
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">Your Service Listings</h3>
+          {userServices.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <div className="text-4xl mb-2">🚜</div>
+              <p>No service listings yet</p>
+              <Link to="/list-service" className="text-blue-600 font-semibold mt-2 inline-block">
+                List your first service →
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {userServices.slice(0, 3).map(service => (
+                <div key={service.id} className="border rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-800">{service.name}</h4>
+                  <p className="text-gray-600 text-sm">{service.type}</p>
+                  <p className="text-gray-600 text-sm">{service.location.county} County</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Profile;
