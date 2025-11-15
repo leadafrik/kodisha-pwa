@@ -16,6 +16,7 @@ export interface Property {
   type: 'sale' | 'rental';
 }
 
+// ✅ UPDATED: Simplified since we're using FormData directly
 export interface PropertyFormData {
   title: string;
   description: string;
@@ -26,6 +27,7 @@ export interface PropertyFormData {
   constituency: string;
   contact: string;
   type: 'sale' | 'rental';
+  // Removed images field since we're using FormData
 }
 
 // Service Types

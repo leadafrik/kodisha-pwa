@@ -15,24 +15,52 @@ const ListProperty: React.FC = () => {
     contact: '',
     type: 'sale'
   });
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    addProperty(formData);
-    alert('Property listed successfully! It will appear after verification.');
+    setUploading(true);
     
-    // Reset form
-    setFormData({
-      title: '',
-      description: '',
-      price: '',
-      size: '',
-      sizeUnit: 'acres',
-      county: '',
-      constituency: '',
-      contact: '',
-      type: 'sale'
-    });
+    try {
+      // Create FormData for file upload
+      const submitData = new FormData();
+      submitData.append('title', formData.title);
+      submitData.append('description', formData.description);
+      submitData.append('price', formData.price);
+      submitData.append('size', formData.size);
+      submitData.append('sizeUnit', formData.sizeUnit);
+      submitData.append('county', formData.county);
+      submitData.append('constituency', formData.constituency);
+      submitData.append('contact', formData.contact);
+      submitData.append('type', formData.type);
+      
+      // Append images
+      selectedImages.forEach((image) => {
+        submitData.append('images', image);
+      });
+
+      await addProperty(submitData);
+      alert('Property listed successfully! It will appear after verification.');
+      
+      // Reset form
+      setFormData({
+        title: '',
+        description: '',
+        price: '',
+        size: '',
+        sizeUnit: 'acres',
+        county: '',
+        constituency: '',
+        contact: '',
+        type: 'sale'
+      });
+      setSelectedImages([]);
+    } catch (error) {
+      alert('Error listing property. Please try again.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -40,6 +68,18 @@ const ListProperty: React.FC = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const newImages = Array.from(files).slice(0, 5 - selectedImages.length);
+      setSelectedImages(prev => [...prev, ...newImages]);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setSelectedImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const kenyaCounties = [
@@ -202,22 +242,68 @@ const ListProperty: React.FC = () => {
             <p className="text-sm text-gray-500 mt-1">Enter your 10-digit Kenyan phone number</p>
           </div>
 
-          {/* Image Upload Placeholder */}
+          {/* Image Upload - REPLACED THE PLACEHOLDER */}
           <div className="md:col-span-2">
             <label className="block text-gray-700 mb-2">Property Images</label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-              <p className="text-gray-500">📷 Image upload feature coming soon</p>
-              <p className="text-sm text-gray-400 mt-2">You'll be able to upload multiple photos of your land</p>
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-400 transition-colors">
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+                id="image-upload"
+              />
+              <label htmlFor="image-upload" className="cursor-pointer">
+                <div className="text-4xl mb-2">📷</div>
+                <p className="font-semibold text-gray-700">Upload Property Images</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Click to select images or drag and drop
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Up to 5 images • JPG, PNG, GIF • Max 5MB each
+                </p>
+              </label>
             </div>
+            
+            {/* Selected Images Preview */}
+            {selectedImages.length > 0 && (
+              <div className="mt-4">
+                <p className="text-sm text-gray-600 mb-2">
+                  Selected images ({selectedImages.length}/5):
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  {selectedImages.map((file, index) => (
+                    <div key={index} className="relative bg-gray-100 rounded-lg p-2">
+                      <div className="text-xs text-gray-700 max-w-24 truncate">
+                        📷 {file.name}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
         </div>
 
         <button
           type="submit"
-          className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold text-lg hover:bg-green-700 transition duration-300 mt-6"
+          disabled={uploading}
+          className={`w-full py-3 rounded-lg font-semibold text-lg transition duration-300 mt-6 ${
+            uploading 
+              ? 'bg-gray-400 cursor-not-allowed' 
+              : 'bg-green-600 hover:bg-green-700 text-white'
+          }`}
         >
-          List Property
+          {uploading ? 'Uploading...' : 'List Property'}
         </button>
       </form>
     </div>
