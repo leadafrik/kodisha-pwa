@@ -6,14 +6,26 @@ export interface Property {
   size: number;
   sizeUnit: 'acres' | 'hectares';
   county: string;
-  constituency?: string;
-  ward?: string;
+  constituency: string; // ✅ CHANGED: Made required
+  ward: string; // ✅ CHANGED: Made required
   contact: string;
   images: string[];
   verified: boolean;
   listedBy: string;
   createdAt: Date;
   type: 'sale' | 'rental';
+  
+  // ✅ ADDED: All new agricultural fields
+  approximateLocation: string;
+  soilType: string;
+  waterAvailability: string;
+  previousCrops: string;
+  organicCertified: boolean;
+  availableFrom: string;
+  availableTo: string;
+  minLeasePeriod: number;
+  maxLeasePeriod: number;
+  preferredCrops: string;
 }
 
 // ✅ UPDATED: Added all the new fields from your form
@@ -25,17 +37,17 @@ export interface PropertyFormData {
   sizeUnit: 'acres' | 'hectares';
   county: string;
   constituency: string;
-  ward: string; // ✅ ADDED
-  approximateLocation: string; // ✅ ADDED
-  soilType: string; // ✅ ADDED
-  waterAvailability: string; // ✅ ADDED
-  previousCrops: string; // ✅ ADDED
-  organicCertified: boolean; // ✅ ADDED
-  availableFrom: string; // ✅ ADDED
-  availableTo: string; // ✅ ADDED
-  minLeasePeriod: string; // ✅ ADDED
-  maxLeasePeriod: string; // ✅ ADDED
-  preferredCrops: string; // ✅ ADDED
+  ward: string;
+  approximateLocation: string;
+  soilType: string;
+  waterAvailability: string;
+  previousCrops: string;
+  organicCertified: boolean;
+  availableFrom: string;
+  availableTo: string;
+  minLeasePeriod: string;
+  maxLeasePeriod: string;
+  preferredCrops: string;
   contact: string;
   type: 'sale' | 'rental';
   // Removed images field since we're using FormData

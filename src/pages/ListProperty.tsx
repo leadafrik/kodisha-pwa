@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useProperties } from '../contexts/PropertyContext';
 import { PropertyFormData } from '../types/property';
+import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from '../data/kenyaCounties';
 
 const ListProperty: React.FC = () => {
   const { addProperty } = useProperties();
@@ -12,29 +13,60 @@ const ListProperty: React.FC = () => {
     sizeUnit: 'acres',
     county: '',
     constituency: '',
-    ward: '', // ✅ ADDED
-    approximateLocation: '', // ✅ ADDED
-    soilType: 'loam', // ✅ ADDED
-    waterAvailability: 'rain-fed', // ✅ ADDED
-    previousCrops: '', // ✅ ADDED
-    organicCertified: false, // ✅ ADDED
-    availableFrom: '', // ✅ ADDED
-    availableTo: '', // ✅ ADDED
-    minLeasePeriod: '1', // ✅ ADDED
-    maxLeasePeriod: '12', // ✅ ADDED
-    preferredCrops: '', // ✅ ADDED
+    ward: '',
+    approximateLocation: '',
+    soilType: 'loam',
+    waterAvailability: 'rain-fed',
+    previousCrops: '',
+    organicCertified: false,
+    availableFrom: '',
+    availableTo: '',
+    minLeasePeriod: '1',
+    maxLeasePeriod: '12',
+    preferredCrops: '',
     contact: '',
     type: 'sale'
   });
+  
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [constituencies, setConstituencies] = useState<{value: string; label: string}[]>([]);
+  const [wards, setWards] = useState<{value: string; label: string}[]>([]);
+
+  useEffect(() => {
+    if (formData.county) {
+      const countyConstituencies = getConstituenciesByCounty(formData.county);
+      setConstituencies(countyConstituencies);
+      setFormData(prev => ({
+        ...prev,
+        constituency: '',
+        ward: ''
+      }));
+      setWards([]);
+    } else {
+      setConstituencies([]);
+      setWards([]);
+    }
+  }, [formData.county]);
+
+  useEffect(() => {
+    if (formData.county && formData.constituency) {
+      const constituencyWards = getWardsByConstituency(formData.county, formData.constituency);
+      setWards(constituencyWards);
+      setFormData(prev => ({
+        ...prev,
+        ward: ''
+      }));
+    } else {
+      setWards([]);
+    }
+  }, [formData.county, formData.constituency]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setUploading(true);
     
     try {
-      // Create FormData for file upload
       const submitData = new FormData();
       submitData.append('title', formData.title);
       submitData.append('description', formData.description);
@@ -43,21 +75,20 @@ const ListProperty: React.FC = () => {
       submitData.append('sizeUnit', formData.sizeUnit);
       submitData.append('county', formData.county);
       submitData.append('constituency', formData.constituency);
-      submitData.append('ward', formData.ward); // ✅ ADDED
-      submitData.append('approximateLocation', formData.approximateLocation); // ✅ ADDED
-      submitData.append('soilType', formData.soilType); // ✅ ADDED
-      submitData.append('waterAvailability', formData.waterAvailability); // ✅ ADDED
-      submitData.append('previousCrops', formData.previousCrops); // ✅ ADDED
-      submitData.append('organicCertified', formData.organicCertified.toString()); // ✅ ADDED
-      submitData.append('availableFrom', formData.availableFrom); // ✅ ADDED
-      submitData.append('availableTo', formData.availableTo); // ✅ ADDED
-      submitData.append('minLeasePeriod', formData.minLeasePeriod); // ✅ ADDED
-      submitData.append('maxLeasePeriod', formData.maxLeasePeriod); // ✅ ADDED
-      submitData.append('preferredCrops', formData.preferredCrops); // ✅ ADDED
+      submitData.append('ward', formData.ward);
+      submitData.append('approximateLocation', formData.approximateLocation);
+      submitData.append('soilType', formData.soilType);
+      submitData.append('waterAvailability', formData.waterAvailability);
+      submitData.append('previousCrops', formData.previousCrops);
+      submitData.append('organicCertified', formData.organicCertified.toString());
+      submitData.append('availableFrom', formData.availableFrom);
+      submitData.append('availableTo', formData.availableTo);
+      submitData.append('minLeasePeriod', formData.minLeasePeriod);
+      submitData.append('maxLeasePeriod', formData.maxLeasePeriod);
+      submitData.append('preferredCrops', formData.preferredCrops);
       submitData.append('contact', formData.contact);
       submitData.append('type', formData.type);
       
-      // Append images
       selectedImages.forEach((image) => {
         submitData.append('images', image);
       });
@@ -65,7 +96,6 @@ const ListProperty: React.FC = () => {
       await addProperty(submitData);
       alert('Property listed successfully! It will appear after verification.');
       
-      // Reset form
       setFormData({
         title: '',
         description: '',
@@ -74,21 +104,23 @@ const ListProperty: React.FC = () => {
         sizeUnit: 'acres',
         county: '',
         constituency: '',
-        ward: '', // ✅ ADDED
-        approximateLocation: '', // ✅ ADDED
-        soilType: 'loam', // ✅ ADDED
-        waterAvailability: 'rain-fed', // ✅ ADDED
-        previousCrops: '', // ✅ ADDED
-        organicCertified: false, // ✅ ADDED
-        availableFrom: '', // ✅ ADDED
-        availableTo: '', // ✅ ADDED
-        minLeasePeriod: '1', // ✅ ADDED
-        maxLeasePeriod: '12', // ✅ ADDED
-        preferredCrops: '', // ✅ ADDED
+        ward: '',
+        approximateLocation: '',
+        soilType: 'loam',
+        waterAvailability: 'rain-fed',
+        previousCrops: '',
+        organicCertified: false,
+        availableFrom: '',
+        availableTo: '',
+        minLeasePeriod: '1',
+        maxLeasePeriod: '12',
+        preferredCrops: '',
         contact: '',
         type: 'sale'
       });
       setSelectedImages([]);
+      setConstituencies([]);
+      setWards([]);
     } catch (error) {
       alert('Error listing property. Please try again.');
     } finally {
@@ -116,14 +148,10 @@ const ListProperty: React.FC = () => {
     setSelectedImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  const kenyaCounties = [
-    'Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Thika', 'Malindi', 'Kitale',
-    'Kericho', 'Kakamega', 'Garissa', 'Wajir', 'Mandera', 'Marsabit', 'Isiolo', 'Meru',
-    'Nyeri', 'Embu', 'Machakos', 'Kitui', 'Makueni', 'Nyandarua', 'Kirinyaga', 'Muranga',
-    'Kiambu', 'Turkana', 'West Pokot', 'Samburu', 'Trans Nzoia', 'Uasin Gishu', 'Elgeyo Marakwet',
-    'Nandi', 'Baringo', 'Laikipia', 'Nakuru', 'Narok', 'Kajiado', 'Bomet', 'Bungoma', 'Busia',
-    'Siaya', 'Kisii', 'Homa Bay', 'Migori', 'Kisumu', 'Vihiga', 'Nyamira'
-  ];
+  const countiesForDropdown = kenyaCounties.map(county => ({
+    value: county.name.toLowerCase(),
+    label: county.name
+  }));
 
   const soilTypes = [
     { value: 'clay', label: 'Clay' },
@@ -149,7 +177,6 @@ const ListProperty: React.FC = () => {
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
-          {/* Property Type */}
           <div className="md:col-span-2">
             <label className="block text-gray-700 mb-2">Lease Type *</label>
             <div className="flex gap-4">
@@ -178,7 +205,6 @@ const ListProperty: React.FC = () => {
             </div>
           </div>
 
-          {/* Property Details */}
           <div className="md:col-span-2">
             <label className="block text-gray-700 mb-2">Farmland Title *</label>
             <input
@@ -205,7 +231,6 @@ const ListProperty: React.FC = () => {
             />
           </div>
 
-          {/* Location Details */}
           <div>
             <label className="block text-gray-700 mb-2">County *</label>
             <select
@@ -216,36 +241,44 @@ const ListProperty: React.FC = () => {
               required
             >
               <option value="">Select County</option>
-              {kenyaCounties.map(county => (
-                <option key={county} value={county.toLowerCase()}>{county}</option>
+              {countiesForDropdown.map(county => (
+                <option key={county.value} value={county.value}>{county.label}</option>
               ))}
             </select>
           </div>
 
           <div>
             <label className="block text-gray-700 mb-2">Constituency *</label>
-            <input
-              type="text"
+            <select
               name="constituency"
               value={formData.constituency}
               onChange={handleChange}
               className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="e.g., Kikuyu Constituency"
               required
-            />
+              disabled={!formData.county}
+            >
+              <option value="">{formData.county ? 'Select Constituency' : 'Select County First'}</option>
+              {constituencies.map(constituency => (
+                <option key={constituency.value} value={constituency.value}>{constituency.label}</option>
+              ))}
+            </select>
           </div>
 
           <div>
             <label className="block text-gray-700 mb-2">Ward *</label>
-            <input
-              type="text"
+            <select
               name="ward"
               value={formData.ward}
               onChange={handleChange}
               className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="e.g., Kikuyu Ward"
               required
-            />
+              disabled={!formData.constituency}
+            >
+              <option value="">{formData.constituency ? 'Select Ward' : 'Select Constituency First'}</option>
+              {wards.map(ward => (
+                <option key={ward.value} value={ward.value}>{ward.label}</option>
+              ))}
+            </select>
           </div>
 
           <div>
@@ -261,7 +294,6 @@ const ListProperty: React.FC = () => {
             />
           </div>
 
-          {/* Agricultural Details */}
           <div>
             <label className="block text-gray-700 mb-2">Soil Type *</label>
             <select
@@ -316,7 +348,6 @@ const ListProperty: React.FC = () => {
             />
           </div>
 
-          {/* Lease Period */}
           <div>
             <label className="block text-gray-700 mb-2">Available From *</label>
             <input
@@ -369,7 +400,6 @@ const ListProperty: React.FC = () => {
             />
           </div>
 
-          {/* Price & Size */}
           <div>
             <label className="block text-gray-700 mb-2">Price (KSh) *</label>
             <input
@@ -413,7 +443,6 @@ const ListProperty: React.FC = () => {
             </div>
           </div>
 
-          {/* Organic Certification */}
           <div className="md:col-span-2">
             <label className="flex items-center">
               <input
@@ -427,7 +456,6 @@ const ListProperty: React.FC = () => {
             </label>
           </div>
 
-          {/* Contact */}
           <div className="md:col-span-2">
             <label className="block text-gray-700 mb-2">Contact Phone *</label>
             <input
@@ -443,7 +471,6 @@ const ListProperty: React.FC = () => {
             <p className="text-sm text-gray-500 mt-1">Enter your 10-digit Kenyan phone number</p>
           </div>
 
-          {/* Image Upload */}
           <div className="md:col-span-2">
             <label className="block text-gray-700 mb-2">Farmland Images</label>
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-400 transition-colors">
@@ -467,7 +494,6 @@ const ListProperty: React.FC = () => {
               </label>
             </div>
             
-            {/* Selected Images Preview */}
             {selectedImages.length > 0 && (
               <div className="mt-4">
                 <p className="text-sm text-gray-600 mb-2">

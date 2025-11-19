@@ -107,7 +107,7 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({ children }) 
       console.error('❌ Error creating property:', error);
       console.log('🔧 Error message:', error.message);
       
-      // ✅ Fallback: Add locally if API fails (for demo)
+      // ✅ UPDATED: Fallback with all new fields
       const title = formData.get('title') as string;
       const description = formData.get('description') as string;
       const price = formData.get('price') as string;
@@ -121,9 +121,20 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({ children }) 
         description,
         price: parseInt(price),
         size: parseInt(size),
-        sizeUnit: 'acres',
+        sizeUnit: (formData.get('sizeUnit') as 'acres' | 'hectares') || 'acres',
         county,
         constituency: formData.get('constituency') as string || '',
+        ward: formData.get('ward') as string || '', // ✅ ADDED
+        approximateLocation: formData.get('approximateLocation') as string || '', // ✅ ADDED
+        soilType: formData.get('soilType') as string || 'loam', // ✅ ADDED
+        waterAvailability: formData.get('waterAvailability') as string || 'rain-fed', // ✅ ADDED
+        previousCrops: formData.get('previousCrops') as string || '', // ✅ ADDED
+        organicCertified: formData.get('organicCertified') === 'true', // ✅ ADDED
+        availableFrom: formData.get('availableFrom') as string || '', // ✅ ADDED
+        availableTo: formData.get('availableTo') as string || '', // ✅ ADDED
+        minLeasePeriod: parseInt(formData.get('minLeasePeriod') as string || '1'), // ✅ ADDED
+        maxLeasePeriod: parseInt(formData.get('maxLeasePeriod') as string || '12'), // ✅ ADDED
+        preferredCrops: formData.get('preferredCrops') as string || '', // ✅ ADDED
         contact: formData.get('contact') as string,
         images: [], // Empty array for local fallback
         verified: false,
