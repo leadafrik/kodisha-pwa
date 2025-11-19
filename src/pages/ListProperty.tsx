@@ -68,27 +68,38 @@ const ListProperty: React.FC = () => {
     
     try {
       const submitData = new FormData();
-      submitData.append('title', formData.title);
-      submitData.append('description', formData.description);
+      
+      // Basic Information
+      submitData.append('title', formData.title.trim());
+      submitData.append('description', formData.description.trim());
       submitData.append('price', formData.price);
       submitData.append('size', formData.size);
-      submitData.append('sizeUnit', formData.sizeUnit);
+      submitData.append('sizeUnit', formData.sizeUnit || 'acres');
+      
+      // Location Information
       submitData.append('county', formData.county);
       submitData.append('constituency', formData.constituency);
       submitData.append('ward', formData.ward);
-      submitData.append('approximateLocation', formData.approximateLocation);
+      submitData.append('approximateLocation', formData.approximateLocation.trim());
+      
+      // Agricultural Details
       submitData.append('soilType', formData.soilType);
       submitData.append('waterAvailability', formData.waterAvailability);
       submitData.append('previousCrops', formData.previousCrops);
       submitData.append('organicCertified', formData.organicCertified.toString());
+      
+      // Lease Details
       submitData.append('availableFrom', formData.availableFrom);
       submitData.append('availableTo', formData.availableTo);
       submitData.append('minLeasePeriod', formData.minLeasePeriod);
       submitData.append('maxLeasePeriod', formData.maxLeasePeriod);
       submitData.append('preferredCrops', formData.preferredCrops);
-      submitData.append('contact', formData.contact);
+      
+      // Contact & Type
+      submitData.append('contact', formData.contact.trim());
       submitData.append('type', formData.type);
       
+      // Images
       selectedImages.forEach((image) => {
         submitData.append('images', image);
       });
@@ -96,6 +107,7 @@ const ListProperty: React.FC = () => {
       await addProperty(submitData);
       alert('Property listed successfully! It will appear after verification.');
       
+      // Reset form
       setFormData({
         title: '',
         description: '',
@@ -123,6 +135,7 @@ const ListProperty: React.FC = () => {
       setWards([]);
     } catch (error) {
       alert('Error listing property. Please try again.');
+      console.error('Submission error:', error);
     } finally {
       setUploading(false);
     }
