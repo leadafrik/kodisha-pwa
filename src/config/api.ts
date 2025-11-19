@@ -1,4 +1,6 @@
-export const API_BASE_URL = 'https://kodisha-backend-vjr9.onrender.com/api';
+// Use environment variable for local development, fallback to production
+export const API_BASE_URL = process.env.REACT_APP_API_URL 
+  || 'https://kodisha-backend-vjr9.onrender.com/api';
 
 export const API_ENDPOINTS = {
   // Authentication (your existing endpoints)
@@ -9,6 +11,8 @@ export const API_ENDPOINTS = {
     // ✅ ADDED VERIFICATION ENDPOINTS
     verifyPhone: `${API_BASE_URL}/auth/verify-phone`,
     resendVerification: `${API_BASE_URL}/auth/resend-verification`,
+    // 🆕 ADMIN REGISTRATION
+    registerAdmin: `${API_BASE_URL}/auth/register-admin`,
   },
   // Properties (your existing endpoints)
   properties: {
@@ -26,6 +30,22 @@ export const API_ENDPOINTS = {
     send: `${API_BASE_URL}/verification/send-verification`,
     verify: `${API_BASE_URL}/verification/verify-phone`,
     status: (userId: string) => `${API_BASE_URL}/verification/status/${userId}`,
+  },
+  // 🆕 ADMIN PANEL ENDPOINTS
+  admin: {
+    dashboard: `${API_BASE_URL}/admin/dashboard`,
+    listings: {
+      getAll: `${API_BASE_URL}/admin/listings`,
+      getPending: `${API_BASE_URL}/admin/listings/pending`,
+      getById: (id: string) => `${API_BASE_URL}/admin/listings/${id}`,
+      verify: (id: string) => `${API_BASE_URL}/admin/listings/${id}/verify`,
+    },
+    users: {
+      getAll: `${API_BASE_URL}/admin/users`,
+      getById: (id: string) => `${API_BASE_URL}/admin/users/${id}`,
+      updateRole: (id: string) => `${API_BASE_URL}/admin/users/${id}/role`,
+      toggleActive: (id: string) => `${API_BASE_URL}/admin/users/${id}/active`,
+    }
   }
 };
 
@@ -40,6 +60,33 @@ export const apiRequest = async (url: string, options: RequestInit = {}) => {
   });
 
   if (!response.ok) {
+    throw new Error(`API error: ${response.status}`);
+  }
+
+  return response.json();
+};
+
+// 🆕 ADMIN API REQUEST HELPER (with authentication)
+export const adminApiRequest = async (url: string, options: RequestInit = {}) => {
+  const token = localStorage.getItem('token');
+  
+  if (!token) {
+    throw new Error('Authentication required for admin access');
+  }
+
+  const response = await fetch(url, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+      ...options.headers,
+    },
+    ...options,
+  });
+
+  if (!response.ok) {
+    if (response.status === 403) {
+      throw new Error('Admin access required');
+    }
     throw new Error(`API error: ${response.status}`);
   }
 

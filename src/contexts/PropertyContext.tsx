@@ -40,12 +40,27 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({ children }) 
   const refreshProperties = async () => {
     setLoading(true);
     try {
+      // 🔧 ADDED DEBUG LINES
+      console.log('=== FRONTEND DEBUG: refreshProperties ===');
+      console.log('🔧 API_ENDPOINTS.properties.getAll:', API_ENDPOINTS.properties.getAll);
+      console.log('🔧 Full URL being called:', API_ENDPOINTS.properties.getAll);
+      
       const response = await fetch(API_ENDPOINTS.properties.getAll);
+      
+      // 🔧 ADDED DEBUG LINES
+      console.log('🔧 Response status:', response.status);
+      console.log('🔧 Response ok?', response.ok);
+      
       if (!response.ok) throw new Error('Failed to fetch properties');
       const data = await response.json();
+      
+      // 🔧 ADDED DEBUG LINES
+      console.log('🔧 Response data received:', data);
+      console.log('🔧 Number of properties:', data.data?.length || data.length || 0);
+      
       setProperties(data.data || data || []);
     } catch (error) {
-      console.error('Error fetching properties:', error);
+      console.error('❌ Error fetching properties:', error);
       // Keep existing properties if API fails
     } finally {
       setLoading(false);
@@ -57,6 +72,11 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({ children }) 
     try {
       console.log('📤 Uploading property with images...');
       
+      // 🔧 ADDED DEBUG LINES
+      console.log('=== FRONTEND DEBUG: addProperty ===');
+      console.log('🔧 API_ENDPOINTS.properties.create:', API_ENDPOINTS.properties.create);
+      console.log('🔧 Full URL being called:', API_ENDPOINTS.properties.create);
+      
       // ✅ Use fetch directly for FormData (not apiRequest helper)
       const response = await fetch(API_ENDPOINTS.properties.create, {
         method: 'POST',
@@ -64,8 +84,13 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({ children }) 
         // Don't set Content-Type header - browser will set it with boundary
       });
 
+      // 🔧 ADDED DEBUG LINES
+      console.log('🔧 Create response status:', response.status);
+      console.log('🔧 Create response ok?', response.ok);
+      
       if (!response.ok) {
         const errorData = await response.json();
+        console.log('🔧 Error response data:', errorData);
         throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
 
@@ -80,6 +105,7 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({ children }) 
       
     } catch (error: any) {
       console.error('❌ Error creating property:', error);
+      console.log('🔧 Error message:', error.message);
       
       // ✅ Fallback: Add locally if API fails (for demo)
       const title = formData.get('title') as string;
