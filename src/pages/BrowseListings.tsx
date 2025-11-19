@@ -76,6 +76,12 @@ const BrowseListings: React.FC = () => {
     return `${size} ${unit}`;
   };
 
+  // ✅ ADDED SAFE COUNTY FORMATTING FUNCTION
+  const formatCounty = (county: string | undefined) => {
+    if (!county) return 'Unknown Location';
+    return county.charAt(0).toUpperCase() + county.slice(1) + ' County';
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-gray-800 mb-8">Browse Land Listings</h1>
@@ -134,7 +140,16 @@ const BrowseListings: React.FC = () => {
         {filteredProperties.map(property => (
           <div key={property.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300">
             <div className="h-48 bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center relative">
-              <span className="text-white text-lg font-semibold">Land Photo</span>
+              {/* ✅ FIXED: Show actual images if they exist */}
+              {property.images && property.images.length > 0 ? (
+                <img 
+                  src={property.images[0]} 
+                  alt={property.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-white text-lg font-semibold">Land Photo</span>
+              )}
               {property.verified && (
                 <div className="absolute top-3 right-3 bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
                   ✅ Verified
@@ -150,7 +165,8 @@ const BrowseListings: React.FC = () => {
                 </span>
               </p>
               <div className="text-gray-600 space-y-1 mb-3">
-                <p>📍 {property.county.charAt(0).toUpperCase() + property.county.slice(1)} County{property.constituency && `, ${property.constituency}`}</p>
+                {/* ✅ FIXED: Safe county formatting */}
+                <p>📍 {formatCounty(property.county)}{property.constituency && `, ${property.constituency}`}</p>
                 <p>📏 {formatSize(property.size, property.sizeUnit)}</p>
                 <p>🏷️ {property.type === 'sale' ? 'For Sale' : 'For Rent/Lease'}</p>
                 <p className="text-sm">📞 {property.contact}</p>
