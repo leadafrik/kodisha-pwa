@@ -11,6 +11,7 @@ import FindServices from './pages/FindServices';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
 import Navbar from './components/Navbar';
+import AdminDashboard from './pages/AdminDashboard';
 import BackendTest from './components/BackendTest';
 
 function App() {
@@ -29,6 +30,8 @@ function App() {
                 <Route path="/list-service" element={<ListService />} />
                 <Route path="/browse" element={<BrowseListings />} />
                 <Route path="/find-services" element={<FindServices />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/backend-test" element={<BackendTest />} />
               </Routes>
             </div>
           </Router>
