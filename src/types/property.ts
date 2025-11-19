@@ -1,4 +1,4 @@
-export interface Property {
+export interface LandListing {
   id: string;
   title: string;
   description: string;

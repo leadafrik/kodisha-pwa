@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Property, PropertyFormData, ServiceListing, ServiceFormData } from '../types/property';
+import { LandListing, PropertyFormData, ServiceListing, ServiceFormData } from '../types/property';
 import { API_ENDPOINTS } from '../config/api';
 
 interface PropertyContextType {
-  properties: Property[];
+  properties: LandListing[];
   serviceListings: ServiceListing[];
   addProperty: (propertyData: FormData) => Promise<void>; // ✅ Changed to FormData
   addService: (serviceData: ServiceFormData) => void;
-  getPropertiesByCounty: (county: string) => Property[];
+  getPropertiesByCounty: (county: string) => LandListing[];
   getServicesByType: (type: 'equipment' | 'agrovet' | 'professional_services', county?: string) => ServiceListing[];
   loading: boolean;
   refreshProperties: () => Promise<void>;
@@ -28,7 +28,7 @@ interface PropertyProviderProps {
 }
 
 export const PropertyProvider: React.FC<PropertyProviderProps> = ({ children }) => {
-  const [properties, setProperties] = useState<Property[]>([]);
+  const [properties, setProperties] = useState<LandListing[]>([]);
   const [serviceListings, setServiceListings] = useState<ServiceListing[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -107,43 +107,41 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({ children }) 
       console.error('❌ Error creating property:', error);
       console.log('🔧 Error message:', error.message);
       
-      // ✅ UPDATED: Fallback with all new fields
-      const title = formData.get('title') as string;
-      const description = formData.get('description') as string;
-      const price = formData.get('price') as string;
-      const size = formData.get('size') as string;
-      const county = formData.get('county') as string;
-      const type = formData.get('type') as string;
-      
-      const newProperty: Property = {
-        id: Math.random().toString(36).substr(2, 9),
-        title,
-        description,
-        price: parseInt(price),
-        size: parseInt(size),
-        sizeUnit: (formData.get('sizeUnit') as 'acres' | 'hectares') || 'acres',
-        county,
-        constituency: formData.get('constituency') as string || '',
-        ward: formData.get('ward') as string || '', // ✅ ADDED
-        approximateLocation: formData.get('approximateLocation') as string || '', // ✅ ADDED
-        soilType: formData.get('soilType') as string || 'loam', // ✅ ADDED
-        waterAvailability: formData.get('waterAvailability') as string || 'rain-fed', // ✅ ADDED
-        previousCrops: formData.get('previousCrops') as string || '', // ✅ ADDED
-        organicCertified: formData.get('organicCertified') === 'true', // ✅ ADDED
-        availableFrom: formData.get('availableFrom') as string || '', // ✅ ADDED
-        availableTo: formData.get('availableTo') as string || '', // ✅ ADDED
-        minLeasePeriod: parseInt(formData.get('minLeasePeriod') as string || '1'), // ✅ ADDED
-        maxLeasePeriod: parseInt(formData.get('maxLeasePeriod') as string || '12'), // ✅ ADDED
-        preferredCrops: formData.get('preferredCrops') as string || '', // ✅ ADDED
+      // ✅ UPDATED: Create LandListing structure for fallback
+      const newLandListing: any = {
+        _id: Math.random().toString(36).substr(2, 9),
+        title: formData.get('title') as string,
+        description: formData.get('description') as string,
+        size: parseFloat(formData.get('size') as string),
+        price: parseFloat(formData.get('price') as string),
+        priceType: 'per-season',
+        location: {
+          county: formData.get('county') as string,
+          constituency: formData.get('constituency') as string,
+          ward: formData.get('ward') as string,
+          approximateLocation: formData.get('approximateLocation') as string,
+        },
+        soilType: formData.get('soilType') as string || 'loam',
+        waterAvailability: formData.get('waterAvailability') as string || 'rain-fed',
+        previousCrops: (formData.get('previousCrops') as string)?.split(',').filter(Boolean) || [],
+        organicCertified: formData.get('organicCertified') === 'true',
+        availableFrom: new Date(formData.get('availableFrom') as string),
+        availableTo: new Date(formData.get('availableTo') as string),
+        minLeasePeriod: parseInt(formData.get('minLeasePeriod') as string || '1'),
+        maxLeasePeriod: parseInt(formData.get('maxLeasePeriod') as string || '12'),
+        preferredCrops: (formData.get('preferredCrops') as string)?.split(',').filter(Boolean) || [],
         contact: formData.get('contact') as string,
-        images: [], // Empty array for local fallback
-        verified: false,
-        listedBy: 'Current User',
+        images: [],
+        isVerified: false,
+        status: 'available',
+        views: 0,
+        inquiries: 0,
+        owner: 'current-user-id',
         createdAt: new Date(),
-        type: type as 'sale' | 'rental',
+        updatedAt: new Date(),
       };
       
-      setProperties(prev => [newProperty, ...prev]);
+      setProperties(prev => [newLandListing, ...prev]);
       alert('ℹ️ Property listed locally (backend connection failed)');
     } finally {
       setLoading(false);
