@@ -16,7 +16,7 @@ export interface Property {
   type: 'sale' | 'rental';
 }
 
-// ✅ UPDATED: Simplified since we're using FormData directly
+// ✅ UPDATED: Added all the new fields from your form
 export interface PropertyFormData {
   title: string;
   description: string;
@@ -25,6 +25,17 @@ export interface PropertyFormData {
   sizeUnit: 'acres' | 'hectares';
   county: string;
   constituency: string;
+  ward: string; // ✅ ADDED
+  approximateLocation: string; // ✅ ADDED
+  soilType: string; // ✅ ADDED
+  waterAvailability: string; // ✅ ADDED
+  previousCrops: string; // ✅ ADDED
+  organicCertified: boolean; // ✅ ADDED
+  availableFrom: string; // ✅ ADDED
+  availableTo: string; // ✅ ADDED
+  minLeasePeriod: string; // ✅ ADDED
+  maxLeasePeriod: string; // ✅ ADDED
+  preferredCrops: string; // ✅ ADDED
   contact: string;
   type: 'sale' | 'rental';
   // Removed images field since we're using FormData
