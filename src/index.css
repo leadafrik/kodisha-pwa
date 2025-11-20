@@ -2,16 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Improved global styling */
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Inter', 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #f9fafb; /* subtle modern background */
+  color: #111827; /* slate-900 */
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  color: #0f172a; /* slate-900 */
+  letter-spacing: -0.01em;
+}
+
+p, span, li, a {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  color: #1f2937; /* slate-800 */
+  line-height: 1.6;
+}
+
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: 'Fira Code', 'source-code-pro', Menlo, Monaco, Consolas, 'Courier New', monospace;
 }

@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-
-const earthTone = "#A0452E"; // Kenyan earth-tone accent
+import KodishaLogo from "./KodishaLogo";
 
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
@@ -10,118 +9,124 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      {/* NAVBAR */}
-      <nav className="bg-white shadow-md border-b" style={{ borderColor: earthTone }}>
+      {/* GLOBAL NAVBAR */}
+      <nav className="bg-white shadow-sm border-b border-[#A0452E]/20 sticky top-0 z-40">
+        <div className="h-1 w-full bg-[#A0452E]"></div>
+
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex justify-between items-center py-3">
-            
+          <div className="flex justify-between items-center py-4">
+
             {/* LOGO */}
-            <Link to="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-[##0F4F2C] flex items-center justify-center shadow-sm border border-gray-200">
-                <span className="text-xl">🌱</span>
-              </div>
-              <span className="text-2xl tracking-tight font-bold text-gray-800">
+            <Link to="/" className="flex items-center gap-3">
+              <KodishaLogo size={42} />
+              <span className="text-2xl font-extrabold text-gray-800 tracking-tight">
                 Kodisha
               </span>
             </Link>
 
-            {/* Desktop Nav */}
-            <div className="hidden lg:flex items-center gap-8 font-medium text-gray-700">
-              <Link to="/browse" className="hover:text-black transition">🏞️ Browse Land</Link>
-              <Link to="/find-services" className="hover:text-black transition">🛠️ Find Services</Link>
+            {/* DESKTOP NAV */}
+            <div className="hidden lg:flex items-center gap-10 font-semibold text-gray-700">
 
-              {/* Logged In */}
+              <Link to="/browse" className="hover:text-black hover:underline underline-offset-4 transition">
+                Browse Land
+              </Link>
+
+              <Link to="/find-services" className="hover:text-black hover:underline underline-offset-4 transition">
+                Find Services
+              </Link>
+
+              {/* LOGGED IN */}
               {user ? (
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-6">
 
                   {/* LIST DROPDOWN */}
-                  <div className="relative group">
+                  <div className="group relative">
                     <button className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition font-semibold flex items-center gap-2">
-                      ➕ List <span className="text-sm">▼</span>
+                      List <span className="text-sm">▼</span>
                     </button>
 
-                    <div className="absolute hidden group-hover:block bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 right-0">
+                    <div className="absolute hidden group-hover:block bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 right-0 z-50">
                       <Link to="/list-property" className="block px-4 py-3 hover:bg-gray-50 border-b">
-                        <div className="font-semibold flex gap-2">🏞️ List Land</div>
+                        <div className="font-semibold">List Land</div>
                         <p className="text-sm text-gray-600">Sell or lease farmland</p>
                       </Link>
 
                       <Link to="/list-agrovet" className="block px-4 py-3 hover:bg-gray-50 border-b">
-                        <div className="font-semibold flex gap-2">🏪 List Agrovet</div>
-                        <p className="text-sm text-gray-600">Add farm supplies & products</p>
+                        <div className="font-semibold">List Agrovet</div>
+                        <p className="text-sm text-gray-600">Add farm supplies</p>
                       </Link>
 
                       <Link to="/list-service" className="block px-4 py-3 hover:bg-gray-50">
-                        <div className="font-semibold flex gap-2">🚜 List Service</div>
+                        <div className="font-semibold">List Service</div>
                         <p className="text-sm text-gray-600">Equipment or expertise</p>
                       </Link>
                     </div>
                   </div>
 
                   {/* USER DROPDOWN */}
-                  <div className="relative group">
+                  <div className="group relative">
                     <button className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition flex items-center gap-2 font-semibold text-gray-800">
-                      <span className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">👤</span>
+                      <span className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+                        👤
+                      </span>
                       {user.name.split(" ")[0]}
                       <span className="text-sm">▼</span>
                     </button>
 
-                    <div className="absolute hidden group-hover:block bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 right-0">
+                    <div className="absolute hidden group-hover:block bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 right-0 z-50">
                       <div className="px-4 py-3 border-b bg-gray-50">
                         <div className="font-semibold">{user.name}</div>
                         <div className="text-sm text-gray-600">{user.email}</div>
                       </div>
 
                       <Link to="/profile" className="block px-4 py-3 hover:bg-gray-50 border-b">
-                        <div className="font-semibold">📊 My Dashboard</div>
-                        <p className="text-sm text-gray-600">View activity</p>
+                        <div className="font-semibold">Dashboard</div>
                       </Link>
 
                       <div className="border-b">
-                        <Link to="/list-property" className="block px-4 py-2 hover:bg-gray-50 text-sm">🏞️ My Land Listings</Link>
-                        <Link to="/list-agrovet" className="block px-4 py-2 hover:bg-gray-50 text-sm">🏪 My Agrovet Listings</Link>
-                        <Link to="/list-service" className="block px-4 py-2 hover:bg-gray-50 text-sm">🚜 My Service Listings</Link>
+                        <Link to="/list-property" className="block px-4 py-2 hover:bg-gray-50 text-sm">My Land Listings</Link>
+                        <Link to="/list-agrovet" className="block px-4 py-2 hover:bg-gray-50 text-sm">My Agrovet Listings</Link>
+                        <Link to="/list-service" className="block px-4 py-2 hover:bg-gray-50 text-sm">My Service Listings</Link>
                       </div>
 
-                      {/* TEMP ADMIN */}
-                      <Link to="/admin" className="block px-4 py-2 hover:bg-blue-50 text-blue-600 font-semibold border-b text-sm">
-                        ⚙️ Admin Dashboard
+                      <Link
+                        to="/admin"
+                        className="block px-4 py-2 hover:bg-blue-50 text-blue-600 font-semibold border-b text-sm"
+                      >
+                        Admin Dashboard
                       </Link>
 
                       <button
                         onClick={logout}
                         className="w-full text-left px-4 py-3 hover:bg-red-50 text-red-600 font-semibold"
                       >
-                        🚪 Logout
+                        Logout
                       </button>
                     </div>
                   </div>
-
                 </div>
               ) : (
-                /* Guest */
+                /* GUEST MENU */
                 <div className="flex items-center gap-4">
-                  <Link
-                    to="/login"
-                    className="px-5 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 font-semibold transition"
-                  >
+
+                  <Link to="/login" className="px-5 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 font-semibold transition">
                     Login
                   </Link>
 
-                  <div className="relative group">
+                  <div className="group relative">
                     <button className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition font-semibold flex items-center gap-2">
-                      ➕ List <span className="text-sm">▼</span>
+                      List <span className="text-sm">▼</span>
                     </button>
 
-                    <div className="absolute hidden group-hover:block bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 right-0">
+                    <div className="absolute hidden group-hover:block bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 right-0 z-50">
                       <Link to="/list-property" className="block px-4 py-3 hover:bg-gray-50 border-b">
-                        🏞️ List Land
+                        List Land
                       </Link>
                       <Link to="/list-agrovet" className="block px-4 py-3 hover:bg-gray-50 border-b">
-                        🏪 List Agrovet
+                        List Agrovet
                       </Link>
                       <Link to="/list-service" className="block px-4 py-3 hover:bg-gray-50">
-                        🚜 List Service
+                        List Service
                       </Link>
                     </div>
                   </div>
@@ -129,22 +134,23 @@ const Navbar: React.FC = () => {
               )}
             </div>
 
-            {/* MOBILE MENU BUTTON */}
+            {/* MOBILE MENU ICON */}
             <button
               className="lg:hidden flex flex-col gap-1"
               onClick={() => setMobileOpen(true)}
             >
-              <span className="w-6 h-0.5 bg-gray-800"></span>
-              <span className="w-6 h-0.5 bg-gray-800"></span>
-              <span className="w-6 h-0.5 bg-gray-800"></span>
+              <span className="w-6 h-0.5 bg-gray-900"></span>
+              <span className="w-6 h-0.5 bg-gray-900"></span>
+              <span className="w-6 h-0.5 bg-gray-900"></span>
             </button>
+
           </div>
         </div>
       </nav>
 
-      {/* MOBILE SLIDE-IN MENU */}
+      {/* MOBILE MENU */}
       {mobileOpen && (
-        <div className="fixed inset-0 bg-black/40 z-50" onClick={() => setMobileOpen(false)}>
+        <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setMobileOpen(false)}>
           <div
             className="absolute top-0 left-0 h-full w-72 bg-white shadow-xl p-6"
             onClick={(e) => e.stopPropagation()}
@@ -155,32 +161,27 @@ const Navbar: React.FC = () => {
             </div>
 
             <div className="flex flex-col gap-4 text-lg font-medium">
-              <Link to="/browse">🏞️ Browse Land</Link>
-              <Link to="/find-services">🛠️ Find Services</Link>
+              <Link to="/browse">Browse Land</Link>
+              <Link to="/find-services">Find Services</Link>
               <hr />
 
-              {/* Logged In */}
               {user ? (
                 <>
-                  <Link to="/profile">📊 Dashboard</Link>
-                  <Link to="/list-property">🏞️ List Land</Link>
-                  <Link to="/list-agrovet">🏪 List Agrovet</Link>
-                  <Link to="/list-service">🚜 List Service</Link>
-                  <Link to="/admin">⚙️ Admin</Link>
-
-                  <button
-                    onClick={logout}
-                    className="text-left text-red-600 font-semibold mt-4"
-                  >
-                    🚪 Logout
+                  <Link to="/profile">Dashboard</Link>
+                  <Link to="/list-property">List Land</Link>
+                  <Link to="/list-agrovet">List Agrovet</Link>
+                  <Link to="/list-service">List Service</Link>
+                  <Link to="/admin">Admin</Link>
+                  <button onClick={logout} className="text-left text-red-600 font-semibold mt-4">
+                    Logout
                   </button>
                 </>
               ) : (
                 <>
                   <Link to="/login">Login</Link>
-                  <Link to="/list-property">🏞️ List Land</Link>
-                  <Link to="/list-agrovet">🏪 List Agrovet</Link>
-                  <Link to="/list-service">🚜 List Service</Link>
+                  <Link to="/list-property">List Land</Link>
+                  <Link to="/list-agrovet">List Agrovet</Link>
+                  <Link to="/list-service">List Service</Link>
                 </>
               )}
             </div>
