@@ -13,6 +13,7 @@ import Profile from './pages/Profile';
 import Navbar from './components/Navbar';
 import AdminDashboard from './pages/AdminDashboard';
 import BackendTest from './components/BackendTest';
+import ListAgrovet from './pages/ListAgrovet';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/list-property" element={<ListProperty />} />
+                <Route path="/list-agrovet" element={<ListAgrovet />} />
                 <Route path="/list-service" element={<ListService />} />
                 <Route path="/browse" element={<BrowseListings />} />
                 <Route path="/find-services" element={<FindServices />} />

@@ -6,8 +6,8 @@ export interface LandListing {
   size: number;
   sizeUnit: 'acres' | 'hectares';
   county: string;
-  constituency: string; // ✅ CHANGED: Made required
-  ward: string; // ✅ CHANGED: Made required
+  constituency: string;
+  ward: string;
   contact: string;
   images: string[];
   verified: boolean;
@@ -15,7 +15,7 @@ export interface LandListing {
   createdAt: Date;
   type: 'sale' | 'rental';
   
-  // ✅ ADDED: All new agricultural fields
+  // Agricultural fields
   approximateLocation: string;
   soilType: string;
   waterAvailability: string;
@@ -26,9 +26,23 @@ export interface LandListing {
   minLeasePeriod: number;
   maxLeasePeriod: number;
   preferredCrops: string;
+  
+  // Backend fields (from MongoDB)
+  _id?: string;
+  isVerified?: boolean;
+  status?: 'available' | 'leased' | 'under-maintenance';
+  views?: number;
+  inquiries?: number;
+  owner?: any;
+  location?: {
+    county: string;
+    constituency: string;
+    ward: string;
+    approximateLocation: string;
+  };
+  priceType?: 'per-season' | 'per-month' | 'per-acre';
 }
 
-// ✅ UPDATED: Added all the new fields from your form
 export interface PropertyFormData {
   title: string;
   description: string;
@@ -50,7 +64,6 @@ export interface PropertyFormData {
   preferredCrops: string;
   contact: string;
   type: 'sale' | 'rental';
-  // Removed images field since we're using FormData
 }
 
 // Service Types
@@ -70,6 +83,13 @@ export interface ServiceListing {
   verified: boolean;
   subscriptionEnd: Date;
   createdAt: Date;
+  
+  // New fields for equipment and professional services
+  pricing?: string;
+  experience?: string;
+  operatorIncluded?: boolean;
+  approximateLocation?: string;
+  qualifications?: string;
 }
 
 export interface ServiceFormData {
@@ -81,9 +101,16 @@ export interface ServiceFormData {
   ward: string;
   contact: string;
   services: string[];
+  
+  // New fields for equipment and professional services
+  pricing?: string;
+  experience?: string;
+  operatorIncluded?: boolean;
+  approximateLocation?: string;
+  qualifications?: string;
 }
 
-// User Types - UPDATED WITH VERIFICATION FIELDS
+// User Types
 export interface User {
   id: string;
   name: string;
@@ -95,14 +122,15 @@ export interface User {
   createdAt: Date;
   type: 'buyer' | 'seller' | 'service_provider' | 'admin';
   
-  // ✅ ADD THESE NEW FIELDS TO MATCH BACKEND
+  // Backend fields
   _id?: string;
   fullName?: string;
   userType?: 'farmer' | 'landowner' | 'buyer' | 'service provider';
   county?: string;
   isVerified?: boolean;
+  role?: 'user' | 'admin'; // Add role field
   
-  // ✅ ADD VERIFICATION OBJECT
+  // Verification object
   verification?: {
     phoneVerified: boolean;
     idVerified: boolean;
@@ -114,7 +142,6 @@ export interface User {
   };
 }
 
-// Update the AuthContextType interface
 export interface AuthContextType {
   user: User | null;
   login: (phone: string, name: string) => void;
@@ -124,7 +151,6 @@ export interface AuthContextType {
   loading: boolean;
 }
 
-// Update the UserFormData interface
 export interface UserFormData {
   name: string;
   phone: string;
@@ -133,4 +159,82 @@ export interface UserFormData {
   county: string;
   constituency?: string;
   ward?: string;
+}
+
+// Agrovet Types
+export interface AgrovetListing {
+  id: string;
+  name: string;
+  description: string;
+  location: {
+    county: string;
+    constituency: string;
+    ward: string;
+    town?: string;
+    approximateLocation: string;
+  };
+  contact: string;
+  categories: {
+    products: boolean;
+    animalHealth: boolean;
+    cropProtection: boolean;
+    equipment: boolean;
+  };
+  services: {
+    seeds: string[];
+    fertilizers: string[];
+    animalFeeds: string[];
+    dewormers: boolean;
+    vaccines: boolean;
+    antibiotics: boolean;
+    vitaminSupplements: boolean;
+    artificialInsemination: boolean;
+    pesticides: boolean;
+    herbicides: boolean;
+    fungicides: boolean;
+    sprayers: boolean;
+    waterPumps: boolean;
+    protectiveGear: boolean;
+    farmTools: boolean;
+  };
+  openingHours?: string;
+  deliveryAvailable: boolean;
+  verified: boolean;
+  createdAt: Date;
+}
+
+export interface AgrovetFormData {
+  name: string;
+  description: string;
+  county: string;
+  constituency: string;
+  ward: string;
+  town: string;
+  approximateLocation: string;
+  contact: string;
+  openingHours: string;
+  deliveryAvailable: boolean;
+  
+  // Categories
+  products: boolean;
+  animalHealth: boolean;
+  cropProtection: boolean;
+  equipment: boolean;
+  
+  // Services
+  seeds: string;
+  fertilizers: string;
+  animalFeeds: string;
+  dewormers: boolean;
+  vaccines: boolean;
+  antibiotics: boolean;
+  vitaminSupplements: boolean;
+  artificialInsemination: boolean;
+  pesticides: boolean;
+  herbicides: boolean;
+  fungicides: boolean;
+  sprayers: boolean;
+  waterPumps: boolean;
+  protectiveGear: boolean;
+  farmTools: boolean;
 }
