@@ -90,6 +90,7 @@ export interface ServiceListing {
   operatorIncluded?: boolean;
   approximateLocation?: string;
   qualifications?: string;
+  photos?: string[]; // Add photos field
 }
 
 export interface ServiceFormData {
@@ -108,6 +109,35 @@ export interface ServiceFormData {
   operatorIncluded?: boolean;
   approximateLocation?: string;
   qualifications?: string;
+  photos?: string[]; // Add photos field
+  
+  // ✅ ADDED: Agrovet specific fields
+  town?: string;
+  openingHours?: string;
+  deliveryAvailable?: boolean;
+  
+  // Categories
+  products?: boolean;
+  animalHealth?: boolean;
+  cropProtection?: boolean;
+  equipment?: boolean;
+  
+  // Services
+  seeds?: string;
+  fertilizers?: string;
+  animalFeeds?: string;
+  dewormers?: boolean;
+  vaccines?: boolean;
+  antibiotics?: boolean;
+  vitaminSupplements?: boolean;
+  artificialInsemination?: boolean;
+  pesticides?: boolean;
+  herbicides?: boolean;
+  fungicides?: boolean;
+  sprayers?: boolean;
+  waterPumps?: boolean;
+  protectiveGear?: boolean;
+  farmTools?: boolean;
 }
 
 // User Types

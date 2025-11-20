@@ -37,6 +37,9 @@ interface AgrovetFormData {
   waterPumps: boolean;
   protectiveGear: boolean;
   farmTools: boolean;
+  
+  // Photos
+  photos: string[];
 }
 
 const ListAgrovet: React.FC = () => {
@@ -74,12 +77,16 @@ const ListAgrovet: React.FC = () => {
     sprayers: false,
     waterPumps: false,
     protectiveGear: false,
-    farmTools: false
+    farmTools: false,
+    
+    // Photos
+    photos: []
   });
 
   const [constituencies, setConstituencies] = useState<{value: string; label: string}[]>([]);
   const [wards, setWards] = useState<{value: string; label: string}[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
 
   // Update constituencies when county changes
   useEffect(() => {
@@ -112,6 +119,62 @@ const ListAgrovet: React.FC = () => {
     }
   }, [formData.county, formData.constituency]);
 
+  // Photo handling functions
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    setUploadingPhotos(true);
+    
+    try {
+      const newPhotos: string[] = [];
+      
+      // Convert files to base64
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+          alert(`File ${file.name} is too large. Maximum size is 5MB.`);
+          continue;
+        }
+
+        const base64 = await convertToBase64(file);
+        newPhotos.push(base64);
+      }
+
+      // Add new photos to existing ones (limit to 8 photos)
+      const updatedPhotos = [...formData.photos, ...newPhotos].slice(0, 8);
+      
+      setFormData(prev => ({
+        ...prev,
+        photos: updatedPhotos
+      }));
+
+      if (newPhotos.length < files.length) {
+        alert('Some photos were not added due to size limits or maximum photo count reached.');
+      }
+    } catch (error) {
+      alert('Error uploading photos. Please try again.');
+    } finally {
+      setUploadingPhotos(false);
+    }
+  };
+
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
+  const removePhoto = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      photos: prev.photos.filter((_, i) => i !== index)
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -126,7 +189,9 @@ const ListAgrovet: React.FC = () => {
         constituency: formData.constituency,
         ward: formData.ward,
         contact: formData.contact,
-        services: getSelectedServices()
+        services: getSelectedServices(),
+        photos: formData.photos, // Include photos
+        approximateLocation: formData.approximateLocation
       };
       
       await addService(serviceData);
@@ -162,7 +227,8 @@ const ListAgrovet: React.FC = () => {
         sprayers: false,
         waterPumps: false,
         protectiveGear: false,
-        farmTools: false
+        farmTools: false,
+        photos: []
       });
       setConstituencies([]);
       setWards([]);
@@ -265,6 +331,52 @@ const ListAgrovet: React.FC = () => {
               placeholder="Describe your agrovet, your specialties, and why farmers should choose you..."
               required
             />
+          </div>
+
+          {/* Agrovet Photos Section */}
+          <div className="md:col-span-2 border-l-4 border-orange-500 pl-4 bg-orange-50 rounded-r-lg p-4">
+            <h3 className="font-semibold text-gray-800 mb-3">📸 Agrovet Photos (Optional)</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Add photos of your agrovet storefront, products, or services to attract more customers. Maximum 8 photos, 5MB each.
+            </p>
+            
+            {/* Photo Upload */}
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">Upload Photos</label>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                disabled={uploadingPhotos || formData.photos.length >= 8}
+                className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                {uploadingPhotos ? 'Uploading...' : `Photos: ${formData.photos.length}/8`}
+              </p>
+            </div>
+
+            {/* Photo Preview */}
+            {formData.photos.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                {formData.photos.map((photo, index) => (
+                  <div key={index} className="relative group">
+                    <img 
+                      src={photo} 
+                      alt={`Agrovet ${index + 1}`}
+                      className="w-full h-24 object-cover rounded-lg border"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removePhoto(index)}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Location with Dropdowns */}
@@ -568,7 +680,7 @@ const ListAgrovet: React.FC = () => {
         <div className="mt-6 p-4 bg-blue-50 rounded-lg">
           <p className="text-blue-800 text-sm">
             💡 <strong>Note:</strong> Your agrovet will be verified before appearing in search results. 
-            Farmers will be able to contact you directly.
+            {formData.photos.length > 0 && ' Photos help farmers trust your business.'}
           </p>
         </div>
 
