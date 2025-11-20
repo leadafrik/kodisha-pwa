@@ -91,6 +91,11 @@ export interface ServiceListing {
   approximateLocation?: string;
   qualifications?: string;
   photos?: string[]; // Add photos field
+  
+  // ✅ ADDED: New contact fields for listings
+  alternativeContact?: string;
+  email?: string;
+  businessHours?: string;
 }
 
 export interface ServiceFormData {
@@ -138,6 +143,11 @@ export interface ServiceFormData {
   waterPumps?: boolean;
   protectiveGear?: boolean;
   farmTools?: boolean;
+  
+  // ✅ ADDED: New contact fields
+  alternativeContact?: string;
+  email?: string;
+  businessHours?: string;
 }
 
 // User Types
@@ -231,6 +241,11 @@ export interface AgrovetListing {
   deliveryAvailable: boolean;
   verified: boolean;
   createdAt: Date;
+  
+  // ✅ ADDED: New contact fields for agrovet
+  alternativeContact?: string;
+  email?: string;
+  businessHours?: string;
 }
 
 export interface AgrovetFormData {
@@ -267,4 +282,9 @@ export interface AgrovetFormData {
   waterPumps: boolean;
   protectiveGear: boolean;
   farmTools: boolean;
+  
+  // ✅ ADDED: New contact fields
+  alternativeContact?: string;
+  email?: string;
+  businessHours?: string;
 }
