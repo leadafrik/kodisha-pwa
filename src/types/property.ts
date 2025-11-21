@@ -156,20 +156,21 @@ export interface User {
   name: string;
   phone: string;
   email?: string;
-  verificationStatus: 'pending' | 'verified' | 'rejected';
+  verificationStatus: "pending" | "verified" | "rejected";
   idPhoto?: string;
   listings: string[];
   createdAt: Date;
-  type: 'buyer' | 'seller' | 'service_provider' | 'admin';
+  type: "buyer" | "seller" | "service_provider" | "admin";
   
   // Backend fields
   _id?: string;
   fullName?: string;
-  userType?: 'farmer' | 'landowner' | 'buyer' | 'service provider';
+  userType?: "farmer" | "landowner" | "buyer" | "service provider";
   county?: string;
   isVerified?: boolean;
-  role?: 'user' | 'admin'; // Add role field
+  role?: "user" | "admin" | "moderator";
   
+
   // Verification object
   verification?: {
     phoneVerified: boolean;
@@ -178,13 +179,13 @@ export interface User {
     ownershipVerified: boolean;
     businessVerified: boolean;
     trustScore: number;
-    verificationLevel: 'basic' | 'verified' | 'premium';
+    verificationLevel: "basic" | "verified" | "premium";
   };
 }
 
 export interface AuthContextType {
   user: User | null;
-  login: (phone: string, name: string) => void;
+  login: (phone: string, password: string) => Promise<void>;
   logout: () => void;
   updateProfile: (userData: Partial<User>) => void;
   register: (userData: UserFormData) => Promise<User>;
@@ -195,7 +196,8 @@ export interface UserFormData {
   name: string;
   phone: string;
   email?: string;
-  type: 'buyer' | 'seller' | 'service_provider';
+  password: string;
+  type: "buyer" | "seller" | "service_provider";
   county: string;
   constituency?: string;
   ward?: string;

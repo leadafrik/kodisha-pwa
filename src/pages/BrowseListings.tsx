@@ -65,7 +65,7 @@ const BrowseListings: React.FC = () => {
 
   // SAFELY GET PROPERTIES WITHOUT CRASHING
   const baseProperties =
-    getPropertiesByCounty(filters.county.toUpperCase()) || [];
+    getPropertiesByCounty(filters.county.toLowerCase()) || [];
 
   // FILTERED PROPERTIES
   const filteredProperties = baseProperties.filter((property: any) => {
@@ -78,7 +78,7 @@ const BrowseListings: React.FC = () => {
 
       const ranges: any = {
         "0-5000": price <= 5000,
-        "5000-20000": price >= 5000 && price <= 20000,
+        "5005000-20000": price >= 5000 && price <= 20000,
         "20000-50000": price >= 20000 && price <= 50000,
         "50000-100000": price >= 50000 && price <= 100000,
         "100000-500000": price >= 100000 && price <= 500000,
@@ -110,18 +110,20 @@ const BrowseListings: React.FC = () => {
     return true;
   });
 
-  const openListing = (id: string) => navigate(`/listings/${id}`);
+  // FIXED: Correct route + correct ID
+  const openListing = (id: string) => navigate(`/listing/${id}`);
 
   const openChat = (property: any) => {
     if (!property.ownerId) {
       alert("Seller information missing.");
       return;
     }
-    navigate(`/chat/${property.id}/${property.ownerId}`);
+    navigate(`/chat/${property._id}/${property.ownerId}`);
   };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+
       {/* HEADER */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-2">
@@ -135,6 +137,7 @@ const BrowseListings: React.FC = () => {
       {/* FILTERS */}
       <div className="bg-white rounded-xl shadow-md p-6 mb-8 border border-gray-100">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          
           {/* COUNTY SELECT */}
           <select
             name="county"
@@ -145,8 +148,7 @@ const BrowseListings: React.FC = () => {
             <option value="">All Counties</option>
             {kenyaCounties.map((county: any) => (
               <option key={county.code} value={county.name}>
-                {county.name.charAt(0) +
-                  county.name.slice(1).toLowerCase()}
+                {county.name.charAt(0) + county.name.slice(1).toLowerCase()}
               </option>
             ))}
           </select>
@@ -213,19 +215,17 @@ const BrowseListings: React.FC = () => {
       <div className="mb-6">
         <p className="text-gray-600">
           Showing{" "}
-          <span className="font-semibold">
-            {filteredProperties.length}
-          </span>{" "}
+          <span className="font-semibold">{filteredProperties.length}</span>{" "}
           {filteredProperties.length === 1 ? "listing" : "listings"}
           {filters.county && ` in ${filters.county}`}
         </p>
       </div>
 
-      {/* LISTINGS */}
+      {/* LISTINGS GRID */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProperties.map((property: any) => (
           <div
-            key={property.id}
+            key={property._id}
             className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition duration-300"
           >
             {/* IMAGE */}
@@ -265,9 +265,7 @@ const BrowseListings: React.FC = () => {
 
               <div className="space-y-1 text-gray-600 text-sm mb-3">
                 <p>📍 {formatLocation(property)}</p>
-                <p>
-                  📏 {formatSize(property.size, property.sizeUnit)}
-                </p>
+                <p>📏 {formatSize(property.size, property.sizeUnit)}</p>
                 <p>
                   🏷️{" "}
                   {property.type === "sale"
@@ -276,9 +274,10 @@ const BrowseListings: React.FC = () => {
                 </p>
               </div>
 
+              {/* BUTTONS */}
               <div className="flex gap-2">
                 <button
-                  onClick={() => openListing(property.id)}
+                  onClick={() => openListing(property._id)}
                   className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
                 >
                   View Details
@@ -303,9 +302,7 @@ const BrowseListings: React.FC = () => {
           <h3 className="text-xl font-semibold text-gray-800 mb-2">
             No listings found
           </h3>
-          <p className="text-gray-500 mb-4">
-            Try adjusting filters.
-          </p>
+          <p className="text-gray-500 mb-4">Try adjusting filters.</p>
           <button
             onClick={clearFilters}
             className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"

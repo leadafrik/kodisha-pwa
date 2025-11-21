@@ -378,11 +378,16 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({ children }) 
   };
 
   const getPropertiesByCounty = (county: string) => {
-    if (!county) return properties;
-    return properties.filter(property => 
-      property.county.toLowerCase().includes(county.toLowerCase())
-    );
+    if (!county) return properties; // No filter selected
+
+    const target = county.toLowerCase();
+
+    return properties.filter((p) => {
+      const propCounty = p.location?.county?.toLowerCase() || "";
+      return propCounty === target;
+    });
   };
+
 
   const getServicesByType = (type: 'equipment' | 'agrovet' | 'professional_services', county?: string) => {
     let filtered = serviceListings.filter(service => service.type === type);

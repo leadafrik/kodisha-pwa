@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useProperties } from '../contexts/PropertyContext';
 import { PropertyFormData } from '../types/property';
 import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from '../data/kenyaCounties';
+import GoogleMapsLoader from '../components/GoogleMapsLoader';
+import MapPicker from '../components/MapPicker';
 
 const ListProperty: React.FC = () => {
   const { addProperty } = useProperties();
@@ -140,7 +142,7 @@ const ListProperty: React.FC = () => {
       setUploading(false);
     }
   };
-
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const value = e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value;
     setFormData({
@@ -306,6 +308,28 @@ const ListProperty: React.FC = () => {
               required
             />
           </div>
+          
+          <GoogleMapsLoader>
+            <div className="mb-4">
+             <label className="block font-semibold mb-1 text-gray-800">
+               Select Land Location on Map
+             </label>
+
+            <MapPicker
+              onChange={(coords) => {
+                setFormData((prev) => ({
+                  ...prev,
+                  latitude: coords.lat,
+                  longitude: coords.lng,
+                }));
+             }}
+           />
+
+           <p className="text-xs text-gray-500 mt-1">
+            Tap anywhere on the map to drop a pin.
+           </p>
+        </div>
+      </GoogleMapsLoader>
 
           <div>
             <label className="block text-gray-700 mb-2">Soil Type *</label>
