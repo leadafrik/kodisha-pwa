@@ -102,14 +102,36 @@ const ListingDetails: React.FC = () => {
       </div>
 
       {/* MAP SECTION */}
-      {coords && (
-        <div className="mt-6">
-          <h2 className="font-semibold mb-2">Map Location</h2>
+      <div className="mt-6">
+        <h2 className="font-semibold mb-2">Map Location</h2>
+
+        {!coords ? (
+         <p className="text-gray-500 text-sm">No map location was provided for this listing.</p>
+        ) : (
+         <>
           <GoogleMapsLoader>
-            <ListingMap lat={coords.lat} lng={coords.lng} />
+            <div className="rounded-lg overflow-hidden shadow-md border">
+             <ListingMap lat={coords.lat} lng={coords.lng} />
+           </div>
           </GoogleMapsLoader>
-        </div>
-      )}
+
+         {/* Coordinates text */}
+         <p className="text-gray-500 text-xs mt-2">
+           Coordinates: {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
+         </p>
+
+         {/* Open in Google Maps */}
+         <a
+           href={`https://www.google.com/maps?q=${coords.lat},${coords.lng}`}
+           target="_blank"
+           rel="noopener noreferrer"
+           className="inline-block mt-3 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
+         >
+          Open in Google Maps
+        </a>
+      </>
+     )}
+   </div>
 
       {/* Seller info */}
       <div className="bg-white p-4 rounded-lg mt-6 border">

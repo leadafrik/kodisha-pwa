@@ -64,6 +64,10 @@ export interface PropertyFormData {
   preferredCrops: string;
   contact: string;
   type: 'sale' | 'rental';
+
+   // ⭐ ADD THESE TWO LINES
+  latitude?: number;
+  longitude?: number;
 }
 
 // Service Types

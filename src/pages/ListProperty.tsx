@@ -100,6 +100,11 @@ const ListProperty: React.FC = () => {
       // Contact & Type
       submitData.append('contact', formData.contact.trim());
       submitData.append('type', formData.type);
+
+      // ⭐ Coordinates (if selected)
+      if (formData.latitude) submitData.append("latitude", String(formData.latitude));
+      if (formData.longitude) submitData.append("longitude", String(formData.longitude));
+
       
       // Images
       selectedImages.forEach((image) => {
