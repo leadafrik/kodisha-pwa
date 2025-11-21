@@ -1,154 +1,174 @@
-import React, { useState } from 'react';
-import { useProperties } from '../contexts/PropertyContext';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useProperties } from "../contexts/PropertyContext";
+import { kenyaCounties } from "../data/kenyaCounties";
 
 const BrowseListings: React.FC = () => {
-  const { getPropertiesByCounty } = useProperties(); // Remove unused 'properties'
+  const navigate = useNavigate();
+  const { getPropertiesByCounty } = useProperties();
+
   const [filters, setFilters] = useState({
-    county: '',
-    priceRange: '',
-    sizeRange: '',
-    type: ''
-  });
-
-  // All 47 Kenyan Counties
-  const kenyanCounties = [
-    'Baringo', 'Bomet', 'Bungoma', 'Busia', 'Elgeyo-Marakwet',
-    'Embu', 'Garissa', 'Homa Bay', 'Isiolo', 'Kajiado',
-    'Kakamega', 'Kericho', 'Kiambu', 'Kilifi', 'Kirinyaga',
-    'Kisii', 'Kisumu', 'Kitui', 'Kwale', 'Laikipia',
-    'Lamu', 'Machakos', 'Makueni', 'Mandera', 'Marsabit',
-    'Meru', 'Migori', 'Mombasa', 'Murang\'a', 'Nairobi',
-    'Nakuru', 'Nandi', 'Narok', 'Nyamira', 'Nyandarua',
-    'Nyeri', 'Samburu', 'Siaya', 'Taita-Taveta', 'Tana River',
-    'Tharaka-Nithi', 'Trans Nzoia', 'Turkana', 'Uasin Gishu',
-    'Vihiga', 'Wajir', 'West Pokot'
-  ];
-
-  const filteredProperties = getPropertiesByCounty(filters.county).filter(property => {
-    if (filters.type && property.type !== filters.type) return false;
-    
-    // Price range filtering
-    if (filters.priceRange) {
-      const price = property.price;
-      switch (filters.priceRange) {
-        case '0-5000':
-          if (price > 5000) return false;
-          break;
-        case '5000-20000':
-          if (price < 5000 || price > 20000) return false;
-          break;
-        case '20000-50000':
-          if (price < 20000 || price > 50000) return false;
-          break;
-        case '50000-100000':
-          if (price < 50000 || price > 100000) return false;
-          break;
-        case '100000-500000':
-          if (price < 100000 || price > 500000) return false;
-          break;
-        case '500000+':
-          if (price < 500000) return false;
-          break;
-        default:
-          break;
-      }
-    }
-    
-    return true;
+    county: "",
+    priceRange: "",
+    sizeRange: "",
+    type: "",
   });
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setFilters({
       ...filters,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   const clearFilters = () => {
     setFilters({
-      county: '',
-      priceRange: '',
-      sizeRange: '',
-      type: ''
+      county: "",
+      priceRange: "",
+      sizeRange: "",
+      type: "",
     });
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-KE', {
-      style: 'currency',
-      currency: 'KES',
-      maximumFractionDigits: 0
+    return new Intl.NumberFormat("en-KE", {
+      style: "currency",
+      currency: "KES",
+      maximumFractionDigits: 0,
     }).format(price);
   };
 
-  const formatSize = (size: number, unit: 'acres' | 'hectares' = 'acres') => {
+  const formatSize = (size: number, unit: "acres" | "hectares" = "acres") => {
     return `${size} ${unit}`;
   };
 
-  // ✅ IMPROVED LOCATION FORMATTING
   const formatLocation = (property: any) => {
     if (property.location) {
-      const { county, constituency, ward, approximateLocation } = property.location;
-      return `${approximateLocation}, ${ward}, ${constituency}, ${county}`;
+      const { county, constituency, ward, approximateLocation } =
+        property.location;
+
+      return [approximateLocation, ward, constituency, county]
+        .filter(Boolean)
+        .join(", ");
     }
-    
-    // Fallback for old property structure
+
     if (property.county) {
-      const countyName = property.county.charAt(0).toUpperCase() + property.county.slice(1);
-      return `${countyName} County${property.constituency ? `, ${property.constituency}` : ''}`;
+      return property.county;
     }
-    
-    return 'Location not specified';
+
+    return "Location not specified";
   };
 
-  // ✅ GET FIRST IMAGE OR PLACEHOLDER
   const getPropertyImage = (property: any) => {
-    if (property.images && property.images.length > 0) {
-      return property.images[0];
+    return property.images?.length ? property.images[0] : null;
+  };
+
+  // SAFELY GET PROPERTIES WITHOUT CRASHING
+  const baseProperties =
+    getPropertiesByCounty(filters.county.toUpperCase()) || [];
+
+  // FILTERED PROPERTIES
+  const filteredProperties = baseProperties.filter((property: any) => {
+    // Type filter
+    if (filters.type && property.type !== filters.type) return false;
+
+    // Price filter
+    if (filters.priceRange) {
+      const price = property.price;
+
+      const ranges: any = {
+        "0-5000": price <= 5000,
+        "5000-20000": price >= 5000 && price <= 20000,
+        "20000-50000": price >= 20000 && price <= 50000,
+        "50000-100000": price >= 50000 && price <= 100000,
+        "100000-500000": price >= 100000 && price <= 500000,
+        "500000+": price >= 500000,
+      };
+
+      if (!ranges[filters.priceRange]) return false;
     }
-    return null;
+
+    // Size filter
+    if (filters.sizeRange) {
+      let size = property.size;
+
+      if (property.sizeUnit === "hectares") {
+        size = property.size * 2.47105; // convert ha → acres
+      }
+
+      const sizes: any = {
+        "0-1": size <= 1,
+        "1-5": size >= 1 && size <= 5,
+        "5-10": size >= 5 && size <= 10,
+        "10-20": size >= 10 && size <= 20,
+        "20+": size >= 20,
+      };
+
+      if (!sizes[filters.sizeRange]) return false;
+    }
+
+    return true;
+  });
+
+  const openListing = (id: string) => navigate(`/listings/${id}`);
+
+  const openChat = (property: any) => {
+    if (!property.ownerId) {
+      alert("Seller information missing.");
+      return;
+    }
+    navigate(`/chat/${property.id}/${property.ownerId}`);
   };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* HEADER */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Browse Farmland Listings</h1>
-        <p className="text-gray-600">Discover verified agricultural land across Kenya</p>
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">
+          Browse Farmland Listings
+        </h1>
+        <p className="text-gray-600">
+          Discover verified agricultural land across Kenya
+        </p>
       </div>
-      
-      {/* Filters */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+
+      {/* FILTERS */}
+      <div className="bg-white rounded-xl shadow-md p-6 mb-8 border border-gray-100">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <select 
-            name="county" 
-            value={filters.county} 
+          {/* COUNTY SELECT */}
+          <select
+            name="county"
+            value={filters.county}
             onChange={handleFilterChange}
-            className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="border border-gray-300 bg-gray-50 rounded-lg px-3 py-2 focus:ring-green-500 focus:border-green-500"
           >
             <option value="">All Counties</option>
-            {kenyanCounties.map(county => (
-              <option key={county} value={county.toLowerCase()}>
-                {county}
+            {kenyaCounties.map((county: any) => (
+              <option key={county.code} value={county.name}>
+                {county.name.charAt(0) +
+                  county.name.slice(1).toLowerCase()}
               </option>
             ))}
           </select>
-          
-          <select 
-            name="type" 
-            value={filters.type} 
+
+          {/* TYPE */}
+          <select
+            name="type"
+            value={filters.type}
             onChange={handleFilterChange}
-            className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="border border-gray-300 bg-gray-50 rounded-lg px-3 py-2 focus:ring-green-500 focus:border-green-500"
           >
             <option value="">All Types</option>
             <option value="sale">For Sale</option>
             <option value="rental">For Rent/Lease</option>
           </select>
-          
-          <select 
-            name="priceRange" 
-            value={filters.priceRange} 
+
+          {/* PRICE */}
+          <select
+            name="priceRange"
+            value={filters.priceRange}
             onChange={handleFilterChange}
-            className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="border border-gray-300 bg-gray-50 rounded-lg px-3 py-2 focus:ring-green-500 focus:border-green-500"
           >
             <option value="">Any Price</option>
             <option value="0-5000">Under KSh 5K</option>
@@ -159,11 +179,12 @@ const BrowseListings: React.FC = () => {
             <option value="500000+">Over KSh 500k</option>
           </select>
 
-          <select 
-            name="sizeRange" 
-            value={filters.sizeRange} 
+          {/* SIZE */}
+          <select
+            name="sizeRange"
+            value={filters.sizeRange}
             onChange={handleFilterChange}
-            className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="border border-gray-300 bg-gray-50 rounded-lg px-3 py-2 focus:ring-green-500 focus:border-green-500"
           >
             <option value="">Any Size</option>
             <option value="0-1">Under 1 acre</option>
@@ -172,141 +193,122 @@ const BrowseListings: React.FC = () => {
             <option value="10-20">10 - 20 acres</option>
             <option value="20+">Over 20 acres</option>
           </select>
-          
+
+          {/* BUTTONS */}
           <div className="flex gap-2">
-            <button 
+            <button
               onClick={clearFilters}
-              className="flex-1 bg-gray-500 text-white rounded-lg px-4 py-2 hover:bg-gray-600 transition duration-300"
+              className="flex-1 bg-gray-200 text-gray-700 rounded-lg px-4 py-2 hover:bg-gray-300 transition"
             >
               Clear
             </button>
-            <button className="flex-1 bg-green-600 text-white rounded-lg px-4 py-2 hover:bg-green-700 transition duration-300">
+            <button className="flex-1 bg-green-600 text-white rounded-lg px-4 py-2 hover:bg-green-700 transition">
               Apply
             </button>
           </div>
         </div>
       </div>
 
-      {/* Results Count */}
+      {/* RESULTS COUNT */}
       <div className="mb-6">
         <p className="text-gray-600">
-          Showing <span className="font-semibold">{filteredProperties.length}</span> 
-          {filteredProperties.length === 1 ? ' listing' : ' listings'}
-          {filters.county && ` in ${filters.county.charAt(0).toUpperCase() + filters.county.slice(1)}`}
+          Showing{" "}
+          <span className="font-semibold">
+            {filteredProperties.length}
+          </span>{" "}
+          {filteredProperties.length === 1 ? "listing" : "listings"}
+          {filters.county && ` in ${filters.county}`}
         </p>
       </div>
 
-      {/* Listings Grid */}
+      {/* LISTINGS */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProperties.map(property => (
-          <div key={property.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300 border border-gray-100">
-            {/* Image Section */}
-            <div className="h-48 bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center relative">
+        {filteredProperties.map((property: any) => (
+          <div
+            key={property.id}
+            className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition duration-300"
+          >
+            {/* IMAGE */}
+            <div className="h-48 relative bg-gradient-to-br from-green-400 to-green-600">
               {getPropertyImage(property) ? (
-                <img 
-                  src={getPropertyImage(property)} 
+                <img
+                  src={getPropertyImage(property)}
                   alt={property.title}
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="text-center text-white">
-                  <div className="text-4xl mb-2">🌱</div>
-                  <span className="text-lg font-semibold">Farmland Photo</span>
+                <div className="flex flex-col items-center justify-center h-full text-white">
+                  <div className="text-4xl">🌱</div>
+                  <p>No Image</p>
                 </div>
               )}
-              
-              {/* ✅ FIXED: Use 'verified' instead of 'isVerified' */}
+
               {property.verified && (
-                <div className="absolute top-3 right-3 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 shadow-lg">
-                  <span>✅</span>
-                  <span>Verified</span>
+                <div className="absolute top-3 right-3 bg-green-600 text-white px-3 py-1 rounded-full text-xs">
+                  ✅ Verified
                 </div>
               )}
             </div>
 
-            {/* Content Section */}
+            {/* CONTENT */}
             <div className="p-6">
-              <div className="flex items-start justify-between mb-2">
-                <h3 className="text-xl font-semibold text-gray-800 flex-1 pr-2">{property.title}</h3>
-                {property.verified && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 shrink-0">
-                    ✅ Verified
-                  </span>
-                )}
-              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                {property.title}
+              </h3>
 
               <p className="text-2xl font-bold text-green-600 mb-3">
                 {formatPrice(property.price)}
-                <span className="text-sm font-normal text-gray-600 ml-2">
-                  {property.type === 'rental' ? '/year' : ''}
-                </span>
+                {property.type === "rental" && (
+                  <span className="text-sm text-gray-600">/year</span>
+                )}
               </p>
 
-              <div className="text-gray-600 space-y-2 mb-4">
-                <div className="flex items-start">
-                  <span className="mr-2">📍</span>
-                  <span className="text-sm">{formatLocation(property)}</span>
-                </div>
-                <div className="flex items-center">
-                  <span className="mr-2">📏</span>
-                  <span className="text-sm">{formatSize(property.size, property.sizeUnit)}</span>
-                </div>
-                <div className="flex items-center">
-                  <span className="mr-2">🏷️</span>
-                  <span className="text-sm">
-                    {property.type === 'sale' ? 'For Sale' : 'For Rent/Lease'}
-                    {property.organicCertified && ' • 🌿 Organic'}
-                  </span>
-                </div>
-                {property.contact && (
-                  <div className="flex items-center">
-                    <span className="mr-2">📞</span>
-                    <span className="text-sm">{property.contact}</span>
-                  </div>
-                )}
+              <div className="space-y-1 text-gray-600 text-sm mb-3">
+                <p>📍 {formatLocation(property)}</p>
+                <p>
+                  📏 {formatSize(property.size, property.sizeUnit)}
+                </p>
+                <p>
+                  🏷️{" "}
+                  {property.type === "sale"
+                    ? "For Sale"
+                    : "For Rent/Lease"}
+                </p>
               </div>
 
-              <p className="text-gray-700 text-sm mb-4 line-clamp-2">{property.description}</p>
-
               <div className="flex gap-2">
-                <button className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition duration-300 font-medium">
+                <button
+                  onClick={() => openListing(property.id)}
+                  className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
+                >
                   View Details
                 </button>
-                <button className="px-4 py-2 border border-green-600 text-green-600 rounded-lg hover:bg-green-50 transition duration-300">
+
+                <button
+                  onClick={() => openChat(property)}
+                  className="px-4 py-2 border border-green-600 text-green-700 rounded-lg hover:bg-green-50 transition"
+                >
                   💬
                 </button>
               </div>
-
-              {/* Additional Info */}
-              {(property.soilType || property.waterAvailability) && (
-                <div className="mt-3 pt-3 border-t border-gray-100">
-                  <div className="flex flex-wrap gap-1">
-                    {property.soilType && (
-                      <span className="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">
-                        Soil: {property.soilType}
-                      </span>
-                    )}
-                    {property.waterAvailability && (
-                      <span className="inline-block bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded">
-                        Water: {property.waterAvailability}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         ))}
       </div>
 
+      {/* EMPTY STATE */}
       {filteredProperties.length === 0 && (
         <div className="text-center py-12">
           <div className="text-6xl mb-4">🔍</div>
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">No listings found</h3>
-          <p className="text-gray-500 mb-4">Try adjusting your filters or browse all counties</p>
-          <button 
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">
+            No listings found
+          </h3>
+          <p className="text-gray-500 mb-4">
+            Try adjusting filters.
+          </p>
+          <button
             onClick={clearFilters}
-            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition duration-300"
+            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
           >
             Show All Listings
           </button>
