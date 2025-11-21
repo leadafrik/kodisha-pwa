@@ -22,8 +22,8 @@ export const API_ENDPOINTS = {
   },
   // Services (we'll add these later)
   services: {
-    getAll: `${API_BASE_URL}/"#"`,  // we willfix the services 
-    create: `${API_BASE_URL}/"#"`,
+    getAll: `${API_BASE_URL}/Services`,  // we willfix the services 
+    create: `${API_BASE_URL}/Services`,
   },
   // ✅ ADDED VERIFICATION ROUTES (for future use)
   verification: {
