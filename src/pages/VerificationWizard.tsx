@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { API_BASE_URL } from "../config/api";
 
 /**
  * Simple, mobile-friendly verification wizard.
@@ -105,7 +106,7 @@ const VerificationWizard: React.FC = () => {
     try {
       setStatusLoading(true);
       setError(null);
-      const res = await fetch(`/api/verification/status/${user._id}`);
+      const res = await fetch(`${API_BASE_URL}/verification/status/${user._id}`);
       const data = await res.json();
       if (!data.success) {
         throw new Error(data.message || "Failed to load verification status.");
@@ -147,7 +148,7 @@ const VerificationWizard: React.FC = () => {
       formData.append("userId", user._id as string);
       formData.append("file", file);
 
-      const res = await fetch(`/api/verification/upload/${type}`, {
+      const res = await fetch(`${API_BASE_URL}/verification/upload/${type}`, {
         method: "POST",
         body: formData,
       });
@@ -635,3 +636,4 @@ const StatusRow: React.FC<StatusRowProps> = ({ label, ok, note }) => {
 };
 
 export default VerificationWizard;
+
