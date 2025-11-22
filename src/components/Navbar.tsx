@@ -3,6 +3,12 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import KodishaLogo from "./KodishaLogo";
 
+const Chevron: React.FC = () => (
+  <svg className="w-3 h-3" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M2 2.5L6 6L10 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -20,9 +26,7 @@ const Navbar: React.FC = () => {
             {/* LOGO */}
             <Link to="/" className="flex items-center gap-3">
               <KodishaLogo size={42} />
-              <span className="text-2xl font-extrabold text-gray-800 tracking-tight">
-                Kodisha
-              </span>
+              <span className="text-2xl font-extrabold text-gray-800 tracking-tight">Kodisha</span>
             </Link>
 
             {/* DESKTOP NAV */}
@@ -35,13 +39,12 @@ const Navbar: React.FC = () => {
                 Find Services
               </Link>
 
-              {/* LOGGED IN */}
               {user ? (
                 <div className="flex items-center gap-6">
                   {/* LIST DROPDOWN */}
                   <div className="group relative">
                     <button className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition font-semibold flex items-center gap-2">
-                      List <span className="text-sm">?</span>
+                      List <Chevron />
                     </button>
 
                     <div className="absolute hidden group-hover:block bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 right-0 z-50">
@@ -69,7 +72,7 @@ const Navbar: React.FC = () => {
                         {user.name ? user.name[0].toUpperCase() : "U"}
                       </span>
                       {user.name ? user.name.split(" ")[0] : "Profile"}
-                      <span className="text-sm">?</span>
+                      <Chevron />
                     </button>
 
                     <div className="absolute hidden group-hover:block bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 right-0 z-50">
@@ -88,10 +91,7 @@ const Navbar: React.FC = () => {
                         <Link to="/list-service" className="block px-4 py-2 hover:bg-gray-50 text-sm">My Service Listings</Link>
                       </div>
 
-                      <Link
-                        to="/admin"
-                        className="block px-4 py-2 hover:bg-blue-50 text-blue-600 font-semibold border-b text-sm"
-                      >
+                      <Link to="/admin" className="block px-4 py-2 hover:bg-blue-50 text-blue-600 font-semibold border-b text-sm">
                         Admin Dashboard
                       </Link>
 
@@ -105,7 +105,6 @@ const Navbar: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                /* GUEST MENU */
                 <div className="flex items-center gap-4">
                   <Link to="/login" className="px-5 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 font-semibold transition">
                     Login
@@ -113,7 +112,7 @@ const Navbar: React.FC = () => {
 
                   <div className="group relative">
                     <button className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition font-semibold flex items-center gap-2">
-                      List <span className="text-sm">?</span>
+                      List <Chevron />
                     </button>
 
                     <div className="absolute hidden group-hover:block bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 right-0 z-50">
@@ -133,10 +132,7 @@ const Navbar: React.FC = () => {
             </div>
 
             {/* MOBILE MENU ICON */}
-            <button
-              className="lg:hidden flex flex-col gap-1"
-              onClick={() => setMobileOpen(true)}
-            >
+            <button className="lg:hidden flex flex-col gap-1" onClick={() => setMobileOpen(true)}>
               <span className="w-6 h-0.5 bg-gray-900"></span>
               <span className="w-6 h-0.5 bg-gray-900"></span>
               <span className="w-6 h-0.5 bg-gray-900"></span>
@@ -154,7 +150,7 @@ const Navbar: React.FC = () => {
           >
             <div className="flex justify-between items-center mb-8">
               <span className="text-xl font-bold">Menu</span>
-              <button onClick={closeMobile} aria-label="Close menu">
+              <button onClick={closeMobile} aria-label="Close menu" className="text-2xl leading-none">
                 ×
               </button>
             </div>

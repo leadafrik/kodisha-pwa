@@ -55,20 +55,20 @@ const counties = [
 ];
 
 const Login: React.FC = () => {
-  const {
-    requestEmailOtp,
-    verifyEmailOtp,
-    register,
-    loading,
-  } = useAuth();
+  const { login, requestEmailOtp, verifyEmailOtp, register, loading } = useAuth();
   const navigate = useNavigate();
 
   const [mode, setMode] = useState<Mode>("login");
-  const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [codeSent, setCodeSent] = useState(false);
+  const [otpStep, setOtpStep] = useState(false);
+  const [otpEmail, setOtpEmail] = useState("");
+  const [otpCode, setOtpCode] = useState("");
   const [info, setInfo] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const [loginData, setLoginData] = useState({
+    emailOrPhone: "",
+    password: "",
+  });
 
   const [formData, setFormData] = useState({
     name: "",
@@ -79,34 +79,55 @@ const Login: React.FC = () => {
     county: "",
   });
 
-  const handleSendCode = async () => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     setError(null);
     setInfo(null);
-    if (!email.trim()) {
-      setError("Enter your email to receive a code.");
+    if (!loginData.emailOrPhone.trim() || !loginData.password.trim()) {
+      setError("Enter your email/phone and password.");
       return;
     }
     try {
-      await requestEmailOtp(email.trim());
-      setCodeSent(true);
-      setInfo("Code sent to your email. Enter it below to continue.");
+      await login(loginData.emailOrPhone.trim(), loginData.password.trim());
+      navigate("/profile");
     } catch (err: any) {
-      setError(err?.message || "Failed to send code.");
+      setError(err?.message || "Login failed. Check your credentials.");
     }
+  };
+
+  const handleSendOtp = async (email: string) => {
+    await requestEmailOtp(email);
+    setOtpEmail(email);
+    setOtpStep(true);
+    setInfo("We sent a 6-digit code to your email. Enter it to finish sign up.");
   };
 
   const handleVerifyCode = async () => {
     setError(null);
     setInfo(null);
-    if (!email.trim() || !code.trim()) {
+    if (!otpEmail.trim() || !otpCode.trim()) {
       setError("Enter both email and code.");
       return;
     }
     try {
-      await verifyEmailOtp(email.trim(), code.trim());
+      await verifyEmailOtp(otpEmail.trim(), otpCode.trim());
       navigate("/profile");
     } catch (err: any) {
       setError(err?.message || "Invalid code.");
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setError(null);
+    setInfo(null);
+    if (!otpEmail) {
+      setError("Enter your email first.");
+      return;
+    }
+    try {
+      await handleSendOtp(otpEmail);
+    } catch (err: any) {
+      setError(err?.message || "Failed to resend code.");
     }
   };
 
@@ -140,11 +161,8 @@ const Login: React.FC = () => {
         county: formData.county,
       });
 
-      // Immediately trigger email OTP flow and stay on this screen
-      setEmail(formData.email);
-      await handleSendCode();
+      await handleSendOtp(formData.email);
       setMode("login");
-      setInfo("Account created. Enter the code we sent to your email.");
     } catch (err: any) {
       setError(err?.message || "Registration failed. Please try again.");
     }
@@ -169,7 +187,7 @@ const Login: React.FC = () => {
               Kodisha Access
             </h1>
             <p className="text-gray-600">
-              Login with email OTP or create a new account
+              Sign in with password, or create an account and verify once via email
             </p>
           </div>
           <div className="flex space-x-2">
@@ -208,56 +226,39 @@ const Login: React.FC = () => {
         )}
 
         {mode === "login" ? (
-          <div className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-gray-700 mb-2">Email</label>
+              <label className="block text-gray-700 mb-2">Email or Phone</label>
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                value={loginData.emailOrPhone}
+                onChange={(e) =>
+                  setLoginData((prev) => ({ ...prev, emailOrPhone: e.target.value }))
+                }
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="you@example.com"
+                placeholder="you@example.com or phone"
               />
             </div>
-            {codeSent && (
-              <div>
-                <label className="block text-gray-700 mb-2">
-                  Enter OTP Code
-                </label>
-                <input
-                  type="text"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="6-digit code"
-                />
-              </div>
-            )}
-            <div className="flex space-x-3">
-              <button
-                type="button"
-                onClick={handleSendCode}
-                disabled={loading}
-                className="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-60"
-              >
-                {codeSent ? "Resend Code" : "Send Code"}
-              </button>
-              {codeSent && (
-                <button
-                  type="button"
-                  onClick={handleVerifyCode}
-                  disabled={loading}
-                  className="flex-1 bg-gray-800 text-white py-3 rounded-lg font-semibold hover:bg-gray-900 transition disabled:opacity-60"
-                >
-                  {loading ? "Verifying..." : "Verify & Login"}
-                </button>
-              )}
+            <div>
+              <label className="block text-gray-700 mb-2">Password</label>
+              <input
+                type="password"
+                value={loginData.password}
+                onChange={(e) =>
+                  setLoginData((prev) => ({ ...prev, password: e.target.value }))
+                }
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="Your password"
+              />
             </div>
-            <p className="text-sm text-gray-600">
-              Prefer phone OTP? Use the app or ask support to switch your account
-              to phone-based login.
-            </p>
-          </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-60"
+            >
+              {loading ? "Signing in..." : "Sign In"}
+            </button>
+          </form>
         ) : (
           <form onSubmit={handleRegister} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
@@ -349,6 +350,42 @@ const Login: React.FC = () => {
               </button>
             </div>
           </form>
+        )}
+
+        {otpStep && (
+          <div className="mt-6 border-t pt-6 bg-gray-50 rounded-xl p-4">
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Verify your email</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              We sent a code to <span className="font-semibold">{otpEmail}</span>. Enter it to finish sign up.
+            </p>
+            <div className="flex flex-col md:flex-row gap-3">
+              <input
+                type="text"
+                value={otpCode}
+                onChange={(e) => setOtpCode(e.target.value)}
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="6-digit code"
+              />
+              <button
+                type="button"
+                onClick={handleVerifyCode}
+                disabled={loading}
+                className="px-6 py-3 bg-gray-800 text-white rounded-lg font-semibold hover:bg-gray-900 transition disabled:opacity-60"
+              >
+                {loading ? "Verifying..." : "Verify & Continue"}
+              </button>
+            </div>
+            <div className="mt-3 flex flex-col md:flex-row md:items-center md:justify-between text-sm text-gray-600 gap-2">
+              <span>Didn&apos;t get it? Check spam or resend.</span>
+              <button
+                type="button"
+                onClick={handleResendOtp}
+                className="text-green-700 font-semibold hover:underline"
+              >
+                Resend code
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </div>
