@@ -33,6 +33,7 @@ export const API_ENDPOINTS = {
   },
   // 🆕 ADMIN PANEL ENDPOINTS
   admin: {
+    login: `${API_BASE_URL}/admin/login`,
     dashboard: `${API_BASE_URL}/admin/dashboard`,
     listings: {
       getAll: `${API_BASE_URL}/admin/listings`,

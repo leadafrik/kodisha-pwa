@@ -1,54 +1,96 @@
+// ===============================
+// LAND LISTING TYPES
+// ===============================
 export interface LandListing {
-  id: string;
+  id: string;             // frontend ID
+  _id?: string;           // backend MongoDB ID
+
+  // Basic fields
   title: string;
   description: string;
   price: number;
   size: number;
-  sizeUnit: 'acres' | 'hectares';
+  sizeUnit: "acres" | "hectares";
+  type: "sale" | "rental";
+
+  // Frontend location fields
   county: string;
   constituency: string;
   ward: string;
-  contact: string;
-  images: string[];
-  verified: boolean;
-  listedBy: string;
-  createdAt: Date;
-  type: 'sale' | 'rental';
-  
-  // Agricultural fields
   approximateLocation: string;
-  soilType: string;
-  waterAvailability: string;
-  previousCrops: string;
-  organicCertified: boolean;
-  availableFrom: string;
-  availableTo: string;
-  minLeasePeriod: number;
-  maxLeasePeriod: number;
-  preferredCrops: string;
-  
-  // Backend fields (from MongoDB)
-  _id?: string;
-  isVerified?: boolean;
-  status?: 'available' | 'leased' | 'under-maintenance';
-  views?: number;
-  inquiries?: number;
-  owner?: any;
+
+  // Backend location structure
   location?: {
     county: string;
     constituency: string;
     ward: string;
-    approximateLocation: string;
+    approximateLocation?: string;
   };
-  priceType?: 'per-season' | 'per-month' | 'per-acre';
+
+  // Contact
+  contact: string;
+
+  // Images
+  images: string[];
+
+  // Agricultural details
+  soilType: string;
+  waterAvailability: string;
+  previousCrops: string[]; // FIXED: backend sends array
+  organicCertified: boolean;
+
+  availableFrom: string;
+  availableTo: string;
+  minLeasePeriod: number;
+  maxLeasePeriod: number;
+  preferredCrops: string[]; // FIXED: should be array
+
+  // Backend verification + status
+  verified?: boolean;
+  isVerified?: boolean;
+  status?:
+    | "pending_verification"
+    | "pending_payment"
+    | "active"
+    | "leased"
+    | "sold"
+    | "rejected";
+
+  // Location coordinates
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+
+  // Analytics
+  views?: number;
+  inquiries?: number;
+
+  // Owner object from backend
+  owner?: any;
+
+  // Payment structure
+  payment?: {
+    firstListingFreeApplied?: boolean;
+    paymentStatus?: "not_required" | "pending" | "paid";
+  };
+
+  // Pricing
+  priceType?: "per-season" | "per-month" | "per-acre";
+
+  listedBy: string;
+  createdAt: Date;
 }
 
+// ===============================
+// PROPERTY FORM DATA (frontend form)
+// ===============================
 export interface PropertyFormData {
   title: string;
   description: string;
   price: string;
   size: string;
-  sizeUnit: 'acres' | 'hectares';
+  sizeUnit: "acres" | "hectares";
   county: string;
   constituency: string;
   ward: string;
@@ -63,17 +105,19 @@ export interface PropertyFormData {
   maxLeasePeriod: string;
   preferredCrops: string;
   contact: string;
-  type: 'sale' | 'rental';
+  type: "sale" | "rental";
 
-   // ⭐ ADD THESE TWO LINES
+  // Coordinates added
   latitude?: number;
   longitude?: number;
 }
 
-// Service Types
+// ===============================
+// SERVICE LISTINGS
+// ===============================
 export interface ServiceListing {
   id: string;
-  type: 'equipment' | 'agrovet' | 'professional_services';
+  type: "equipment" | "agrovet" | "professional_services";
   name: string;
   description: string;
   location: {
@@ -87,23 +131,23 @@ export interface ServiceListing {
   verified: boolean;
   subscriptionEnd: Date;
   createdAt: Date;
-  
-  // New fields for equipment and professional services
+
+  // Extra details
   pricing?: string;
   experience?: string;
   operatorIncluded?: boolean;
   approximateLocation?: string;
   qualifications?: string;
-  photos?: string[]; // Add photos field
-  
-  // ✅ ADDED: New contact fields for listings
+  photos?: string[];
+
+  // New contact fields
   alternativeContact?: string;
   email?: string;
   businessHours?: string;
 }
 
 export interface ServiceFormData {
-  type: 'equipment' | 'agrovet' | 'professional_services';
+  type: "equipment" | "agrovet" | "professional_services";
   name: string;
   description: string;
   county: string;
@@ -111,27 +155,23 @@ export interface ServiceFormData {
   ward: string;
   contact: string;
   services: string[];
-  
-  // New fields for equipment and professional services
+
   pricing?: string;
   experience?: string;
   operatorIncluded?: boolean;
   approximateLocation?: string;
   qualifications?: string;
-  photos?: string[]; // Add photos field
-  
-  // ✅ ADDED: Agrovet specific fields
+  photos?: string[];
+
   town?: string;
   openingHours?: string;
   deliveryAvailable?: boolean;
-  
-  // Categories
+
   products?: boolean;
   animalHealth?: boolean;
   cropProtection?: boolean;
   equipment?: boolean;
-  
-  // Services
+
   seeds?: string;
   fertilizers?: string;
   animalFeeds?: string;
@@ -147,14 +187,15 @@ export interface ServiceFormData {
   waterPumps?: boolean;
   protectiveGear?: boolean;
   farmTools?: boolean;
-  
-  // ✅ ADDED: New contact fields
+
   alternativeContact?: string;
   email?: string;
   businessHours?: string;
 }
 
-// User Types
+// ===============================
+// USER TYPES
+// ===============================
 export interface User {
   id: string;
   name: string;
@@ -165,17 +206,14 @@ export interface User {
   listings: string[];
   createdAt: Date;
   type: "buyer" | "seller" | "service_provider" | "admin";
-  
-  // Backend fields
+
   _id?: string;
   fullName?: string;
   userType?: "farmer" | "landowner" | "buyer" | "service provider";
   county?: string;
   isVerified?: boolean;
   role?: "user" | "admin" | "moderator";
-  
 
-  // Verification object
   verification?: {
     phoneVerified: boolean;
     idVerified: boolean;
@@ -207,7 +245,9 @@ export interface UserFormData {
   ward?: string;
 }
 
-// Agrovet Types
+// ===============================
+// AGROVET TYPES
+// ===============================
 export interface AgrovetListing {
   id: string;
   name: string;
@@ -247,8 +287,7 @@ export interface AgrovetListing {
   deliveryAvailable: boolean;
   verified: boolean;
   createdAt: Date;
-  
-  // ✅ ADDED: New contact fields for agrovet
+
   alternativeContact?: string;
   email?: string;
   businessHours?: string;
@@ -265,14 +304,12 @@ export interface AgrovetFormData {
   contact: string;
   openingHours: string;
   deliveryAvailable: boolean;
-  
-  // Categories
+
   products: boolean;
   animalHealth: boolean;
   cropProtection: boolean;
   equipment: boolean;
-  
-  // Services
+
   seeds: string;
   fertilizers: string;
   animalFeeds: string;
@@ -288,8 +325,7 @@ export interface AgrovetFormData {
   waterPumps: boolean;
   protectiveGear: boolean;
   farmTools: boolean;
-  
-  // ✅ ADDED: New contact fields
+
   alternativeContact?: string;
   email?: string;
   businessHours?: string;

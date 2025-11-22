@@ -78,7 +78,7 @@ const BrowseListings: React.FC = () => {
 
       const ranges: any = {
         "0-5000": price <= 5000,
-        "5005000-20000": price >= 5000 && price <= 20000,
+        "5000-20000": price >= 5000 && price <= 20000,
         "20000-50000": price >= 20000 && price <= 50000,
         "50000-100000": price >= 50000 && price <= 100000,
         "100000-500000": price >= 100000 && price <= 500000,
