@@ -69,11 +69,15 @@ export const apiRequest = async (url: string, options: RequestInit = {}) => {
     ...options,
   });
 
+  const data = await response.json().catch(() => ({}));
+
   if (!response.ok) {
-    throw new Error(`API error: ${response.status}`);
+    const message =
+      (data && (data.message || data.error)) || `API error: ${response.status}`;
+    throw new Error(message);
   }
 
-  return response.json();
+  return data;
 };
 
 export const adminApiRequest = async (
