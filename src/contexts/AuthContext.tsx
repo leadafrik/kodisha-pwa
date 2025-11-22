@@ -99,11 +99,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (userData: UserFormData): Promise<User | null> => {
     setLoading(true);
     try {
-      let userType: "farmer" | "landowner" | "buyer" | "service provider" =
+      let userType: "farmer" | "landowner" | "buyer" | "service_provider" =
         "buyer";
       if (userData.type === "seller") userType = "landowner";
       if (userData.type === "buyer") userType = "farmer";
-      if (userData.type === "service_provider") userType = "service provider";
+      if (userData.type === "service_provider") userType = "service_provider";
 
       const payload = {
         phone: userData.phone || userData.email || "email-only",
