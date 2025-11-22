@@ -61,12 +61,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const login = async (phone: string, password: string) => {
+  const login = async (identifier: string, password: string) => {
     setLoading(true);
     try {
+      const trimmed = identifier.trim();
+      const payload: any = { password };
+      if (trimmed.includes("@")) {
+        payload.email = trimmed;
+      } else {
+        payload.phone = trimmed;
+      }
+
       const res: any = await apiRequest(API_ENDPOINTS.auth.login, {
         method: "POST",
-        body: JSON.stringify({ phone, password }),
+        body: JSON.stringify(payload),
       });
 
       if (!res.success || !res.user) {
