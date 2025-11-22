@@ -23,12 +23,11 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Map backend user → frontend User type
+// Map backend user -> frontend User type
 const mapBackendUserToFrontendUser = (apiUser: any): User => {
   const id = apiUser._id?.toString?.() || apiUser.id || "";
   const name = apiUser.fullName || apiUser.name || "User";
 
-  // Map backend userType to frontend type
   let type: User["type"] = "buyer";
   if (apiUser.userType === "landowner") type = "seller";
   else if (apiUser.userType === "farmer") type = "buyer";
@@ -62,7 +61,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // 🔑 Login with phone + password
   const login = async (phone: string, password: string) => {
     setLoading(true);
     try {
@@ -71,18 +69,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         body: JSON.stringify({ phone, password }),
       });
 
-      if (!res.success || !res.data) {
+      if (!res.success || !res.user) {
         throw new Error(res.message || "Login failed");
       }
 
-      const apiUser = res.data;
-      const mappedUser = mapBackendUserToFrontendUser(apiUser);
-
+      const mappedUser = mapBackendUserToFrontendUser(res.user);
       setUser(mappedUser);
       localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
 
-      if (apiUser.token) {
-        localStorage.setItem("kodisha_token", apiUser.token);
+      if (res.token) {
+        localStorage.setItem("kodisha_token", res.token);
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -92,11 +88,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // 📝 Register with your real backend
-  const register = async (userData: UserFormData): Promise<User> => {
+  const register = async (userData: UserFormData): Promise<User | null> => {
     setLoading(true);
     try {
-      // Map frontend type → backend userType
       let userType: "farmer" | "landowner" | "buyer" | "service provider" =
         "buyer";
       if (userData.type === "seller") userType = "landowner";
@@ -119,23 +113,64 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         body: JSON.stringify(payload),
       });
 
-      if (!res.success || !res.data) {
+      if (!res.success) {
         throw new Error(res.message || "Registration failed");
       }
 
-      const apiUser = res.data;
-      const mappedUser = mapBackendUserToFrontendUser(apiUser);
-
-      setUser(mappedUser);
-      localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
-
-      if (apiUser.token) {
-        localStorage.setItem("kodisha_token", apiUser.token);
+      if (res.user) {
+        const mappedUser = mapBackendUserToFrontendUser(res.user);
+        setUser(mappedUser);
+        localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
+        if (res.token) {
+          localStorage.setItem("kodisha_token", res.token);
+        }
+        return mappedUser;
       }
 
-      return mappedUser;
+      return null;
     } catch (error) {
       console.error("Registration error:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const requestEmailOtp = async (email: string) => {
+    setLoading(true);
+    try {
+      const res: any = await apiRequest(API_ENDPOINTS.auth.emailOtpRequest, {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+      if (!res.success) {
+        throw new Error(res.message || "Failed to send email OTP.");
+      }
+    } catch (error) {
+      console.error("Email OTP request error:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyEmailOtp = async (email: string, code: string) => {
+    setLoading(true);
+    try {
+      const res: any = await apiRequest(API_ENDPOINTS.auth.emailOtpVerify, {
+        method: "POST",
+        body: JSON.stringify({ email, code }),
+      });
+      if (!res.success || !res.user || !res.token) {
+        throw new Error(res.message || "Invalid code.");
+      }
+
+      const mappedUser = mapBackendUserToFrontendUser(res.user);
+      setUser(mappedUser);
+      localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
+      localStorage.setItem("kodisha_token", res.token);
+    } catch (error) {
+      console.error("Email OTP verify error:", error);
       throw error;
     } finally {
       setLoading(false);
@@ -156,7 +191,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Load user from localStorage on mount
   useEffect(() => {
     try {
       const savedUser = localStorage.getItem("kodisha_user");
@@ -174,6 +208,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       value={{
         user,
         login,
+        requestEmailOtp,
+        verifyEmailOtp,
         logout,
         updateProfile,
         register,

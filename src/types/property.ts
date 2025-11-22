@@ -228,9 +228,11 @@ export interface User {
 export interface AuthContextType {
   user: User | null;
   login: (phone: string, password: string) => Promise<void>;
+   requestEmailOtp: (email: string) => Promise<void>;
+   verifyEmailOtp: (email: string, code: string) => Promise<void>;
   logout: () => void;
   updateProfile: (userData: Partial<User>) => void;
-  register: (userData: UserFormData) => Promise<User>;
+  register: (userData: UserFormData) => Promise<User | null>;
   loading: boolean;
 }
 

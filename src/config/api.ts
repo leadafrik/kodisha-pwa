@@ -7,6 +7,10 @@ export const API_ENDPOINTS = {
   auth: {
     register: `${API_BASE_URL}/auth/register`,
     login: `${API_BASE_URL}/auth/login`,
+    loginOtpRequest: `${API_BASE_URL}/auth/login-otp/request`,
+    loginOtpVerify: `${API_BASE_URL}/auth/login-otp/verify`,
+    emailOtpRequest: `${API_BASE_URL}/auth/email-otp/request`,
+    emailOtpVerify: `${API_BASE_URL}/auth/email-otp/verify`,
     me: `${API_BASE_URL}/auth/me`,
     // ✅ ADDED VERIFICATION ENDPOINTS
     verifyPhone: `${API_BASE_URL}/auth/verify-phone`,
