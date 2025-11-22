@@ -66,6 +66,17 @@ const ListProperty: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Pre-submit verification gating by listing type
+    const lowerType = formData.type.toLowerCase();
+    if (lowerType === "sale") {
+      alert(
+        "To list land for SALE you must have uploaded: ID front, ID back, a selfie holding your ID, and proof of ownership (title deed + land search OR chief letter with stamp)."
+      );
+    } else if (lowerType === "rental" || lowerType === "lease") {
+      alert("To list land for RENT/LEASE you must have uploaded: ID front, ID back, and a selfie holding your ID.");
+    }
+
     setUploading(true);
     
     try {

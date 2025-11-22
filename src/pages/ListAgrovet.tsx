@@ -180,21 +180,19 @@ const ListAgrovet: React.FC = () => {
     setSubmitting(true);
     
     try {
-      // Convert to ServiceFormData format
-      const serviceData = {
-        type: 'agrovet' as const,
-        name: formData.name,
-        description: formData.description,
-        county: formData.county,
-        constituency: formData.constituency,
-        ward: formData.ward,
-        contact: formData.contact,
-        services: getSelectedServices(),
-        photos: formData.photos, // Include photos
-        approximateLocation: formData.approximateLocation
-      };
-      
-      await addService(serviceData);
+      // Convert to FormData for backend upload (uses professional endpoint until agrovet route exists)
+      const submitData = new FormData();
+      submitData.append('type', 'professional_services'); // backend currently supports equipment/professional
+      submitData.append('name', formData.name);
+      submitData.append('description', formData.description);
+      submitData.append('county', formData.county);
+      submitData.append('constituency', formData.constituency);
+      submitData.append('ward', formData.ward);
+      submitData.append('contact', formData.contact);
+      submitData.append('services', getSelectedServices().join(','));
+      submitData.append('approximateLocation', formData.approximateLocation);
+
+      await addService(submitData);
       alert('Agrovet listed successfully! It will appear after verification.');
       
       // Reset form

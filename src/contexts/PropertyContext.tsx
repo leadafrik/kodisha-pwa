@@ -1,15 +1,27 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
-import { LandListing, ServiceListing, ServiceFormData } from "../types/property";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import {
+  LandListing,
+  ServiceListing,
+  ServiceFormData,
+} from "../types/property";
 import { API_ENDPOINTS } from "../config/api";
+
+type ServiceType = "equipment" | "agrovet" | "professional_services";
 
 interface PropertyContextType {
   properties: LandListing[];
   serviceListings: ServiceListing[];
   addProperty: (propertyData: FormData) => Promise<void>;
-  addService: (serviceData: ServiceFormData) => Promise<void>;
+  addService: (serviceData: FormData) => Promise<void>;
   getPropertiesByCounty: (county: string) => LandListing[];
   getServicesByType: (
-    type: "equipment" | "agrovet" | "professional_services",
+    type: ServiceType,
     county?: string
   ) => ServiceListing[];
   loading: boolean;
@@ -33,6 +45,59 @@ interface PropertyProviderProps {
   children: ReactNode;
 }
 
+const normalizeServiceTags = (services: any): string[] => {
+  if (!services) return [];
+  if (Array.isArray(services)) return services.filter(Boolean);
+  if (typeof services === "string") {
+    return services
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+  return [];
+};
+
+const mapServiceRecord = (item: any): ServiceListing => {
+  const services = normalizeServiceTags(item.services);
+  const createdAt = item.createdAt ? new Date(item.createdAt) : new Date();
+  const subscriptionEnd = item.subscriptionEnd
+    ? new Date(item.subscriptionEnd)
+    : new Date();
+
+  return {
+    id: item._id || item.id,
+    type: (item.type || "equipment") as ServiceType,
+    name: item.name || "Service",
+    description: item.description || "",
+    location: {
+      county: item.location?.county || "",
+      constituency: item.location?.constituency || "",
+      ward: item.location?.ward || "",
+      coordinates: item.location?.coordinates,
+    },
+    contact:
+      item.contact ||
+      item.owner?.phone ||
+      item.owner?.email ||
+      item.alternativeContact ||
+      "",
+    services,
+    verified: item.isVerified ?? item.verified ?? false,
+    subscriptionEnd,
+    createdAt,
+    pricing: item.pricing,
+    experience: item.experience,
+    operatorIncluded: item.operatorIncluded,
+    approximateLocation:
+      item.location?.approximateLocation || item.approximateLocation,
+    qualifications: item.qualifications,
+    photos: item.images || item.photos,
+    alternativeContact: item.alternativeContact,
+    email: item.email,
+    businessHours: item.businessHours,
+  };
+};
+
 export const PropertyProvider: React.FC<PropertyProviderProps> = ({
   children,
 }) => {
@@ -40,45 +105,58 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
   const [serviceListings, setServiceListings] = useState<ServiceListing[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Load properties on mount
-  React.useEffect(() => {
+  useEffect(() => {
     refreshProperties();
+    refreshServices();
   }, []);
 
-  // ============================================================
-  // FETCH LAND LISTINGS
-  // ============================================================
   const refreshProperties = async () => {
     setLoading(true);
     try {
-      console.log("📡 Fetching properties:", API_ENDPOINTS.properties.getAll);
-
       const response = await fetch(API_ENDPOINTS.properties.getAll);
-
       if (!response.ok) throw new Error("Failed to fetch listings");
-
       const data = await response.json();
-
-      setProperties(data.data || []);
-      console.log("✅ Listings loaded:", data.data?.length || 0);
+      setProperties(data.data || data.listings || []);
+      console.log("Listings loaded:", data.data?.length || 0);
     } catch (error) {
-      console.error("❌ Error loading properties:", error);
+      console.error("Error loading properties:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // ============================================================
-  // TEMP DISABLE SERVICES (backend not implemented yet)
-  // ============================================================
   const refreshServices = async () => {
-    console.warn("⚠️ Service fetch disabled — backend route not ready");
-    setServiceListings([]);
+    setLoading(true);
+    try {
+      const [equipmentRes, professionalRes] = await Promise.all([
+        fetch(API_ENDPOINTS.services.equipment.list),
+        fetch(API_ENDPOINTS.services.professional.list),
+      ]);
+
+      if (!equipmentRes.ok || !professionalRes.ok) {
+        throw new Error("Failed to fetch services");
+      }
+
+      const equipmentJson = await equipmentRes.json();
+      const professionalJson = await professionalRes.json();
+
+      const equipment = (equipmentJson.data || []).map(mapServiceRecord);
+      const professional = (professionalJson.data || []).map(mapServiceRecord);
+
+      const combined = [...equipment, ...professional].sort(
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+      );
+
+      setServiceListings(combined);
+      console.log("Services loaded:", combined.length);
+    } catch (error) {
+      console.error("Error loading services:", error);
+      setServiceListings([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // ============================================================
-  // ADD PROPERTY (ACTUAL BACKEND UPLOAD)
-  // ============================================================
   const addProperty = async (formData: FormData) => {
     setLoading(true);
     try {
@@ -89,57 +167,79 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
         throw new Error("No auth token");
       }
 
-      console.log("📤 Uploading property →", API_ENDPOINTS.properties.create);
-
       const response = await fetch(API_ENDPOINTS.properties.create, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`, // ⭐ required for backend protect middleware
+          Authorization: `Bearer ${token}`,
         },
         body: formData,
       });
 
       const result = await response.json();
-      console.log("📩 Backend response:", result);
 
       if (!response.ok) {
-        alert(`❌ Upload failed: ${result.message || "Unknown error"}`);
+        alert(`Upload failed: ${result.message || "Unknown error"}`);
         throw new Error(result.message || "Failed");
       }
 
       await refreshProperties();
-      alert("✅ Property listed successfully! It will appear after verification.");
+      alert("Property listed successfully! It will appear after verification.");
     } catch (error) {
-      console.error("❌ addProperty error:", error);
-      alert("❌ Failed to upload property. Please try again.");
+      console.error("addProperty error:", error);
+      alert("Failed to upload property. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  // ============================================================
-  // ADD SERVICE (DISABLED UNTIL BACKEND IS READY)
-  // ============================================================
-  const addService = async () => {
-    alert("⚠️ Services upload not yet connected to backend.");
+  const addService = async (formData: FormData) => {
+    setLoading(true);
+    try {
+      const type = (formData.get("type") as string) || "equipment";
+      const token = localStorage.getItem("kodisha_token");
+      // Default equipment, send non-equipment (professional/agrovet) to professional endpoint
+      const endpoint =
+        type === "equipment"
+          ? API_ENDPOINTS.services.equipment.create
+          : API_ENDPOINTS.services.professional.create;
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || result.success === false) {
+        throw new Error(result.message || "Failed to create service");
+      }
+
+      await refreshServices();
+      alert("Service listed successfully! It will appear after verification.");
+    } catch (error) {
+      console.error("addService error:", error);
+      alert("Failed to upload service. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // ============================================================
-  // FILTER PROPERTIES BY COUNTY
-  // ============================================================
   const getPropertiesByCounty = (county: string) => {
     if (!county) return properties;
     return properties.filter(
-      (p) =>
-        p.location?.county?.toLowerCase() === county.toLowerCase()
+      (p) => p.location?.county?.toLowerCase() === county.toLowerCase()
     );
   };
 
-  // ============================================================
-  // FILTER SERVICES (TEMPORARILY UNUSED)
-  // ============================================================
-  const getServicesByType = () => {
-    return [];
+  const getServicesByType = (type: ServiceType, county?: string) => {
+    let list = serviceListings.filter((s) => s.type === type);
+    if (county) {
+      list = list.filter(
+        (s) => s.location?.county?.toLowerCase() === county.toLowerCase()
+      );
+    }
+    return list;
   };
 
   return (

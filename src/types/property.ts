@@ -238,7 +238,7 @@ export interface AuthContextType {
 
 export interface UserFormData {
   name: string;
-  phone: string;
+  phone?: string;
   email?: string;
   password: string;
   type: "buyer" | "seller" | "service_provider";

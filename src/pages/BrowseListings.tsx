@@ -30,53 +30,40 @@ const BrowseListings: React.FC = () => {
     });
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-KE", {
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat("en-KE", {
       style: "currency",
       currency: "KES",
       maximumFractionDigits: 0,
     }).format(price);
-  };
 
-  const formatSize = (size: number, unit: "acres" | "hectares" = "acres") => {
-    return `${size} ${unit}`;
-  };
+  const formatSize = (size: number, unit: "acres" | "hectares" = "acres") =>
+    `${size} ${unit}`;
 
   const formatLocation = (property: any) => {
     if (property.location) {
       const { county, constituency, ward, approximateLocation } =
         property.location;
-
       return [approximateLocation, ward, constituency, county]
         .filter(Boolean)
         .join(", ");
     }
-
-    if (property.county) {
-      return property.county;
-    }
-
+    if (property.county) return property.county;
     return "Location not specified";
   };
 
-  const getPropertyImage = (property: any) => {
-    return property.images?.length ? property.images[0] : null;
-  };
+  const getPropertyImage = (property: any) =>
+    property.images?.length ? property.images[0] : null;
 
-  // SAFELY GET PROPERTIES WITHOUT CRASHING
   const baseProperties =
     getPropertiesByCounty(filters.county.toLowerCase()) || [];
 
-  // FILTERED PROPERTIES
   const filteredProperties = baseProperties.filter((property: any) => {
-    // Type filter
     if (filters.type && property.type !== filters.type) return false;
 
-    // Price filter
     if (filters.priceRange) {
       const price = property.price;
-
-      const ranges: any = {
+      const ranges: Record<string, boolean> = {
         "0-5000": price <= 5000,
         "5000-20000": price >= 5000 && price <= 20000,
         "20000-50000": price >= 20000 && price <= 50000,
@@ -84,47 +71,57 @@ const BrowseListings: React.FC = () => {
         "100000-500000": price >= 100000 && price <= 500000,
         "500000+": price >= 500000,
       };
-
       if (!ranges[filters.priceRange]) return false;
     }
 
-    // Size filter
     if (filters.sizeRange) {
       let size = property.size;
-
       if (property.sizeUnit === "hectares") {
-        size = property.size * 2.47105; // convert ha → acres
+        size = property.size * 2.47105; // ha -> acres
       }
-
-      const sizes: any = {
+      const sizes: Record<string, boolean> = {
         "0-1": size <= 1,
         "1-5": size >= 1 && size <= 5,
         "5-10": size >= 5 && size <= 10,
         "10-20": size >= 10 && size <= 20,
         "20+": size >= 20,
       };
-
       if (!sizes[filters.sizeRange]) return false;
     }
-
     return true;
   });
 
-  // FIXED: Correct route + correct ID
-  const openListing = (id: string) => navigate(`/listing/${id}`);
+  const getContactValue = (property: any) =>
+    property.contact || property.owner?.phone || property.owner?.email || "";
 
-  const openChat = (property: any) => {
-    if (!property.ownerId) {
-      alert("Seller information missing.");
+  const openListing = (property: any) => {
+    const id = property?._id || property?.id;
+    if (!id) {
+      alert("Listing ID missing.");
       return;
     }
-    navigate(`/chat/${property._id}/${property.ownerId}`);
+    navigate(`/listings/${id}`);
+  };
+
+  const openChat = (property: any) => {
+    const contact = getContactValue(property).toString().trim();
+    if (!contact) {
+      alert("Seller contact not available.");
+      return;
+    }
+    if (/^\+?[0-9 ]+$/.test(contact)) {
+      window.location.href = `tel:${contact.replace(/\s+/g, "")}`;
+      return;
+    }
+    if (contact.includes("@")) {
+      window.location.href = `mailto:${contact}`;
+      return;
+    }
+    alert("Seller contact not available.");
   };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-
-      {/* HEADER */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-2">
           Browse Farmland Listings
@@ -134,11 +131,8 @@ const BrowseListings: React.FC = () => {
         </p>
       </div>
 
-      {/* FILTERS */}
       <div className="bg-white rounded-xl shadow-md p-6 mb-8 border border-gray-100">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          
-          {/* COUNTY SELECT */}
           <select
             name="county"
             value={filters.county}
@@ -153,7 +147,6 @@ const BrowseListings: React.FC = () => {
             ))}
           </select>
 
-          {/* TYPE */}
           <select
             name="type"
             value={filters.type}
@@ -165,7 +158,6 @@ const BrowseListings: React.FC = () => {
             <option value="rental">For Rent/Lease</option>
           </select>
 
-          {/* PRICE */}
           <select
             name="priceRange"
             value={filters.priceRange}
@@ -181,7 +173,6 @@ const BrowseListings: React.FC = () => {
             <option value="500000+">Over KSh 500k</option>
           </select>
 
-          {/* SIZE */}
           <select
             name="sizeRange"
             value={filters.sizeRange}
@@ -196,7 +187,6 @@ const BrowseListings: React.FC = () => {
             <option value="20+">Over 20 acres</option>
           </select>
 
-          {/* BUTTONS */}
           <div className="flex gap-2">
             <button
               onClick={clearFilters}
@@ -211,24 +201,20 @@ const BrowseListings: React.FC = () => {
         </div>
       </div>
 
-      {/* RESULTS COUNT */}
       <div className="mb-6">
         <p className="text-gray-600">
-          Showing{" "}
-          <span className="font-semibold">{filteredProperties.length}</span>{" "}
+          Showing <span className="font-semibold">{filteredProperties.length}</span>{" "}
           {filteredProperties.length === 1 ? "listing" : "listings"}
           {filters.county && ` in ${filters.county}`}
         </p>
       </div>
 
-      {/* LISTINGS GRID */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProperties.map((property: any) => (
           <div
-            key={property._id}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition duration-300"
+            key={property._id || property.id}
+            className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition duration-300 flex flex-col"
           >
-            {/* IMAGE */}
             <div className="h-48 relative bg-gradient-to-br from-green-400 to-green-600">
               {getPropertyImage(property) ? (
                 <img
@@ -237,57 +223,62 @@ const BrowseListings: React.FC = () => {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="flex flex-col items-center justify-center h-full text-white">
-                  <div className="text-4xl">🌱</div>
+                <div className="flex flex-col items-center justify-center h-full text-white text-sm">
                   <p>No Image</p>
                 </div>
               )}
 
-              {property.verified && (
-                <div className="absolute top-3 right-3 bg-green-600 text-white px-3 py-1 rounded-full text-xs">
-                  ✅ Verified
-                </div>
-              )}
+              <div className="absolute top-3 right-3">
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    property.verified
+                      ? "bg-green-600 text-white"
+                      : "bg-yellow-200 text-yellow-800"
+                  }`}
+                >
+                  {property.verified ? "Verified" : "Pending"}
+                </span>
+              </div>
             </div>
 
-            {/* CONTENT */}
-            <div className="p-6">
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                {property.title}
-              </h3>
+            <div className="p-6 flex flex-col justify-between min-h-[260px]">
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                  {property.title}
+                </h3>
 
-              <p className="text-2xl font-bold text-green-600 mb-3">
-                {formatPrice(property.price)}
-                {property.type === "rental" && (
-                  <span className="text-sm text-gray-600">/year</span>
-                )}
-              </p>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-2xl font-bold text-green-600">
+                    {formatPrice(property.price)}
+                  </p>
+                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
+                    {property.type === "sale" ? "For Sale" : "For Rent/Lease"}
+                  </span>
+                </div>
 
-              <div className="space-y-1 text-gray-600 text-sm mb-3">
-                <p>📍 {formatLocation(property)}</p>
-                <p>📏 {formatSize(property.size, property.sizeUnit)}</p>
-                <p>
-                  🏷️{" "}
-                  {property.type === "sale"
-                    ? "For Sale"
-                    : "For Rent/Lease"}
-                </p>
+                <div className="space-y-1 text-gray-600 text-sm mb-3">
+                  <p>{formatLocation(property)}</p>
+                  <p>{formatSize(property.size, property.sizeUnit)}</p>
+                  <p className="text-xs text-gray-500">
+                    {property.verified ? "Verified listing" : "Pending verification"}
+                  </p>
+                </div>
               </div>
 
-              {/* BUTTONS */}
-              <div className="flex gap-2">
+              <div className="flex gap-2 pt-2 mt-3">
                 <button
-                  onClick={() => openListing(property._id)}
-                  className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
+                  onClick={() => openListing(property)}
+                  className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition shadow-sm"
                 >
                   View Details
                 </button>
 
                 <button
                   onClick={() => openChat(property)}
-                  className="px-4 py-2 border border-green-600 text-green-700 rounded-lg hover:bg-green-50 transition"
+                  className="px-4 py-2 border border-green-600 text-green-700 bg-white rounded-lg hover:bg-green-50 transition shadow-sm"
+                  title="Call or email the seller"
                 >
-                  💬
+                  Contact
                 </button>
               </div>
             </div>
@@ -295,10 +286,9 @@ const BrowseListings: React.FC = () => {
         ))}
       </div>
 
-      {/* EMPTY STATE */}
       {filteredProperties.length === 0 && (
         <div className="text-center py-12">
-          <div className="text-6xl mb-4">🔍</div>
+          <div className="text-6xl mb-4">No results</div>
           <h3 className="text-xl font-semibold text-gray-800 mb-2">
             No listings found
           </h3>

@@ -67,11 +67,11 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [codeSent, setCodeSent] = useState(false);
+  const [info, setInfo] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
-    phone: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -81,6 +81,7 @@ const Login: React.FC = () => {
 
   const handleSendCode = async () => {
     setError(null);
+    setInfo(null);
     if (!email.trim()) {
       setError("Enter your email to receive a code.");
       return;
@@ -88,6 +89,7 @@ const Login: React.FC = () => {
     try {
       await requestEmailOtp(email.trim());
       setCodeSent(true);
+      setInfo("Code sent to your email. Enter it below to continue.");
     } catch (err: any) {
       setError(err?.message || "Failed to send code.");
     }
@@ -95,6 +97,7 @@ const Login: React.FC = () => {
 
   const handleVerifyCode = async () => {
     setError(null);
+    setInfo(null);
     if (!email.trim() || !code.trim()) {
       setError("Enter both email and code.");
       return;
@@ -110,9 +113,10 @@ const Login: React.FC = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setInfo(null);
 
-    if (!formData.name.trim() || !formData.phone.trim() || !formData.county) {
-      setError("Please fill in all required fields including county.");
+    if (!formData.name.trim() || !formData.email.trim() || !formData.county) {
+      setError("Please fill in name, email, and county.");
       return;
     }
 
@@ -129,13 +133,18 @@ const Login: React.FC = () => {
     try {
       await register({
         name: formData.name,
-        phone: formData.phone,
+        phone: formData.email || undefined, // temp: use email as phone surrogate
         email: formData.email || undefined,
         password: formData.password,
         type: formData.userType,
         county: formData.county,
       });
-      navigate("/verify-phone");
+
+      // Immediately trigger email OTP flow and stay on this screen
+      setEmail(formData.email);
+      await handleSendCode();
+      setMode("login");
+      setInfo("Account created. Enter the code we sent to your email.");
     } catch (err: any) {
       setError(err?.message || "Registration failed. Please try again.");
     }
@@ -190,6 +199,11 @@ const Login: React.FC = () => {
         {error && (
           <div className="mb-4 rounded-lg bg-red-50 text-red-700 px-4 py-3 text-sm">
             {error}
+          </div>
+        )}
+        {info && (
+          <div className="mb-4 rounded-lg bg-green-50 text-green-700 px-4 py-3 text-sm">
+            {info}
           </div>
         )}
 
@@ -259,21 +273,7 @@ const Login: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-gray-700 mb-2">
-                Phone Number (Kenya) *
-              </label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="+2547XXXXXXXX"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 mb-2">Email (optional)</label>
+              <label className="block text-gray-700 mb-2">Email *</label>
               <input
                 type="email"
                 name="email"
@@ -281,6 +281,7 @@ const Login: React.FC = () => {
                 onChange={handleChange}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
                 placeholder="you@example.com"
+                required
               />
             </div>
             <div>

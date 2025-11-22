@@ -18,6 +18,8 @@ import PhoneVerification from './pages/PhoneVerification';
 import VerificationWizard from './pages/VerificationWizard';
 import ListingDetails from './pages/ListingDetails';
 import AdminLogin from "./pages/admin/AdminLogin";
+import AdminRoute from "./components/admin/AdminRoute";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
   return (
@@ -30,20 +32,54 @@ function App() {
               <div className="flex-1 py-4">
                 <Routes>
                   <Route path="/" element={<Home />} />
-                  <Route path="/list-property" element={<ListProperty />} />
-                  <Route path="/list-service" element={<ListService />} />
-                  <Route path="/list-agrovet" element={<ListAgrovet />} />
+                  <Route
+                    path="/list-property"
+                    element={
+                      <ProtectedRoute>
+                        <ListProperty />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/list-service"
+                    element={
+                      <ProtectedRoute>
+                        <ListService />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/list-agrovet"
+                    element={
+                      <ProtectedRoute>
+                        <ListAgrovet />
+                      </ProtectedRoute>
+                    }
+                  />
                   <Route path="/browse" element={<BrowseListings />} />
                   <Route path="/find-services" element={<FindServices />} />
                   <Route path="/login" element={<Login />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/admin" element={<AdminDashboard />} />
+                  <Route
+                    path="/profile"
+                    element={
+                      <ProtectedRoute>
+                        <Profile />
+                      </ProtectedRoute>
+                    }
+                  />
                   <Route path="/backend-test" element={<BackendTest />} />
                   <Route path="/verify-phone" element={<PhoneVerification />} />
                   <Route path="/verify" element={<VerificationWizard />} />
                   <Route path="/listings/:id" element={<ListingDetails />} />
                   <Route path="/admin-login" element={<AdminLogin />} />
-                  <Route path="/admin" element={<AdminDashboard />} />
+                  <Route
+                    path="/admin"
+                    element={
+                      <AdminRoute>
+                        <AdminDashboard />
+                      </AdminRoute>
+                    }
+                  />
                 </Routes>
               </div>
             </div>

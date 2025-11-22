@@ -98,7 +98,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (userData.type === "service_provider") userType = "service provider";
 
       const payload = {
-        phone: userData.phone,
+        phone: userData.phone || userData.email || "email-only",
         email: userData.email,
         fullName: userData.name,
         password: userData.password,

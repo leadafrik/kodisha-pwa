@@ -67,16 +67,16 @@ const Navbar: React.FC = () => {
                   <div className="group relative">
                     <button className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition flex items-center gap-2 font-semibold text-gray-800">
                       <span className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
-                        👤
+                        {user.name ? user.name[0].toUpperCase() : "U"}
                       </span>
-                      {user.name.split(" ")[0]}
+                      {user.name ? user.name.split(" ")[0] : "Profile"}
                       <span className="text-sm">▼</span>
                     </button>
 
                     <div className="absolute hidden group-hover:block bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 right-0 z-50">
                       <div className="px-4 py-3 border-b bg-gray-50">
-                        <div className="font-semibold">{user.name}</div>
-                        <div className="text-sm text-gray-600">{user.email}</div>
+                        <div className="font-semibold truncate">{user.name || "User"}</div>
+                        <div className="text-sm text-gray-600 truncate">{user.email}</div>
                       </div>
 
                       <Link to="/profile" className="block px-4 py-3 hover:bg-gray-50 border-b">
@@ -119,14 +119,14 @@ const Navbar: React.FC = () => {
                     </button>
 
                     <div className="absolute hidden group-hover:block bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 right-0 z-50">
-                      <Link to="/list-property" className="block px-4 py-3 hover:bg-gray-50 border-b">
-                        List Land
+                      <Link to="/login" className="block px-4 py-3 hover:bg-gray-50 border-b">
+                        List Land (login)
                       </Link>
-                      <Link to="/list-agrovet" className="block px-4 py-3 hover:bg-gray-50 border-b">
-                        List Agrovet
+                      <Link to="/login" className="block px-4 py-3 hover:bg-gray-50 border-b">
+                        List Agrovet (login)
                       </Link>
-                      <Link to="/list-service" className="block px-4 py-3 hover:bg-gray-50">
-                        List Service
+                      <Link to="/login" className="block px-4 py-3 hover:bg-gray-50">
+                        List Service (login)
                       </Link>
                     </div>
                   </div>

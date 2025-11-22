@@ -3,6 +3,7 @@ import { API_ENDPOINTS } from "../../config/api";
 
 export default function AdminLogin() {
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const loginAdmin = async () => {
@@ -10,13 +11,13 @@ export default function AdminLogin() {
       const res = await fetch(API_ENDPOINTS.admin.login, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, password }),
+        body: JSON.stringify({ phone, email, password }),
       });
 
       const data = await res.json();
-      if (!data.success) throw new Error(data.message);
+      if (!data.success) throw new Error(data.message || "Login failed");
 
-      localStorage.setItem("admin_token", data.data.token);
+      localStorage.setItem("kodisha_admin_token", data.token);
       alert("Admin logged in!");
       window.location.href = "/admin";
 
@@ -26,13 +27,34 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="p-4 max-w-md mx-auto">
+    <div className="p-4 max-w-md mx-auto space-y-3">
       <h1 className="text-xl font-bold">Admin Login</h1>
+      <p className="text-sm text-gray-600">Use phone or email plus password.</p>
 
-      <input className="input" placeholder="Phone" onChange={(e) => setPhone(e.target.value)} />
-      <input className="input" placeholder="Password" type="password" onChange={(e) => setPassword(e.target.value)} />
+      <input
+        className="input w-full border rounded px-3 py-2"
+        placeholder="Admin phone (optional)"
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+      />
+      <input
+        className="input w-full border rounded px-3 py-2"
+        placeholder="Admin email (optional)"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        type="email"
+      />
+      <input
+        className="input w-full border rounded px-3 py-2"
+        placeholder="Password"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
 
-      <button className="btn" onClick={loginAdmin}>Login</button>
+      <button className="btn w-full bg-emerald-600 text-white py-2 rounded" onClick={loginAdmin}>
+        Login
+      </button>
     </div>
   );
 }

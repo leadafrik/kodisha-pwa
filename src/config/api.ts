@@ -1,9 +1,9 @@
 // Use environment variable for local development, fallback to production
-export const API_BASE_URL = process.env.REACT_APP_API_URL 
-  || 'https://kodisha-backend-vjr9.onrender.com/api';
+export const API_BASE_URL =
+  process.env.REACT_APP_API_URL ||
+  "https://kodisha-backend-vjr9.onrender.com/api";
 
 export const API_ENDPOINTS = {
-  // Authentication (your existing endpoints)
   auth: {
     register: `${API_BASE_URL}/auth/register`,
     login: `${API_BASE_URL}/auth/login`,
@@ -12,32 +12,37 @@ export const API_ENDPOINTS = {
     emailOtpRequest: `${API_BASE_URL}/auth/email-otp/request`,
     emailOtpVerify: `${API_BASE_URL}/auth/email-otp/verify`,
     me: `${API_BASE_URL}/auth/me`,
-    // ✅ ADDED VERIFICATION ENDPOINTS
     verifyPhone: `${API_BASE_URL}/auth/verify-phone`,
     resendVerification: `${API_BASE_URL}/auth/resend-verification`,
-    // 🆕 ADMIN REGISTRATION
     registerAdmin: `${API_BASE_URL}/auth/register-admin`,
   },
-  // Properties (your existing endpoints)
   properties: {
     getAll: `${API_BASE_URL}/listings`,
     create: `${API_BASE_URL}/listings`,
     getById: (id: string) => `${API_BASE_URL}/listings/${id}`,
   },
-  // Services (we'll add these later)
   services: {
-    getAll: `${API_BASE_URL}/Services`,  // we willfix the services 
-    create: `${API_BASE_URL}/Services`,
+    equipment: {
+      list: `${API_BASE_URL}/services/equipment`,
+      create: `${API_BASE_URL}/services/equipment`,
+    },
+    professional: {
+      list: `${API_BASE_URL}/services/professional`,
+      create: `${API_BASE_URL}/services/professional`,
+    },
   },
-  // ✅ ADDED VERIFICATION ROUTES (for future use)
+  messages: {
+    send: `${API_BASE_URL}/messages`,
+    threads: `${API_BASE_URL}/messages/threads`,
+    withUser: (id: string) => `${API_BASE_URL}/messages/with/${id}`,
+  },
   verification: {
     send: `${API_BASE_URL}/verification/send-verification`,
     verify: `${API_BASE_URL}/verification/verify-phone`,
     status: (userId: string) => `${API_BASE_URL}/verification/status/${userId}`,
   },
-  // 🆕 ADMIN PANEL ENDPOINTS
   admin: {
-    login: `${API_BASE_URL}/admin/login`,
+    login: `${API_BASE_URL}/admin-auth/login`,
     dashboard: `${API_BASE_URL}/admin/dashboard`,
     listings: {
       getAll: `${API_BASE_URL}/admin/listings`,
@@ -50,15 +55,15 @@ export const API_ENDPOINTS = {
       getById: (id: string) => `${API_BASE_URL}/admin/users/${id}`,
       updateRole: (id: string) => `${API_BASE_URL}/admin/users/${id}/role`,
       toggleActive: (id: string) => `${API_BASE_URL}/admin/users/${id}/active`,
-    }
-  }
+      verify: (id: string) => `${API_BASE_URL}/admin/users/${id}/verify`,
+    },
+  },
 };
 
-// Helper function for API calls (keep your existing one)
 export const apiRequest = async (url: string, options: RequestInit = {}) => {
   const response = await fetch(url, {
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...options.headers,
     },
     ...options,
@@ -71,18 +76,23 @@ export const apiRequest = async (url: string, options: RequestInit = {}) => {
   return response.json();
 };
 
-// 🆕 ADMIN API REQUEST HELPER (with authentication)
-export const adminApiRequest = async (url: string, options: RequestInit = {}) => {
-  const token = localStorage.getItem('token');
-  
+export const adminApiRequest = async (
+  url: string,
+  options: RequestInit = {}
+) => {
+  const token =
+    localStorage.getItem("kodisha_admin_token") ||
+    localStorage.getItem("kodisha_token") ||
+    localStorage.getItem("token");
+
   if (!token) {
-    throw new Error('Authentication required for admin access');
+    throw new Error("Authentication required for admin access");
   }
 
   const response = await fetch(url, {
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
       ...options.headers,
     },
     ...options,
@@ -90,7 +100,7 @@ export const adminApiRequest = async (url: string, options: RequestInit = {}) =>
 
   if (!response.ok) {
     if (response.status === 403) {
-      throw new Error('Admin access required');
+      throw new Error("Admin access required");
     }
     throw new Error(`API error: ${response.status}`);
   }

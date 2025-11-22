@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_ENDPOINTS, adminApiRequest } from '../../config/api';
 export {}; // Add this line to make it a module
 
 interface Listing {
@@ -15,7 +16,8 @@ interface Listing {
   };
   images: string[];
   contact: string;
-  isVerified: boolean;
+  verified?: boolean;
+  status?: string;
   createdAt: string;
 }
 
@@ -28,6 +30,7 @@ const AdminDashboard: React.FC = () => {
     totalUsers: 0
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchDashboardData();
@@ -35,19 +38,18 @@ const AdminDashboard: React.FC = () => {
 
   const fetchDashboardData = async () => {
     try {
+      setError(null);
       setLoading(true);
-      const [statsRes, listingsRes] = await Promise.all([
-        fetch('/api/admin/dashboard'),
-        fetch('/api/admin/listings/pending')
+      const [statsData, listingsData] = await Promise.all([
+        adminApiRequest(API_ENDPOINTS.admin.dashboard),
+        adminApiRequest(API_ENDPOINTS.admin.listings.getPending),
       ]);
-      
-      const statsData = await statsRes.json();
-      const listingsData = await listingsRes.json();
-      
-      if (statsData.success) setStats(statsData.data);
-      if (listingsData.success) setPendingListings(listingsData.data);
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+
+      if (statsData?.success && statsData.data) setStats(statsData.data);
+      if (listingsData?.success && listingsData.data) setPendingListings(listingsData.data);
+    } catch (err: any) {
+      console.error('Error fetching dashboard data:', err);
+      setError(err?.message || 'Failed to load admin data. Check your admin login/token.');
     } finally {
       setLoading(false);
     }
@@ -55,25 +57,19 @@ const AdminDashboard: React.FC = () => {
 
   const verifyListing = async (id: string, status: 'approved' | 'rejected') => {
     try {
-      const response = await fetch(`/api/admin/listings/${id}/verify`, {
+      const data = await adminApiRequest(API_ENDPOINTS.admin.listings.verify(id), {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ status }),
       });
 
-      const data = await response.json();
-      
       if (data.success) {
-        alert(`Listing ${status} successfully!`);
         fetchDashboardData(); // Refresh data
       } else {
-        alert('Error: ' + data.message);
+        alert('Error: ' + (data.message || 'Could not update listing'));
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error verifying listing:', error);
-      alert('Error verifying listing');
+      alert(error?.message || 'Error verifying listing');
     }
   };
 
@@ -81,21 +77,18 @@ const AdminDashboard: React.FC = () => {
     if (!window.confirm('Are you sure you want to delete this listing?')) return;
     
     try {
-      const response = await fetch(`/api/admin/listings/${id}`, {
+      const data = await adminApiRequest(API_ENDPOINTS.admin.listings.getById(id), {
         method: 'DELETE',
       });
 
-      const data = await response.json();
-      
       if (data.success) {
-        alert('Listing deleted successfully!');
         fetchDashboardData(); // Refresh data
       } else {
-        alert('Error: ' + data.message);
+        alert('Error: ' + (data.message || 'Could not delete listing'));
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting listing:', error);
-      alert('Error deleting listing');
+      alert(error?.message || 'Error deleting listing');
     }
   };
 
@@ -174,6 +167,11 @@ const AdminDashboard: React.FC = () => {
             <p className="text-gray-600 text-sm">
               {pendingListings.length} listings waiting for approval
             </p>
+            {error && (
+              <p className="text-red-600 text-sm mt-2">
+                {error}
+              </p>
+            )}
           </div>
 
           {pendingListings.length === 0 ? (
