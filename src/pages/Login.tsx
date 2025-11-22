@@ -1,58 +1,19 @@
 import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { kenyaCounties } from "../data/kenyaCounties";
 
 type Mode = "login" | "register";
 
-const counties = [
-  "Baringo",
-  "Bomet",
-  "Bungoma",
-  "Busia",
-  "Elgeyo-Marakwet",
-  "Embu",
-  "Garissa",
-  "Homa Bay",
-  "Isiolo",
-  "Kajiado",
-  "Kakamega",
-  "Kericho",
-  "Kiambu",
-  "Kilifi",
-  "Kirinyaga",
-  "Kisii",
-  "Kisumu",
-  "Kitui",
-  "Kwale",
-  "Laikipia",
-  "Lamu",
-  "Machakos",
-  "Makueni",
-  "Mandera",
-  "Marsabit",
-  "Meru",
-  "Migori",
-  "Mombasa",
-  "Murang'a",
-  "Nairobi",
-  "Nakuru",
-  "Nandi",
-  "Narok",
-  "Nyamira",
-  "Nyandarua",
-  "Nyeri",
-  "Samburu",
-  "Siaya",
-  "Taita-Taveta",
-  "Tana River",
-  "Tharaka-Nithi",
-  "Trans Nzoia",
-  "Turkana",
-  "Uasin Gishu",
-  "Vihiga",
-  "Wajir",
-  "West Pokot",
-];
+const formatCountyName = (name: string) =>
+  name
+    .split(/([-\s])/)
+    .map((part) => {
+      if (part === "-" || part === " ") return part;
+      const lower = part.toLowerCase();
+      return lower.charAt(0).toUpperCase() + lower.slice(1);
+    })
+    .join("");
 
 const Login: React.FC = () => {
   const { login, requestEmailOtp, verifyEmailOtp, register, loading } = useAuth();
@@ -183,9 +144,7 @@ const Login: React.FC = () => {
       <div className="max-w-2xl w-full bg-white rounded-2xl shadow-xl p-8">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">
-              Kodisha Access
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-800">Kodisha Access</h1>
             <p className="text-gray-600">
               Sign in with password, or create an account and verify once via email
             </p>
@@ -309,9 +268,7 @@ const Login: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-gray-700 mb-2">
-                What best describes you?
-              </label>
+              <label className="block text-gray-700 mb-2">What best describes you?</label>
               <select
                 name="userType"
                 value={formData.userType}
@@ -333,11 +290,13 @@ const Login: React.FC = () => {
                 required
               >
                 <option value="">Select County</option>
-                {counties.map((county) => (
-                  <option key={county} value={county}>
-                    {county}
-                  </option>
-                ))}
+                {[...kenyaCounties]
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map((county) => (
+                    <option key={county.code} value={county.name}>
+                      {formatCountyName(county.name)}
+                    </option>
+                  ))}
               </select>
             </div>
             <div className="md:col-span-2">

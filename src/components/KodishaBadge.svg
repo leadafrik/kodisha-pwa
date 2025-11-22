@@ -1,0 +1,52 @@
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sunGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFE57F"/>
+      <stop offset="100%" stop-color="#FF9E2C"/>
+    </linearGradient>
+    <linearGradient id="leafGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2ECC71"/>
+      <stop offset="100%" stop-color="#1E7A3C"/>
+    </linearGradient>
+    <linearGradient id="fieldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2ECC71"/>
+      <stop offset="100%" stop-color="#0F5A25"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="80" cy="80" r="75" fill="#F8FDF6" stroke="#E6F2E6" stroke-width="2"/>
+
+  <!-- Sun -->
+  <circle cx="112" cy="46" r="18" fill="url(#sunGrad)" opacity="0.9"/>
+
+  <!-- Subtle rays -->
+  <g stroke="#FFB22C" stroke-width="6" stroke-linecap="round" opacity="0.7">
+    <line x1="112" y1="18" x2="112" y2="10"/>
+    <line x1="112" y1="82" x2="112" y2="90"/>
+    <line x1="90"  y1="46" x2="82"  y2="46"/>
+    <line x1="134" y1="46" x2="142" y2="46"/>
+  </g>
+
+  <!-- Fields -->
+  <path d="M20 130 Q80 92 140 130 Q80 144 20 130Z" fill="url(#fieldGrad)" />
+  <path d="M32 130 Q80 104 128 130" stroke="#145C2A" stroke-width="6" fill="none" opacity="0.8"/>
+  <path d="M44 130 Q80 114 116 130" stroke="#145C2A" stroke-width="6" fill="none" opacity="0.8"/>
+
+  <!-- Central plant -->
+  <path
+    d="M80 78
+       Q104 56 112 90
+       Q104 124 80 130
+       Q56 124 48 90
+       Q56 56 80 78Z"
+    fill="url(#leafGrad)"
+    stroke="#0F4F23"
+    stroke-width="3"
+    opacity="0.92"
+  />
+  <line x1="80" y1="78" x2="80" y2="124" stroke="#0F4F23" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M80 92 L64 100" stroke="#0F4F23" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M80 104 L60 116" stroke="#0F4F23" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M80 92 L96 100" stroke="#0F4F23" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M80 104 L100 116" stroke="#0F4F23" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

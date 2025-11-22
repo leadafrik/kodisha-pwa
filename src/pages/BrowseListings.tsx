@@ -288,7 +288,21 @@ const BrowseListings: React.FC = () => {
 
       {filteredProperties.length === 0 && (
         <div className="text-center py-12">
-          <div className="text-6xl mb-4">No results</div>
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-50 text-green-600">
+            <svg
+              className="h-8 w-8"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <line x1="16.65" y1="16.65" x2="21" y2="21" />
+            </svg>
+          </div>
           <h3 className="text-xl font-semibold text-gray-800 mb-2">
             No listings found
           </h3>

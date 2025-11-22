@@ -117,13 +117,13 @@ const Navbar: React.FC = () => {
 
                     <div className="absolute hidden group-hover:block bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 right-0 z-50">
                       <Link to="/login" className="block px-4 py-3 hover:bg-gray-50 border-b">
-                        List Land (login)
+                        List Land
                       </Link>
                       <Link to="/login" className="block px-4 py-3 hover:bg-gray-50 border-b">
-                        List Agrovet (login)
+                        List Agrovet
                       </Link>
                       <Link to="/login" className="block px-4 py-3 hover:bg-gray-50">
-                        List Service (login)
+                        List Service
                       </Link>
                     </div>
                   </div>
