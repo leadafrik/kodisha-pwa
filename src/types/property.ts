@@ -120,6 +120,9 @@ export interface ServiceListing {
   type: "equipment" | "agrovet" | "professional_services";
   name: string;
   description: string;
+  ownerId?: string;
+  ownerName?: string;
+  owner?: any;
   location: {
     county: string;
     constituency: string;

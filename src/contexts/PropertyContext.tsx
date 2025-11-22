@@ -63,12 +63,17 @@ const mapServiceRecord = (item: any): ServiceListing => {
   const subscriptionEnd = item.subscriptionEnd
     ? new Date(item.subscriptionEnd)
     : new Date();
+  const ownerId = item.owner?._id || item.ownerId || item.owner;
+  const ownerName = item.owner?.name || item.owner?.fullName;
 
   return {
     id: item._id || item.id,
     type: (item.type || "equipment") as ServiceType,
     name: item.name || "Service",
     description: item.description || "",
+    ownerId,
+    ownerName,
+    owner: item.owner,
     location: {
       county: item.location?.county || "",
       constituency: item.location?.constituency || "",

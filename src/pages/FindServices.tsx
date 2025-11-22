@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { useProperties } from "../contexts/PropertyContext";
 import { kenyaCounties } from "../data/kenyaCounties";
 import { ServiceListing } from "../types/property";
+import { useAuth } from "../contexts/AuthContext";
+import { API_ENDPOINTS } from "../config/api";
 
 type ServiceType = "equipment" | "agrovet" | "professional_services";
 
@@ -85,6 +87,7 @@ const typeDescriptions: Record<ServiceType, string> = {
 
 const FindServices: React.FC = () => {
   const { serviceListings } = useProperties();
+  const { user } = useAuth();
 
   const [filters, setFilters] = useState<{
     type: ServiceType | "";
@@ -226,6 +229,47 @@ const FindServices: React.FC = () => {
       return;
     }
     alert("Provider contact not available.");
+  };
+
+  const openInAppMessage = async (service: ServiceListing) => {
+    if (!service.ownerId) {
+      openContact(service);
+      return;
+    }
+    if (!user) {
+      alert("Please log in to message the provider.");
+      return;
+    }
+    const body = window.prompt("Message to provider:");
+    if (!body || !body.trim()) return;
+
+    try {
+      const token = localStorage.getItem("kodisha_token");
+      if (!token) {
+        alert("Please log in to message the provider.");
+        return;
+      }
+      const res = await fetch(API_ENDPOINTS.messages.send, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          toUserId: service.ownerId,
+          body: body.trim(),
+          listingId: service.id,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.success === false) {
+        throw new Error(data.message || `API error: ${res.status}`);
+      }
+      alert("Message sent to provider.");
+    } catch (err: any) {
+      console.error("Message send error", err);
+      alert(err?.message || "Failed to send message.");
+    }
   };
 
   const getLocationLabel = (service: ServiceListing) => {
@@ -469,7 +513,7 @@ const FindServices: React.FC = () => {
                         </span>
                         <button
                           type="button"
-                          onClick={() => openContact(service)}
+                          onClick={() => openInAppMessage(service)}
                           className="text-xs bg-emerald-600 text-white px-3 py-1.5 rounded-lg hover:bg-emerald-700 transition-colors"
                         >
                           Contact
