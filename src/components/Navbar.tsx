@@ -7,6 +7,8 @@ const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const closeMobile = () => setMobileOpen(false);
+
   return (
     <>
       {/* GLOBAL NAVBAR */}
@@ -15,7 +17,6 @@ const Navbar: React.FC = () => {
 
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center py-4">
-
             {/* LOGO */}
             <Link to="/" className="flex items-center gap-3">
               <KodishaLogo size={42} />
@@ -26,7 +27,6 @@ const Navbar: React.FC = () => {
 
             {/* DESKTOP NAV */}
             <div className="hidden lg:flex items-center gap-10 font-semibold text-gray-700">
-
               <Link to="/browse" className="hover:text-black hover:underline underline-offset-4 transition">
                 Browse Land
               </Link>
@@ -38,11 +38,10 @@ const Navbar: React.FC = () => {
               {/* LOGGED IN */}
               {user ? (
                 <div className="flex items-center gap-6">
-
                   {/* LIST DROPDOWN */}
                   <div className="group relative">
                     <button className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition font-semibold flex items-center gap-2">
-                      List <span className="text-sm">▼</span>
+                      List <span className="text-sm">?</span>
                     </button>
 
                     <div className="absolute hidden group-hover:block bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 right-0 z-50">
@@ -70,7 +69,7 @@ const Navbar: React.FC = () => {
                         {user.name ? user.name[0].toUpperCase() : "U"}
                       </span>
                       {user.name ? user.name.split(" ")[0] : "Profile"}
-                      <span className="text-sm">▼</span>
+                      <span className="text-sm">?</span>
                     </button>
 
                     <div className="absolute hidden group-hover:block bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 right-0 z-50">
@@ -108,14 +107,13 @@ const Navbar: React.FC = () => {
               ) : (
                 /* GUEST MENU */
                 <div className="flex items-center gap-4">
-
                   <Link to="/login" className="px-5 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 font-semibold transition">
                     Login
                   </Link>
 
                   <div className="group relative">
                     <button className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition font-semibold flex items-center gap-2">
-                      List <span className="text-sm">▼</span>
+                      List <span className="text-sm">?</span>
                     </button>
 
                     <div className="absolute hidden group-hover:block bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 right-0 z-50">
@@ -143,45 +141,49 @@ const Navbar: React.FC = () => {
               <span className="w-6 h-0.5 bg-gray-900"></span>
               <span className="w-6 h-0.5 bg-gray-900"></span>
             </button>
-
           </div>
         </div>
       </nav>
 
       {/* MOBILE MENU */}
       {mobileOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setMobileOpen(false)}>
+        <div className="fixed inset-0 bg-black/50 z-50" onClick={closeMobile}>
           <div
             className="absolute top-0 left-0 h-full w-72 bg-white shadow-xl p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-8">
               <span className="text-xl font-bold">Menu</span>
-              <button onClick={() => setMobileOpen(false)}>✖</button>
+              <button onClick={closeMobile} aria-label="Close menu">
+                �
+              </button>
             </div>
 
             <div className="flex flex-col gap-4 text-lg font-medium">
-              <Link to="/browse">Browse Land</Link>
-              <Link to="/find-services">Find Services</Link>
+              <Link to="/browse" onClick={closeMobile}>Browse Land</Link>
+              <Link to="/find-services" onClick={closeMobile}>Find Services</Link>
               <hr />
 
               {user ? (
                 <>
-                  <Link to="/profile">Dashboard</Link>
-                  <Link to="/list-property">List Land</Link>
-                  <Link to="/list-agrovet">List Agrovet</Link>
-                  <Link to="/list-service">List Service</Link>
-                  <Link to="/admin">Admin</Link>
-                  <button onClick={logout} className="text-left text-red-600 font-semibold mt-4">
+                  <Link to="/profile" onClick={closeMobile}>Dashboard</Link>
+                  <Link to="/list-property" onClick={closeMobile}>List Land</Link>
+                  <Link to="/list-agrovet" onClick={closeMobile}>List Agrovet</Link>
+                  <Link to="/list-service" onClick={closeMobile}>List Service</Link>
+                  <Link to="/admin" onClick={closeMobile}>Admin</Link>
+                  <button
+                    onClick={() => { logout(); closeMobile(); }}
+                    className="text-left text-red-600 font-semibold mt-4"
+                  >
                     Logout
                   </button>
                 </>
               ) : (
                 <>
-                  <Link to="/login">Login</Link>
-                  <Link to="/list-property">List Land</Link>
-                  <Link to="/list-agrovet">List Agrovet</Link>
-                  <Link to="/list-service">List Service</Link>
+                  <Link to="/login" onClick={closeMobile}>Login</Link>
+                  <Link to="/list-property" onClick={closeMobile}>List Land</Link>
+                  <Link to="/list-agrovet" onClick={closeMobile}>List Agrovet</Link>
+                  <Link to="/list-service" onClick={closeMobile}>List Service</Link>
                 </>
               )}
             </div>
