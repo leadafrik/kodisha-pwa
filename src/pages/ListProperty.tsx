@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useProperties } from '../contexts/PropertyContext';
+import { useAuth } from '../contexts/AuthContext';
 import { PropertyFormData } from '../types/property';
 import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from '../data/kenyaCounties';
 import GoogleMapsLoader from '../components/GoogleMapsLoader';
@@ -7,6 +9,8 @@ import MapPicker from '../components/MapPicker';
 
 const ListProperty: React.FC = () => {
   const { addProperty } = useProperties();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<PropertyFormData>({
     title: '',
     description: '',
@@ -69,12 +73,19 @@ const ListProperty: React.FC = () => {
 
     // Pre-submit verification gating by listing type
     const lowerType = formData.type.toLowerCase();
-    if (lowerType === "sale") {
+    const needsOwnership = lowerType === "sale";
+    const idOk = !!user?.verification?.idVerified;
+    const selfieOk = !!user?.verification?.selfieVerified;
+    const ownershipOk = !!user?.verification?.ownershipVerified;
+
+    if (!idOk || !selfieOk || (needsOwnership && !ownershipOk)) {
       alert(
-        "To list land for SALE you must have uploaded: ID front, ID back, a selfie holding your ID, and proof of ownership (title deed + land search OR chief letter with stamp)."
+        needsOwnership
+          ? "You need to upload verification docs (ID front/back, selfie with ID, and proof of ownership) before listing for sale. Redirecting to verification."
+          : "You need to upload verification docs (ID front/back and a selfie with ID) before listing. Redirecting to verification."
       );
-    } else if (lowerType === "rental" || lowerType === "lease") {
-      alert("To list land for RENT/LEASE you must have uploaded: ID front, ID back, and a selfie holding your ID.");
+      navigate("/verify");
+      return;
     }
 
     setUploading(true);

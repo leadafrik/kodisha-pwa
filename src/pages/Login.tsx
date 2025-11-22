@@ -123,7 +123,7 @@ const Login: React.FC = () => {
       });
 
       await handleSendOtp(formData.email);
-      setMode("login");
+      // Stay on the registration view while verifying OTP so the user does not get bounced to login.
     } catch (err: any) {
       setError(err?.message || "Registration failed. Please try again.");
     }
