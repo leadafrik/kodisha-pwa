@@ -84,7 +84,10 @@ export const adminApiRequest = async (
   url: string,
   options: RequestInit = {}
 ) => {
-  const token = localStorage.getItem("kodisha_admin_token");
+  const token =
+    localStorage.getItem("kodisha_admin_token") ||
+    localStorage.getItem("kodisha_token") ||
+    localStorage.getItem("token");
 
   if (!token) {
     throw new Error("Admin login required. Please sign in at /admin/login.");
@@ -97,6 +100,7 @@ export const adminApiRequest = async (
       Authorization: bearer,
       "x-auth-token": token,
       "x-access-token": token,
+      token,
       ...options.headers,
     },
     ...options,
