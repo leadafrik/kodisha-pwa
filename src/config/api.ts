@@ -93,8 +93,11 @@ export const adminApiRequest = async (
     throw new Error("Admin login required. Please sign in at /admin/login.");
   }
 
+  const urlWithToken = `${url}${url.includes("?") ? "&" : "?"}token=${encodeURIComponent(
+    token
+  )}`;
   const bearer = `Bearer ${token}`;
-  const response = await fetch(url, {
+  const response = await fetch(urlWithToken, {
     headers: {
       "Content-Type": "application/json",
       Authorization: bearer,
@@ -103,6 +106,7 @@ export const adminApiRequest = async (
       token,
       ...options.headers,
     },
+    credentials: "include",
     ...options,
   });
 
