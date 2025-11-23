@@ -134,7 +134,7 @@ const ListProperty: React.FC = () => {
       });
 
       await addProperty(submitData);
-      alert('Property listed successfully! It will appear after verification.');
+      alert('Property submitted! An admin will review and verify it shortly.');
       
       // Reset form
       setFormData({
@@ -162,6 +162,7 @@ const ListProperty: React.FC = () => {
       setSelectedImages([]);
       setConstituencies([]);
       setWards([]);
+      navigate('/');
     } catch (error) {
       alert('Error listing property. Please try again.');
       console.error('Submission error:', error);
