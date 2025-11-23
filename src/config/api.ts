@@ -84,13 +84,10 @@ export const adminApiRequest = async (
   url: string,
   options: RequestInit = {}
 ) => {
-  const token =
-    localStorage.getItem("kodisha_admin_token") ||
-    localStorage.getItem("kodisha_token") ||
-    localStorage.getItem("token");
+  const token = localStorage.getItem("kodisha_admin_token");
 
   if (!token) {
-    throw new Error("Authentication required for admin access");
+    throw new Error("Admin login required. Please sign in at /admin/login.");
   }
 
   const response = await fetch(url, {
@@ -103,8 +100,9 @@ export const adminApiRequest = async (
   });
 
   if (!response.ok) {
-    if (response.status === 403) {
-      throw new Error("Admin access required");
+    if (response.status === 401 || response.status === 403) {
+      localStorage.removeItem("kodisha_admin_token");
+      throw new Error("Admin session expired or insufficient privileges. Please log in again.");
     }
     throw new Error(`API error: ${response.status}`);
   }
