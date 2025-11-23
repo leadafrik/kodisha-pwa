@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import GoogleMapsLoader from "../components/GoogleMapsLoader";
 import ListingMap from "../components/ListingMap";
 import { API_ENDPOINTS } from "../config/api";
+import { io, Socket } from "socket.io-client";
 
 interface Message {
   _id?: string;
@@ -10,6 +11,7 @@ interface Message {
   to: string;
   body: string;
   createdAt?: string;
+  read?: boolean;
 }
 
 const ListingDetails: React.FC = () => {
@@ -20,6 +22,10 @@ const ListingDetails: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [ownerOnline, setOwnerOnline] = useState(false);
+  const socketRef = useRef<Socket | null>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchListing = async () => {
     setLoading(true);
@@ -56,6 +62,65 @@ const ListingDetails: React.FC = () => {
     }
   };
 
+  const setupSocket = (ownerId: string) => {
+    const token =
+      localStorage.getItem("kodisha_token") ||
+      localStorage.getItem("kodisha_admin_token");
+    if (!token) return;
+
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+    }
+
+    const baseUrl = API_ENDPOINTS.properties.getAll.replace("/listings", "");
+    const socket = io(baseUrl, {
+      auth: { token },
+      transports: ["websocket"],
+    });
+
+    socket.on("connect", () => {
+      socket.emit("message:read", { from: ownerId });
+    });
+
+    socket.on("message:new", (msg: Message) => {
+      if (
+        (msg.from === ownerId && msg.to) ||
+        (msg.to === ownerId && msg.from)
+      ) {
+        setMessages((prev) => {
+          const exists = prev.some((m) => m._id === msg._id);
+          if (exists) return prev;
+          return [...prev, msg].sort(
+            (a, b) =>
+              new Date(a.createdAt || "").getTime() -
+              new Date(b.createdAt || "").getTime()
+          );
+        });
+        socket.emit("message:read", { from: ownerId });
+      }
+    });
+
+    socket.on("message:typing", (payload: any) => {
+      if (payload?.from === ownerId) {
+        setTyping(true);
+        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = setTimeout(() => setTyping(false), 2000);
+      }
+    });
+
+    socket.on("message:read", (payload: any) => {
+      if (payload?.from === ownerId) {
+        setMessages((prev) => prev.map((m) => ({ ...m, read: true })));
+      }
+    });
+
+    socket.on("presence:update", (list: string[]) => {
+      setOwnerOnline(Array.isArray(list) && list.includes(ownerId));
+    });
+
+    socketRef.current = socket;
+  };
+
   const sendMessage = async () => {
     if (!newMessage.trim() || !listing?.owner?._id) return;
     setSending(true);
@@ -67,29 +132,46 @@ const ListingDetails: React.FC = () => {
         alert("Please log in to chat with the seller.");
         return;
       }
-      const res = await fetch(API_ENDPOINTS.messages.send, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          toUserId: listing.owner._id,
+      const socket = socketRef.current;
+      if (socket && socket.connected) {
+        socket.emit("message:send", {
+          to: listing.owner._id,
           listingId: listing._id,
           body: newMessage.trim(),
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
+        });
         setNewMessage("");
-        await fetchMessages(listing.owner._id);
       } else {
-        alert(data.message || "Failed to send message");
+        const res = await fetch(API_ENDPOINTS.messages.send, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            toUserId: listing.owner._id,
+            listingId: listing._id,
+            body: newMessage.trim(),
+          }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          setNewMessage("");
+          await fetchMessages(listing.owner._id);
+        } else {
+          alert(data.message || "Failed to send message");
+        }
       }
     } catch (err) {
       console.error("Send message error:", err);
     } finally {
       setSending(false);
+    }
+  };
+
+  const sendTyping = () => {
+    const socket = socketRef.current;
+    if (socket && socket.connected && listing?.owner?._id) {
+      socket.emit("message:typing", { to: listing.owner._id, listingId: listing._id });
     }
   };
 
@@ -100,7 +182,17 @@ const ListingDetails: React.FC = () => {
   useEffect(() => {
     if (listing?.owner?._id) {
       fetchMessages(listing.owner._id);
+      setupSocket(listing.owner._id);
     }
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
   }, [listing]);
 
   if (loading) {
@@ -206,6 +298,12 @@ const ListingDetails: React.FC = () => {
 
             <p><strong>Name:</strong> {owner.fullName || owner.name}</p>
             <p><strong>Phone:</strong> {owner.phone || "Not provided"}</p>
+            <p className="text-sm text-gray-600">
+              Status:{" "}
+              <span className={ownerOnline ? "text-green-700" : "text-gray-500"}>
+                {ownerOnline ? "Online" : "Offline"}
+              </span>
+            </p>
 
             {owner.isVerified ? (
               <span className="inline-block mt-2 px-3 py-1 bg-green-100 text-green-700 rounded text-sm">
@@ -234,18 +332,33 @@ const ListingDetails: React.FC = () => {
                 <p className="text-gray-500 text-center text-xs">No messages yet.</p>
               ) : (
                 messages.map((msg, idx) => (
-                  <div key={idx} className="bg-gray-100 rounded p-2">
-                    <p className="text-gray-800">{msg.body}</p>
+                  <div
+                    key={idx}
+                    className={`rounded p-2 ${
+                      msg.from === owner._id ? "bg-gray-100" : "bg-green-50"
+                    }`}
+                  >
+                    <p className="text-xs text-gray-500 mb-1">
+                      {msg.from === owner._id ? "Seller" : "You"}
+                      {msg.read ? " • Read" : ""}
+                    </p>
+                    <p className="text-gray-800 text-sm">{msg.body}</p>
                     <p className="text-[10px] text-gray-500 mt-1">
                       {msg.createdAt ? new Date(msg.createdAt).toLocaleString() : ""}
                     </p>
                   </div>
                 ))
               )}
+              {typing && (
+                <p className="text-xs text-gray-500 italic">Seller is typing…</p>
+              )}
             </div>
             <textarea
               value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
+              onChange={(e) => {
+                setNewMessage(e.target.value);
+                sendTyping();
+              }}
               className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-green-500 focus:border-green-500"
               placeholder="Type your message..."
             />
