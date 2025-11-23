@@ -37,6 +37,10 @@ const ListService: React.FC = () => {
   >([]);
   const [wards, setWards] = useState<{ value: string; label: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [idFrontFile, setIdFrontFile] = useState<File | null>(null);
+  const [idBackFile, setIdBackFile] = useState<File | null>(null);
+  const [selfieFile, setSelfieFile] = useState<File | null>(null);
+  const [businessPermitFile, setBusinessPermitFile] = useState<File | null>(null);
 
   const serviceOptions: Record<ServiceType, string[]> = {
     equipment: [
@@ -133,6 +137,12 @@ const ListService: React.FC = () => {
     setSubmitting(true);
 
     try {
+      if (!idFrontFile || !idBackFile || !selfieFile) {
+        alert("Please upload ID front, ID back, and a selfie with your ID to list a service.");
+        setSubmitting(false);
+        return;
+      }
+
       const submitData = new FormData();
 
       submitData.append("type", formData.type);
@@ -179,6 +189,13 @@ const ListService: React.FC = () => {
         submitData.append("images", image);
       });
 
+      submitData.append("idFront", idFrontFile);
+      submitData.append("idBack", idBackFile);
+      submitData.append("selfie", selfieFile);
+      if (businessPermitFile) {
+        submitData.append("businessPermit", businessPermitFile);
+      }
+
       await addService(submitData as any);
       alert("Service listed successfully! It will appear after verification.");
 
@@ -203,6 +220,10 @@ const ListService: React.FC = () => {
       setSelectedImages([]);
       setConstituencies([]);
       setWards([]);
+      setIdFrontFile(null);
+      setIdBackFile(null);
+      setSelfieFile(null);
+      setBusinessPermitFile(null);
     } catch (error) {
       alert("Error listing service. Please try again.");
       console.error("Submission error:", error);
@@ -640,6 +661,58 @@ const ListService: React.FC = () => {
                 onChange={handleChange}
                 className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
                 placeholder="e.g., Mon-Fri: 8AM-6PM, Sat: 9AM-1PM"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+          <h3 className="font-semibold text-gray-800 mb-2">
+            Identity & Business Verification (Required)
+          </h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Upload clear photos of your ID front and back, plus a selfie holding your ID. Business permit is optional but boosts trust.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-gray-700 mb-2">ID Front *</label>
+              <input
+                type="file"
+                accept="image/*"
+                required
+                onChange={(e) => setIdFrontFile(e.target.files?.[0] || null)}
+                className="w-full border rounded-lg px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 mb-2">ID Back *</label>
+              <input
+                type="file"
+                accept="image/*"
+                required
+                onChange={(e) => setIdBackFile(e.target.files?.[0] || null)}
+                className="w-full border rounded-lg px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 mb-2">Selfie with ID *</label>
+              <input
+                type="file"
+                accept="image/*"
+                required
+                onChange={(e) => setSelfieFile(e.target.files?.[0] || null)}
+                className="w-full border rounded-lg px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 mb-2">
+                Business Permit (Optional)
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setBusinessPermitFile(e.target.files?.[0] || null)}
+                className="w-full border rounded-lg px-3 py-2"
               />
             </div>
           </div>

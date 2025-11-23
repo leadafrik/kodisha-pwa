@@ -202,6 +202,11 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
     try {
       const type = (formData.get("type") as string) || "equipment";
       const token = localStorage.getItem("kodisha_token");
+
+      if (!token) {
+        alert("You must be logged in and verified to list a service or agrovet.");
+        throw new Error("No auth token");
+      }
       // Default equipment, send non-equipment (professional/agrovet) to professional endpoint
       const endpoint =
         type === "equipment"
@@ -210,7 +215,7 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
 
       const response = await fetch(endpoint, {
         method: "POST",
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
 

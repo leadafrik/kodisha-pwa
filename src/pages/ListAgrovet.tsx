@@ -87,6 +87,10 @@ const ListAgrovet: React.FC = () => {
   const [wards, setWards] = useState<{value: string; label: string}[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
+  const [idFrontFile, setIdFrontFile] = useState<File | null>(null);
+  const [idBackFile, setIdBackFile] = useState<File | null>(null);
+  const [selfieFile, setSelfieFile] = useState<File | null>(null);
+  const [businessPermitFile, setBusinessPermitFile] = useState<File | null>(null);
 
   // Update constituencies when county changes
   useEffect(() => {
@@ -180,6 +184,12 @@ const ListAgrovet: React.FC = () => {
     setSubmitting(true);
     
     try {
+      if (!idFrontFile || !idBackFile || !selfieFile) {
+        alert('Please upload ID front, ID back, and a selfie with your ID to list an agrovet.');
+        setSubmitting(false);
+        return;
+      }
+
       // Convert to FormData for backend upload (uses professional endpoint until agrovet route exists)
       const submitData = new FormData();
       submitData.append('type', 'professional_services'); // backend currently supports equipment/professional
@@ -191,6 +201,13 @@ const ListAgrovet: React.FC = () => {
       submitData.append('contact', formData.contact);
       submitData.append('services', getSelectedServices().join(','));
       submitData.append('approximateLocation', formData.approximateLocation);
+
+      submitData.append('idFront', idFrontFile);
+      submitData.append('idBack', idBackFile);
+      submitData.append('selfie', selfieFile);
+      if (businessPermitFile) {
+        submitData.append('businessPermit', businessPermitFile);
+      }
 
       await addService(submitData);
       alert('Agrovet listed successfully! It will appear after verification.');
@@ -230,6 +247,10 @@ const ListAgrovet: React.FC = () => {
       });
       setConstituencies([]);
       setWards([]);
+      setIdFrontFile(null);
+      setIdBackFile(null);
+      setSelfieFile(null);
+      setBusinessPermitFile(null);
       
     } catch (error) {
       alert('Error listing agrovet. Please try again.');
@@ -673,6 +694,56 @@ const ListAgrovet: React.FC = () => {
             <label className="text-gray-700">Delivery Available</label>
           </div>
 
+        </div>
+
+        <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+          <h3 className="font-semibold text-gray-800 mb-2">
+            Identity & Business Verification (Required)
+          </h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Upload clear photos of your ID front and back, plus a selfie holding your ID. A business permit is optional but recommended.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-gray-700 mb-2">ID Front *</label>
+              <input
+                type="file"
+                accept="image/*"
+                required
+                onChange={(e) => setIdFrontFile(e.target.files?.[0] || null)}
+                className="w-full border rounded-lg px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 mb-2">ID Back *</label>
+              <input
+                type="file"
+                accept="image/*"
+                required
+                onChange={(e) => setIdBackFile(e.target.files?.[0] || null)}
+                className="w-full border rounded-lg px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 mb-2">Selfie with ID *</label>
+              <input
+                type="file"
+                accept="image/*"
+                required
+                onChange={(e) => setSelfieFile(e.target.files?.[0] || null)}
+                className="w-full border rounded-lg px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 mb-2">Business Permit (Optional)</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setBusinessPermitFile(e.target.files?.[0] || null)}
+                className="w-full border rounded-lg px-3 py-2"
+              />
+            </div>
+          </div>
         </div>
 
         <div className="mt-6 p-4 bg-blue-50 rounded-lg">
