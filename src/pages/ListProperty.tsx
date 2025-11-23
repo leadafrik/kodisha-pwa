@@ -7,6 +7,8 @@ import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from
 import GoogleMapsLoader from '../components/GoogleMapsLoader';
 import MapPicker from '../components/MapPicker';
 
+const DRAFT_STORAGE_KEY = 'listPropertyDraft';
+
 const ListProperty: React.FC = () => {
   const { addProperty } = useProperties();
   const { user } = useAuth();
@@ -39,19 +41,62 @@ const ListProperty: React.FC = () => {
   const [constituencies, setConstituencies] = useState<{value: string; label: string}[]>([]);
   const [wards, setWards] = useState<{value: string; label: string}[]>([]);
 
+  const saveDraft = (data: PropertyFormData) => {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(data));
+    } catch (err) {
+      console.error('Failed to save draft listing', err);
+    }
+  };
+
+  const clearDraft = () => {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+    } catch (err) {
+      console.error('Failed to clear draft listing', err);
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const saved = localStorage.getItem(DRAFT_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setFormData((prev) => ({ ...prev, ...parsed }));
+      }
+    } catch (err) {
+      console.error('Failed to restore draft listing', err);
+    }
+  }, []);
+
   useEffect(() => {
     if (formData.county) {
       const countyConstituencies = getConstituenciesByCounty(formData.county);
       setConstituencies(countyConstituencies);
-      setFormData(prev => ({
-        ...prev,
-        constituency: '',
-        ward: ''
-      }));
-      setWards([]);
+      setFormData((prev) => {
+        const constituencyValid = countyConstituencies.some(
+          (item) => item.value === prev.constituency
+        );
+        const nextConstituency = constituencyValid ? prev.constituency : '';
+        const nextWard = constituencyValid ? prev.ward : '';
+        if (nextConstituency === prev.constituency && nextWard === prev.ward) {
+          return prev;
+        }
+        return { ...prev, constituency: nextConstituency, ward: nextWard };
+      });
+      if (!formData.constituency) {
+        setWards([]);
+      }
     } else {
       setConstituencies([]);
       setWards([]);
+      setFormData((prev) => {
+        if (prev.constituency === '' && prev.ward === '') return prev;
+        return { ...prev, constituency: '', ward: '' };
+      });
     }
   }, [formData.county]);
 
@@ -59,12 +104,20 @@ const ListProperty: React.FC = () => {
     if (formData.county && formData.constituency) {
       const constituencyWards = getWardsByConstituency(formData.county, formData.constituency);
       setWards(constituencyWards);
-      setFormData(prev => ({
-        ...prev,
-        ward: ''
-      }));
+      setFormData((prev) => {
+        const wardValid = constituencyWards.some((item) => item.value === prev.ward);
+        const nextWard = wardValid ? prev.ward : '';
+        if (nextWard === prev.ward) {
+          return prev;
+        }
+        return { ...prev, ward: nextWard };
+      });
     } else {
       setWards([]);
+      setFormData((prev) => {
+        if (prev.ward === '') return prev;
+        return { ...prev, ward: '' };
+      });
     }
   }, [formData.county, formData.constituency]);
 
@@ -79,10 +132,11 @@ const ListProperty: React.FC = () => {
     const ownershipOk = !!user?.verification?.ownershipVerified;
 
     if (!idOk || !selfieOk || (needsOwnership && !ownershipOk)) {
+      saveDraft(formData);
       alert(
         needsOwnership
-          ? "You need to upload verification docs (ID front/back, selfie with ID, and proof of ownership) before listing for sale. Redirecting to verification."
-          : "You need to upload verification docs (ID front/back and a selfie with ID) before listing. Redirecting to verification."
+          ? "You need to upload verification docs (ID front/back, selfie with ID, and proof of ownership) before listing for sale. Your draft is saved. Redirecting to verification."
+          : "You need to upload verification docs (ID front/back and a selfie with ID) before listing. Your draft is saved. Redirecting to verification."
       );
       navigate("/verify");
       return;
@@ -123,7 +177,7 @@ const ListProperty: React.FC = () => {
       submitData.append('contact', formData.contact.trim());
       submitData.append('type', formData.type);
 
-      // ⭐ Coordinates (if selected)
+      // Coordinates (if selected)
       if (formData.latitude) submitData.append("latitude", String(formData.latitude));
       if (formData.longitude) submitData.append("longitude", String(formData.longitude));
 
@@ -135,6 +189,7 @@ const ListProperty: React.FC = () => {
 
       await addProperty(submitData);
       alert('Property submitted! An admin will review and verify it shortly.');
+      clearDraft();
       
       // Reset form
       setFormData({
@@ -548,13 +603,13 @@ const ListProperty: React.FC = () => {
                 id="image-upload"
               />
               <label htmlFor="image-upload" className="cursor-pointer">
-                <div className="text-4xl mb-2">📷</div>
+                <div className="text-3xl mb-2 font-bold text-green-500" aria-hidden="true">+</div>
                 <p className="font-semibold text-gray-700">Upload Farmland Images</p>
                 <p className="text-sm text-gray-500 mt-1">
                   Click to select images or drag and drop
                 </p>
                 <p className="text-xs text-gray-400 mt-1">
-                  Up to 5 images • JPG, PNG, GIF • Max 5MB each
+                  Up to 5 images - JPG, PNG, GIF - Max 5MB each
                 </p>
               </label>
             </div>
@@ -568,14 +623,14 @@ const ListProperty: React.FC = () => {
                   {selectedImages.map((file, index) => (
                     <div key={index} className="relative bg-gray-100 rounded-lg p-2">
                       <div className="text-xs text-gray-700 max-w-24 truncate">
-                        📷 {file.name}
+                        Image: {file.name}
                       </div>
                       <button
                         type="button"
                         onClick={() => removeImage(index)}
                         className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center"
                       >
-                        ×
+                        X
                       </button>
                     </div>
                   ))}
