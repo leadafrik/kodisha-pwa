@@ -94,13 +94,13 @@ export const adminApiRequest = async (
   }
 
   const bearer = `Bearer ${token}`;
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     Authorization: bearer,
-    ...(options.headers || {}),
+    ...(options.headers as Record<string, string> | undefined),
   };
 
   // Only set Content-Type for requests that carry a JSON body to avoid unnecessary CORS preflights on GETs
-  if (options.body && !(headers as any)["Content-Type"]) {
+  if (options.body && !headers["Content-Type"]) {
     headers["Content-Type"] = "application/json";
   }
 
