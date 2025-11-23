@@ -40,6 +40,8 @@ interface AdminListing {
   services?: string[];
   categories?: any;
   createdAt?: string;
+  ownerTrustScore?: number;
+  ownerTrustLevel?: "very_low" | "low" | "medium" | "high" | "very_high";
 }
 
 const listingTypeMeta: Record<
@@ -95,6 +97,17 @@ const formatPrice = (price?: number, priceType?: string) => {
   if (typeof price !== 'number') return 'N/A';
   const suffix = priceType ? ` (${priceType.replace('-', ' ')})` : '';
   return `Ksh ${price.toLocaleString()}${suffix}`;
+};
+
+const trustLevelMeta: Record<
+  NonNullable<AdminListing['ownerTrustLevel']>,
+  { label: string; color: string; bg: string }
+> = {
+  very_low: { label: 'Very Low Trust', color: 'text-red-700', bg: 'bg-red-100' },
+  low: { label: 'Low Trust', color: 'text-orange-700', bg: 'bg-orange-100' },
+  medium: { label: 'Medium Trust', color: 'text-amber-700', bg: 'bg-amber-100' },
+  high: { label: 'High Trust', color: 'text-green-700', bg: 'bg-green-100' },
+  very_high: { label: 'Very High Trust', color: 'text-emerald-700', bg: 'bg-emerald-100' },
 };
 
 const AdminDashboard: React.FC = () => {
@@ -366,6 +379,9 @@ const AdminDashboard: React.FC = () => {
               {pendingListings.map((listing) => {
                 const meta = listingTypeMeta[listing.listingType];
                 const hasServices = listing.services && listing.services.length > 0;
+                const trustMeta = listing.ownerTrustLevel
+                  ? trustLevelMeta[listing.ownerTrustLevel]
+                  : null;
 
                 return (
                   <div key={listing._id} className="p-6">
@@ -430,6 +446,15 @@ const AdminDashboard: React.FC = () => {
                                 ? new Date(listing.createdAt).toLocaleDateString()
                                 : 'N/A'}
                             </p>
+                            {trustMeta && (
+                              <p className="text-gray-900">
+                                <span className="font-medium">Owner Trust:</span>{' '}
+                                <span className={`${trustMeta.color} px-2 py-0.5 rounded-full text-xs ${trustMeta.bg}`}>
+                                  {trustMeta.label}
+                                  {listing.ownerTrustScore != null ? ` (${listing.ownerTrustScore})` : ''}
+                                </span>
+                              </p>
+                            )}
                           </div>
                         </div>
 
