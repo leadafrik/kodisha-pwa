@@ -99,13 +99,28 @@ export const adminApiRequest = async (
     ...options,
   });
 
+  let data: any = null;
+  try {
+    data = await response.json();
+  } catch (_) {
+    // ignore JSON parse errors for non-JSON responses
+  }
+
   if (!response.ok) {
     if (response.status === 401 || response.status === 403) {
       localStorage.removeItem("kodisha_admin_token");
-      throw new Error("Admin session expired or insufficient privileges. Please log in again.");
+      if (typeof window !== "undefined" && !window.location.pathname.includes("/admin/login")) {
+        window.location.href = "/admin/login";
+      }
+      const message =
+        (data && (data.message || data.error)) ||
+        "Admin session expired or insufficient privileges. Please log in again.";
+      throw new Error(message);
     }
-    throw new Error(`API error: ${response.status}`);
+    const message =
+      (data && (data.message || data.error)) || `API error: ${response.status}`;
+    throw new Error(message);
   }
 
-  return response.json();
+  return data;
 };
