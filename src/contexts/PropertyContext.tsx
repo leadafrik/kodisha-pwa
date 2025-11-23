@@ -8,7 +8,6 @@ import React, {
 import {
   LandListing,
   ServiceListing,
-  ServiceFormData,
 } from "../types/property";
 import { API_ENDPOINTS } from "../config/api";
 

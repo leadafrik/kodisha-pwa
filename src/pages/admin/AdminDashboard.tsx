@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { API_ENDPOINTS, adminApiRequest } from '../../config/api';
 export {}; // Add this line to make it a module
 
@@ -121,10 +121,6 @@ const AdminDashboard: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
   const normalizeListing = (listing: any): AdminListing => {
     const rawType = (listing.listingType || listing.type) as string;
     const derivedType: ListingType =
@@ -165,7 +161,7 @@ const AdminDashboard: React.FC = () => {
     };
   };
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       const [statsData, listingsData] = await Promise.all([
@@ -196,7 +192,11 @@ const AdminDashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   const verifyListing = async (
     id: string,
@@ -488,7 +488,7 @@ const AdminDashboard: React.FC = () => {
                                 <img
                                   key={index}
                                   src={image}
-                                  alt={`Listing image ${index + 1}`}
+                                  alt={`Listing ${index + 1}`}
                                   className="w-16 h-16 object-cover rounded border"
                                 />
                               ))}

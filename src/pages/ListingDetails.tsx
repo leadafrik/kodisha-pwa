@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import { useParams } from "react-router-dom";
 import GoogleMapsLoader from "../components/GoogleMapsLoader";
 import ListingMap from "../components/ListingMap";
 import { API_ENDPOINTS } from "../config/api";
@@ -16,7 +16,6 @@ interface Message {
 
 const ListingDetails: React.FC = () => {
   const { id } = useParams();
-  const location = useLocation();
   const [listing, setListing] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -27,7 +26,7 @@ const ListingDetails: React.FC = () => {
   const socketRef = useRef<Socket | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const fetchListing = async () => {
+  const fetchListing = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(`${API_ENDPOINTS.properties.getById(id || "")}`);
@@ -39,7 +38,7 @@ const ListingDetails: React.FC = () => {
       console.error("Error fetching listing:", err);
     }
     setLoading(false);
-  };
+  }, [id]);
 
   const fetchMessages = async (ownerId: string) => {
     try {
@@ -177,7 +176,7 @@ const ListingDetails: React.FC = () => {
 
   useEffect(() => {
     fetchListing();
-  }, [id]);
+  }, [fetchListing]);
 
   useEffect(() => {
     if (listing?.owner?._id) {

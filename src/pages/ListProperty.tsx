@@ -98,7 +98,7 @@ const ListProperty: React.FC = () => {
         return { ...prev, constituency: '', ward: '' };
       });
     }
-  }, [formData.county]);
+  }, [formData.county, formData.constituency]);
 
   useEffect(() => {
     if (formData.county && formData.constituency) {

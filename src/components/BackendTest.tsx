@@ -12,14 +12,14 @@ const BackendTest: React.FC = () => {
   const testBackendConnection = async () => {
     try {
       // Test health endpoint
-      const health = await apiRequest(API_ENDPOINTS.auth.register.replace('/auth/register', '/health'));
-      setHealthStatus('✅ Connected to Backend');
+      await apiRequest(API_ENDPOINTS.auth.register.replace('/auth/register', '/health'));
+      setHealthStatus('Connected to backend');
       
       // Test company endpoint
       const company = await apiRequest(API_ENDPOINTS.auth.register.replace('/auth/register', '/company'));
       setCompanyInfo(company);
     } catch (error) {
-      setHealthStatus('❌ Backend Connection Failed');
+      setHealthStatus('Backend connection failed');
       console.error('Backend test failed:', error);
     }
   };
@@ -30,7 +30,7 @@ const BackendTest: React.FC = () => {
       <div className="space-y-3">
         <div className="flex items-center">
           <span className="font-semibold mr-2">Status:</span>
-          <span className={healthStatus.includes('✅') ? 'text-green-600' : 'text-red-600'}>
+          <span className={healthStatus.toLowerCase().includes('connected') ? 'text-green-600' : 'text-red-600'}>
             {healthStatus}
           </span>
         </div>

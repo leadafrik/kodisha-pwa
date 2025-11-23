@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext'; // We'll use this to get current user
+import { useCallback } from 'react';
 
 interface VerificationContextType {
   verificationStatus: any;
@@ -16,7 +17,7 @@ export const VerificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const { user } = useAuth(); // Get current user from auth context
 
-  const refreshVerification = async () => {
+  const refreshVerification = useCallback(async () => {
     // For now, set basic status
     // Later we'll fetch from API
     setVerificationStatus({
@@ -30,7 +31,7 @@ export const VerificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (user && !user.verification?.phoneVerified) {
       setShowVerificationModal(true);
     }
-  };
+  }, [user]);
 
   const requiresVerification = (type: string): boolean => {
     if (!verificationStatus) return false;
@@ -49,7 +50,7 @@ export const VerificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   useEffect(() => {
     refreshVerification();
-  }, [user]); // Refresh when user changes
+  }, [refreshVerification]); // Refresh when user changes
 
   return (
     <VerificationContext.Provider value={{

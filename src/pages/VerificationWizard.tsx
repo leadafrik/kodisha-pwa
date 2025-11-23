@@ -102,7 +102,6 @@ const VerificationWizard: React.FC = () => {
   const currentStep = steps[currentIndex];
 
   const canGoBack = currentIndex > 0;
-  const canGoNext = currentIndex < steps.length - 1;
 
   const goNext = () => {
     if (currentIndex < steps.length - 1) {
