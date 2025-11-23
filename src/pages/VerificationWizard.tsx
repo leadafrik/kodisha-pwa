@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { API_BASE_URL } from "../config/api";
 
@@ -23,7 +23,7 @@ interface StepConfig {
   description: string;
 }
 
-const stepConfigs: StepConfig[] = [
+const allStepConfigs: StepConfig[] = [
   {
     key: "identity",
     label: "Identity",
@@ -33,7 +33,7 @@ const stepConfigs: StepConfig[] = [
     key: "land",
     label: "Land documents",
     description:
-      "If you plan to SELL land, upload your title deed and either a land search report or chief’s letter. Optional for rent/lease listings.",
+      "If you plan to SELL land, upload your title deed and either a land search report or chief's letter. Optional for rent/lease listings.",
   },
   {
     key: "business",
@@ -74,19 +74,38 @@ const VerificationWizard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const currentStep = stepConfigs[currentIndex];
-
   const isLandOwner =
     user?.userType === "landowner" || user?.type === "seller";
   const isServiceProvider =
     user?.userType === "service provider" ||
     user?.type === "service_provider";
 
+  const steps: StepConfig[] = useMemo(() => {
+    const list: StepConfig[] = [];
+    list.push(allStepConfigs.find((s) => s.key === "identity")!);
+    if (isLandOwner) {
+      list.push(allStepConfigs.find((s) => s.key === "land")!);
+    }
+    if (isServiceProvider) {
+      list.push(allStepConfigs.find((s) => s.key === "business")!);
+    }
+    list.push(allStepConfigs.find((s) => s.key === "review")!);
+    return list;
+  }, [isLandOwner, isServiceProvider]);
+
+  useEffect(() => {
+    if (currentIndex > steps.length - 1) {
+      setCurrentIndex(steps.length - 1);
+    }
+  }, [steps, currentIndex]);
+
+  const currentStep = steps[currentIndex];
+
   const canGoBack = currentIndex > 0;
-  const canGoNext = currentIndex < stepConfigs.length - 1;
+  const canGoNext = currentIndex < steps.length - 1;
 
   const goNext = () => {
-    if (currentIndex < stepConfigs.length - 1) {
+    if (currentIndex < steps.length - 1) {
       setCurrentIndex((prev) => prev + 1);
       setError(null);
       setSuccessMessage(null);
@@ -336,6 +355,8 @@ const VerificationWizard: React.FC = () => {
     const businessVerified = !!v?.businessVerified;
     const level = v?.verificationLevel ?? "basic";
     const trustScore = v?.trustScore ?? 0;
+    const showLandStatus = isLandOwner || ownershipVerified;
+    const showBusinessStatus = isServiceProvider || businessVerified;
 
     return (
       <div className="space-y-4">
@@ -367,16 +388,20 @@ const VerificationWizard: React.FC = () => {
             label="ID + Selfie verified"
             ok={idVerified && selfieVerified}
           />
-          <StatusRow
-            label="Land ownership documents"
-            ok={ownershipVerified}
-            note="Required for selling land"
-          />
-          <StatusRow
-            label="Business / service verification"
-            ok={businessVerified}
-            note="Recommended for service providers & agrovets"
-          />
+          {showLandStatus && (
+            <StatusRow
+              label="Land ownership documents"
+              ok={ownershipVerified}
+              note="Required for selling land"
+            />
+          )}
+          {showBusinessStatus && (
+            <StatusRow
+              label="Business / service verification"
+              ok={businessVerified}
+              note="Recommended for service providers & agrovets"
+            />
+          )}
         </div>
 
         <p className="text-xs text-gray-500">
@@ -421,11 +446,15 @@ const VerificationWizard: React.FC = () => {
           Help us keep Kodisha safe and trustworthy by completing the
           verification steps below.
         </p>
+        <p className="text-[11px] text-gray-500 mb-4">
+          Steps are tailored to your profile (seller vs service provider). You
+          only see what applies to you.
+        </p>
 
         {/* Progress indicator */}
         <div className="mb-6">
           <div className="flex items-center justify-between text-xs font-medium text-gray-500 mb-2">
-            {stepConfigs.map((s, index) => (
+            {steps.map((s, index) => (
               <div key={s.key} className="flex-1 flex flex-col items-center">
                 <div
                   className={`w-7 h-7 rounded-full flex items-center justify-center text-xs mb-1 ${
@@ -454,7 +483,7 @@ const VerificationWizard: React.FC = () => {
             <div
               className="bg-green-600 h-1.5 transition-all duration-300"
               style={{
-                width: `${((currentIndex + 1) / stepConfigs.length) * 100}%`,
+                width: `${((currentIndex + 1) / steps.length) * 100}%`,
               }}
             />
           </div>
@@ -625,7 +654,7 @@ const StatusRow: React.FC<StatusRowProps> = ({ label, ok, note }) => {
           ok ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
         }`}
       >
-        {ok ? "✓" : "!"}
+        {ok ? "OK" : "!"}
       </span>
       <div>
         <p className="font-medium">{label}</p>
