@@ -119,6 +119,7 @@ export const adminApiRequest = async (
   const response = await fetch(url, {
     headers,
     mode: "cors",
+    credentials: options.credentials ?? "include",
     ...options,
   });
 
