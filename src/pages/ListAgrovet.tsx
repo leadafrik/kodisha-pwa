@@ -42,6 +42,119 @@ interface AgrovetFormData {
   photos: string[];
 }
 
+const AGROVET_FIRST_LISTING_FREE_KEY = "kodisha_agrovet_first_listing_free_used";
+
+type ListingPlanOption = {
+  id: "free" | "basic" | "verified" | "premium";
+  name: string;
+  price: number;
+  subtitle: string;
+  note?: string;
+};
+
+const LISTING_PLAN_OPTIONS: ListingPlanOption[] = [
+  {
+    id: "free",
+    name: "First Listing Free",
+    price: 0,
+    subtitle: "Start with a single free agrovet listing (verification required).",
+    note: "First listing only",
+  },
+  {
+    id: "basic",
+    name: "Basic Listing",
+    price: 49,
+    subtitle: "KSh 49 - Standard placement with a verified badge.",
+  },
+  {
+    id: "verified",
+    name: "Verified Listing",
+    price: 99,
+    subtitle: "KSh 99 - Priority placement and trust.",
+  },
+  {
+    id: "premium",
+    name: "Premium Boosted Listing",
+    price: 199,
+    subtitle: "KSh 199 - Featured spot and longer exposure.",
+  },
+];
+
+type BoostOption = {
+  id: "none" | "daily" | "weekly" | "monthly";
+  name: string;
+  price: number;
+  subtitle: string;
+};
+
+const BOOST_OPTIONS: BoostOption[] = [
+  {
+    id: "none",
+    name: "Standard placement",
+    price: 0,
+    subtitle: "Appears in the regular feed.",
+  },
+  {
+    id: "daily",
+    name: "KSh 50 / Day Boost",
+    price: 50,
+    subtitle: "Top of feed for 24 hours.",
+  },
+  {
+    id: "weekly",
+    name: "KSh 150 / Week Boost",
+    price: 150,
+    subtitle: "Featured section for seven days.",
+  },
+  {
+    id: "monthly",
+    name: "KSh 499 / Month Boost",
+    price: 499,
+    subtitle: "Carousel coverage for a month.",
+  },
+];
+
+type VerificationTierOption = {
+  id: "none" | "basic" | "advanced" | "business";
+  name: string;
+  price: number;
+  subtitle: string;
+};
+
+const VERIFICATION_TIERS: VerificationTierOption[] = [
+  {
+    id: "none",
+    name: "Standard verification",
+    price: 0,
+    subtitle: "Kodisha performs manual checks.",
+  },
+  {
+    id: "basic",
+    name: "KSh 99 Basic Verification",
+    price: 99,
+    subtitle: "ID + selfie verification for trust badges.",
+  },
+  {
+    id: "advanced",
+    name: "KSh 199 Advanced Verification",
+    price: 199,
+    subtitle: "Adds business/ownership proof.",
+  },
+  {
+    id: "business",
+    name: "KSh 399 Business Verification",
+    price: 399,
+    subtitle: "Full business profile verification.",
+  },
+];
+
+type ListingPlanId = ListingPlanOption["id"];
+type BoostOptionId = BoostOption["id"];
+type VerificationTierId = VerificationTierOption["id"];
+
+const formatKenyanPrice = (value: number) =>
+  value === 0 ? "Free" : `KSh ${value.toLocaleString()}`;
+
 const ListAgrovet: React.FC = () => {
   const { addService } = useProperties();
   const [formData, setFormData] = useState<AgrovetFormData>({
@@ -91,6 +204,11 @@ const ListAgrovet: React.FC = () => {
   const [idBackFile, setIdBackFile] = useState<File | null>(null);
   const [selfieFile, setSelfieFile] = useState<File | null>(null);
   const [businessPermitFile, setBusinessPermitFile] = useState<File | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<ListingPlanId>("free");
+  const [selectedBoost, setSelectedBoost] = useState<BoostOptionId>("none");
+  const [selectedVerification, setSelectedVerification] =
+    useState<VerificationTierId>("none");
+  const [firstListingFreeUsed, setFirstListingFreeUsed] = useState(false);
 
   // Update constituencies when county changes
   useEffect(() => {
@@ -122,6 +240,44 @@ const ListAgrovet: React.FC = () => {
       setWards([]);
     }
   }, [formData.county, formData.constituency]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem(AGROVET_FIRST_LISTING_FREE_KEY);
+    setFirstListingFreeUsed(stored === "true");
+  }, []);
+
+  useEffect(() => {
+    if (firstListingFreeUsed && selectedPlan === "free") {
+      setSelectedPlan("basic");
+    }
+  }, [firstListingFreeUsed, selectedPlan]);
+
+  const selectedPlanDetails =
+    LISTING_PLAN_OPTIONS.find(plan => plan.id === selectedPlan) ||
+    LISTING_PLAN_OPTIONS[0];
+  const selectedBoostDetails =
+    BOOST_OPTIONS.find(option => option.id === selectedBoost) || BOOST_OPTIONS[0];
+  const selectedVerificationDetails =
+    VERIFICATION_TIERS.find(tier => tier.id === selectedVerification) ||
+    VERIFICATION_TIERS[0];
+
+  const firstListingFreeAvailable = !firstListingFreeUsed;
+  const effectivePlanPrice =
+    firstListingFreeAvailable && selectedPlan === "free"
+      ? 0
+      : selectedPlanDetails.price;
+  const boostPrice = selectedBoostDetails.price;
+  const verificationPrice = selectedVerificationDetails.price;
+  const totalMonetizationFee =
+    effectivePlanPrice + boostPrice + verificationPrice;
+  const boostLabel =
+    selectedBoost !== "none" ? ` with ${selectedBoostDetails.name}` : "";
+  const verificationLabel =
+    selectedVerification !== "none"
+      ? ` and ${selectedVerificationDetails.name}`
+      : "";
+  const monetizationSummaryLabel = `${selectedPlanDetails.name}${boostLabel}${verificationLabel}`;
 
   // Photo handling functions
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -190,6 +346,16 @@ const ListAgrovet: React.FC = () => {
         return;
       }
 
+      if (totalMonetizationFee > 0 && typeof window !== "undefined") {
+        const confirmMessage = `${monetizationSummaryLabel}. You will be billed ${formatKenyanPrice(
+          totalMonetizationFee
+        )} once your listing is approved. Continue?`;
+        if (!window.confirm(confirmMessage)) {
+          setSubmitting(false);
+          return;
+        }
+      }
+
       // Convert to FormData for backend upload (uses professional endpoint until agrovet route exists)
       const submitData = new FormData();
       submitData.append('type', 'professional_services'); // backend currently supports equipment/professional
@@ -200,6 +366,13 @@ const ListAgrovet: React.FC = () => {
       submitData.append('ward', formData.ward);
       submitData.append('contact', formData.contact);
       submitData.append('services', getSelectedServices().join(','));
+      submitData.append('listingPlan', selectedPlan);
+      submitData.append('listingPlanPrice', String(effectivePlanPrice));
+      submitData.append('boostOption', selectedBoost);
+      submitData.append('boostPrice', String(boostPrice));
+      submitData.append('verificationTier', selectedVerification);
+      submitData.append('verificationPrice', String(verificationPrice));
+      submitData.append('totalMonetizationFee', String(totalMonetizationFee));
       submitData.append('approximateLocation', formData.approximateLocation);
 
       submitData.append('idFront', idFrontFile);
@@ -210,7 +383,26 @@ const ListAgrovet: React.FC = () => {
       }
 
       await addService(submitData);
-      alert('Agrovet listed successfully! It will appear after verification.');
+
+      if (!firstListingFreeUsed) {
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem(
+            AGROVET_FIRST_LISTING_FREE_KEY,
+            "true"
+          );
+        }
+        setFirstListingFreeUsed(true);
+      }
+
+      const feeNote =
+        totalMonetizationFee > 0
+          ? `${monetizationSummaryLabel} for ${formatKenyanPrice(
+              totalMonetizationFee
+            )}.`
+          : "You used your free listing credit.";
+      alert(
+        `Agrovet listed successfully! It will appear after verification. ${feeNote}`
+      );
       
       // Reset form
       setFormData({
@@ -251,6 +443,9 @@ const ListAgrovet: React.FC = () => {
       setIdBackFile(null);
       setSelfieFile(null);
       setBusinessPermitFile(null);
+      setSelectedPlan("basic");
+      setSelectedBoost("none");
+      setSelectedVerification("none");
       
     } catch (error) {
       alert('Error listing agrovet. Please try again.');
@@ -323,6 +518,97 @@ const ListAgrovet: React.FC = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
+        <div className="mb-6 space-y-4 rounded-2xl border border-green-200 bg-green-50/40 p-4">
+          <div>
+            <h2 className="text-xl font-semibold text-gray-800">Monetized Listing Options</h2>
+            <p className="text-sm text-gray-600">
+              Showcase your agrovet with paid plans, boosts, and verification tiers while keeping
+              the first listing free.
+            </p>
+          </div>
+          <div className="grid gap-3 md:grid-cols-4">
+            {LISTING_PLAN_OPTIONS.map((plan) => {
+              const disabled = plan.id === "free" && firstListingFreeUsed;
+              const selected = selectedPlan === plan.id;
+              return (
+                <button
+                  key={plan.id}
+                  type="button"
+                  onClick={() => setSelectedPlan(plan.id)}
+                  disabled={disabled}
+                  aria-pressed={selected}
+                  className={`rounded-2xl border p-4 text-left transition ${
+                    selected
+                      ? "border-green-600 bg-white shadow-sm"
+                      : "border-gray-200 bg-white hover:border-green-500"
+                  } ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-semibold uppercase tracking-wide text-green-600">
+                      {plan.price === 0 ? "Free" : formatKenyanPrice(plan.price)}
+                    </span>
+                    {plan.note && (
+                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700">
+                        {plan.note}
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-2 text-lg font-semibold text-gray-900">{plan.name}</p>
+                  <p className="text-sm text-gray-500">{plan.subtitle}</p>
+                </button>
+              );
+            })}
+          </div>
+          <div className="grid gap-6 md:grid-cols-2">
+            <label className="block text-sm text-gray-700">
+              <span className="font-semibold text-gray-900">Boost Option</span>
+              <select
+                name="boostOption"
+                value={selectedBoost}
+                onChange={(e) => setSelectedBoost(e.target.value as BoostOptionId)}
+                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+              >
+                {BOOST_OPTIONS.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.name} - {formatKenyanPrice(option.price)}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1 text-xs text-gray-500">{selectedBoostDetails.subtitle}</p>
+            </label>
+            <label className="block text-sm text-gray-700">
+              <span className="font-semibold text-gray-900">Verification Tier</span>
+              <select
+                name="verificationTier"
+                value={selectedVerification}
+                onChange={(e) =>
+                  setSelectedVerification(e.target.value as VerificationTierId)
+                }
+                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+              >
+                {VERIFICATION_TIERS.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.name} - {formatKenyanPrice(option.price)}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1 text-xs text-gray-500">{selectedVerificationDetails.subtitle}</p>
+            </label>
+          </div>
+          <div className="rounded-lg border border-dashed border-green-200 bg-white p-3 text-sm text-gray-700">
+            <p className="font-semibold text-gray-900">
+              Total commitment: {formatKenyanPrice(totalMonetizationFee)}
+            </p>
+            <p>
+              {firstListingFreeAvailable
+                ? "Your first listing credit is still active; you pay only when you select a paid tier."
+                : "Free credit used - this listing follows paid tiers, boosts, and verification fees."}
+            </p>
+            <p className="text-xs text-gray-500">
+              Payment (M-Pesa) will run after admin approval.
+            </p>
+          </div>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
           {/* Basic Information */}
