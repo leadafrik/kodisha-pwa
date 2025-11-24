@@ -377,20 +377,11 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
       return;
     }
 
-    const needsOwnership = false;
-    const identityReady = identityDocsSatisfied;
-    const ownershipReady = true;
+    const identityReady = identityDocsSatisfied; const ownershipReady = true;
 
     if (!identityReady) {
       alert(
         "Please upload your ID front, ID back, and a selfie with your ID (or ensure your identity is already verified)."
-      );
-      return;
-    }
-
-    if (!ownershipReady) {
-      alert(
-        "For land sales, upload a title deed and either a land search report or chief's letter to prove ownership."
       );
       return;
     }
@@ -752,7 +743,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
 
             <label className="block text-sm text-gray-700">
               <span className="font-semibold text-gray-900">
-                Title Deed {ownershipDocsNeeded ? '*' : ''}
+                Title Deed {false ? '*' : ''}
               </span>
               <input
                 type="file"
@@ -1165,3 +1156,6 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
 };
 
 export default ListProperty;
+
+
+

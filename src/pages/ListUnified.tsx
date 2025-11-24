@@ -85,37 +85,37 @@ const ListUnified: React.FC<ListUnifiedProps> = ({
   );
 
   const renderForm = () => {
-    if (category === "land") {
-      return (
-        <ListProperty
-          key={`land-${landType}`}
-          initialType={landType}
-        />
-      );
-    }
+  if (category === "land") {
+    return (
+      <ListProperty
+        key={`land-rental`}
+        initialType="rental"
+      />
+    );
+  }
     if (category === "service") {
       return (
         <div className="space-y-3">
-          <div className="flex flex-wrap gap-2">
-            {(
-              ["equipment", "professional_services"] as Array<
-                "equipment" | "professional_services"
-              >
-            ).map((type) => (
-              <button
-                key={type}
-                type="button"
-                onClick={() => setServiceType(type)}
-                className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                  serviceType === type
-                    ? "border-green-600 bg-green-50 text-green-700"
-                    : "border-gray-200 bg-white text-gray-700 hover:border-green-400"
-                }`}
-              >
-                {type === "equipment" ? "Equipment Hire" : "Professional Services"}
-              </button>
-            ))}
-          </div>
+        <div className="flex flex-wrap gap-2">
+          {(
+            ["equipment", "professional_services"] as Array<
+              "equipment" | "professional_services"
+            >
+          ).map((type) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => setServiceType(type)}
+              className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                serviceType === type
+                  ? "border-green-600 bg-green-50 text-green-700"
+                  : "border-gray-200 bg-white text-gray-700 hover-border-green-400"
+              }`}
+            >
+              {type === "equipment" ? "Equipment Hire" : "Professional Services"}
+            </button>
+          ))}
+        </div>
           <ListService
             key={`service-${serviceType}`}
             initialServiceType={serviceType}
@@ -192,7 +192,7 @@ const ListUnified: React.FC<ListUnifiedProps> = ({
               <button
                 key={type}
                 type="button"
-                onClick={() => setLandType(type)}
+                onClick={() => }
                 className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
                   landType === type
                     ? "border-blue-600 bg-blue-50 text-blue-700"
@@ -236,3 +236,4 @@ const ListUnified: React.FC<ListUnifiedProps> = ({
 };
 
 export default ListUnified;
+
