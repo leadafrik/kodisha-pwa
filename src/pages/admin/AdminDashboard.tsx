@@ -126,6 +126,7 @@ const AdminDashboard: React.FC = () => {
     breakdown: undefined,
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const normalizeListing = (listing: any): AdminListing => {
     const rawType = (listing.listingType || listing.type) as string;
@@ -173,6 +174,7 @@ const AdminDashboard: React.FC = () => {
   const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
       const [statsData, listingsData] = await Promise.all([
         adminApiRequest(API_ENDPOINTS.admin.dashboard),
         adminApiRequest(API_ENDPOINTS.admin.listings.getPending),
@@ -194,7 +196,7 @@ const AdminDashboard: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Error fetching dashboard data:', error);
-      alert(
+      setError(
         error?.message ||
           'Could not load dashboard data. Please confirm you are logged in as an admin.'
       );
@@ -212,6 +214,7 @@ const AdminDashboard: React.FC = () => {
     status: 'approved' | 'rejected'
   ) => {
     try {
+      setError(null);
       await adminApiRequest(API_ENDPOINTS.admin.listings.verify(id), {
         method: 'PUT',
         headers: {
@@ -224,7 +227,7 @@ const AdminDashboard: React.FC = () => {
       fetchDashboardData(); // Refresh data
     } catch (error: any) {
       console.error('Error verifying listing:', error);
-      alert(error?.message || 'Error verifying listing');
+      setError(error?.message || 'Error verifying listing');
     }
   };
 
@@ -232,6 +235,7 @@ const AdminDashboard: React.FC = () => {
     if (!window.confirm('Are you sure you want to delete this listing?')) return;
 
     try {
+      setError(null);
       await adminApiRequest(API_ENDPOINTS.admin.listings.getById(id), {
         method: 'DELETE',
       });
@@ -240,7 +244,7 @@ const AdminDashboard: React.FC = () => {
       fetchDashboardData(); // Refresh data
     } catch (error: any) {
       console.error('Error deleting listing:', error);
-      alert(error?.message || 'Error deleting listing');
+      setError(error?.message || 'Error deleting listing');
     }
   };
 
@@ -254,14 +258,20 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-600">
-            Manage verification for land, equipment, professional services, and agrovets
-          </p>
-        </div>
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+            <p className="text-gray-600">
+              Manage verification for land, equipment, professional services, and agrovets
+            </p>
+          </div>
+
+          {error && (
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error} <span className="font-semibold">Tip:</span> try re-logging at <a className="underline" href="/admin-login">admin login</a> if the session expired.
+            </div>
+          )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">

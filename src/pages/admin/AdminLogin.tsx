@@ -18,6 +18,8 @@ export default function AdminLogin() {
       if (!data.success) throw new Error(data.message || "Login failed");
 
       localStorage.setItem("kodisha_admin_token", data.token);
+      // Mirror admin token into user token so admin routes that use either will pass
+      localStorage.setItem("kodisha_token", data.token);
       alert("Admin logged in!");
       window.location.href = "/admin";
 
