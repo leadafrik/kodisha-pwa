@@ -3,7 +3,6 @@ import { useProperties } from "../contexts/PropertyContext";
 import { kenyaCounties } from "../data/kenyaCounties";
 
 type Category = "all" | "land" | "service" | "agrovet" | "product";
-type LandSubType = "all" | "sale" | "rental";
 type ServiceSubType = "all" | "equipment" | "professional_services";
 
 type UnifiedCard = {
@@ -43,7 +42,6 @@ const BrowseListings: React.FC = () => {
   const { properties, serviceListings, productListings, loading } = useProperties();
 
   const [category, setCategory] = useState<Category>("all");
-  const [landSub, setLandSub] = useState<LandSubType>("all");
   const [serviceSub, setServiceSub] = useState<ServiceSubType>("all");
   const [county, setCounty] = useState<string>("");
   const [search, setSearch] = useState<string>("");
@@ -53,6 +51,7 @@ const BrowseListings: React.FC = () => {
       properties?.map((p: any) => {
         const status = p.status;
         if (status === "rejected" || status === "archived") return null;
+        if (p.type === "sale") return null; // temporarily hide sale listings
         const boostFlag =
           p.isFeatured ||
           (p.monetization?.boostOption &&
@@ -69,7 +68,7 @@ const BrowseListings: React.FC = () => {
           locationLabel: buildLocation(p.location || {}),
           priceLabel: formatPrice(p.price),
           sizeLabel: p.size ? `${p.size} ${p.sizeUnit || "acres"}` : undefined,
-          typeLabel: p.type === "sale" ? "For Sale" : "For Rent/Lease",
+          typeLabel: "For Rent/Lease",
           verified: verifiedFlag,
           paid: !!paidFlag,
           boosted: !!boostFlag,
@@ -154,8 +153,6 @@ const BrowseListings: React.FC = () => {
     return cards
       .filter((card) => {
         if (category !== "all" && card.category !== category) return false;
-        if (category === "land" && landSub !== "all" && card.subCategory !== landSub)
-          return false;
         if (
           category === "service" &&
           serviceSub !== "all" &&
@@ -177,7 +174,7 @@ const BrowseListings: React.FC = () => {
         const timeB = b.createdAt ? b.createdAt.getTime() : 0;
         return timeB - timeA;
       });
-  }, [cards, category, landSub, serviceSub, county, search]);
+  }, [cards, category, serviceSub, county, search]);
 
   const categoryPills: Array<{ id: Category; label: string }> = [
     { id: "all", label: "All" },
@@ -249,15 +246,9 @@ const BrowseListings: React.FC = () => {
               <label className="text-xs font-semibold text-gray-600">
                 Land type
               </label>
-              <select
-                value={landSub}
-                onChange={(e) => setLandSub(e.target.value as LandSubType)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200"
-              >
-                <option value="all">Sale + Rent</option>
-                <option value="sale">For Sale</option>
-                <option value="rental">For Rent/Lease</option>
-              </select>
+              <div className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-gray-50 text-gray-700">
+                Rent / Lease only (sales temporarily disabled)
+              </div>
             </div>
           )}
 

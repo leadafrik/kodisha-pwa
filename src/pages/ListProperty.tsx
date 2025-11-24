@@ -13,7 +13,7 @@ const DRAFT_STORAGE_KEY = 'listPropertyDraft';
 const FIRST_LISTING_FREE_KEY = 'kodisha_first_listing_free_used';
 
 type ListPropertyProps = {
-  initialType?: 'sale' | 'rental';
+  initialType?: 'rental';
 };
 
 type ListingPlanOption = {
@@ -156,7 +156,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
     maxLeasePeriod: '12',
     preferredCrops: '',
     contact: '',
-    type: initialType || 'sale'
+    type: initialType || 'rental'
   });
   
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
@@ -205,6 +205,13 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
       console.error('Failed to restore draft listing', err);
     }
   }, []);
+
+  // Force rental-only listings (disable sale for now)
+  useEffect(() => {
+    if (formData.type !== 'rental') {
+      setFormData((prev) => ({ ...prev, type: 'rental' }));
+    }
+  }, [formData.type]);
 
   useEffect(() => {
     saveDraft(formData);
@@ -301,7 +308,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
       ? ` and ${selectedVerificationDetails.name}`
       : '';
   const monetizationSummaryLabel = `${selectedPlanDetails.name}${boostLabel}${verificationLabel}`;
-  const isSaleListing = formData.type === 'sale';
+  const isSaleListing = false;
   const idVerified = !!user?.verification?.idVerified;
   const selfieVerified = !!user?.verification?.selfieVerified;
   const ownershipVerified = !!user?.verification?.ownershipVerified;
@@ -314,7 +321,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
     (titleDeedFile !== null && (landSearchFile !== null || chiefLetterFile !== null));
   const idDocsNeeded = !idVerified;
   const selfieNeeded = !selfieVerified;
-  const ownershipDocsNeeded = isSaleListing && !ownershipVerified;
+  const ownershipDocsNeeded = false;
 
   const uploadVerificationDoc = async (type: string, file: File) => {
     const token = localStorage.getItem('kodisha_token');
@@ -353,11 +360,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
       uploads.push({ type: 'selfie', file: selfieFile });
     }
 
-    if (isSaleListing && !ownershipVerified) {
-      if (titleDeedFile) uploads.push({ type: 'title-deed', file: titleDeedFile });
-      if (landSearchFile) uploads.push({ type: 'land-search', file: landSearchFile });
-      else if (chiefLetterFile) uploads.push({ type: 'chief-letter', file: chiefLetterFile });
-    }
+    // Rental-only: ownership docs optional, not enforced
 
     if (uploads.length === 0) return;
 
@@ -379,9 +382,9 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
       return;
     }
 
-    const needsOwnership = isSaleListing;
+    const needsOwnership = false;
     const identityReady = identityDocsSatisfied;
-    const ownershipReady = needsOwnership ? ownershipDocsSatisfied : true;
+    const ownershipReady = true;
 
     if (!identityReady) {
       alert(
@@ -446,7 +449,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
       
       // Contact & Type
       submitData.append('contact', formData.contact.trim());
-      submitData.append('type', formData.type);
+      submitData.append('type', 'rental');
       submitData.append('listingPlan', selectedPlan);
       submitData.append('planDuration', selectedPlanDetails.duration || '');
       submitData.append('listingPlanPrice', String(effectivePlanPrice));
@@ -693,8 +696,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
             <div>
               <h2 className="text-xl font-semibold text-gray-800">Verification Documents</h2>
               <p className="text-sm text-gray-600">
-                Upload the documents needed for this listing type. Requirements switch automatically when you choose
-                <span className="font-semibold"> {isSaleListing ? 'Sale' : 'Rent/Lease'} </span> above.
+                Upload the documents needed for this listing type. Currently supporting <span className="font-semibold">Rent/Lease</span> only.
               </p>
             </div>
             {docUploading && (
@@ -762,8 +764,8 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
                 accept="image/*,application/pdf"
                 onChange={(e) => setTitleDeedFile(e.target.files?.[0] || null)}
                 className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                required={isSaleListing && !ownershipVerified}
-                disabled={!isSaleListing}
+                required={false}
+                disabled={false}
               />
               <p className="mt-1 text-xs text-gray-500">
                 Required for sale. For rent/lease this stays optional.
@@ -772,14 +774,14 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
 
             <label className="block text-sm text-gray-700">
               <span className="font-semibold text-gray-900">
-                Land Search Report {isSaleListing && !ownershipVerified ? '*' : ''}
+                Land Search Report
               </span>
               <input
                 type="file"
                 accept="image/*,application/pdf"
                 onChange={(e) => setLandSearchFile(e.target.files?.[0] || null)}
                 className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                disabled={!isSaleListing}
+                disabled={false}
               />
               <p className="mt-1 text-xs text-gray-500">
                 Required for sale (or provide a chief&apos;s letter instead).
@@ -795,7 +797,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
                 accept="image/*,application/pdf"
                 onChange={(e) => setChiefLetterFile(e.target.files?.[0] || null)}
                 className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                disabled={!isSaleListing}
+                disabled={false}
               />
               <p className="mt-1 text-xs text-gray-500">
                 Optional fallback if you don&apos;t have a land search document.
@@ -809,31 +811,8 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
           <div className="md:col-span-2">
-            <label className="block text-gray-700 mb-2">Lease Type *</label>
-            <div className="flex gap-4">
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="type"
-                  value="sale"
-                  checked={formData.type === 'sale'}
-                  onChange={handleChange}
-                  className="mr-2"
-                />
-                For Sale
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="type"
-                  value="rental"
-                  checked={formData.type === 'rental'}
-                  onChange={handleChange}
-                  className="mr-2"
-                />
-                For Rent/Lease
-              </label>
-            </div>
+            <label className="block text-gray-700 mb-2">Lease Type</label>
+            <p className="text-sm text-gray-600">We currently accept Rent/Lease listings only.</p>
           </div>
 
           <div className="md:col-span-2">
