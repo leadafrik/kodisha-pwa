@@ -10,7 +10,7 @@ type ProductCategory = "produce" | "livestock" | "inputs";
 
 type ListUnifiedProps = {
   initialCategory?: Category;
-  initialLandType?: "sale" | "rental";
+  initialLandType?: "rental";
   initialServiceType?: "equipment" | "professional_services";
   initialProductCategory?: ProductCategory;
 };
@@ -49,7 +49,7 @@ const CATEGORY_CARDS: Array<{
 
 const ListUnified: React.FC<ListUnifiedProps> = ({
   initialCategory = "land",
-  initialLandType = "sale",
+  initialLandType = "rental",
   initialServiceType = "equipment",
   initialProductCategory,
 }) => {
@@ -63,8 +63,7 @@ const ListUnified: React.FC<ListUnifiedProps> = ({
   };
 
   const parsedCategory = parseCategory(searchParams.get("category")) || initialCategory;
-  const parsedLandType =
-    (searchParams.get("landType") as "sale" | "rental" | null) || initialLandType;
+  const parsedLandType = "rental";
   const parsedServiceType =
     (searchParams.get("serviceType") as "equipment" | "professional_services" | null) ||
     initialServiceType;
@@ -74,7 +73,7 @@ const ListUnified: React.FC<ListUnifiedProps> = ({
     "produce";
 
   const [category, setCategory] = useState<Category>(parsedCategory);
-  const [landType, setLandType] = useState<"sale" | "rental">(parsedLandType);
+  const [landType] = useState<"rental">(parsedLandType);
   const [serviceType, setServiceType] = useState<
     "equipment" | "professional_services"
   >(parsedServiceType);

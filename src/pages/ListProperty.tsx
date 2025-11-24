@@ -308,7 +308,6 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
       ? ` and ${selectedVerificationDetails.name}`
       : '';
   const monetizationSummaryLabel = `${selectedPlanDetails.name}${boostLabel}${verificationLabel}`;
-  const isSaleListing = false;
   const idVerified = !!user?.verification?.idVerified;
   const selfieVerified = !!user?.verification?.selfieVerified;
   const ownershipVerified = !!user?.verification?.ownershipVerified;
@@ -316,12 +315,8 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
   const hasSelfieDoc = selfieVerified || selfieFile !== null;
   const identityDocsSatisfied = hasIdDocs && hasSelfieDoc;
 
-  const ownershipDocsSatisfied =
-    ownershipVerified ||
-    (titleDeedFile !== null && (landSearchFile !== null || chiefLetterFile !== null));
   const idDocsNeeded = !idVerified;
   const selfieNeeded = !selfieVerified;
-  const ownershipDocsNeeded = false;
 
   const uploadVerificationDoc = async (type: string, file: File) => {
     const token = localStorage.getItem('kodisha_token');

@@ -310,7 +310,6 @@ const BrowseListings: React.FC = () => {
           <button
             onClick={() => {
               setCategory("all");
-              setLandSub("all");
               setServiceSub("all");
               setCounty("");
               setSearch("");
