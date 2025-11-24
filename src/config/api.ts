@@ -33,6 +33,7 @@ export const API_ENDPOINTS = {
     },
     agrovets: {
       list: `${API_BASE_URL}/agrovets`,
+      create: `${API_BASE_URL}/agrovets`,
     },
     products: {
       list: `${API_BASE_URL}/products`,

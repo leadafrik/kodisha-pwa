@@ -321,7 +321,7 @@ const ListAgrovet: React.FC = () => {
 
       // Convert to FormData for backend upload (uses professional endpoint until agrovet route exists)
       const submitData = new FormData();
-      submitData.append('type', 'professional_services'); // backend currently supports equipment/professional
+      submitData.append('type', 'agrovet');
       submitData.append('name', formData.name);
       submitData.append('description', formData.description);
       submitData.append('county', formData.county);

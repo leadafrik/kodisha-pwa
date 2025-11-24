@@ -230,10 +230,11 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
         alert("You must be logged in and verified to list a service or agrovet.");
         throw new Error("No auth token");
       }
-      // Default equipment, send non-equipment (professional/agrovet) to professional endpoint
       const endpoint =
         type === "equipment"
           ? API_ENDPOINTS.services.equipment.create
+          : type === "agrovet"
+          ? API_ENDPOINTS.services.agrovets.create
           : API_ENDPOINTS.services.professional.create;
 
       const response = await fetch(endpoint, {
