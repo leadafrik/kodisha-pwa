@@ -43,41 +43,21 @@ interface AgrovetFormData {
   photos: string[];
 }
 
-const AGROVET_FIRST_LISTING_FREE_KEY = "kodisha_agrovet_first_listing_free_used";
-
 type ListingPlanOption = {
-  id: "free" | "basic" | "verified" | "premium";
+  id: "annual";
   name: string;
   price: number;
   subtitle: string;
-  note?: string;
+  duration: string;
 };
 
 const LISTING_PLAN_OPTIONS: ListingPlanOption[] = [
   {
-    id: "free",
-    name: "First Listing Free",
-    price: 0,
-    subtitle: "Start with a single free agrovet listing (verification required).",
-    note: "First listing only",
-  },
-  {
-    id: "basic",
-    name: "Basic Listing",
-    price: 49,
-    subtitle: "KSh 49 - Standard placement with a verified badge.",
-  },
-  {
-    id: "verified",
-    name: "Verified Listing",
-    price: 99,
-    subtitle: "KSh 99 - Priority placement and trust.",
-  },
-  {
-    id: "premium",
-    name: "Premium Boosted Listing",
-    price: 199,
-    subtitle: "KSh 199 - Featured spot and longer exposure.",
+    id: "annual",
+    name: "Annual Subscription",
+    price: 599,
+    subtitle: "KSh 599/year — recurring exposure plus boosts.",
+    duration: "12 months",
   },
 ];
 
@@ -205,12 +185,10 @@ const ListAgrovet: React.FC = () => {
   const [idBackFile, setIdBackFile] = useState<File | null>(null);
   const [selfieFile, setSelfieFile] = useState<File | null>(null);
   const [businessPermitFile, setBusinessPermitFile] = useState<File | null>(null);
-  const [selectedPlan, setSelectedPlan] = useState<ListingPlanId>("free");
+  const [selectedPlan, setSelectedPlan] = useState<ListingPlanId>("annual");
   const [selectedBoost, setSelectedBoost] = useState<BoostOptionId>("none");
   const [selectedVerification, setSelectedVerification] =
     useState<VerificationTierId>("none");
-  const [firstListingFreeUsed, setFirstListingFreeUsed] = useState(false);
-
   // Update constituencies when county changes
   useEffect(() => {
     if (formData.county) {
@@ -242,18 +220,6 @@ const ListAgrovet: React.FC = () => {
     }
   }, [formData.county, formData.constituency]);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const stored = window.localStorage.getItem(AGROVET_FIRST_LISTING_FREE_KEY);
-    setFirstListingFreeUsed(stored === "true");
-  }, []);
-
-  useEffect(() => {
-    if (firstListingFreeUsed && selectedPlan === "free") {
-      setSelectedPlan("basic");
-    }
-  }, [firstListingFreeUsed, selectedPlan]);
-
   const selectedPlanDetails =
     LISTING_PLAN_OPTIONS.find(plan => plan.id === selectedPlan) ||
     LISTING_PLAN_OPTIONS[0];
@@ -263,11 +229,7 @@ const ListAgrovet: React.FC = () => {
     VERIFICATION_TIERS.find(tier => tier.id === selectedVerification) ||
     VERIFICATION_TIERS[0];
 
-  const firstListingFreeAvailable = !firstListingFreeUsed;
-  const effectivePlanPrice =
-    firstListingFreeAvailable && selectedPlan === "free"
-      ? 0
-      : selectedPlanDetails.price;
+  const effectivePlanPrice = selectedPlanDetails.price;
   const boostPrice = selectedBoostDetails.price;
   const verificationPrice = selectedVerificationDetails.price;
   const totalMonetizationFee =
@@ -385,16 +347,6 @@ const ListAgrovet: React.FC = () => {
 
       const result = await addService(submitData);
 
-      if (!firstListingFreeUsed) {
-        if (typeof window !== "undefined") {
-          window.localStorage.setItem(
-            AGROVET_FIRST_LISTING_FREE_KEY,
-            "true"
-          );
-        }
-        setFirstListingFreeUsed(true);
-      }
-
       const listingId =
         result?.data?._id || result?.data?.id || result?.service?._id || result?.service?.id;
 
@@ -463,7 +415,7 @@ const ListAgrovet: React.FC = () => {
       setIdBackFile(null);
       setSelfieFile(null);
       setBusinessPermitFile(null);
-      setSelectedPlan("basic");
+      setSelectedPlan("annual");
       setSelectedBoost("none");
       setSelectedVerification("none");
       
@@ -542,36 +494,28 @@ const ListAgrovet: React.FC = () => {
           <div>
             <h2 className="text-xl font-semibold text-gray-800">Monetized Listing Options</h2>
             <p className="text-sm text-gray-600">
-              Showcase your agrovet with paid plans, boosts, and verification tiers while keeping
-              the first listing free.
+              Annual subscription unlocks boosted exposure; add optional verification and boosts.
             </p>
           </div>
           <div className="grid gap-3 md:grid-cols-4">
             {LISTING_PLAN_OPTIONS.map((plan) => {
-              const disabled = plan.id === "free" && firstListingFreeUsed;
               const selected = selectedPlan === plan.id;
               return (
                 <button
                   key={plan.id}
                   type="button"
                   onClick={() => setSelectedPlan(plan.id)}
-                  disabled={disabled}
                   aria-pressed={selected}
                   className={`rounded-2xl border p-4 text-left transition ${
                     selected
                       ? "border-green-600 bg-white shadow-sm"
                       : "border-gray-200 bg-white hover:border-green-500"
-                  } ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
+                  }`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-sm font-semibold uppercase tracking-wide text-green-600">
                       {plan.price === 0 ? "Free" : formatKenyanPrice(plan.price)}
                     </span>
-                    {plan.note && (
-                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700">
-                        {plan.note}
-                      </span>
-                    )}
                   </div>
                   <p className="mt-2 text-lg font-semibold text-gray-900">{plan.name}</p>
                   <p className="text-sm text-gray-500">{plan.subtitle}</p>
@@ -620,9 +564,7 @@ const ListAgrovet: React.FC = () => {
               Total commitment: {formatKenyanPrice(totalMonetizationFee)}
             </p>
             <p>
-              {firstListingFreeAvailable
-                ? "Your first listing credit is still active; you pay only when you select a paid tier."
-                : "Free credit used - this listing follows paid tiers, boosts, and verification fees."}
+              Subscription lasts {selectedPlanDetails.duration}; renew from your profile when it expires.
             </p>
             <p className="text-xs text-gray-500">
               Payment (M-Pesa) will run after admin approval.

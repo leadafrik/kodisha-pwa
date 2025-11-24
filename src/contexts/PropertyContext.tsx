@@ -12,12 +12,15 @@ import {
 import { API_ENDPOINTS } from "../config/api";
 
 type ServiceType = "equipment" | "agrovet" | "professional_services";
+type ProductListing = any;
 
 interface PropertyContextType {
   properties: LandListing[];
   serviceListings: ServiceListing[];
+  productListings: ProductListing[];
   addProperty: (propertyData: FormData) => Promise<any>;
   addService: (serviceData: FormData) => Promise<any>;
+  addProduct: (productData: FormData) => Promise<any>;
   getPropertiesByCounty: (county: string) => LandListing[];
   getServicesByType: (
     type: ServiceType,
@@ -26,6 +29,7 @@ interface PropertyContextType {
   loading: boolean;
   refreshProperties: () => Promise<void>;
   refreshServices: () => Promise<void>;
+  refreshProducts: () => Promise<void>;
 }
 
 const PropertyContext = createContext<PropertyContextType | undefined>(
@@ -107,11 +111,13 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
 }) => {
   const [properties, setProperties] = useState<LandListing[]>([]);
   const [serviceListings, setServiceListings] = useState<ServiceListing[]>([]);
+  const [productListings, setProductListings] = useState<ProductListing[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     refreshProperties();
     refreshServices();
+    refreshProducts();
   }, []);
 
   const refreshProperties = async () => {
@@ -132,22 +138,27 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
   const refreshServices = async () => {
     setLoading(true);
     try {
-      const [equipmentRes, professionalRes] = await Promise.all([
+      const [equipmentRes, professionalRes, agrovetRes] = await Promise.all([
         fetch(API_ENDPOINTS.services.equipment.list),
         fetch(API_ENDPOINTS.services.professional.list),
+        fetch(API_ENDPOINTS.services.agrovets.list),
       ]);
 
-      if (!equipmentRes.ok || !professionalRes.ok) {
+      if (!equipmentRes.ok || !professionalRes.ok || !agrovetRes.ok) {
         throw new Error("Failed to fetch services");
       }
 
       const equipmentJson = await equipmentRes.json();
       const professionalJson = await professionalRes.json();
+      const agrovetJson = await agrovetRes.json();
 
       const equipment = (equipmentJson.data || []).map(mapServiceRecord);
       const professional = (professionalJson.data || []).map(mapServiceRecord);
+      const agrovet = (agrovetJson.data || []).map((item: any) =>
+        mapServiceRecord({ ...item, type: "agrovet" })
+      );
 
-      const combined = [...equipment, ...professional].sort(
+      const combined = [...equipment, ...professional, ...agrovet].sort(
         (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
       );
 
@@ -158,6 +169,18 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
       setServiceListings([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const refreshProducts = async () => {
+    try {
+      const res = await fetch(API_ENDPOINTS.services.products.list);
+      if (!res.ok) throw new Error("Failed to fetch products");
+      const json = await res.json();
+      setProductListings(json.data || []);
+    } catch (err) {
+      console.error("Error loading products:", err);
+      setProductListings([]);
     }
   };
 
@@ -236,6 +259,34 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
     }
   };
 
+  const addProduct = async (formData: FormData) => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("kodisha_token");
+      if (!token) {
+        alert("You must be logged in to list a product.");
+        throw new Error("No auth token");
+      }
+      const response = await fetch(API_ENDPOINTS.services.products.create, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      const result = await response.json();
+      if (!response.ok || result.success === false) {
+        throw new Error(result.message || "Failed to create product");
+      }
+      await refreshProducts();
+      return result;
+    } catch (error) {
+      console.error("addProduct error:", error);
+      alert("Failed to upload product. Please try again.");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getPropertiesByCounty = (county: string) => {
     if (!county) return properties;
     return properties.filter(
@@ -258,13 +309,16 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
       value={{
         properties,
         serviceListings,
+        productListings,
         addProperty,
         addService,
+        addProduct,
         getPropertiesByCounty,
         getServicesByType,
         loading,
         refreshProperties,
         refreshServices,
+        refreshProducts,
       }}
     >
       {children}

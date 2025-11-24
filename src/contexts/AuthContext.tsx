@@ -185,6 +185,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const resetPasswordWithEmail = async ({
+    email,
+    code,
+    newPassword,
+  }: {
+    email: string;
+    code: string;
+    newPassword: string;
+  }) => {
+    setLoading(true);
+    try {
+      const res: any = await apiRequest(API_ENDPOINTS.auth.passwordReset, {
+        method: "POST",
+        body: JSON.stringify({ email, code, newPassword }),
+      });
+
+      if (!res.success || !res.user || !res.token) {
+        throw new Error(res.message || "Password reset failed.");
+      }
+
+      const mappedUser = mapBackendUserToFrontendUser(res.user);
+      setUser(mappedUser);
+      localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
+      localStorage.setItem("kodisha_token", res.token);
+    } catch (error) {
+      console.error("Password reset error:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem("kodisha_user");
@@ -218,6 +250,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         login,
         requestEmailOtp,
         verifyEmailOtp,
+        resetPasswordWithEmail,
         logout,
         updateProfile,
         register,

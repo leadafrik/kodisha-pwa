@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { API_ENDPOINTS, adminApiRequest } from '../../config/api';
 export {}; // Add this line to make it a module
 
-type ListingType = 'land' | 'equipment' | 'professional_services' | 'agrovet';
+type ListingType = 'land' | 'equipment' | 'professional_services' | 'agrovet' | 'product';
 
 interface CountBreakdown {
   total: number;
@@ -72,6 +72,12 @@ const listingTypeMeta: Record<
     pill: 'bg-blue-100 text-blue-800',
     icon: '🧪',
   },
+  product: {
+    label: 'Products & Livestock',
+    color: 'text-orange-700',
+    pill: 'bg-orange-100 text-orange-800',
+    icon: '🛒',
+  },
 };
 
 const normalizeServices = (services: any): string[] => {
@@ -124,7 +130,10 @@ const AdminDashboard: React.FC = () => {
   const normalizeListing = (listing: any): AdminListing => {
     const rawType = (listing.listingType || listing.type) as string;
     const derivedType: ListingType =
-      rawType === 'equipment' || rawType === 'professional_services' || rawType === 'agrovet'
+      rawType === 'equipment' ||
+      rawType === 'professional_services' ||
+      rawType === 'agrovet' ||
+      rawType === 'product'
         ? (rawType as ListingType)
         : 'land';
 
@@ -312,8 +321,8 @@ const AdminDashboard: React.FC = () => {
         </div>
 
         {stats.breakdown && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            {(['land', 'equipment', 'professional_services', 'agrovet'] as ListingType[]).map(
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+            {(['land', 'equipment', 'professional_services', 'agrovet', 'product'] as ListingType[]).map(
               (type) => {
                 const meta = listingTypeMeta[type];
                 const counts = stats.breakdown?.[type] || {

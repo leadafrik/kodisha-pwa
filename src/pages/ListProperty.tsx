@@ -7,9 +7,14 @@ import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from
 import GoogleMapsLoader from '../components/GoogleMapsLoader';
 import MapPicker from '../components/MapPicker';
 import { initiatePaymentFlow } from '../utils/paymentHelpers';
+import { API_BASE_URL } from '../config/api';
 
 const DRAFT_STORAGE_KEY = 'listPropertyDraft';
 const FIRST_LISTING_FREE_KEY = 'kodisha_first_listing_free_used';
+
+type ListPropertyProps = {
+  initialType?: 'sale' | 'rental';
+};
 
 type ListingPlanOption = {
   id: 'free' | 'basic' | 'verified' | 'premium';
@@ -17,6 +22,7 @@ type ListingPlanOption = {
   price: number;
   subtitle: string;
   note?: string;
+  duration?: string;
 };
 
 const LISTING_PLAN_OPTIONS: ListingPlanOption[] = [
@@ -26,24 +32,28 @@ const LISTING_PLAN_OPTIONS: ListingPlanOption[] = [
     price: 0,
     subtitle: 'One trial listing at no charge; verification still required.',
     note: 'First listing only',
+    duration: '1 month',
   },
   {
     id: 'basic',
     name: 'Basic Listing',
     price: 49,
-    subtitle: 'KSh 49 - Verified badge plus 7-day exposure.',
+    subtitle: 'KSh 49 - One-week listing with verified badge.',
+    duration: '1 week',
   },
   {
     id: 'verified',
     name: 'Verified Listing',
     price: 99,
-    subtitle: 'KSh 99 - Priority placement plus extended duration.',
+    subtitle: 'KSh 99 - Three-week priority placement.',
+    duration: '3 weeks',
   },
   {
     id: 'premium',
     name: 'Premium Boosted Listing',
     price: 199,
-    subtitle: 'KSh 199 - Featured sections, longer duration, and boosted reach.',
+    subtitle: 'KSh 199 - Two-month featured exposure.',
+    duration: '2 months',
   },
 ];
 
@@ -122,7 +132,7 @@ type VerificationTierId = VerificationTierOption['id'];
 const formatKenyanPrice = (value: number) =>
   value === 0 ? 'Free' : `KSh ${value.toLocaleString()}`;
 
-const ListProperty: React.FC = () => {
+const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
   const { addProperty } = useProperties();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -146,7 +156,7 @@ const ListProperty: React.FC = () => {
     maxLeasePeriod: '12',
     preferredCrops: '',
     contact: '',
-    type: 'sale'
+    type: initialType || 'sale'
   });
   
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
@@ -157,6 +167,13 @@ const ListProperty: React.FC = () => {
   const [selectedBoost, setSelectedBoost] = useState<BoostOptionId>('none');
   const [selectedVerification, setSelectedVerification] = useState<VerificationTierId>('none');
   const [firstListingFreeUsed, setFirstListingFreeUsed] = useState(false);
+  const [idFrontFile, setIdFrontFile] = useState<File | null>(null);
+  const [idBackFile, setIdBackFile] = useState<File | null>(null);
+  const [selfieFile, setSelfieFile] = useState<File | null>(null);
+  const [titleDeedFile, setTitleDeedFile] = useState<File | null>(null);
+  const [landSearchFile, setLandSearchFile] = useState<File | null>(null);
+  const [chiefLetterFile, setChiefLetterFile] = useState<File | null>(null);
+  const [docUploading, setDocUploading] = useState(false);
 
   const saveDraft = (data: PropertyFormData) => {
     if (typeof window === 'undefined') return;
@@ -188,6 +205,18 @@ const ListProperty: React.FC = () => {
       console.error('Failed to restore draft listing', err);
     }
   }, []);
+
+  useEffect(() => {
+    saveDraft(formData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData]);
+
+  useEffect(() => {
+    if (initialType && initialType !== formData.type) {
+      setFormData((prev) => ({ ...prev, type: initialType }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialType]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -272,25 +301,106 @@ const ListProperty: React.FC = () => {
       ? ` and ${selectedVerificationDetails.name}`
       : '';
   const monetizationSummaryLabel = `${selectedPlanDetails.name}${boostLabel}${verificationLabel}`;
+  const isSaleListing = formData.type === 'sale';
+  const idVerified = !!user?.verification?.idVerified;
+  const selfieVerified = !!user?.verification?.selfieVerified;
+  const ownershipVerified = !!user?.verification?.ownershipVerified;
+  const hasIdDocs = idVerified || (idFrontFile !== null && idBackFile !== null);
+  const hasSelfieDoc = selfieVerified || selfieFile !== null;
+  const identityDocsSatisfied = hasIdDocs && hasSelfieDoc;
+
+  const ownershipDocsSatisfied =
+    ownershipVerified ||
+    (titleDeedFile !== null && (landSearchFile !== null || chiefLetterFile !== null));
+  const idDocsNeeded = !idVerified;
+  const selfieNeeded = !selfieVerified;
+  const ownershipDocsNeeded = isSaleListing && !ownershipVerified;
+
+  const uploadVerificationDoc = async (type: string, file: File) => {
+    const token = localStorage.getItem('kodisha_token');
+    const userId = (user as any)?._id || (user as any)?.id;
+    if (!token) {
+      throw new Error('You must be logged in to upload verification documents.');
+    }
+    if (!userId) {
+      throw new Error('Missing user id for verification uploads.');
+    }
+
+    const formData = new FormData();
+    formData.append('userId', userId);
+    formData.append('file', file);
+
+    const response = await fetch(`${API_BASE_URL}/verification/upload/${type}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+    const json = await response.json();
+    if (!response.ok || json.success === false) {
+      throw new Error(json.message || 'Failed to upload document');
+    }
+    return json;
+  };
+
+  const ensureDocsUploaded = async () => {
+    const uploads: Array<{ type: string; file: File }> = [];
+
+    if (!idVerified) {
+      if (idFrontFile) uploads.push({ type: 'id-front', file: idFrontFile });
+      if (idBackFile) uploads.push({ type: 'id-back', file: idBackFile });
+    }
+    if (!selfieVerified && selfieFile) {
+      uploads.push({ type: 'selfie', file: selfieFile });
+    }
+
+    if (isSaleListing && !ownershipVerified) {
+      if (titleDeedFile) uploads.push({ type: 'title-deed', file: titleDeedFile });
+      if (landSearchFile) uploads.push({ type: 'land-search', file: landSearchFile });
+      else if (chiefLetterFile) uploads.push({ type: 'chief-letter', file: chiefLetterFile });
+    }
+
+    if (uploads.length === 0) return;
+
+    setDocUploading(true);
+    try {
+      for (const item of uploads) {
+        await uploadVerificationDoc(item.type, item.file);
+      }
+    } finally {
+      setDocUploading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Pre-submit verification gating by listing type
-    const lowerType = formData.type.toLowerCase();
-    const needsOwnership = lowerType === "sale";
-    const idOk = !!user?.verification?.idVerified;
-    const selfieOk = !!user?.verification?.selfieVerified;
-    const ownershipOk = !!user?.verification?.ownershipVerified;
+    if (!user) {
+      alert("You must be logged in to list your farmland.");
+      return;
+    }
 
-    if (!idOk || !selfieOk || (needsOwnership && !ownershipOk)) {
-      saveDraft(formData);
+    const needsOwnership = isSaleListing;
+    const identityReady = identityDocsSatisfied;
+    const ownershipReady = needsOwnership ? ownershipDocsSatisfied : true;
+
+    if (!identityReady) {
       alert(
-        needsOwnership
-          ? "You need to upload verification docs (ID front/back, selfie with ID, and proof of ownership) before listing for sale. Your draft is saved. Redirecting to verification."
-          : "You need to upload verification docs (ID front/back and a selfie with ID) before listing. Your draft is saved. Redirecting to verification."
+        "Please upload your ID front, ID back, and a selfie with your ID (or ensure your identity is already verified)."
       );
-      navigate("/verify");
+      return;
+    }
+
+    if (!ownershipReady) {
+      alert(
+        "For land sales, upload a title deed and either a land search report or chief's letter to prove ownership."
+      );
+      return;
+    }
+
+    try {
+      await ensureDocsUploaded();
+    } catch (err: any) {
+      alert(err.message || "Failed to upload verification documents.");
       return;
     }
 
@@ -338,6 +448,7 @@ const ListProperty: React.FC = () => {
       submitData.append('contact', formData.contact.trim());
       submitData.append('type', formData.type);
       submitData.append('listingPlan', selectedPlan);
+      submitData.append('planDuration', selectedPlanDetails.duration || '');
       submitData.append('listingPlanPrice', String(effectivePlanPrice));
       submitData.append('boostOption', selectedBoost);
       submitData.append('boostPrice', String(boostPrice));
@@ -423,6 +534,12 @@ const ListProperty: React.FC = () => {
       setSelectedPlan('basic');
       setSelectedBoost('none');
       setSelectedVerification('none');
+      setIdFrontFile(null);
+      setIdBackFile(null);
+      setSelfieFile(null);
+      setTitleDeedFile(null);
+      setLandSearchFile(null);
+      setChiefLetterFile(null);
       navigate('/');
     } catch (error) {
       alert('Error listing property. Please try again.');
@@ -569,6 +686,125 @@ const ListProperty: React.FC = () => {
               Payment (M-Pesa STK push) is triggered after the admin approves the listing.
             </p>
           </div>
+        </div>
+
+        <div className="mb-6 space-y-4 rounded-2xl border border-blue-200 bg-blue-50/40 p-4">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800">Verification Documents</h2>
+              <p className="text-sm text-gray-600">
+                Upload the documents needed for this listing type. Requirements switch automatically when you choose
+                <span className="font-semibold"> {isSaleListing ? 'Sale' : 'Rent/Lease'} </span> above.
+              </p>
+            </div>
+            {docUploading && (
+              <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+                Uploading docs…
+              </span>
+            )}
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="block text-sm text-gray-700">
+              <span className="font-semibold text-gray-900">
+                National ID (Front) {idDocsNeeded ? '*' : ''}
+              </span>
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={(e) => setIdFrontFile(e.target.files?.[0] || null)}
+                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                required={!idVerified}
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Required for rent & sale unless already verified.
+              </p>
+            </label>
+
+            <label className="block text-sm text-gray-700">
+              <span className="font-semibold text-gray-900">
+                National ID (Back) {idDocsNeeded ? '*' : ''}
+              </span>
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={(e) => setIdBackFile(e.target.files?.[0] || null)}
+                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                required={!idVerified}
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Required for rent & sale unless already verified.
+              </p>
+            </label>
+
+            <label className="block text-sm text-gray-700">
+              <span className="font-semibold text-gray-900">
+                Selfie holding ID {selfieNeeded ? '*' : ''}
+              </span>
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={(e) => setSelfieFile(e.target.files?.[0] || null)}
+                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                required={!selfieVerified}
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Needed for trust & fraud checks; already verified users can skip.
+              </p>
+            </label>
+
+            <label className="block text-sm text-gray-700">
+              <span className="font-semibold text-gray-900">
+                Title Deed {ownershipDocsNeeded ? '*' : ''}
+              </span>
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={(e) => setTitleDeedFile(e.target.files?.[0] || null)}
+                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                required={isSaleListing && !ownershipVerified}
+                disabled={!isSaleListing}
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Required for sale. For rent/lease this stays optional.
+              </p>
+            </label>
+
+            <label className="block text-sm text-gray-700">
+              <span className="font-semibold text-gray-900">
+                Land Search Report {isSaleListing && !ownershipVerified ? '*' : ''}
+              </span>
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={(e) => setLandSearchFile(e.target.files?.[0] || null)}
+                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                disabled={!isSaleListing}
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Required for sale (or provide a chief&apos;s letter instead).
+              </p>
+            </label>
+
+            <label className="block text-sm text-gray-700">
+              <span className="font-semibold text-gray-900">
+                Chief&apos;s Letter (alternative to land search)
+              </span>
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={(e) => setChiefLetterFile(e.target.files?.[0] || null)}
+                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                disabled={!isSaleListing}
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Optional fallback if you don&apos;t have a land search document.
+              </p>
+            </label>
+          </div>
+          <p className="text-xs text-gray-600">
+            We store these securely and auto-verify your profile so the listing can be approved without sending you away from this page.
+          </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           

@@ -4,16 +4,13 @@ import { PropertyProvider } from './contexts/PropertyContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { VerificationProvider } from './contexts/VerificationContext';
 import Home from './pages/Home';
-import ListProperty from './pages/ListProperty';
-import ListService from './pages/ListService';
 import BrowseListings from './pages/BrowseListings';
-import FindServices from './pages/FindServices';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
 import Navbar from './components/Navbar';
+import ListUnified from './pages/ListUnified';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import BackendTest from './components/BackendTest';
-import ListAgrovet from './pages/ListAgrovet';
 import PhoneVerification from './pages/PhoneVerification';
 import VerificationWizard from './pages/VerificationWizard';
 import ListingDetails from './pages/ListingDetails';
@@ -33,10 +30,18 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route
+                    path="/list"
+                    element={
+                      <ProtectedRoute>
+                        <ListUnified />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
                     path="/list-property"
                     element={
                       <ProtectedRoute>
-                        <ListProperty />
+                        <ListUnified initialCategory="land" initialLandType="sale" />
                       </ProtectedRoute>
                     }
                   />
@@ -44,7 +49,10 @@ function App() {
                     path="/list-service"
                     element={
                       <ProtectedRoute>
-                        <ListService />
+                        <ListUnified
+                          initialCategory="service"
+                          initialServiceType="equipment"
+                        />
                       </ProtectedRoute>
                     }
                   />
@@ -52,12 +60,12 @@ function App() {
                     path="/list-agrovet"
                     element={
                       <ProtectedRoute>
-                        <ListAgrovet />
+                        <ListUnified initialCategory="agrovet" />
                       </ProtectedRoute>
                     }
                   />
                   <Route path="/browse" element={<BrowseListings />} />
-                  <Route path="/find-services" element={<FindServices />} />
+                  <Route path="/find-services" element={<BrowseListings />} />
                   <Route path="/login" element={<Login />} />
                   <Route
                     path="/profile"

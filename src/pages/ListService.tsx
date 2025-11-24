@@ -11,41 +11,25 @@ import { initiatePaymentFlow } from "../utils/paymentHelpers";
 
 type ServiceType = "equipment" | "professional_services";
 
-const SERVICE_FIRST_LISTING_FREE_KEY = "kodisha_service_first_listing_free_used";
+type ListServiceProps = {
+  initialServiceType?: ServiceType;
+};
 
-type ListingPlanOption = {
-  id: "free" | "basic" | "verified" | "premium";
+type SubscriptionPlanOption = {
+  id: "annual";
   name: string;
   price: number;
   subtitle: string;
-  note?: string;
+  duration: string;
 };
 
-const LISTING_PLAN_OPTIONS: ListingPlanOption[] = [
+const LISTING_PLAN_OPTIONS: SubscriptionPlanOption[] = [
   {
-    id: "free",
-    name: "First Listing Free",
-    price: 0,
-    subtitle: "Try the platform with a single free listing (verification required).",
-    note: "First listing only",
-  },
-  {
-    id: "basic",
-    name: "Basic Listing",
-    price: 49,
-    subtitle: "KSh 49 - Verified badge plus balanced exposure.",
-  },
-  {
-    id: "verified",
-    name: "Verified Listing",
-    price: 99,
-    subtitle: "KSh 99 - More trust with priority placement.",
-  },
-  {
-    id: "premium",
-    name: "Premium Boosted Listing",
-    price: 199,
-    subtitle: "KSh 199 - Featured placement plus longer duration.",
+    id: "annual",
+    name: "Annual Subscription",
+    price: 599,
+    subtitle: "KSh 599/year — recurring visibility + boosts.",
+    duration: "12 months",
   },
 ];
 
@@ -117,17 +101,17 @@ const VERIFICATION_TIERS: VerificationTierOption[] = [
   },
 ];
 
-type ListingPlanId = ListingPlanOption["id"];
+type ListingPlanId = SubscriptionPlanOption["id"];
 type BoostOptionId = BoostOption["id"];
 type VerificationTierId = VerificationTierOption["id"];
 
 const formatKenyanPrice = (value: number) =>
   value === 0 ? "Free" : `KSh ${value.toLocaleString()}`;
 
-const ListService: React.FC = () => {
+const ListService: React.FC<ListServiceProps> = ({ initialServiceType }) => {
   const { addService } = useProperties();
   const [formData, setFormData] = useState<ServiceFormData>({
-    type: "equipment",
+    type: initialServiceType || "equipment",
     name: "",
     description: "",
     county: "",
@@ -155,11 +139,17 @@ const ListService: React.FC = () => {
   const [idBackFile, setIdBackFile] = useState<File | null>(null);
   const [selfieFile, setSelfieFile] = useState<File | null>(null);
   const [businessPermitFile, setBusinessPermitFile] = useState<File | null>(null);
-  const [selectedPlan, setSelectedPlan] = useState<ListingPlanId>("free");
+  const [selectedPlan, setSelectedPlan] = useState<ListingPlanId>("annual");
   const [selectedBoost, setSelectedBoost] = useState<BoostOptionId>("none");
   const [selectedVerification, setSelectedVerification] =
     useState<VerificationTierId>("none");
-  const [firstListingFreeUsed, setFirstListingFreeUsed] = useState(false);
+
+  useEffect(() => {
+    if (initialServiceType && initialServiceType !== formData.type) {
+      setFormData((prev) => ({ ...prev, type: initialServiceType }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialServiceType]);
 
   const serviceOptions: Record<ServiceType, string[]> = {
     equipment: [
@@ -251,18 +241,6 @@ const ListService: React.FC = () => {
     }
   }, [formData.county, formData.constituency]);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const stored = window.localStorage.getItem(SERVICE_FIRST_LISTING_FREE_KEY);
-    setFirstListingFreeUsed(stored === "true");
-  }, []);
-
-  useEffect(() => {
-    if (firstListingFreeUsed && selectedPlan === "free") {
-      setSelectedPlan("basic");
-    }
-  }, [firstListingFreeUsed, selectedPlan]);
-
   const selectedPlanDetails =
     LISTING_PLAN_OPTIONS.find((plan) => plan.id === selectedPlan) ||
     LISTING_PLAN_OPTIONS[0];
@@ -273,11 +251,7 @@ const ListService: React.FC = () => {
     VERIFICATION_TIERS.find((tier) => tier.id === selectedVerification) ||
     VERIFICATION_TIERS[0];
 
-  const firstListingFreeAvailable = !firstListingFreeUsed;
-  const effectivePlanPrice =
-    firstListingFreeAvailable && selectedPlan === "free"
-      ? 0
-      : selectedPlanDetails.price;
+  const effectivePlanPrice = selectedPlanDetails.price;
   const boostPrice = selectedBoostDetails.price;
   const verificationPrice = selectedVerificationDetails.price;
   const totalMonetizationFee =
@@ -327,6 +301,7 @@ const ListService: React.FC = () => {
       submitData.append("boostPrice", String(boostPrice));
       submitData.append("verificationTier", selectedVerification);
       submitData.append("verificationPrice", String(verificationPrice));
+      submitData.append("planDuration", selectedPlanDetails.duration);
       submitData.append("totalMonetizationFee", String(totalMonetizationFee));
 
       if (formData.approximateLocation) {
@@ -372,12 +347,6 @@ const ListService: React.FC = () => {
       }
 
       const result = await addService(submitData as any);
-      if (!firstListingFreeUsed) {
-        if (typeof window !== "undefined") {
-          window.localStorage.setItem(SERVICE_FIRST_LISTING_FREE_KEY, "true");
-        }
-        setFirstListingFreeUsed(true);
-      }
 
       const serviceId =
         result?.data?._id || result?.data?.id || result?.service?._id || result?.service?.id;
@@ -435,7 +404,7 @@ const ListService: React.FC = () => {
       setIdBackFile(null);
       setSelfieFile(null);
       setBusinessPermitFile(null);
-      setSelectedPlan("basic");
+      setSelectedPlan("annual");
       setSelectedBoost("none");
       setSelectedVerification("none");
     } catch (error) {
@@ -509,36 +478,28 @@ const ListService: React.FC = () => {
           <div>
             <h2 className="text-xl font-semibold text-gray-800">Monetized Listing Options</h2>
             <p className="text-sm text-gray-600">
-              First listing is free. Choose a paid plan, boost, or verification level to increase
-              visibility—your total commitment is shown below.
+              Annual subscription for providers plus optional boosts and verification; your total commitment is shown below.
             </p>
           </div>
           <div className="grid gap-3 md:grid-cols-4">
             {LISTING_PLAN_OPTIONS.map((plan) => {
-              const disabled = plan.id === "free" && firstListingFreeUsed;
               const selected = selectedPlan === plan.id;
               return (
                 <button
                   key={plan.id}
                   type="button"
                   onClick={() => setSelectedPlan(plan.id)}
-                  disabled={disabled}
                   aria-pressed={selected}
                   className={`rounded-2xl border p-4 text-left transition ${
                     selected
                       ? "border-green-600 bg-white shadow-sm"
                       : "border-gray-200 bg-white hover:border-green-500"
-                  } ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
+                  }`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-sm font-semibold uppercase tracking-wide text-green-600">
                       {plan.price === 0 ? "Free" : formatKenyanPrice(plan.price)}
                     </span>
-                    {plan.note && (
-                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700">
-                        {plan.note}
-                      </span>
-                    )}
                   </div>
                   <p className="mt-2 text-lg font-semibold text-gray-900">{plan.name}</p>
                   <p className="text-sm text-gray-500">{plan.subtitle}</p>
@@ -589,9 +550,7 @@ const ListService: React.FC = () => {
               Total commitment: {formatKenyanPrice(totalMonetizationFee)}
             </p>
             <p>
-              {firstListingFreeAvailable
-                ? "Your first listing credit is still active; you only pay when you opt into a paid plan."
-                : "Already used the free listing credit - this listing requires the selected paid tiers."}
+              Annual subscription stays active for {selectedPlanDetails.duration}. Renew from your profile when it expires.
             </p>
             <p className="text-xs text-gray-500">
               Payment (M-Pesa) is triggered after admin approval.

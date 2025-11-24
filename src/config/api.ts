@@ -11,6 +11,7 @@ export const API_ENDPOINTS = {
     loginOtpVerify: `${API_BASE_URL}/auth/login-otp/verify`,
     emailOtpRequest: `${API_BASE_URL}/auth/email-otp/request`,
     emailOtpVerify: `${API_BASE_URL}/auth/email-otp/verify`,
+    passwordReset: `${API_BASE_URL}/auth/password/reset`,
     me: `${API_BASE_URL}/auth/me`,
     verifyPhone: `${API_BASE_URL}/auth/verify-phone`,
     resendVerification: `${API_BASE_URL}/auth/resend-verification`,
@@ -29,6 +30,13 @@ export const API_ENDPOINTS = {
     professional: {
       list: `${API_BASE_URL}/services/professional`,
       create: `${API_BASE_URL}/services/professional`,
+    },
+    agrovets: {
+      list: `${API_BASE_URL}/agrovets`,
+    },
+    products: {
+      list: `${API_BASE_URL}/products`,
+      create: `${API_BASE_URL}/products`,
     },
   },
   messages: {
