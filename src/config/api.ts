@@ -58,6 +58,9 @@ export const API_ENDPOINTS = {
       verify: (id: string) => `${API_BASE_URL}/admin/users/${id}/verify`,
     },
   },
+  payments: {
+    initiateStk: `${API_BASE_URL}/payments/stk/initiate`,
+  },
 };
 
 export const apiRequest = async (url: string, options: RequestInit = {}) => {

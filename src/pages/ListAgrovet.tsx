@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useProperties } from '../contexts/PropertyContext';
 import { Link } from 'react-router-dom';
 import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from '../data/kenyaCounties';
+import { initiatePaymentFlow } from '../utils/paymentHelpers';
 
 interface AgrovetFormData {
   name: string;
@@ -382,7 +383,7 @@ const ListAgrovet: React.FC = () => {
         submitData.append('businessPermit', businessPermitFile);
       }
 
-      await addService(submitData);
+      const result = await addService(submitData);
 
       if (!firstListingFreeUsed) {
         if (typeof window !== "undefined") {
@@ -394,11 +395,30 @@ const ListAgrovet: React.FC = () => {
         setFirstListingFreeUsed(true);
       }
 
+      const listingId =
+        result?.data?._id || result?.data?.id || result?.service?._id || result?.service?.id;
+
+      let paymentNote = "";
+      if (totalMonetizationFee > 0 && listingId) {
+        try {
+          await initiatePaymentFlow({
+            targetType: "agrovet",
+            targetId: listingId,
+            amount: totalMonetizationFee,
+            summaryLabel: monetizationSummaryLabel,
+          });
+          paymentNote = " A payment request was sent to your phone.";
+        } catch (error: any) {
+          console.error("Agrovet payment failed", error);
+          paymentNote = " MPesa request could not be initiated; try again via Payments.";
+        }
+      }
+
       const feeNote =
         totalMonetizationFee > 0
           ? `${monetizationSummaryLabel} for ${formatKenyanPrice(
               totalMonetizationFee
-            )}.`
+            )}.${paymentNote}`
           : "You used your free listing credit.";
       alert(
         `Agrovet listed successfully! It will appear after verification. ${feeNote}`

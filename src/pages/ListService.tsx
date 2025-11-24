@@ -7,6 +7,7 @@ import {
   getConstituenciesByCounty,
   getWardsByConstituency,
 } from "../data/kenyaCounties";
+import { initiatePaymentFlow } from "../utils/paymentHelpers";
 
 type ServiceType = "equipment" | "professional_services";
 
@@ -370,8 +371,7 @@ const ListService: React.FC = () => {
         submitData.append("businessPermit", businessPermitFile);
       }
 
-      await addService(submitData as any);
-
+      const result = await addService(submitData as any);
       if (!firstListingFreeUsed) {
         if (typeof window !== "undefined") {
           window.localStorage.setItem(SERVICE_FIRST_LISTING_FREE_KEY, "true");
@@ -379,11 +379,32 @@ const ListService: React.FC = () => {
         setFirstListingFreeUsed(true);
       }
 
+      const serviceId =
+        result?.data?._id || result?.data?.id || result?.service?._id || result?.service?.id;
+
+      let paymentNote = "";
+      if (totalMonetizationFee > 0 && serviceId) {
+        try {
+          await initiatePaymentFlow({
+            targetType: "service",
+            targetId: serviceId,
+            amount: totalMonetizationFee,
+            targetCategory: formData.type,
+            summaryLabel: monetizationSummaryLabel,
+          });
+          paymentNote = " A payment request was sent to your phone.";
+        } catch (error: any) {
+          console.error("Service payment failed", error);
+          paymentNote =
+            " MPesa request could not be initiated; please try again once you have your phone ready.";
+        }
+      }
+
       const feeNote =
         totalMonetizationFee > 0
           ? `${monetizationSummaryLabel} for ${formatKenyanPrice(
               totalMonetizationFee
-            )}.`
+            )}.${paymentNote}`
           : "You used your free listing credit.";
       alert(
         `Service listed successfully! It will appear after verification. ${feeNote}`

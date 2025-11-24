@@ -16,8 +16,8 @@ type ServiceType = "equipment" | "agrovet" | "professional_services";
 interface PropertyContextType {
   properties: LandListing[];
   serviceListings: ServiceListing[];
-  addProperty: (propertyData: FormData) => Promise<void>;
-  addService: (serviceData: FormData) => Promise<void>;
+  addProperty: (propertyData: FormData) => Promise<any>;
+  addService: (serviceData: FormData) => Promise<any>;
   getPropertiesByCounty: (county: string) => LandListing[];
   getServicesByType: (
     type: ServiceType,
@@ -187,10 +187,11 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
       }
 
       await refreshProperties();
-      alert("Property listed successfully! It will appear after verification.");
+      return result;
     } catch (error) {
       console.error("addProperty error:", error);
       alert("Failed to upload property. Please try again.");
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -225,10 +226,11 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
       }
 
       await refreshServices();
-      alert("Service listed successfully! It will appear after verification.");
+      return result;
     } catch (error) {
       console.error("addService error:", error);
       alert("Failed to upload service. Please try again.");
+      throw error;
     } finally {
       setLoading(false);
     }

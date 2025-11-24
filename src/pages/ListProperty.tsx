@@ -6,6 +6,7 @@ import { PropertyFormData } from '../types/property';
 import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from '../data/kenyaCounties';
 import GoogleMapsLoader from '../components/GoogleMapsLoader';
 import MapPicker from '../components/MapPicker';
+import { initiatePaymentFlow } from '../utils/paymentHelpers';
 
 const DRAFT_STORAGE_KEY = 'listPropertyDraft';
 const FIRST_LISTING_FREE_KEY = 'kodisha_first_listing_free_used';
@@ -354,7 +355,9 @@ const ListProperty: React.FC = () => {
         submitData.append('images', image);
       });
 
-      await addProperty(submitData);
+      const result = await addProperty(submitData);
+      const listingId =
+        result?.data?._id || result?.data?.id || result?.listing?._id || result?.listing?.id;
 
       if (!firstListingFreeUsed) {
         if (typeof window !== "undefined") {
@@ -363,11 +366,28 @@ const ListProperty: React.FC = () => {
         setFirstListingFreeUsed(true);
       }
 
+      let paymentNote = "";
+      if (totalMonetizationFee > 0 && listingId) {
+        try {
+          await initiatePaymentFlow({
+            targetType: "land",
+            targetId: listingId,
+            amount: totalMonetizationFee,
+            summaryLabel: monetizationSummaryLabel,
+          });
+          paymentNote = " Tab to your phone to complete the STK push.";
+        } catch (error: any) {
+          console.error("Payment initiation failed", error);
+          paymentNote =
+            " We could not trigger the MPesa STK push; please try again from the Payments screen.";
+        }
+      }
+
       const feeNote =
         totalMonetizationFee > 0
           ? `${monetizationSummaryLabel} for a total of ${formatKenyanPrice(
               totalMonetizationFee
-            )}.`
+            )}.${paymentNote}`
           : "You used your free listing credit.";
       alert(
         `Property submitted! An admin will review and verify it shortly. ${feeNote}`
