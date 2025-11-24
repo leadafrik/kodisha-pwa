@@ -41,7 +41,7 @@ function App() {
                     path="/list-property"
                     element={
                       <ProtectedRoute>
-                        <ListUnified initialCategory="land" initialLandType="sale" />
+                        <ListUnified initialCategory="land" initialLandType="rental" />
                       </ProtectedRoute>
                     }
                   />

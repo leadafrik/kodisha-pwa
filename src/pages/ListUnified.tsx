@@ -73,7 +73,7 @@ const ListUnified: React.FC<ListUnifiedProps> = ({
     "produce";
 
   const [category, setCategory] = useState<Category>(parsedCategory);
-  const [landType] = useState<"rental">(parsedLandType);
+  const landType: "rental" = parsedLandType;
   const [serviceType, setServiceType] = useState<
     "equipment" | "professional_services"
   >(parsedServiceType);
@@ -187,21 +187,8 @@ const ListUnified: React.FC<ListUnifiedProps> = ({
         </div>
 
         {category === "land" && (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {(["sale", "rental"] as Array<"sale" | "rental">).map((type) => (
-              <button
-                key={type}
-                type="button"
-                onClick={() => }
-                className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                  landType === type
-                    ? "border-blue-600 bg-blue-50 text-blue-700"
-                    : "border-gray-200 bg-white text-gray-700 hover:border-blue-400"
-                }`}
-              >
-                {type === "sale" ? "For Sale" : "For Rent/Lease"}
-              </button>
-            ))}
+          <div className="mt-4 text-sm text-gray-700">
+            Land listings are currently rent/lease only.
           </div>
         )}
         {category === "product" && (
