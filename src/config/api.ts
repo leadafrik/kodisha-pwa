@@ -56,6 +56,7 @@ export const API_ENDPOINTS = {
     listings: {
       getAll: `${API_BASE_URL}/admin/listings`,
       getPending: `${API_BASE_URL}/admin/listings/pending`,
+       getApproved: `${API_BASE_URL}/admin/listings/approved`,
       getById: (id: string) => `${API_BASE_URL}/admin/listings/${id}`,
       verify: (id: string) => `${API_BASE_URL}/admin/listings/${id}/verify`,
     },

@@ -118,6 +118,7 @@ const trustLevelMeta: Record<
 
 const AdminDashboard: React.FC = () => {
   const [pendingListings, setPendingListings] = useState<AdminListing[]>([]);
+  const [approvedListings, setApprovedListings] = useState<AdminListing[]>([]);
   const [stats, setStats] = useState<DashboardStats>({
     totalListings: 0,
     pendingListings: 0,
@@ -175,9 +176,10 @@ const AdminDashboard: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const [statsData, listingsData] = await Promise.all([
+      const [statsData, pendingData, approvedData] = await Promise.all([
         adminApiRequest(API_ENDPOINTS.admin.dashboard),
         adminApiRequest(API_ENDPOINTS.admin.listings.getPending),
+        adminApiRequest(API_ENDPOINTS.admin.listings.getApproved),
       ]);
 
       if (statsData?.success !== false) {
@@ -190,9 +192,14 @@ const AdminDashboard: React.FC = () => {
         });
       }
 
-      if (listingsData?.success !== false) {
-        const items = (listingsData.data || []).map(normalizeListing);
+      if (pendingData?.success !== false) {
+        const items = (pendingData.data || []).map(normalizeListing);
         setPendingListings(items);
+      }
+
+      if (approvedData?.success !== false) {
+        const items = (approvedData.data || []).map(normalizeListing);
+        setApprovedListings(items);
       }
     } catch (error: any) {
       console.error('Error fetching dashboard data:', error);
@@ -537,6 +544,75 @@ const AdminDashboard: React.FC = () => {
                           🗑️ Delete
                         </button>
                       </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Approved Listings Section */}
+        <div className="bg-white rounded-lg shadow mt-6">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-800">Approved Listings</h2>
+            <p className="text-gray-600 text-sm">
+              {approvedListings.length} active listings visible to users
+            </p>
+          </div>
+
+          {approvedListings.length === 0 ? (
+            <div className="p-8 text-center text-gray-500 text-sm">
+              No approved listings yet.
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-4 p-6">
+              {approvedListings.map((listing) => {
+                const meta = listingTypeMeta[listing.listingType];
+                return (
+                  <div
+                    key={listing._id}
+                    className="rounded-xl border border-gray-200 bg-white shadow-sm p-4 space-y-2"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-xs font-semibold px-2 py-1 rounded-full ${meta.pill}`}>
+                          {meta.label}
+                        </span>
+                        <span className="text-[10px] px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 font-semibold">
+                          Approved
+                        </span>
+                      </div>
+                      <span className="text-xs text-gray-500">
+                        {listing.createdAt ? new Date(listing.createdAt).toLocaleDateString() : ''}
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">{listing.title}</h3>
+                    <p className="text-sm text-gray-600 line-clamp-2">{listing.description}</p>
+                    <p className="text-xs text-gray-500">{formatLocation(listing.location)}</p>
+                    <div className="flex items-center justify-between text-sm text-gray-700">
+                      <span>{formatPrice(listing.price, listing.priceType)}</span>
+                      {listing.status && (
+                        <span className="text-[10px] px-2 py-1 rounded-full bg-gray-100 text-gray-700 font-semibold">
+                          {listing.status}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                      <a
+                        href={`/listing/${listing._id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1 text-xs rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
+                      >
+                        View
+                      </a>
+                      <button
+                        onClick={() => deleteListing(listing._id)}
+                        className="px-3 py-1 text-xs rounded bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      >
+                        Delete
+                      </button>
                     </div>
                   </div>
                 );
