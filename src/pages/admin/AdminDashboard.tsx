@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+﻿import React, { useEffect, useState, useCallback } from 'react';
 import { API_ENDPOINTS, adminApiRequest } from '../../config/api';
 export {}; // Add this line to make it a module
 
@@ -52,31 +52,31 @@ const listingTypeMeta: Record<
     label: 'Land Listing',
     color: 'text-green-700',
     pill: 'bg-green-100 text-green-800',
-    icon: '🌾',
+    icon: '',
   },
   equipment: {
     label: 'Equipment Service',
     color: 'text-orange-700',
     pill: 'bg-orange-100 text-orange-800',
-    icon: '🚜',
+    icon: '',
   },
   professional_services: {
     label: 'Professional Service',
     color: 'text-purple-700',
     pill: 'bg-purple-100 text-purple-800',
-    icon: '🧑‍🔧',
+    icon: '',
   },
   agrovet: {
     label: 'Agrovet / Inputs',
     color: 'text-blue-700',
     pill: 'bg-blue-100 text-blue-800',
-    icon: '🧪',
+    icon: '',
   },
   product: {
     label: 'Products & Livestock',
     color: 'text-orange-700',
     pill: 'bg-orange-100 text-orange-800',
-    icon: '🛒',
+    icon: '',
   },
 };
 
@@ -218,7 +218,8 @@ const AdminDashboard: React.FC = () => {
 
   const verifyListing = async (
     id: string,
-    status: 'approved' | 'rejected'
+    status: 'approved' | 'rejected',
+    notes?: string
   ) => {
     try {
       setError(null);
@@ -227,7 +228,7 @@ const AdminDashboard: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, notes }),
       });
 
       alert(`Listing ${status} successfully!`);
@@ -285,7 +286,7 @@ const AdminDashboard: React.FC = () => {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="rounded-full bg-blue-100 p-3">
-                <span className="text-blue-600 text-xl">📊</span>
+                <span className="text-blue-600 text-xl"></span>
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Listings</p>
@@ -299,7 +300,7 @@ const AdminDashboard: React.FC = () => {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="rounded-full bg-yellow-100 p-3">
-                <span className="text-yellow-600 text-xl">⏳</span>
+                <span className="text-yellow-600 text-xl"></span>
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Pending Verification</p>
@@ -313,7 +314,7 @@ const AdminDashboard: React.FC = () => {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="rounded-full bg-green-100 p-3">
-                <span className="text-green-600 text-xl">✅</span>
+                <span className="text-green-600 text-xl"></span>
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Verified</p>
@@ -327,7 +328,7 @@ const AdminDashboard: React.FC = () => {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="rounded-full bg-purple-100 p-3">
-                <span className="text-purple-600 text-xl">👥</span>
+                <span className="text-purple-600 text-xl"></span>
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Users</p>
@@ -396,7 +397,7 @@ const AdminDashboard: React.FC = () => {
 
           {pendingListings.length === 0 ? (
             <div className="p-8 text-center">
-              <div className="text-gray-400 text-6xl mb-4">🎉</div>
+              <div className="text-gray-400 text-6xl mb-4"></div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">No pending listings</h3>
               <p className="text-gray-500">All listings have been verified!</p>
             </div>
@@ -529,19 +530,22 @@ const AdminDashboard: React.FC = () => {
                           onClick={() => verifyListing(listing._id, 'approved')}
                           className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                         >
-                          ✅ Approve
+                          Approve
                         </button>
                         <button
-                          onClick={() => verifyListing(listing._id, 'rejected')}
+                          onClick={() => {
+                            const notes = window.prompt('Enter rejection reason (optional):') || undefined;
+                            verifyListing(listing._id, 'rejected', notes);
+                          }}
                           className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                         >
-                          ❌ Reject
+                          Reject
                         </button>
                         <button
                           onClick={() => deleteListing(listing._id)}
                           className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                         >
-                          🗑️ Delete
+                           Delete
                         </button>
                       </div>
                     </div>
@@ -626,3 +630,6 @@ const AdminDashboard: React.FC = () => {
 };
 
 export default AdminDashboard;
+
+
+

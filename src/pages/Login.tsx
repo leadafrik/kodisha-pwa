@@ -108,7 +108,9 @@ const Login: React.FC = () => {
       await requestEmailOtp(signupData.email);
       setOtpEmail(signupData.email);
       setMode("otp-signup");
-      setInfo("We sent a 6-digit code to your email. Enter it to finish sign up.");
+      setInfo(
+        "We sent a 6-digit code to your email (check spam too). If you don't see it, request again."
+      );
     } catch (err: any) {
       setError(err?.message || "Registration failed. Please try again.");
     }
@@ -139,7 +141,7 @@ const Login: React.FC = () => {
       await requestEmailOtp(resetPassword.email.trim());
       setOtpEmail(resetPassword.email.trim());
       setMode("otp-reset");
-      setInfo("We sent a code to your email. Enter it with your new password.");
+      setInfo("We sent a code to your email (check spam). Enter it with your new password.");
     } catch (err: any) {
       setError(err?.message || "Failed to send reset code.");
     }
