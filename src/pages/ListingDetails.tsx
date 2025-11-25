@@ -19,6 +19,92 @@ interface Message {
   read?: boolean;
 }
 
+// Type-specific detail section components
+const LandDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
+  <div className="bg-gray-100 p-4 rounded-lg mb-6">
+    <h2 className="font-semibold mb-3">Land Details</h2>
+    <div className="space-y-2">
+      <p><strong>Size:</strong> {listing.size ?? '—'} {listing.size ? 'acres' : ''}</p>
+      <p><strong>Soil Type:</strong> {listing.soilType || '—'}</p>
+      <p><strong>Water Availability:</strong> {listing.waterAvailability || '—'}</p>
+      <p><strong>Organic Certified:</strong> {listing.organicCertified ? "Yes" : "No"}</p>
+      <p><strong>Previous Crops:</strong> {Array.isArray(listing.previousCrops) ? listing.previousCrops.join(", ") : listing.previousCrops || '—'}</p>
+      {listing.availableFrom && <p><strong>Available From:</strong> {new Date(listing.availableFrom).toLocaleDateString()}</p>}
+      {listing.availableTo && <p><strong>Available Until:</strong> {new Date(listing.availableTo).toLocaleDateString()}</p>}
+      {listing.minLeasePeriod && <p><strong>Min Lease Period:</strong> {listing.minLeasePeriod} months</p>}
+      {listing.maxLeasePeriod && <p><strong>Max Lease Period:</strong> {listing.maxLeasePeriod} months</p>}
+    </div>
+  </div>
+);
+
+const EquipmentDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
+  <div className="bg-blue-50 p-4 rounded-lg mb-6">
+    <h2 className="font-semibold mb-3 text-blue-900">Equipment & Services</h2>
+    <div className="space-y-2">
+      <p><strong>Services Available:</strong> {Array.isArray(listing.services) ? listing.services.join(', ') : listing.services || '—'}</p>
+      {listing.pricing && <p><strong>Pricing:</strong> {listing.pricing}</p>}
+      {typeof listing.operatorIncluded !== 'undefined' && <p><strong>Operator Included:</strong> {listing.operatorIncluded ? 'Yes' : 'No'}</p>}
+      {listing.minHirePeriod && <p><strong>Min Hire Period:</strong> {listing.minHirePeriod}</p>}
+      {listing.maxHirePeriod && <p><strong>Max Hire Period:</strong> {listing.maxHirePeriod}</p>}
+    </div>
+  </div>
+);
+
+const ProfessionalDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
+  <div className="bg-purple-50 p-4 rounded-lg mb-6">
+    <h2 className="font-semibold mb-3 text-purple-900">Professional Services</h2>
+    <div className="space-y-2">
+      <p><strong>Services Offered:</strong> {Array.isArray(listing.services) ? listing.services.join(', ') : listing.services || '—'}</p>
+      {listing.experience && <p><strong>Years of Experience:</strong> {listing.experience}</p>}
+      {listing.qualifications && <p><strong>Qualifications:</strong> {listing.qualifications}</p>}
+      {listing.pricing && <p><strong>Rate:</strong> {listing.pricing}</p>}
+    </div>
+  </div>
+);
+
+const AgrovetDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
+  <div className="bg-green-50 p-4 rounded-lg mb-6">
+    <h2 className="font-semibold mb-3 text-green-900">Agrovet Details</h2>
+    <div className="space-y-2">
+      <p><strong>Products/Services:</strong> {Array.isArray(listing.services) ? listing.services.join(', ') : listing.services || '—'}</p>
+      {listing.pricing && <p><strong>Pricing Info:</strong> {listing.pricing}</p>}
+      {listing.specialization && <p><strong>Specialization:</strong> {listing.specialization}</p>}
+      {listing.businessHours && <p><strong>Business Hours:</strong> {listing.businessHours}</p>}
+    </div>
+  </div>
+);
+
+const ProductDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
+  <div className="bg-orange-50 p-4 rounded-lg mb-6">
+    <h2 className="font-semibold mb-3 text-orange-900">Product Information</h2>
+    <div className="space-y-2">
+      <p><strong>Category:</strong> {listing.category || listing.type || '—'}</p>
+      {listing.price && <p><strong>Price per Unit:</strong> {typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : listing.price}</p>}
+      {listing.unit && <p><strong>Unit:</strong> {listing.unit}</p>}
+      {listing.quantity && <p><strong>Quantity Available:</strong> {listing.quantity}</p>}
+      {listing.grade && <p><strong>Grade:</strong> {listing.grade}</p>}
+      {listing.harvestDate && <p><strong>Harvest Date:</strong> {new Date(listing.harvestDate).toLocaleDateString()}</p>}
+    </div>
+  </div>
+);
+
+const renderDetailsSection = (listingType: string | null, listing: any) => {
+  switch (listingType) {
+    case 'land':
+      return <LandDetailsSection listing={listing} />;
+    case 'equipment':
+      return <EquipmentDetailsSection listing={listing} />;
+    case 'professional':
+      return <ProfessionalDetailsSection listing={listing} />;
+    case 'agrovet':
+      return <AgrovetDetailsSection listing={listing} />;
+    case 'product':
+      return <ProductDetailsSection listing={listing} />;
+    default:
+      return <LandDetailsSection listing={listing} />;
+  }
+};
+
 const ListingDetails: React.FC = () => {
   const { id } = useParams();
   const [listing, setListing] = useState<any>(null);
@@ -53,6 +139,8 @@ const ListingDetails: React.FC = () => {
       const token = getAuthToken();
       if (!token) return; // chat only for logged in users
 
+      // Fetch messages with this listing's owner
+      // API_ENDPOINTS.messages.withUser(ownerId) returns messages between current user and ownerId
       const res = await fetch(API_ENDPOINTS.messages.withUser(ownerId), {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -252,35 +340,8 @@ const ListingDetails: React.FC = () => {
 
           <p className="text-gray-700 mb-6">{listing.description}</p>
 
-          {/* Details section: land, service, or product-specific */}
-          {listingType === 'land' || listing.soilType || listing.size ? (
-            <div className="bg-gray-100 p-4 rounded-lg mb-6">
-              <h2 className="font-semibold mb-2">Land Details</h2>
-
-              <p><strong>Size:</strong> {listing.size ?? '—'} {listing.size ? 'acres' : ''}</p>
-              <p><strong>Soil Type:</strong> {listing.soilType || '—'}</p>
-              <p><strong>Water Availability:</strong> {listing.waterAvailability || '—'}</p>
-              <p><strong>Organic Certified:</strong> {listing.organicCertified ? "Yes" : "No"}</p>
-              <p><strong>Previous Crops:</strong> {Array.isArray(listing.previousCrops) ? listing.previousCrops.join(", ") : listing.previousCrops || '—'}</p>
-            </div>
-          ) : listingType === 'equipment' || listingType === 'professional' || listingType === 'agrovet' ? (
-            <div className="bg-gray-100 p-4 rounded-lg mb-6">
-              <h2 className="font-semibold mb-2">Service Details</h2>
-              <p><strong>Services / Offerings:</strong> {Array.isArray(listing.services) ? listing.services.join(', ') : listing.services || '—'}</p>
-              {listing.pricing && <p><strong>Pricing:</strong> {listing.pricing}</p>}
-              {listing.experience && <p><strong>Experience:</strong> {listing.experience}</p>}
-              {listing.qualifications && <p><strong>Qualifications:</strong> {listing.qualifications}</p>}
-              {typeof listing.operatorIncluded !== 'undefined' && <p><strong>Operator included:</strong> {listing.operatorIncluded ? 'Yes' : 'No'}</p>}
-            </div>
-          ) : listingType === 'product' ? (
-            <div className="bg-gray-100 p-4 rounded-lg mb-6">
-              <h2 className="font-semibold mb-2">Product Details</h2>
-              <p><strong>Category:</strong> {listing.category || listing.type || '—'}</p>
-              {listing.price && <p><strong>Price:</strong> {typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : listing.price}</p>}
-              {listing.unit && <p><strong>Unit:</strong> {listing.unit}</p>}
-              {listing.quantity && <p><strong>Quantity:</strong> {listing.quantity}</p>}
-            </div>
-          ) : null}
+          {/* Type-specific details section */}
+          {renderDetailsSection(listingType, listing)}
 
           <div className="mt-6">
             <h2 className="font-semibold mb-2">Map Location</h2>
