@@ -1,7 +1,53 @@
-// Use environment variable for local development, fallback to production
-export const API_BASE_URL =
-  process.env.REACT_APP_API_URL ||
-  "https://kodisha-backend-vjr9.onrender.com/api";
+// Environment-aware API configuration
+// Use environment variables for different environments (dev/staging/production)
+
+/**
+ * Get the API base URL based on environment
+ */
+const getApiBaseUrl = (): string => {
+  // Development environment
+  if (process.env.NODE_ENV === 'development') {
+    return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+  }
+
+  // Use explicit env var if set
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL;
+  }
+
+  // Production fallback
+  return 'https://kodisha-backend-vjr9.onrender.com/api';
+};
+
+/**
+ * Get the Socket.IO URL based on environment
+ */
+const getSocketUrl = (): string => {
+  // Development environment
+  if (process.env.NODE_ENV === 'development') {
+    return process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000';
+  }
+
+  // Use explicit env var if set
+  if (process.env.REACT_APP_SOCKET_URL) {
+    return process.env.REACT_APP_SOCKET_URL;
+  }
+
+  // Production fallback
+  return 'https://kodisha-backend-vjr9.onrender.com';
+};
+
+export const API_BASE_URL = getApiBaseUrl();
+export const SOCKET_URL = getSocketUrl();
+
+// Log configuration in development
+if (process.env.NODE_ENV === 'development') {
+  console.log('🔧 API Configuration:', {
+    apiUrl: API_BASE_URL,
+    socketUrl: SOCKET_URL,
+    environment: process.env.NODE_ENV,
+  });
+}
 
 export const API_ENDPOINTS = {
   auth: {
@@ -75,78 +121,100 @@ export const API_ENDPOINTS = {
 };
 
 export const apiRequest = async (url: string, options: RequestInit = {}) => {
-  const response = await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-    ...options,
-  });
+  try {
+    const response = await fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+      ...options,
+    });
 
-  const data = await response.json().catch(() => ({}));
+    const data = await response.json().catch(() => ({}));
 
-  if (!response.ok) {
-    const message =
-      (data && (data.message || data.error)) || `API error: ${response.status}`;
-    throw new Error(message);
+    if (!response.ok) {
+      const message =
+        (data && (data.message || data.error)) || `API error: ${response.status}`;
+      const error: any = new Error(message);
+      error.response = { status: response.status, data };
+      throw error;
+    }
+
+    return data;
+  } catch (error: any) {
+    // Log errors in development
+    if (process.env.NODE_ENV === 'development') {
+      console.error('API Request Error:', { url, error });
+    }
+    throw error;
   }
-
-  return data;
 };
 
 export const adminApiRequest = async (
   url: string,
   options: RequestInit = {}
 ) => {
-  const token =
-    localStorage.getItem("kodisha_admin_token") ||
-    localStorage.getItem("kodisha_token") ||
-    localStorage.getItem("token");
-
-  if (!token) {
-    throw new Error("Admin login required. Please sign in at /admin/login.");
-  }
-
-  const bearer = `Bearer ${token}`;
-  const headers: Record<string, string> = {
-    Authorization: bearer,
-    ...(options.headers as Record<string, string> | undefined),
-  };
-
-  // Only set Content-Type for requests that carry a JSON body to avoid unnecessary CORS preflights on GETs
-  if (options.body && !headers["Content-Type"]) {
-    headers["Content-Type"] = "application/json";
-  }
-
-  const response = await fetch(url, {
-    headers,
-    mode: "cors",
-    credentials: options.credentials ?? "include",
-    ...options,
-  });
-
-  let data: any = null;
   try {
-    data = await response.json();
-  } catch (_) {
-    // ignore JSON parse errors for non-JSON responses
-  }
+    const token =
+      localStorage.getItem("kodisha_admin_token") ||
+      localStorage.getItem("kodisha_token") ||
+      localStorage.getItem("token");
 
-  if (!response.ok) {
-    if (response.status === 401 || response.status === 403) {
-      localStorage.removeItem("kodisha_admin_token");
-      if (typeof window !== "undefined" && !window.location.pathname.includes("/admin/login")) {
-        window.location.href = "/admin/login";
+    if (!token) {
+      throw new Error("Admin login required. Please sign in at /admin/login.");
+    }
+
+    const bearer = `Bearer ${token}`;
+    const headers: Record<string, string> = {
+      Authorization: bearer,
+      ...(options.headers as Record<string, string> | undefined),
+    };
+
+    // Only set Content-Type for requests that carry a JSON body to avoid unnecessary CORS preflights on GETs
+    if (options.body && !headers["Content-Type"]) {
+      headers["Content-Type"] = "application/json";
+    }
+
+    const response = await fetch(url, {
+      headers,
+      mode: "cors",
+      credentials: options.credentials ?? "include",
+      ...options,
+    });
+
+    let data: any = null;
+    try {
+      data = await response.json();
+    } catch (_) {
+      // ignore JSON parse errors for non-JSON responses
+    }
+
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        localStorage.removeItem("kodisha_admin_token");
+        localStorage.removeItem("kodisha_token");
+        localStorage.removeItem("token");
+        if (typeof window !== "undefined" && !window.location.pathname.includes("/admin/login")) {
+          window.location.href = "/admin/login";
+        }
+        const message =
+          (data && (data.message || data.error)) ||
+          "Admin session expired or insufficient privileges. Please log in again.";
+        throw new Error(message);
       }
       const message =
-        (data && (data.message || data.error)) ||
-        "Admin session expired or insufficient privileges. Please log in again.";
-      throw new Error(message);
+        (data && (data.message || data.error)) || `API error: ${response.status}`;
+      const error: any = new Error(message);
+      error.response = { status: response.status, data };
+      throw error;
     }
-    const message =
-      (data && (data.message || data.error)) || `API error: ${response.status}`;
-    throw new Error(message);
-  }
 
-  return data;
+    return data;
+  } catch (error: any) {
+    // Log errors in development
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Admin API Request Error:', { url, error });
+    }
+    throw error;
+  }
 };
