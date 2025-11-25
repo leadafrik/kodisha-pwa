@@ -145,14 +145,14 @@ const Profile: React.FC = () => {
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Quick Actions</h2>
         <div className="grid md:grid-cols-2 gap-4">
           <Link
-            to="/list-property"
+            to="/list?category=land"
             className="bg-green-600 text-white p-6 rounded-xl hover:bg-green-700 transition duration-300 text-center"
           >
             <div className="font-semibold text-lg">List Land</div>
             <div className="text-green-100 text-sm">Sell or rent out your land</div>
           </Link>
           <Link
-            to="/list-service"
+            to="/list?category=service"
             className="bg-blue-600 text-white p-6 rounded-xl hover:bg-blue-700 transition duration-300 text-center"
           >
             <div className="font-semibold text-lg">List Service</div>
@@ -169,7 +169,7 @@ const Profile: React.FC = () => {
           {userProperties.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <p>No land listings yet</p>
-              <Link to="/list-property" className="text-green-600 font-semibold mt-2 inline-block">
+              <Link to="/list?category=land" className="text-green-600 font-semibold mt-2 inline-block">
                 List your first property
               </Link>
             </div>
@@ -192,7 +192,7 @@ const Profile: React.FC = () => {
           {userServices.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <p>No service listings yet</p>
-              <Link to="/list-service" className="text-blue-600 font-semibold mt-2 inline-block">
+              <Link to="/list?category=service" className="text-blue-600 font-semibold mt-2 inline-block">
                 List your first service
               </Link>
             </div>

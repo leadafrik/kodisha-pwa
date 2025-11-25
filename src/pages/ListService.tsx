@@ -457,20 +457,6 @@ const ListService: React.FC<ListServiceProps> = ({ initialServiceType }) => {
           Offer farm equipment hire or professional agricultural services to
           farmers
         </p>
-        <div className="flex gap-4 mt-4">
-          <Link
-            to="/list-property"
-            className="text-green-600 hover:text-green-700 font-semibold"
-          >
-            List Land Instead
-          </Link>
-          <Link
-            to="/list-agrovet"
-            className="text-green-600 hover:text-green-700 font-semibold"
-          >
-            List Agrovet Instead
-          </Link>
-        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">

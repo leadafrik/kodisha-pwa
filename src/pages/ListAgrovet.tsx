@@ -473,20 +473,6 @@ const ListAgrovet: React.FC = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-2">List Your Agrovet</h1>
         <p className="text-gray-600">Connect with farmers by listing your agricultural products and services</p>
-        <div className="flex gap-4 mt-4">
-          <Link 
-            to="/list-property" 
-            className="text-green-600 hover:text-green-700 font-semibold"
-          >
-            ← List Land Instead
-          </Link>
-          <Link 
-            to="/list-service" 
-            className="text-green-600 hover:text-green-700 font-semibold"
-          >
-            ← Other Services
-          </Link>
-        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
