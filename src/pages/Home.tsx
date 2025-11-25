@@ -213,7 +213,7 @@ const Home: React.FC = () => {
               <p className="text-green-100">Verified Users</p>
             </div>
             <div>
-              <div className="text-5xl font-bold mb-2">₦2B+</div>
+              <div className="text-5xl font-bold mb-2">KES 2B+</div>
               <p className="text-green-100">Transactions Facilitated</p>
             </div>
           </div>
