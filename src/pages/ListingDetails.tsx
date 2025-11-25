@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import GoogleMapsLoader from "../components/GoogleMapsLoader";
 import ListingMap from "../components/ListingMap";
-import { API_ENDPOINTS } from "../config/api";
+import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
 import { io, Socket } from "socket.io-client";
 
 interface Message {
@@ -17,6 +17,7 @@ interface Message {
 const ListingDetails: React.FC = () => {
   const { id } = useParams();
   const [listing, setListing] = useState<any>(null);
+  const [listingType, setListingType] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -29,10 +30,47 @@ const ListingDetails: React.FC = () => {
   const fetchListing = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_ENDPOINTS.properties.getById(id || "")}`);
-      const data = await res.json();
-      if (data.success) {
-        setListing(data.data);
+      if (!id) return;
+
+      // Try multiple endpoints so the details page can show land, services, agrovets, or products
+      const candidates = [
+        API_ENDPOINTS.properties.getById(id as string),
+        `${API_BASE_URL}/services/equipment/${id}`,
+        `${API_BASE_URL}/services/professional/${id}`,
+        `${API_BASE_URL}/agrovets/${id}`,
+        `${API_BASE_URL}/products/${id}`,
+      ];
+
+      let found: any = null;
+      let foundType: string | null = null;
+
+      for (const url of candidates) {
+        try {
+          const res = await fetch(url);
+          // Try to parse — some endpoints return { success, data }
+          const txt = await res.text();
+          if (!txt) continue;
+          const data = JSON.parse(txt);
+          if (res.ok && data && (data.data || data.success)) {
+            found = data.data || data;
+            // Infer type from the url
+            if (url.includes('/services/equipment')) foundType = 'equipment';
+            else if (url.includes('/services/professional')) foundType = 'professional';
+            else if (url.includes('/agrovets')) foundType = 'agrovet';
+            else if (url.includes('/products')) foundType = 'product';
+            else foundType = 'land';
+            break;
+          }
+        } catch (e) {
+          // ignore and try next
+        }
+      }
+
+      if (found) {
+        setListing(found);
+        setListingType(foundType);
+      } else {
+        setListing(null);
       }
     } catch (err) {
       console.error("Error fetching listing:", err);
@@ -71,7 +109,7 @@ const ListingDetails: React.FC = () => {
       socketRef.current.disconnect();
     }
 
-    const baseUrl = API_ENDPOINTS.properties.getAll.replace("/listings", "");
+    const baseUrl = API_BASE_URL.replace(/\/api$/, "");
     const socket = io(baseUrl, {
       auth: { token },
       transports: ["websocket"],
@@ -214,7 +252,7 @@ const ListingDetails: React.FC = () => {
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            {listing.title}
+            {listing.title || listing.name}
           </h1>
           <p className="text-gray-600 mb-4">
             {listing.location?.county}, {listing.location?.constituency},{" "}
@@ -244,21 +282,43 @@ const ListingDetails: React.FC = () => {
 
           <div className="mb-4">
             <span className="text-xl font-semibold text-green-700">
-              KES {listing.price.toLocaleString()}
+              {listing.price || listing.pricing ? (
+                typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : `KES ${listing.price || listing.pricing}`
+              ) : null}
             </span>
           </div>
 
           <p className="text-gray-700 mb-6">{listing.description}</p>
 
-          <div className="bg-gray-100 p-4 rounded-lg mb-6">
-            <h2 className="font-semibold mb-2">Land Details</h2>
+          {/* Details section: land, service, or product-specific */}
+          {listingType === 'land' || listing.soilType || listing.size ? (
+            <div className="bg-gray-100 p-4 rounded-lg mb-6">
+              <h2 className="font-semibold mb-2">Land Details</h2>
 
-            <p><strong>Size:</strong> {listing.size} acres</p>
-            <p><strong>Soil Type:</strong> {listing.soilType}</p>
-            <p><strong>Water Availability:</strong> {listing.waterAvailability}</p>
-            <p><strong>Organic Certified:</strong> {listing.organicCertified ? "Yes" : "No"}</p>
-            <p><strong>Previous Crops:</strong> {Array.isArray(listing.previousCrops) ? listing.previousCrops.join(", ") : listing.previousCrops}</p>
-          </div>
+              <p><strong>Size:</strong> {listing.size ?? '—'} {listing.size ? 'acres' : ''}</p>
+              <p><strong>Soil Type:</strong> {listing.soilType || '—'}</p>
+              <p><strong>Water Availability:</strong> {listing.waterAvailability || '—'}</p>
+              <p><strong>Organic Certified:</strong> {listing.organicCertified ? "Yes" : "No"}</p>
+              <p><strong>Previous Crops:</strong> {Array.isArray(listing.previousCrops) ? listing.previousCrops.join(", ") : listing.previousCrops || '—'}</p>
+            </div>
+          ) : listingType === 'equipment' || listingType === 'professional' || listingType === 'agrovet' ? (
+            <div className="bg-gray-100 p-4 rounded-lg mb-6">
+              <h2 className="font-semibold mb-2">Service Details</h2>
+              <p><strong>Services / Offerings:</strong> {Array.isArray(listing.services) ? listing.services.join(', ') : listing.services || '—'}</p>
+              {listing.pricing && <p><strong>Pricing:</strong> {listing.pricing}</p>}
+              {listing.experience && <p><strong>Experience:</strong> {listing.experience}</p>}
+              {listing.qualifications && <p><strong>Qualifications:</strong> {listing.qualifications}</p>}
+              {typeof listing.operatorIncluded !== 'undefined' && <p><strong>Operator included:</strong> {listing.operatorIncluded ? 'Yes' : 'No'}</p>}
+            </div>
+          ) : listingType === 'product' ? (
+            <div className="bg-gray-100 p-4 rounded-lg mb-6">
+              <h2 className="font-semibold mb-2">Product Details</h2>
+              <p><strong>Category:</strong> {listing.category || listing.type || '—'}</p>
+              {listing.price && <p><strong>Price:</strong> {typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : listing.price}</p>}
+              {listing.unit && <p><strong>Unit:</strong> {listing.unit}</p>}
+              {listing.quantity && <p><strong>Quantity:</strong> {listing.quantity}</p>}
+            </div>
+          ) : null}
 
           <div className="mt-6">
             <h2 className="font-semibold mb-2">Map Location</h2>
