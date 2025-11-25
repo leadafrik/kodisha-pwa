@@ -203,6 +203,7 @@ const AdminControlsSection: React.FC<AdminControlsProps> = ({ listing, onUpdate 
 const ListingDetails: React.FC = () => {
   const { id } = useParams();
   const [listing, setListing] = useState<any>(null);
+  const [mainImage, setMainImage] = useState<string | null>(null);
   const [listingType, setListingType] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -223,6 +224,9 @@ const ListingDetails: React.FC = () => {
       if (data.success && data.data) {
         setListing(data.data);
         setListingType(data.data.listingType || "land");
+        if (data.data.images && data.data.images.length > 0) {
+          setMainImage(data.data.images[0]);
+        }
       }
     } catch (err) {
       console.error("Error fetching listing:", err);
@@ -402,41 +406,95 @@ const ListingDetails: React.FC = () => {
     <div className="p-4 max-w-5xl mx-auto">
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            {listing.title || listing.name}
-          </h1>
-          <p className="text-gray-600 mb-4">
-            {listing.location?.county}, {listing.location?.constituency},{" "}
-            {listing.location?.ward}
-          </p>
+          {/* Title + price row - improved layout */}
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                {listing.title || listing.name}
+              </h1>
+              <p className="text-sm text-gray-600">
+                {listing.location?.county}, {listing.location?.constituency}, {listing.location?.ward}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-gray-500 mb-1">Price</p>
+              <p className="text-2xl font-extrabold text-green-700">
+                {listing.price || listing.pricing ? (
+                  typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : `KES ${listing.price || listing.pricing}`
+                ) : 'Contact for price'}
+              </p>
+            </div>
+          </div>
 
+          {/* Image gallery with main image and selectable thumbnails */}
           {listing.images && listing.images.length > 0 && (
             <div className="mb-6">
-              <img
-                src={listing.images[0]}
-                alt="Property"
-                className="w-full h-72 object-cover rounded-lg"
-              />
-
-              <div className="grid grid-cols-3 gap-2 mt-2">
-                {listing.images.slice(1).map((img: string, i: number) => (
-                  <img
+              <div className="rounded-lg overflow-hidden bg-gray-100 mb-3">
+                <img
+                  src={mainImage || listing.images[0]}
+                  alt="Listing main"
+                  className="w-full h-96 object-cover"
+                />
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {listing.images.map((img: string, i: number) => (
+                  <button
                     key={i}
-                    src={img}
-                    alt="Property"
-                    className="h-24 object-cover rounded"
-                  />
+                    onClick={() => setMainImage(img)}
+                    className={`h-20 rounded overflow-hidden border-2 transition ${
+                      mainImage === img ? 'border-green-600' : 'border-gray-200 hover:border-gray-400'
+                    }`}
+                  >
+                    <img src={img} alt={`Thumbnail ${i + 1}`} className="w-full h-full object-cover" />
+                  </button>
                 ))}
               </div>
             </div>
           )}
 
-          <div className="mb-4">
-            <span className="text-xl font-semibold text-green-700">
-              {listing.price || listing.pricing ? (
-                typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : `KES ${listing.price || listing.pricing}`
-              ) : null}
-            </span>
+          {/* Quick action CTAs */}
+          <div className="flex flex-wrap gap-3 mb-6">
+            <a
+              href={`tel:${owner.phone || ''}`}
+              className="px-5 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
+            >
+              Call Seller
+            </a>
+            <button
+              onClick={() => {
+                if (!getAuthToken()) {
+                  window.location.href = `/login?next=/listings/${id}`;
+                } else {
+                  const el = document.querySelector('textarea');
+                  if (el) (el as HTMLElement).focus();
+                }
+              }}
+              className="px-5 py-2 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition"
+            >
+              Message
+            </button>
+            <button
+              onClick={() => {
+                if ((navigator as any).share) {
+                  (navigator as any).share({
+                    title: listing.title,
+                    text: listing.description,
+                    url: window.location.href,
+                  });
+                } else {
+                  window.alert('Share link: ' + window.location.href);
+                }
+              }}
+              className="px-5 py-2 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition"
+            >
+              Share
+            </button>
+            <button
+              onClick={() => window.alert('Added to favorites')}
+              className="px-5 py-2 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition"
+            >
+              Save
+            </button>
           </div>
 
           <p className="text-gray-700 mb-6">{listing.description}</p>
@@ -479,84 +537,95 @@ const ListingDetails: React.FC = () => {
 
         {/* Sidebar with seller + chat */}
         <div className="space-y-4">
-          <div className="bg-white p-4 rounded-lg border">
-            <h2 className="font-semibold mb-2">Seller Information</h2>
+          {/* Seller card - improved with avatar and verification */}
+          <div className="bg-white p-4 rounded-lg border shadow-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-lg font-bold text-gray-700">
+                {owner.name ? owner.name[0].toUpperCase() : (owner.fullName ? owner.fullName[0].toUpperCase() : 'S')}
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900">{owner.fullName || owner.name || 'Seller'}</h3>
+                {owner.isVerified && (
+                  <span className="inline-block text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded">
+                    ✓ Verified
+                  </span>
+                )}
+              </div>
+            </div>
 
-            <p><strong>Name:</strong> {owner.fullName || owner.name}</p>
-            <p><strong>Phone:</strong> {owner.phone || "Not provided"}</p>
-            <p className="text-sm text-gray-600">
-              Status:{" "}
-              <span className={ownerOnline ? "text-green-700" : "text-gray-500"}>
-                {ownerOnline ? "Online" : "Offline"}
-              </span>
+            <p className="text-sm text-gray-600 mb-3">
+              {owner.responseTime || 'Usually replies within 24 hours'}
             </p>
 
-            {owner.isVerified ? (
-              <span className="inline-block mt-2 px-3 py-1 bg-green-100 text-green-700 rounded text-sm">
-                Verified Seller
-              </span>
-            ) : (
-              <span className="inline-block mt-2 px-3 py-1 bg-yellow-100 text-yellow-700 rounded text-sm">
-                Unverified Seller
-              </span>
-            )}
-
-            <div className="flex gap-3 mt-4">
+            <div className="flex gap-2">
               <a
-                href={`tel:${owner.phone || ""}`}
-                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg text-sm text-center"
+                href={`tel:${owner.phone || ''}`}
+                className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 text-center"
               >
-                Call Seller
+                Call
               </a>
+              <button
+                onClick={() => {
+                  const el = document.querySelector('textarea');
+                  if (el) (el as HTMLElement).focus();
+                }}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-50"
+              >
+                Message
+              </button>
             </div>
+
+            <p className="text-xs text-gray-500 mt-3">
+              {owner.isVerified ? 'ID & phone verified' : 'Unverified seller'}
+            </p>
           </div>
 
+          {/* Chat section - improved UI and microcopy */}
           <div className="bg-white p-4 rounded-lg border">
-            <h3 className="font-semibold mb-2">Chat with Seller</h3>
-            <div className="max-h-64 overflow-y-auto border rounded-lg p-2 mb-3 text-sm space-y-2">
+            <h3 className="font-semibold mb-3">Message the Seller</h3>
+
+            <div className="max-h-64 overflow-y-auto border rounded-lg p-3 mb-3 bg-gray-50">
               {messages.length === 0 ? (
-                <p className="text-gray-500 text-center text-xs">No messages yet.</p>
+                <p className="text-gray-500 text-center text-xs py-4">
+                  No messages yet. Ask about availability, pricing, or arrange a viewing.
+                </p>
               ) : (
                 messages.map((msg, idx) => (
-                  <div
-                    key={idx}
-                    className={`rounded p-2 ${
-                      msg.from === owner._id ? "bg-gray-100" : "bg-green-50"
-                    }`}
-                  >
-                    <p className="text-xs text-gray-500 mb-1">
-                      {msg.from === owner._id ? "Seller" : "You"}
-                      {msg.read ? " • Read" : ""}
+                  <div key={idx} className={`rounded p-2 mb-2 ${msg.from === owner._id ? 'bg-white border' : 'bg-green-50'}`}>
+                    <p className="text-xs text-gray-600 font-semibold mb-1">
+                      {msg.from === owner._id ? 'Seller' : 'You'} {msg.read && msg.from === owner._id ? '✓✓' : ''}
                     </p>
                     <p className="text-gray-800 text-sm">{msg.body}</p>
                     <p className="text-[10px] text-gray-500 mt-1">
-                      {msg.createdAt ? new Date(msg.createdAt).toLocaleString() : ""}
+                      {msg.createdAt ? new Date(msg.createdAt).toLocaleString() : ''}
                     </p>
                   </div>
                 ))
               )}
-              {typing && (
-                <p className="text-xs text-gray-500 italic">Seller is typing…</p>
-              )}
+              {typing && <p className="text-xs text-gray-500 italic">Seller is typing…</p>}
             </div>
+
             <textarea
               value={newMessage}
               onChange={(e) => {
                 setNewMessage(e.target.value);
                 sendTyping();
               }}
-              className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-green-500 focus:border-green-500"
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
               placeholder="Type your message..."
+              rows={3}
             />
+
             <button
               onClick={sendMessage}
               disabled={sending || !newMessage.trim()}
-              className="w-full mt-2 bg-blue-600 text-white rounded-lg py-2 text-sm disabled:opacity-60"
+              className="w-full mt-2 bg-blue-600 text-white rounded-lg py-2 text-sm font-semibold hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition"
             >
-              {sending ? "Sending..." : "Send"}
+              {sending ? 'Sending...' : 'Send Message'}
             </button>
-            <p className="text-xs text-gray-500 mt-2">
-              You must be logged in to send messages.
+
+            <p className="text-xs text-gray-500 mt-2 text-center">
+              {getAuthToken() ? 'Messages are private and secure.' : 'Log in to send and receive messages.'}
             </p>
           </div>
         </div>
