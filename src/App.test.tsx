@@ -2,8 +2,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders Kodisha home link', () => {
+test('renders a home link labeled Kodisha', () => {
   render(<App />);
-  const homeLink = screen.getByRole('link', { name: /Kodisha/i });
-  expect(homeLink).toBeInTheDocument();
+  const links = screen.getAllByRole('link', { name: /Kodisha/i });
+  expect(links.some(a => a.getAttribute('href') === '/')).toBe(true);
 });
