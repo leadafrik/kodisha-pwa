@@ -54,7 +54,16 @@ const Profile: React.FC = () => {
     }
   };
 
-  const verificationDetails = user.verification || {};
+  const verificationDetails: {
+    phoneVerified?: boolean;
+    idVerified?: boolean;
+    selfieVerified?: boolean;
+    ownershipVerified?: boolean;
+    businessVerified?: boolean;
+    verificationLevel?: string;
+    trustScore?: number;
+  } = user.verification || {};
+
   const verificationItems = [
     { label: "Phone verified", value: verificationDetails.phoneVerified },
     { label: "ID verified", value: verificationDetails.idVerified },

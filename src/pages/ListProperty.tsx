@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProperties } from '../contexts/PropertyContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -310,7 +310,6 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
   const monetizationSummaryLabel = `${selectedPlanDetails.name}${boostLabel}${verificationLabel}`;
   const idVerified = !!user?.verification?.idVerified;
   const selfieVerified = !!user?.verification?.selfieVerified;
-  const ownershipVerified = !!user?.verification?.ownershipVerified;
   const hasIdDocs = idVerified || (idFrontFile !== null && idBackFile !== null);
   const hasSelfieDoc = selfieVerified || selfieFile !== null;
   const identityDocsSatisfied = hasIdDocs && hasSelfieDoc;
@@ -377,9 +376,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
       return;
     }
 
-    const identityReady = identityDocsSatisfied; const ownershipReady = true;
-
-    if (!identityReady) {
+    if (!identityDocsSatisfied) {
       alert(
         "Please upload your ID front, ID back, and a selfie with your ID (or ensure your identity is already verified)."
       );
@@ -515,7 +512,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
         maxLeasePeriod: '12',
         preferredCrops: '',
         contact: '',
-        type: 'sale'
+        type: 'rental'
       });
       setSelectedImages([]);
       setConstituencies([]);
@@ -582,15 +579,14 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-gray-800 mb-2">List Your Farmland</h1>
-      <p className="text-gray-600 mb-8">Connect with farmers across Kenya - list your land for seasonal leasing</p>
+      <p className="text-gray-600 mb-8">Connect with farmers across Kenya â€” list your land for rent/lease with clear pricing and trust signals.</p>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
         <div className="mb-6 space-y-4 rounded-2xl border border-green-200 bg-green-50/40 p-4">
           <div>
             <h2 className="text-xl font-semibold text-gray-800">Monetized Listing Options</h2>
             <p className="text-sm text-gray-600">
-              First listing is free. Choose a paid plan, boost, or verification level that matches your
-              confidence and budget, and your total commitment is shown below.
+              First listing is free. Paid plans, boosts, and verification tiers add visibility and trust. The total payable after approval is shown below.
             </p>
           </div>
           <div className="grid gap-3 md:grid-cols-4">
@@ -664,7 +660,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
           </div>
           <div className="rounded-lg border border-dashed border-green-200 bg-white p-3 text-sm text-gray-700">
             <p className="font-semibold text-gray-900">
-              Total commitment: {formatKenyanPrice(totalMonetizationFee)}
+              Total payable after approval: {formatKenyanPrice(totalMonetizationFee)}
             </p>
             <p>
               {firstListingFreeAvailable
@@ -672,7 +668,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
                 : 'First listing credit used - this listing is covered by paid plans, boosts, and verification fees.'}
             </p>
             <p className="text-xs text-gray-500">
-              Payment (M-Pesa STK push) is triggered after the admin approves the listing.
+              Payment (M-Pesa STK push) triggers only after an admin approves the listing.
             </p>
           </div>
         </div>
@@ -682,7 +678,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
             <div>
               <h2 className="text-xl font-semibold text-gray-800">Verification Documents</h2>
               <p className="text-sm text-gray-600">
-                Upload the documents needed for this listing type. Currently supporting <span className="font-semibold">Rent/Lease</span> only.
+                Upload the documents needed for rent/lease. Ownership proofs are optional but improve trust and speed approvals.
               </p>
             </div>
             {docUploading && (
@@ -705,7 +701,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
                 required={!idVerified}
               />
               <p className="mt-1 text-xs text-gray-500">
-                Required for rent & sale unless already verified.
+                Required for rent/lease unless already verified.
               </p>
             </label>
 
@@ -721,7 +717,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
                 required={!idVerified}
               />
               <p className="mt-1 text-xs text-gray-500">
-                Required for rent & sale unless already verified.
+                Required for rent/lease unless already verified.
               </p>
             </label>
 
@@ -743,7 +739,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
 
             <label className="block text-sm text-gray-700">
               <span className="font-semibold text-gray-900">
-                Title Deed {false ? '*' : ''}
+                Title Deed (optional)
               </span>
               <input
                 type="file"
@@ -754,13 +750,13 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
                 disabled={false}
               />
               <p className="mt-1 text-xs text-gray-500">
-                Required for sale. For rent/lease this stays optional.
+                Optional but increases trust for your lease listing.
               </p>
             </label>
 
             <label className="block text-sm text-gray-700">
               <span className="font-semibold text-gray-900">
-                Land Search Report
+                Land Search Report (optional)
               </span>
               <input
                 type="file"
@@ -770,13 +766,13 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
                 disabled={false}
               />
               <p className="mt-1 text-xs text-gray-500">
-                Required for sale (or provide a chief&apos;s letter instead).
+                Optional supporting document to further boost trust.
               </p>
             </label>
 
             <label className="block text-sm text-gray-700">
               <span className="font-semibold text-gray-900">
-                Chief&apos;s Letter (alternative to land search)
+                Chief&apos;s Letter (optional alternative)
               </span>
               <input
                 type="file"
@@ -1156,6 +1152,11 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
 };
 
 export default ListProperty;
+
+
+
+
+
 
 
 
