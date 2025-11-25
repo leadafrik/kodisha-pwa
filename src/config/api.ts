@@ -59,6 +59,7 @@ export const API_ENDPOINTS = {
        getApproved: `${API_BASE_URL}/admin/listings/approved`,
       getById: (id: string) => `${API_BASE_URL}/admin/listings/${id}`,
       verify: (id: string) => `${API_BASE_URL}/admin/listings/${id}/verify`,
+      delete: (id: string) => `${API_BASE_URL}/admin/listings/${id}`,
     },
     users: {
       getAll: `${API_BASE_URL}/admin/users`,

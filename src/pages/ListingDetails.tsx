@@ -1,13 +1,18 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import GoogleMapsLoader from "../components/GoogleMapsLoader";
 import ListingMap from "../components/ListingMap";
-import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
+import { API_ENDPOINTS, API_BASE_URL, adminApiRequest } from "../config/api";
 import { io, Socket } from "socket.io-client";
 
 // Helper: Get auth token (user or admin)
 const getAuthToken = (): string | null => {
   return localStorage.getItem("kodisha_token") || localStorage.getItem("kodisha_admin_token");
+};
+
+// Helper: Check if user is admin
+const isUserAdmin = (): boolean => {
+  return !!localStorage.getItem("kodisha_admin_token");
 };
 
 interface Message {
@@ -105,11 +110,102 @@ const renderDetailsSection = (listingType: string | null, listing: any) => {
   }
 };
 
+// Admin controls component
+interface AdminControlsProps {
+  listing: any;
+  onUpdate: () => void;
+}
+
+const AdminControlsSection: React.FC<AdminControlsProps> = ({ listing, onUpdate }) => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const handleVerify = async (status: "approved" | "rejected") => {
+    setLoading(true);
+    setMessage("");
+    try {
+      const data = await adminApiRequest(
+        API_ENDPOINTS.admin.listings.verify(listing._id),
+        {
+          method: "PUT",
+          body: JSON.stringify({ status }),
+        }
+      );
+      setMessage(`Listing ${status === "approved" ? "approved" : "rejected"} successfully.`);
+      setTimeout(onUpdate, 1500);
+    } catch (err: any) {
+      setMessage(`Error: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to permanently delete this listing?")) {
+      return;
+    }
+    setLoading(true);
+    setMessage("");
+    try {
+      const data = await adminApiRequest(
+        API_ENDPOINTS.admin.listings.delete(listing._id),
+        { method: "DELETE" }
+      );
+      setMessage("Listing deleted. Redirecting...");
+      setTimeout(() => navigate("/listings"), 1500);
+    } catch (err: any) {
+      setMessage(`Error: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const isVerified = listing.verified || listing.isVerified || listing.status === "active";
+
+  return (
+    <div className="bg-red-50 p-4 rounded-lg border-2 border-red-200 mb-6">
+      <h2 className="font-semibold text-red-900 mb-3">Admin Controls</h2>
+      <div className="space-y-3">
+        <div className="flex gap-2">
+          <button
+            onClick={() => handleVerify("approved")}
+            disabled={loading || isVerified}
+            className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {isVerified ? "✓ Verified" : "Approve"}
+          </button>
+          <button
+            onClick={() => handleVerify("rejected")}
+            disabled={loading}
+            className="flex-1 px-4 py-2 bg-yellow-600 text-white rounded-lg text-sm font-semibold hover:bg-yellow-700 disabled:opacity-60"
+          >
+            Reject
+          </button>
+          <button
+            onClick={handleDelete}
+            disabled={loading}
+            className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 disabled:opacity-60"
+          >
+            Delete
+          </button>
+        </div>
+        {message && (
+          <p className={`text-sm ${message.includes("Error") ? "text-red-700" : "text-green-700"}`}>
+            {message}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const ListingDetails: React.FC = () => {
   const { id } = useParams();
   const [listing, setListing] = useState<any>(null);
   const [listingType, setListingType] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
@@ -133,6 +229,11 @@ const ListingDetails: React.FC = () => {
     }
     setLoading(false);
   }, [id]);
+
+  // Check if user is admin on mount
+  useEffect(() => {
+    setIsAdmin(isUserAdmin());
+  }, []);
 
   const fetchMessages = async (ownerId: string) => {
     try {
@@ -342,6 +443,9 @@ const ListingDetails: React.FC = () => {
 
           {/* Type-specific details section */}
           {renderDetailsSection(listingType, listing)}
+
+          {/* Admin controls (only visible to admins) */}
+          {isAdmin && <AdminControlsSection listing={listing} onUpdate={fetchListing} />}
 
           <div className="mt-6">
             <h2 className="font-semibold mb-2">Map Location</h2>
