@@ -123,7 +123,7 @@ const Home: React.FC = () => {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">M-Pesa Ready</h3>
               <p className="text-gray-600">
-                Secure M-Pesa integration. Send and receive payments instantly, no fees.
+                Secure M-Pesa integration. Send and receive payments instantly with ease.
               </p>
             </div>
 
@@ -160,9 +160,9 @@ const Home: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">24/7 Support</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Trusted Support</h3>
               <p className="text-gray-600">
-                Questions? Our team is here to help you succeed every step of the way.
+                Get help when you need it. Our team is ready to assist you.
               </p>
             </div>
           </div>
@@ -213,8 +213,8 @@ const Home: React.FC = () => {
               <p className="text-green-100">Verified Users</p>
             </div>
             <div>
-              <div className="text-5xl font-bold mb-2">KES 2B+</div>
-              <p className="text-green-100">Transactions Facilitated</p>
+              <div className="text-5xl font-bold mb-2">Secure</div>
+              <p className="text-green-100">M-Pesa Payments</p>
             </div>
           </div>
         </div>
@@ -242,7 +242,7 @@ const Home: React.FC = () => {
               to={user ? "/list" : "/login?next=/list"}
               className="inline-flex justify-center items-center px-8 py-4 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700 shadow-lg transition"
             >
-              {user ? "Create a Listing" : "Sign Up for Free"}
+              {user ? "Create a Listing" : "Create Account"}
             </Link>
           </div>
         </div>

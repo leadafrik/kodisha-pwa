@@ -203,6 +203,8 @@ const AdminControlsSection: React.FC<AdminControlsProps> = ({ listing, onUpdate 
 const ListingDetails: React.FC = () => {
   const { id } = useParams();
   const [listing, setListing] = useState<any>(null);
+  const [markingSold, setMarkingSold] = useState(false);
+  const [soldMessage, setSoldMessage] = useState("");
   const [mainImage, setMainImage] = useState<string | null>(null);
   const [listingType, setListingType] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -212,6 +214,11 @@ const ListingDetails: React.FC = () => {
   const [sending, setSending] = useState(false);
   const [typing, setTyping] = useState(false);
   const [ownerOnline, setOwnerOnline] = useState(false);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [ratingScore, setRatingScore] = useState(0);
+  const [ratingReview, setRatingReview] = useState("");
+  const [submittingRating, setSubmittingRating] = useState(false);
+  const [userRatings, setUserRatings] = useState<any>(null);
   const socketRef = useRef<Socket | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -255,6 +262,18 @@ const ListingDetails: React.FC = () => {
       }
     } catch (err) {
       console.error("Error loading messages:", err);
+    }
+  };
+
+  const fetchUserRatings = async (ownerId: string) => {
+    try {
+      const res = await fetch(API_ENDPOINTS.ratings.getUserRatings(ownerId));
+      const data = await res.json();
+      if (data.success) {
+        setUserRatings(data.data);
+      }
+    } catch (err) {
+      console.error('Error loading ratings:', err);
     }
   };
 
@@ -374,6 +393,7 @@ const ListingDetails: React.FC = () => {
   useEffect(() => {
     if (listing?.owner?._id) {
       fetchMessages(listing.owner._id);
+      fetchUserRatings(listing.owner._id);
       setupSocket(listing.owner._id);
     }
     return () => {
@@ -401,6 +421,70 @@ const ListingDetails: React.FC = () => {
 
   const owner = listing.owner || {};
   const coords = listing.coordinates;
+
+  // Determine owner/admin privileges for marking sold
+  const currentUserRaw = localStorage.getItem('kodisha_user');
+  let currentUserId: string | null = null;
+  try { if (currentUserRaw) currentUserId = JSON.parse(currentUserRaw)?._id; } catch {}
+  const canMarkSold = !!listing && (isAdmin || (currentUserId && listing.owner && listing.owner._id === currentUserId));
+
+  const hoursUntilHide = listing?.sold && listing?.soldAt ? Math.max(0, 48 - ((Date.now() - new Date(listing.soldAt).getTime()) / (1000*60*60))) : null;
+
+  const handleMarkSold = async () => {
+    if (!listing || !canMarkSold) return;
+    setMarkingSold(true);
+    setSoldMessage("");
+    try {
+      const token = getAuthToken();
+      if (!token) { window.location.href = '/login'; return; }
+      const markEndpoint = listingType === 'product'
+        ? API_ENDPOINTS.services.products.markSold(listing._id)
+        : API_ENDPOINTS.properties.markSold(listing._id);
+      const res = await fetch(markEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.message || 'Failed to mark sold');
+      setSoldMessage('Marked as sold. Will disappear after 48 hours.');
+      await fetchListing();
+    } catch (err:any) {
+      setSoldMessage(err.message);
+    } finally {
+      setMarkingSold(false);
+    }
+  };
+
+  const handleRatingSubmit = async () => {
+    if (!listing?.owner?._id || ratingScore === 0) return;
+    setSubmittingRating(true);
+    try {
+      const token = getAuthToken();
+      if (!token) { window.location.href = '/login'; return; }
+      const res = await fetch(API_ENDPOINTS.ratings.submit, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          ratedUserId: listing.owner._id,
+          listingId: listing._id,
+          score: ratingScore,
+          review: ratingReview,
+          category: 'overall',
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.message || 'Failed to submit rating');
+      setShowRatingModal(false);
+      setRatingScore(0);
+      setRatingReview('');
+      fetchUserRatings(listing.owner._id);
+      window.alert('Rating submitted successfully!');
+    } catch (err:any) {
+      window.alert(err.message);
+    } finally {
+      setSubmittingRating(false);
+    }
+  };
 
   return (
     <div className="p-4 max-w-5xl mx-auto">
@@ -495,7 +579,24 @@ const ListingDetails: React.FC = () => {
             >
               Save
             </button>
+            {canMarkSold && !listing.sold && (
+              <button
+                onClick={handleMarkSold}
+                disabled={markingSold}
+                className="px-5 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 disabled:opacity-60 transition"
+              >
+                {markingSold ? 'Marking...' : 'Mark as Sold'}
+              </button>
+            )}
+            {listing.sold && (
+              <span className="px-4 py-2 bg-red-100 text-red-700 rounded-lg font-semibold text-sm">
+                Sold {hoursUntilHide !== null && hoursUntilHide > 0 && `• hides in ${Math.ceil(hoursUntilHide)}h`}
+              </span>
+            )}
           </div>
+          {soldMessage && (
+            <p className={`text-sm mb-4 ${soldMessage.startsWith('Marked') ? 'text-green-700' : 'text-red-600'}`}>{soldMessage}</p>
+          )}
 
           <p className="text-gray-700 mb-6">{listing.description}</p>
 
@@ -557,6 +658,25 @@ const ListingDetails: React.FC = () => {
               {owner.responseTime || 'Usually replies within 24 hours'}
             </p>
 
+            {/* Rating display */}
+            {userRatings?.aggregate && userRatings.aggregate.count > 0 && (
+              <div className="mb-3 p-2 bg-yellow-50 rounded border border-yellow-200">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg font-bold text-yellow-600">
+                    {'⭐'.repeat(Math.round(userRatings.aggregate.average))}
+                  </span>
+                  <span className="text-sm font-semibold">
+                    {userRatings.aggregate.average.toFixed(1)} ({userRatings.aggregate.count} reviews)
+                  </span>
+                </div>
+                {userRatings.aggregate.breakdown.overall > 0 && (
+                  <p className="text-xs text-gray-600">
+                    Overall: {userRatings.aggregate.breakdown.overall.toFixed(1)}/5
+                  </p>
+                )}
+              </div>
+            )}
+
             <div className="flex gap-2">
               <a
                 href={`tel:${owner.phone || ''}`}
@@ -574,6 +694,19 @@ const ListingDetails: React.FC = () => {
                 Message
               </button>
             </div>
+
+            <button
+              onClick={() => {
+                if (!getAuthToken()) {
+                  window.location.href = '/login';
+                } else {
+                  setShowRatingModal(true);
+                }
+              }}
+              className="w-full mt-2 px-3 py-2 border border-yellow-400 bg-yellow-50 text-yellow-700 rounded-lg text-sm font-semibold hover:bg-yellow-100"
+            >
+              ⭐ Rate Seller
+            </button>
 
             <p className="text-xs text-gray-500 mt-3">
               {owner.isVerified ? 'ID & phone verified' : 'Unverified seller'}
@@ -630,6 +763,60 @@ const ListingDetails: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Rating Modal */}
+      {showRatingModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <h3 className="text-xl font-bold mb-4">Rate {owner.fullName || 'Seller'}</h3>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">Rating (1-5 stars)</label>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onClick={() => setRatingScore(star)}
+                    className={`text-3xl ${
+                      star <= ratingScore ? 'text-yellow-500' : 'text-gray-300'
+                    } hover:text-yellow-400 transition`}
+                  >
+                    ⭐
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">Review (optional)</label>
+              <textarea
+                value={ratingReview}
+                onChange={(e) => setRatingReview(e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 text-sm resize-none"
+                rows={4}
+                placeholder="Share your experience..."
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setShowRatingModal(false);
+                  setRatingScore(0);
+                  setRatingReview('');
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRatingSubmit}
+                disabled={submittingRating || ratingScore === 0}
+                className="flex-1 px-4 py-2 bg-yellow-500 text-white rounded-lg font-semibold hover:bg-yellow-600 disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {submittingRating ? 'Submitting...' : 'Submit Rating'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

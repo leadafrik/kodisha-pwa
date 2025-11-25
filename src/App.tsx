@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { PropertyProvider } from './contexts/PropertyContext';
 import { AuthProvider } from './contexts/AuthContext';
@@ -7,18 +7,33 @@ import ErrorBoundary from './components/ErrorBoundary';
 import Home from './pages/Home';
 import BrowseListings from './pages/BrowseListings';
 import Login from './pages/Login';
-import Profile from './pages/Profile';
 import Navbar from './components/Navbar';
-import ListUnified from './pages/ListUnified';
-import BackendTest from './components/BackendTest';
-import PhoneVerification from './pages/PhoneVerification';
-import VerificationWizard from './pages/VerificationWizard';
-import ListingDetails from './pages/ListingDetails';
+import Footer from './components/Footer';
 import NotFound from './pages/NotFound';
 import ServerError from './pages/ServerError';
 import Offline from './pages/Offline';
-import PaymentTestPanel from './pages/PaymentTestPanel';
 import ProtectedRoute from "./routes/ProtectedRoute";
+
+// Lazy load heavy components
+const Profile = lazy(() => import('./pages/Profile'));
+const ListUnified = lazy(() => import('./pages/ListUnified'));
+const BackendTest = lazy(() => import('./components/BackendTest'));
+const PhoneVerification = lazy(() => import('./pages/PhoneVerification'));
+const VerificationWizard = lazy(() => import('./pages/VerificationWizard'));
+const ListingDetails = lazy(() => import('./pages/ListingDetails'));
+const PaymentTestPanel = lazy(() => import('./pages/PaymentTestPanel'));
+const TermsOfService = lazy(() => import('./pages/TermsOfService'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+      <p className="text-gray-600">Loading...</p>
+    </div>
+  </div>
+);
 
 function App() {
   return (
@@ -30,7 +45,8 @@ function App() {
               <div className="min-h-screen bg-gray-50 flex flex-col">
                 <Navbar />
                 <div className="flex-1 py-4">
-                  <Routes>
+                  <Suspense fallback={<LoadingFallback />}>
+                    <Routes>
                     <Route path="/" element={<Home />} />
                     <Route
                       path="/list"
@@ -90,11 +106,15 @@ function App() {
                     <Route path="/verify-phone" element={<PhoneVerification />} />
                     <Route path="/verify" element={<VerificationWizard />} />
                     <Route path="/listings/:id" element={<ListingDetails />} />
+                    <Route path="/legal/terms" element={<TermsOfService />} />
+                    <Route path="/legal/privacy" element={<PrivacyPolicy />} />
                     <Route path="/error" element={<ServerError />} />
                     <Route path="/offline" element={<Offline />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
+                  </Suspense>
                 </div>
+                              <Footer />
               </div>
             </Router>
           </VerificationProvider>

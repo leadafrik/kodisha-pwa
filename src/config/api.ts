@@ -67,6 +67,7 @@ export const API_ENDPOINTS = {
     getAll: `${API_BASE_URL}/listings`,
     create: `${API_BASE_URL}/listings`,
     getById: (id: string) => `${API_BASE_URL}/listings/${id}`,
+    markSold: (id: string) => `${API_BASE_URL}/listings/${id}/mark-sold`,
   },
   services: {
     equipment: {
@@ -84,6 +85,7 @@ export const API_ENDPOINTS = {
     products: {
       list: `${API_BASE_URL}/products`,
       create: `${API_BASE_URL}/products`,
+      markSold: (id: string) => `${API_BASE_URL}/products/${id}/mark-sold`,
     },
   },
   messages: {
@@ -117,6 +119,10 @@ export const API_ENDPOINTS = {
   },
   payments: {
     initiateStk: `${API_BASE_URL}/payments/stk/initiate`,
+  },
+  ratings: {
+    submit: `${API_BASE_URL}/ratings`,
+    getUserRatings: (userId: string) => `${API_BASE_URL}/ratings/user/${userId}`,
   },
 };
 

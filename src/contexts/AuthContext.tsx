@@ -114,6 +114,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         county: userData.county,
         constituency: userData.constituency,
         ward: userData.ward,
+        legalConsents: userData.legalConsents,
       };
 
       const res: any = await apiRequest(API_ENDPOINTS.auth.register, {

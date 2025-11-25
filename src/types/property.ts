@@ -249,6 +249,12 @@ export interface UserFormData {
   county: string;
   constituency?: string;
   ward?: string;
+  legalConsents?: {
+    termsAccepted: boolean;
+    privacyAccepted: boolean;
+    marketingConsent: boolean;
+    dataProcessingConsent: boolean;
+  };
 }
 
 // ===============================

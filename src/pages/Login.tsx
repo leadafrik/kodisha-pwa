@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { kenyaCounties } from "../data/kenyaCounties";
+import LegalAcceptanceModal from "../components/LegalAcceptanceModal";
 
 type Mode = "login" | "signup" | "otp-signup" | "forgot" | "otp-reset";
 
@@ -33,6 +34,8 @@ const Login: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [otpTimer, setOtpTimer] = useState(0);
   const [canResendOtp, setCanResendOtp] = useState(true);
+  const [showLegalModal, setShowLegalModal] = useState(false);
+  const [pendingSignupData, setPendingSignupData] = useState<any>(null);
 
   const [loginData, setLoginData] = useState({
     emailOrPhone: "",
@@ -113,17 +116,38 @@ const Login: React.FC = () => {
       return;
     }
 
+    // Show legal acceptance modal before registration
+    setPendingSignupData(signupData);
+    setShowLegalModal(true);
+  };
+
+  const handleLegalAcceptance = async (consents: {
+    termsAccepted: boolean;
+    privacyAccepted: boolean;
+    marketingConsent: boolean;
+    dataProcessingConsent: boolean;
+  }) => {
+    if (!pendingSignupData) return;
+
     try {
       await register({
-        name: signupData.name,
-        phone: signupData.email || undefined,
-        email: signupData.email || undefined,
-        password: signupData.password,
-        type: signupData.userType,
-        county: signupData.county,
+        name: pendingSignupData.name,
+        phone: pendingSignupData.email || undefined,
+        email: pendingSignupData.email || undefined,
+        password: pendingSignupData.password,
+        type: pendingSignupData.userType,
+        county: pendingSignupData.county,
+        legalConsents: {
+          termsAccepted: consents.termsAccepted,
+          privacyAccepted: consents.privacyAccepted,
+          marketingConsent: consents.marketingConsent,
+          dataProcessingConsent: consents.dataProcessingConsent,
+        },
       });
-      await requestEmailOtp(signupData.email);
-      setOtpEmail(signupData.email);
+      setShowLegalModal(false);
+      setPendingSignupData(null);
+      await requestEmailOtp(pendingSignupData.email);
+      setOtpEmail(pendingSignupData.email);
       setMode("otp-signup");
       startOtpTimer();
       setInfo(
@@ -131,7 +155,13 @@ const Login: React.FC = () => {
       );
     } catch (err: any) {
       setError(err?.message || "Registration failed. Please try again.");
+      setShowLegalModal(false);
     }
+  };
+
+  const handleLegalCancel = () => {
+    setShowLegalModal(false);
+    setPendingSignupData(null);
   };
 
   const handleVerifySignupOtp = async () => {
@@ -204,7 +234,7 @@ const Login: React.FC = () => {
             setLoginData((prev) => ({ ...prev, emailOrPhone: e.target.value }))
           }
           className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-          placeholder="you@example.com or +254712345678"
+          placeholder="Email or phone number"
         />
       </div>
       <div className="space-y-2">
@@ -286,7 +316,7 @@ const Login: React.FC = () => {
               setSignupData((prev) => ({ ...prev, password: e.target.value }))
             }
             className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-            placeholder="Min. 6 characters"
+            placeholder="At least 6 characters"
             required
           />
         </div>
@@ -617,6 +647,14 @@ const Login: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Legal Acceptance Modal */}
+      <LegalAcceptanceModal
+        isOpen={showLegalModal}
+        onAccept={handleLegalAcceptance}
+        onCancel={handleLegalCancel}
+        loading={loading}
+      />
     </div>
   );
 };
