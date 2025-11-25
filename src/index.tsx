@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 import { enforceHttps } from './utils/security';
+import { initSentry } from './config/sentry';
+
+// Initialize Sentry error tracking
+initSentry();
 
 // Enforce HTTPS in production
 enforceHttps();
