@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useProperties } from "../contexts/PropertyContext";
 import { kenyaCounties } from "../data/kenyaCounties";
 
@@ -196,7 +197,7 @@ const BrowseListings: React.FC = () => {
               Browse Land, Services, and Agrovets
             </h1>
             <p className="text-gray-600 text-sm">
-              Filter by category, sale/rent, county, and quickly find verified/paid and boosted listings first.
+              Filter by category and county. Verified, paid, and boosted listings show first.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -390,6 +391,22 @@ const BrowseListings: React.FC = () => {
                 {card.sizeLabel && (
                   <p className="text-xs text-gray-500">{card.sizeLabel}</p>
                 )}
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Link
+                    to={`/listings/${card.id}`}
+                    className="inline-flex items-center justify-center rounded-lg bg-green-600 px-3 py-2 text-xs font-semibold text-white hover:bg-green-700"
+                  >
+                    View details
+                  </Link>
+                  {card.contact && (
+                    <a
+                      href={`tel:${card.contact}`}
+                      className="inline-flex items-center justify-center rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 hover:border-green-400"
+                    >
+                      Contact seller
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
           );
