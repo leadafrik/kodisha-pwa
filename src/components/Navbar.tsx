@@ -108,10 +108,6 @@ const Navbar: React.FC = () => {
                         <Link to="/list" className="block px-4 py-2 hover:bg-gray-50 text-sm">Create Listing</Link>
                       </div>
 
-                      <Link to="/admin" className="block px-4 py-2 hover:bg-blue-50 text-blue-600 font-semibold border-b text-sm">
-                        Admin Dashboard
-                      </Link>
-
                       <button
                         onClick={logout}
                         className="w-full text-left px-4 py-3 hover:bg-red-50 text-red-600 font-semibold"
@@ -162,7 +158,6 @@ const Navbar: React.FC = () => {
                 <>
                   <Link to="/profile" onClick={closeMobile}>Dashboard</Link>
                   <Link to="/list" onClick={closeMobile}>Create Listing</Link>
-                  <Link to="/admin" onClick={closeMobile}>Admin</Link>
                   <button
                     onClick={() => { logout(); closeMobile(); }}
                     className="text-left text-red-600 font-semibold mt-4"

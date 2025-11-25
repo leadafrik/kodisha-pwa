@@ -9,13 +9,10 @@ import Login from './pages/Login';
 import Profile from './pages/Profile';
 import Navbar from './components/Navbar';
 import ListUnified from './pages/ListUnified';
-import AdminDashboard from './pages/admin/AdminDashboard';
 import BackendTest from './components/BackendTest';
 import PhoneVerification from './pages/PhoneVerification';
 import VerificationWizard from './pages/VerificationWizard';
 import ListingDetails from './pages/ListingDetails';
-import AdminLogin from "./pages/admin/AdminLogin";
-import AdminRoute from "./components/admin/AdminRoute";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
@@ -79,15 +76,6 @@ function App() {
                   <Route path="/verify-phone" element={<PhoneVerification />} />
                   <Route path="/verify" element={<VerificationWizard />} />
                   <Route path="/listings/:id" element={<ListingDetails />} />
-                  <Route path="/admin-login" element={<AdminLogin />} />
-                  <Route
-                    path="/admin"
-                    element={
-                      <AdminRoute>
-                        <AdminDashboard />
-                      </AdminRoute>
-                    }
-                  />
                 </Routes>
               </div>
             </div>
