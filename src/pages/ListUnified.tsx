@@ -24,20 +24,20 @@ const CATEGORY_CARDS: Array<{
   {
     id: "land",
     title: "Farmland",
-    subtitle: "Lease or sell land with boosts, verification, and MPesa billing.",
-    badge: "Free 1st listing",
+    subtitle: "Rent/lease only. Simple fees with optional verification and boosts.",
+    badge: "Free first listing",
   },
   {
     id: "service",
     title: "Services & Equipment",
-    subtitle: "Annual subscription for equipment or pro services with optional boosts.",
-    badge: "KSh 599/yr",
+    subtitle: "Tractors, equipment, or pro services with an annual plan and boosts.",
+    badge: "Annual plan",
   },
   {
     id: "agrovet",
     title: "Agrovets",
-    subtitle: "Showcase agro-dealer stock with verification and boosts.",
-    badge: "KSh 599/yr",
+    subtitle: "Showcase your agrovet store with verification and boosts.",
+    badge: "Annual plan",
   },
   {
     id: "product",
@@ -143,10 +143,10 @@ const ListUnified: React.FC<ListUnifiedProps> = ({
               Unified Listing Desk
             </p>
             <h1 className="text-3xl font-bold text-gray-900">
-              List land, services, or agrovets from one page
+              Post a listing in one place
             </h1>
             <p className="text-gray-600">
-              Pick what you are listing, and we’ll load the right form, documents, and monetization options.
+              Choose what you’re listing and we’ll load the right form, documents, and fees automatically.
             </p>
           </div>
           {activeCard && (
