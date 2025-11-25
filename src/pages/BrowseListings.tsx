@@ -187,6 +187,11 @@ const BrowseListings: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+      {process.env.REACT_APP_SALE_LISTINGS_PAUSED === 'true' && (
+        <div className="rounded-lg border-l-4 border-yellow-400 bg-yellow-50 text-yellow-800 px-4 py-3">
+          Sale listings are temporarily paused — you will only see rental listings. Contact support to be notified when sales reopen.
+        </div>
+      )}
       <div className="bg-white rounded-3xl border border-green-100 shadow-sm p-6 md:p-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>

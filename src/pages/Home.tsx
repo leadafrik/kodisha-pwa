@@ -181,7 +181,7 @@ const Home: React.FC = () => {
 
           <div className="grid md:grid-cols-4 gap-6">
             {[
-              { title: "Agricultural Land", emoji: "🌾", desc: "For sale or rent" },
+              { title: "Agricultural Land", emoji: "🌾", desc: "For rent (sale paused)" },
               { title: "Equipment & Tools", emoji: "🚜", desc: "Tractors & machinery" },
               { title: "Professional Services", emoji: "👨‍💼", desc: "Farm consulting" },
               { title: "Farm Produce", emoji: "🥕", desc: "Fresh from farmers" },

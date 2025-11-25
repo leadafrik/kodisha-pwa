@@ -151,6 +151,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
   });
   
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
+    const saleListingsPaused = process.env.REACT_APP_SALE_LISTINGS_PAUSED === 'true';
   const [uploading, setUploading] = useState(false);
   const [constituencies, setConstituencies] = useState<{value: string; label: string}[]>([]);
   const [wards, setWards] = useState<{value: string; label: string}[]>([]);
@@ -571,6 +572,12 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-gray-800 mb-2">List Your Farmland</h1>
       <p className="text-gray-600 mb-8">Connect with farmers across Kenya â€” list your land for rent/lease with clear pricing and trust signals.</p>
+
+      {saleListingsPaused && (
+        <div className="mb-6 rounded-lg border-l-4 border-yellow-400 bg-yellow-50 text-yellow-800 px-4 py-3">
+          Note: Listing land for sale is temporarily paused. You can still create rental/lease listings. Contact <a className="font-semibold underline" href="mailto:support@kodisha.app">support@kodisha.app</a> to be notified when sales reopen.
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
         <div className="mb-6 space-y-4 rounded-2xl border border-green-200 bg-green-50/40 p-4">
