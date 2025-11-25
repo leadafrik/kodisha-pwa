@@ -2,8 +2,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders Kodisha brand in navbar', () => {
+test('renders Kodisha home link', () => {
   render(<App />);
-  const brand = screen.getByText(/Kodisha/i);
-  expect(brand).toBeInTheDocument();
+  const homeLink = screen.getByRole('link', { name: /Kodisha/i });
+  expect(homeLink).toBeInTheDocument();
 });
