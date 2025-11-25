@@ -17,6 +17,7 @@ import ListingDetails from './pages/ListingDetails';
 import NotFound from './pages/NotFound';
 import ServerError from './pages/ServerError';
 import Offline from './pages/Offline';
+import PaymentTestPanel from './pages/PaymentTestPanel';
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
@@ -78,6 +79,14 @@ function App() {
                       }
                     />
                     <Route path="/backend-test" element={<BackendTest />} />
+                    <Route 
+                      path="/payment-test" 
+                      element={
+                        <ProtectedRoute>
+                          <PaymentTestPanel />
+                        </ProtectedRoute>
+                      } 
+                    />
                     <Route path="/verify-phone" element={<PhoneVerification />} />
                     <Route path="/verify" element={<VerificationWizard />} />
                     <Route path="/listings/:id" element={<ListingDetails />} />
