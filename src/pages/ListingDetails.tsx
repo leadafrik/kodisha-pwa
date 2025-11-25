@@ -5,6 +5,11 @@ import ListingMap from "../components/ListingMap";
 import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
 import { io, Socket } from "socket.io-client";
 
+// Helper: Get auth token (user or admin)
+const getAuthToken = (): string | null => {
+  return localStorage.getItem("kodisha_token") || localStorage.getItem("kodisha_admin_token");
+};
+
 interface Message {
   _id?: string;
   from: string;
@@ -31,46 +36,11 @@ const ListingDetails: React.FC = () => {
     setLoading(true);
     try {
       if (!id) return;
-
-      // Try multiple endpoints so the details page can show land, services, agrovets, or products
-      const candidates = [
-        API_ENDPOINTS.properties.getById(id as string),
-        `${API_BASE_URL}/services/equipment/${id}`,
-        `${API_BASE_URL}/services/professional/${id}`,
-        `${API_BASE_URL}/agrovets/${id}`,
-        `${API_BASE_URL}/products/${id}`,
-      ];
-
-      let found: any = null;
-      let foundType: string | null = null;
-
-      for (const url of candidates) {
-        try {
-          const res = await fetch(url);
-          // Try to parse — some endpoints return { success, data }
-          const txt = await res.text();
-          if (!txt) continue;
-          const data = JSON.parse(txt);
-          if (res.ok && data && (data.data || data.success)) {
-            found = data.data || data;
-            // Infer type from the url
-            if (url.includes('/services/equipment')) foundType = 'equipment';
-            else if (url.includes('/services/professional')) foundType = 'professional';
-            else if (url.includes('/agrovets')) foundType = 'agrovet';
-            else if (url.includes('/products')) foundType = 'product';
-            else foundType = 'land';
-            break;
-          }
-        } catch (e) {
-          // ignore and try next
-        }
-      }
-
-      if (found) {
-        setListing(found);
-        setListingType(foundType);
-      } else {
-        setListing(null);
+      const res = await fetch(API_ENDPOINTS.properties.getById(id as string));
+      const data = await res.json();
+      if (data.success && data.data) {
+        setListing(data.data);
+        setListingType(data.data.listingType || "land");
       }
     } catch (err) {
       console.error("Error fetching listing:", err);
@@ -80,15 +50,11 @@ const ListingDetails: React.FC = () => {
 
   const fetchMessages = async (ownerId: string) => {
     try {
-      const token =
-        localStorage.getItem("kodisha_token") ||
-        localStorage.getItem("kodisha_admin_token");
+      const token = getAuthToken();
       if (!token) return; // chat only for logged in users
 
       const res = await fetch(API_ENDPOINTS.messages.withUser(ownerId), {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
       if (data.success) {
@@ -100,9 +66,7 @@ const ListingDetails: React.FC = () => {
   };
 
   const setupSocket = (ownerId: string) => {
-    const token =
-      localStorage.getItem("kodisha_token") ||
-      localStorage.getItem("kodisha_admin_token");
+    const token = getAuthToken();
     if (!token) return;
 
     if (socketRef.current) {
@@ -162,9 +126,7 @@ const ListingDetails: React.FC = () => {
     if (!newMessage.trim() || !listing?.owner?._id) return;
     setSending(true);
     try {
-      const token =
-        localStorage.getItem("kodisha_token") ||
-        localStorage.getItem("kodisha_admin_token");
+      const token = getAuthToken();
       if (!token) {
         alert("Please log in to chat with the seller.");
         return;
