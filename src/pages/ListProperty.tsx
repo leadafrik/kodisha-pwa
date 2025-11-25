@@ -4,8 +4,6 @@ import { useProperties } from '../contexts/PropertyContext';
 import { useAuth } from '../contexts/AuthContext';
 import { PropertyFormData } from '../types/property';
 import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from '../data/kenyaCounties';
-import GoogleMapsLoader from '../components/GoogleMapsLoader';
-import MapPicker from '../components/MapPicker';
 import { initiatePaymentFlow } from '../utils/paymentHelpers';
 import { API_BASE_URL } from '../config/api';
 
@@ -35,25 +33,18 @@ const LISTING_PLAN_OPTIONS: ListingPlanOption[] = [
     duration: '1 month',
   },
   {
-    id: 'basic',
-    name: 'Basic Listing',
-    price: 49,
-    subtitle: 'KSh 49 - One-week listing with verified badge.',
-    duration: '1 week',
-  },
-  {
     id: 'verified',
-    name: 'Verified Listing',
+    name: 'Per Listing',
     price: 99,
-    subtitle: 'KSh 99 - Three-week priority placement.',
-    duration: '3 weeks',
+    subtitle: 'KSh 99 or 0.5% of deal value (whichever is higher). Includes verification & priority review.',
+    duration: 'Listing lifecycle',
   },
   {
     id: 'premium',
-    name: 'Premium Boosted Listing',
-    price: 199,
-    subtitle: 'KSh 199 - Two-month featured exposure.',
-    duration: '2 months',
+    name: 'Annual Subscription',
+    price: 699,
+    subtitle: 'KSh 699 / year - unlimited listings with priority support and trust badge eligibility.',
+    duration: '12 months',
   },
 ];
 
@@ -670,6 +661,9 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
             <p className="text-xs text-gray-500">
               Payment (M-Pesa STK push) triggers only after an admin approves the listing.
             </p>
+            <p className="text-xs text-gray-500">
+              Per listing: KSh 99 minimum or 0.5% of the deal value (whichever is higher). Or choose the KSh 699/year unlimited plan.
+            </p>
           </div>
         </div>
 
@@ -886,28 +880,6 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
             />
           </div>
           
-          <GoogleMapsLoader>
-            <div className="mb-4">
-             <label className="block font-semibold mb-1 text-gray-800">
-               Select Land Location on Map
-             </label>
-
-            <MapPicker
-              onChange={(coords) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  latitude: coords.lat,
-                  longitude: coords.lng,
-                }));
-             }}
-           />
-
-           <p className="text-xs text-gray-500 mt-1">
-            Tap anywhere on the map to drop a pin.
-           </p>
-        </div>
-      </GoogleMapsLoader>
-
           <div>
             <label className="block text-gray-700 mb-2">Soil Type *</label>
             <select
