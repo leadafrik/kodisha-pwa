@@ -39,9 +39,11 @@ export const handleApiError = (error: any): ApiError => {
         details: data,
       };
     case 401:
-      // Unauthorized - clear auth and redirect to login
+      // Unauthorized - clear auth and optionally redirect (skip navigation in test environment to avoid jsdom warnings)
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'test') {
+        window.location.href = '/login';
+      }
       return {
         message: 'Your session has expired. Please log in again.',
         code: 'UNAUTHORIZED',
