@@ -44,8 +44,7 @@ const Login: React.FC = () => {
 
   const [signupData, setSignupData] = useState({
     name: "",
-    email: "",
-    phone: "",
+    emailOrPhone: "",
     password: "",
     confirmPassword: "",
     userType: "buyer" as "buyer" | "seller" | "service_provider",
@@ -109,15 +108,18 @@ const Login: React.FC = () => {
       return;
     }
     
-    // Require either email OR phone
-    if (!signupData.email.trim() && !signupData.phone.trim()) {
-      setError("Please provide either email or phone number.");
+    if (!signupData.emailOrPhone.trim()) {
+      setError("Please provide email or phone number.");
       return;
     }
 
-    // Validate phone if provided (must be 10 digits)
-    if (signupData.phone.trim() && !/^\d{10}$/.test(signupData.phone.trim())) {
-      setError("Phone number must be exactly 10 digits (e.g., 712345678)");
+    // Detect if input is email or phone
+    const input = signupData.emailOrPhone.trim();
+    const isEmail = input.includes('@');
+    const isPhone = /^0?\d{9,10}$/.test(input); // Matches 0720040812 or 720040812
+
+    if (!isEmail && !isPhone) {
+      setError("Please enter a valid email or 10-digit phone number.");
       return;
     }
     
@@ -143,22 +145,28 @@ const Login: React.FC = () => {
   }) => {
     if (!pendingSignupData) return;
 
-    // Prepend +254 to phone if provided, strip leading 0 if present
-    let formattedPhone = undefined;
-    if (pendingSignupData.phone.trim()) {
-      let phoneDigits = pendingSignupData.phone.trim();
-      // Remove leading 0 if present (e.g., 0720040812 -> 720040812)
+    const input = pendingSignupData.emailOrPhone.trim();
+    const isEmail = input.includes('@');
+    
+    let email = undefined;
+    let phone = undefined;
+
+    if (isEmail) {
+      email = input;
+    } else {
+      // It's a phone number - strip leading 0 and add +254
+      let phoneDigits = input;
       if (phoneDigits.startsWith('0')) {
         phoneDigits = phoneDigits.substring(1);
       }
-      formattedPhone = `+254${phoneDigits}`;
+      phone = `+254${phoneDigits}`;
     }
 
     try {
       await register({
         name: pendingSignupData.name,
-        phone: formattedPhone,
-        email: pendingSignupData.email.trim() || undefined,
+        phone: phone,
+        email: email,
         password: pendingSignupData.password,
         type: pendingSignupData.userType,
         county: pendingSignupData.county,
@@ -317,45 +325,20 @@ const Login: React.FC = () => {
         />
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Email <span className="text-xs text-gray-500">(Email or Phone required)</span>
-          </label>
-          <input
-            type="email"
-            name="email"
-            value={signupData.email}
-            onChange={(e) =>
-              setSignupData((prev) => ({ ...prev, email: e.target.value }))
-            }
-            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-            placeholder="you@example.com"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Phone Number <span className="text-xs text-gray-500">(or Email)</span>
-          </label>
-          <div className="flex">
-            <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-600 text-sm">
-              +254
-            </span>
-            <input
-              type="tel"
-              name="phone"
-              value={signupData.phone}
-              onChange={(e) => {
-                const value = e.target.value.replace(/\D/g, '').slice(0, 10);
-                setSignupData((prev) => ({ ...prev, phone: value }))
-              }}
-              className="flex-1 border border-gray-300 rounded-r-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-              placeholder="712345678"
-              maxLength={10}
-            />
-          </div>
-          <p className="text-xs text-gray-500 mt-1">10 digits, e.g., 712345678</p>
-        </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Email or Phone Number *</label>
+        <input
+          type="text"
+          name="emailOrPhone"
+          value={signupData.emailOrPhone}
+          onChange={(e) =>
+            setSignupData((prev) => ({ ...prev, emailOrPhone: e.target.value }))
+          }
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+          placeholder="you@example.com or 0712345678"
+          required
+        />
+        <p className="text-xs text-gray-500 mt-1">Enter your email or 10-digit phone number</p>
       </div>
       
       <div className="grid grid-cols-2 gap-3">
