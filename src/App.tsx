@@ -24,6 +24,7 @@ const ListingDetails = lazy(() => import('./pages/ListingDetails'));
 const PaymentTestPanel = lazy(() => import('./pages/PaymentTestPanel'));
 const TermsOfService = lazy(() => import('./pages/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const Moderation = lazy(() => import('./pages/Moderation'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -106,6 +107,7 @@ function App() {
                     <Route path="/verify-phone" element={<PhoneVerification />} />
                     <Route path="/verify" element={<VerificationWizard />} />
                     <Route path="/listings/:id" element={<ListingDetails />} />
+                    <Route path="/admin/moderation" element={<Moderation />} />
                     <Route path="/legal/terms" element={<TermsOfService />} />
                     <Route path="/legal/privacy" element={<PrivacyPolicy />} />
                     <Route path="/error" element={<ServerError />} />
