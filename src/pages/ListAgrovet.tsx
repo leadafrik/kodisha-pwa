@@ -3,6 +3,7 @@ import { useProperties } from '../contexts/PropertyContext';
 import { Link } from 'react-router-dom';
 import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from '../data/kenyaCounties';
 import { initiatePaymentFlow } from '../utils/paymentHelpers';
+import { PAYMENTS_ENABLED } from '../config/featureFlags';
 
 interface AgrovetFormData {
   name: string;
@@ -351,7 +352,7 @@ const ListAgrovet: React.FC = () => {
         result?.data?._id || result?.data?.id || result?.service?._id || result?.service?.id;
 
       let paymentNote = "";
-      if (totalMonetizationFee > 0 && listingId) {
+      if (PAYMENTS_ENABLED && totalMonetizationFee > 0 && listingId) {
         try {
           await initiatePaymentFlow({
             targetType: "agrovet",
@@ -366,12 +367,11 @@ const ListAgrovet: React.FC = () => {
         }
       }
 
-      const feeNote =
-        totalMonetizationFee > 0
-          ? `${monetizationSummaryLabel} for ${formatKenyanPrice(
-              totalMonetizationFee
-            )}.${paymentNote}`
-          : "You used your free listing credit.";
+      const feeNote = !PAYMENTS_ENABLED
+        ? 'Launch period: listing is free. No payment required.'
+        : totalMonetizationFee > 0
+          ? `${monetizationSummaryLabel} for ${formatKenyanPrice(totalMonetizationFee)}.${paymentNote}`
+          : 'You used your free listing credit.';
       alert(
         `Agrovet listed successfully! It will appear after verification. ${feeNote}`
       );
@@ -478,10 +478,12 @@ const ListAgrovet: React.FC = () => {
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
         <div className="mb-6 space-y-4 rounded-2xl border border-green-200 bg-green-50/40 p-4">
           <div>
-            <h2 className="text-xl font-semibold text-gray-800">Monetized Listing Options</h2>
-            <p className="text-sm text-gray-600">
-              Annual subscription unlocks boosted exposure; add optional verification and boosts.
-            </p>
+            <h2 className="text-xl font-semibold text-gray-800">Listing Visibility Options</h2>
+            {PAYMENTS_ENABLED ? (
+              <p className="text-sm text-gray-600">Annual subscription unlocks boosted exposure; add optional verification and boosts.</p>
+            ) : (
+              <p className="text-sm text-green-700 font-semibold">Launch Offer: All plans and boosts are free while we onboard early partners.</p>
+            )}
           </div>
           <div className="grid gap-3 md:grid-cols-4">
             {LISTING_PLAN_OPTIONS.map((plan) => {
@@ -546,15 +548,15 @@ const ListAgrovet: React.FC = () => {
             </label>
           </div>
           <div className="rounded-lg border border-dashed border-green-200 bg-white p-3 text-sm text-gray-700">
-            <p className="font-semibold text-gray-900">
-              Total commitment: {formatKenyanPrice(totalMonetizationFee)}
-            </p>
-            <p>
-              Subscription lasts {selectedPlanDetails.duration}; renew from your profile when it expires.
-            </p>
-            <p className="text-xs text-gray-500">
-              Payment (M-Pesa) will run after admin approval.
-            </p>
+            {PAYMENTS_ENABLED ? (
+              <>
+                <p className="font-semibold text-gray-900">Total commitment: {formatKenyanPrice(totalMonetizationFee)}</p>
+                <p>Subscription lasts {selectedPlanDetails.duration}; renew from your profile when it expires.</p>
+                <p className="text-xs text-gray-500">Payment will run after admin approval.</p>
+              </>
+            ) : (
+              <p className="font-semibold text-green-700">Launch Period: No fees or payment processing yet—focus on accurate, high-quality agrovet data.</p>
+            )}
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

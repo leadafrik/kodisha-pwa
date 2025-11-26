@@ -27,7 +27,7 @@ const Footer: React.FC = () => {
               Privacy Policy
             </Link>
             <a
-              href="mailto:support@kodisha.co.ke"
+              href="mailto:kodisha.254.ke@gmail.com"
               className="text-gray-600 hover:text-green-700 hover:underline transition"
             >
               Contact Support
@@ -63,8 +63,8 @@ const Footer: React.FC = () => {
           </p>
           <p className="mt-2">
             For data protection inquiries:{' '}
-            <a href="mailto:dpo@kodisha.co.ke" className="text-green-700 hover:underline">
-              dpo@kodisha.co.ke
+            <a href="mailto:kodisha.254.ke@gmail.com" className="text-green-700 hover:underline">
+              kodisha.254.ke@gmail.com
             </a>
           </p>
         </div>

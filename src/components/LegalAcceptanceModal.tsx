@@ -306,8 +306,7 @@ const LegalAcceptanceModal: React.FC<LegalAcceptanceModalProps> = ({
           {/* Contact Info */}
           <div className="bg-gray-50 rounded-lg p-4 text-xs text-gray-600">
             <p className="font-semibold text-gray-900 mb-2">Questions or Concerns?</p>
-            <p>Data Protection Officer: <a href="mailto:dpo@kodisha.co.ke" className="text-green-600 hover:underline">dpo@kodisha.co.ke</a></p>
-            <p>Support: <a href="mailto:support@kodisha.co.ke" className="text-green-600 hover:underline">support@kodisha.co.ke</a></p>
+            <p>Contact Email: <a href="mailto:kodisha.254.ke@gmail.com" className="text-green-600 hover:underline">kodisha.254.ke@gmail.com</a></p>
             <p className="mt-2">Office of the Data Protection Commissioner: <a href="https://www.odpc.go.ke" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:underline">www.odpc.go.ke</a></p>
           </div>
         </div>

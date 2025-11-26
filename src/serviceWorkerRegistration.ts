@@ -12,11 +12,22 @@ type Config = {
 };
 
 export function register(config?: Config) {
-  // We'll implement this later
-  console.log('Service worker registration placeholder');
+  if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
+    navigator.serviceWorker
+      .register('/service-worker.js')
+      .then(reg => {
+        if (config?.onSuccess) config.onSuccess(reg);
+      })
+      .catch(() => {
+        /* silent */
+      });
+  }
 }
 
 export function unregister() {
-  // We'll implement this later
-  console.log('Service worker unregistration placeholder');
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      regs.forEach(r => r.unregister());
+    });
+  }
 }

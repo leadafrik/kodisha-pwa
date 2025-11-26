@@ -1,4 +1,5 @@
 import React from 'react';
+import { PAYMENTS_ENABLED } from '../config/featureFlags';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -12,23 +13,25 @@ const Home: React.FC = () => {
         <div className="max-w-6xl mx-auto">
           <div className="space-y-8">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 text-green-700 text-sm font-semibold tracking-wide">
-              <span className="w-2 h-2 rounded-full bg-green-600"></span>
-              Kenya's #1 Agricultural Marketplace
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 text-green-700 text-xs sm:text-sm font-semibold tracking-wide">
+              <span className="w-2 h-2 rounded-full bg-green-600" aria-hidden="true"></span>
+              Early Access Launch • Free Listings
             </div>
 
             {/* Headline */}
             <div className="space-y-4">
               <h1 className="text-5xl sm:text-6xl font-extrabold text-gray-900 leading-tight">
-                Buy. Sell. Connect.
+                Agriculture. Simplified.
                 <br />
                 <span className="bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
-                  Grow Together.
+                  Discover • List • Connect
                 </span>
               </h1>
-              <p className="text-xl text-gray-600 max-w-2xl leading-relaxed">
-                Access Kenya's largest network of agricultural land, equipment, services, and produce. 
-                Verified sellers, real-time chat, secure payments—all in one app.
+              <p className="text-lg sm:text-xl text-gray-600 max-w-2xl leading-relaxed">
+                One platform for land, equipment, services, and produce across Kenya—built for clarity, trust, and speed.
+                {!PAYMENTS_ENABLED && (
+                  <span className="block mt-3 font-semibold text-green-700">Introductory Phase: Listing is free while we onboard early users.</span>
+                )}
               </p>
             </div>
 
@@ -54,24 +57,14 @@ const Home: React.FC = () => {
               </Link>
             </div>
 
-            {/* Trust Badges */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-12 border-t border-gray-200">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-green-600">47</div>
-                <div className="text-sm text-gray-600 mt-1">Counties</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-green-600">10K+</div>
-                <div className="text-sm text-gray-600 mt-1">Active Listings</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-green-600">Verified</div>
-                <div className="text-sm text-gray-600 mt-1">Sellers & Buyers</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-green-600">Live</div>
-                <div className="text-sm text-gray-600 mt-1">In-App Chat</div>
-              </div>
+            {/* Trust Signals (simple & realistic) */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-10 border-t border-gray-200">
+              {[{label:'Counties Reach',value:'47'},{label:'Launch Users',value:'Early'},{label:'Identity Verification',value:'Enabled'},{label:'In‑App Chat',value:'Live'}].map((item) => (
+                <div key={item.label} className="text-center">
+                  <div className="text-2xl font-bold text-green-600">{item.value}</div>
+                  <div className="text-xs sm:text-sm text-gray-600 mt-1">{item.label}</div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -81,10 +74,8 @@ const Home: React.FC = () => {
       <section className="py-20 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Why Choose Kodisha?</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Everything you need to succeed in Kenya's agricultural economy
-            </p>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Built For Agricultural Trade</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">Identity verification, discovery, communication, and trust features are live. Payments will be introduced later with notice.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -114,18 +105,28 @@ const Home: React.FC = () => {
               </p>
             </div>
 
-            {/* Feature 3 */}
-            <div className="p-8 rounded-2xl border border-gray-200 hover:border-green-300 hover:shadow-lg transition">
-              <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+            {/* Payments feature tile switches when enabled */}
+            {PAYMENTS_ENABLED ? (
+              <div className="p-8 rounded-2xl border border-gray-200 hover:border-green-300 hover:shadow-lg transition">
+                <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center mb-4">
+                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Secure Payments</h3>
+                <p className="text-gray-600">Instant mobile money integration for seamless transactions.</p>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">M-Pesa Ready</h3>
-              <p className="text-gray-600">
-                Secure M-Pesa integration. Send and receive payments instantly with ease.
-              </p>
-            </div>
+            ) : (
+              <div className="p-8 rounded-2xl border border-gray-200 hover:border-green-300 hover:shadow-lg transition">
+                <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center mb-4">
+                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Free Launch</h3>
+                <p className="text-gray-600">All listings are currently free while we onboard Kenya's agricultural community.</p>
+              </div>
+            )}
 
             {/* Feature 4 */}
             <div className="p-8 rounded-2xl border border-gray-200 hover:border-green-300 hover:shadow-lg transition">
@@ -181,7 +182,7 @@ const Home: React.FC = () => {
 
           <div className="grid md:grid-cols-4 gap-6">
             {[
-              { title: "Agricultural Land", emoji: "🌾", desc: "For rent (sale paused)" },
+              { title: "Agricultural Land", emoji: "🌾", desc: "For rent / lease" },
               { title: "Equipment & Tools", emoji: "🚜", desc: "Tractors & machinery" },
               { title: "Professional Services", emoji: "👨‍💼", desc: "Farm consulting" },
               { title: "Farm Produce", emoji: "🥕", desc: "Fresh from farmers" },
@@ -199,24 +200,13 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* STATS SECTION */}
-      <section className="py-20 px-4 bg-green-600">
+      {/* TRUST STRIP */}
+      <section className="py-14 px-4 bg-green-700">
         <div className="max-w-6xl mx-auto text-center text-white">
-          <h2 className="text-4xl font-bold mb-12">Trusted by Thousands</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div>
-              <div className="text-5xl font-bold mb-2">10K+</div>
-              <p className="text-green-100">Active Listings Monthly</p>
-            </div>
-            <div>
-              <div className="text-5xl font-bold mb-2">5K+</div>
-              <p className="text-green-100">Verified Users</p>
-            </div>
-            <div>
-              <div className="text-5xl font-bold mb-2">Secure</div>
-              <p className="text-green-100">M-Pesa Payments</p>
-            </div>
-          </div>
+          <h2 className="text-3xl font-bold mb-6">Core Features Live • Payments Later</h2>
+          <p className="max-w-2xl mx-auto text-green-100 text-sm sm:text-base">
+            Identity verification, document uploads, moderation workflow, and in‑app messaging are active. Listing fees and payment processing will be announced before activation.
+          </p>
         </div>
       </section>
 
@@ -249,40 +239,40 @@ const Home: React.FC = () => {
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-gray-200 bg-gray-900 text-white">
+      <footer className="border-t border-gray-200 bg-gray-950 text-gray-300">
         <div className="max-w-6xl mx-auto px-4 py-12">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <h4 className="font-bold mb-4">Kodisha</h4>
-              <p className="text-gray-400 text-sm">
-                Kenya's agricultural marketplace connecting buyers and sellers.
-              </p>
+          <div className="grid md:grid-cols-5 gap-8 mb-10">
+            <div className="md:col-span-2">
+              <h4 className="text-lg font-bold mb-4 text-white">Kodisha</h4>
+              <p className="text-sm leading-relaxed">A focused agricultural marketplace for Kenya—streamlining discovery of land, equipment, professional services, and produce. Currently free while we expand coverage; listing fees and payments will be introduced later.</p>
             </div>
             <div>
-              <h4 className="font-bold mb-4">Quick Links</h4>
-              <ul className="text-sm text-gray-400 space-y-2">
-                <li><Link to="/browse" className="hover:text-white">Browse</Link></li>
-                <li><Link to={user ? "/list" : "/login"} className="hover:text-white">List</Link></li>
-                <li><Link to="/profile" className="hover:text-white">Profile</Link></li>
+              <h5 className="font-semibold mb-3 text-white">Platform</h5>
+              <ul className="space-y-2 text-sm">
+                <li><Link to="/browse" className="hover:text-white">Browse Listings</Link></li>
+                <li><Link to={user ? "/list" : "/login"} className="hover:text-white">Create Listing</Link></li>
+                <li><Link to="/profile" className="hover:text-white">Your Profile</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-bold mb-4">Support</h4>
-              <ul className="text-sm text-gray-400 space-y-2">
-                <li><a href="mailto:support@kodisha.app" className="hover:text-white">Help</a></li>
-                <li><a href="#" className="hover:text-white">Privacy</a></li>
-                <li><a href="#" className="hover:text-white">Terms</a></li>
+              <h5 className="font-semibold mb-3 text-white">Legal</h5>
+              <ul className="space-y-2 text-sm">
+                <li><Link to="/terms" className="hover:text-white">Terms of Service</Link></li>
+                <li><Link to="/privacy" className="hover:text-white">Privacy Policy</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-bold mb-4">Contact</h4>
-              <p className="text-sm text-gray-400">
-                <a href="tel:+254712345678" className="hover:text-white">+254 (0) 712 345 678</a>
-              </p>
+              <h5 className="font-semibold mb-3 text-white">Contact</h5>
+              <ul className="space-y-2 text-sm">
+                <li><a href="https://wa.me/254796389192" className="hover:text-white" rel="noopener noreferrer">WhatsApp: +254 796 389 192</a></li>
+                <li><a href="mailto:kodisha.254.ke@gmail.com" className="hover:text-white">Email: kodisha.254.ke@gmail.com</a></li>
+              </ul>
+              <p className="text-xs text-gray-500 mt-4">All correspondence: kodisha.254.ke@gmail.com</p>
             </div>
           </div>
-          <div className="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
-            <p>&copy; {new Date().getFullYear()} Kodisha. All rights reserved. | Agricultural Marketplace for Kenya</p>
+          <div className="border-t border-gray-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
+            <p>&copy; {new Date().getFullYear()} Kodisha. All rights reserved.</p>
+            <p>Currently free: listing fees and in‑app payments not yet active.</p>
           </div>
         </div>
       </footer>

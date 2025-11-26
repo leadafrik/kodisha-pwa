@@ -146,31 +146,31 @@ Users providing professional agricultural services (agronomists, veterinarians, 
 
 ---
 
-## 7. PAYMENT TERMS
+## 7. LAUNCH PERIOD
 
-### 7.1 Platform Fees
-- **Land Listings**: First listing free; subsequent listings KSh 99 or 0.5% of annual rent (whichever is higher); or KSh 699/year unlimited subscription
-- **Service/Equipment Listings**: KSh 599/year subscription with optional boost packages
-- **Agrovet Listings**: KSh 599/year subscription
-- **Product Listings**: 0.5% commission or KSh 49 minimum per transaction; or KSh 499/year unlimited subscription
-- **Transaction Fees**: May apply to payments processed through the Platform
-- **Boost Packages**: Optional daily (KSh 50), weekly (KSh 199), monthly (KSh 599) visibility upgrades
+### 7.1 Free Listings
+During the initial launch period, all listing types (land, equipment, services, agrovet, products) are free. No subscription, commission, boost, or verification fees are currently charged.
 
-### 7.2 Payment Processing
-- All payments are processed through M-Pesa or other approved payment gateways
-- You authorize Kodisha to charge your payment method for applicable fees
-- Fees are non-refundable except as required by Kenyan consumer protection law
-- We reserve the right to modify fees with 30 days' notice
+### 7.2 Future Monetization (Advance Notice)
+Planned future fees (subject to change before activation):
+- Listing plans (flat fee or percentage model)
+- Optional visibility boosts
+- Verification tiers
+- Transaction commissions (product sales, rentals, services)
 
-### 7.3 Transaction Payments
-- Rental payments, service fees, and product purchases are between Users
-- Kodisha may facilitate payment escrow services (future feature)
-- Users are responsible for issuing compliant receipts and invoices
+You will receive at least 30 days' notice before any fee activation. Continued use after notice will constitute acceptance of updated fee terms.
+
+### 7.3 Payments Status
+In-platform payment flows (e.g., mobile money integration) are currently disabled. Users must independently arrange any off-platform payments. Kodisha does not process, hold, escrow, or guarantee payments during this period.
 
 ### 7.4 Taxes
-- All fees are exclusive of VAT and other applicable taxes
-- Users are responsible for their own tax obligations
-- We may withhold taxes as required by the Kenya Revenue Authority (KRA)
+Because fees are not being charged during the launch period, no VAT or commission-related tax withholding applies. Users remain responsible for taxes on any independent transactions they arrange.
+
+### 7.5 Prohibited Charging
+Users may not misrepresent platform status or imply official Kodisha payment facilitation while payments are not yet active.
+
+### 7.6 Transition
+When payments go live, updated Terms will replace this section and outline fee structures, payment processing, refund rules, and tax handling.
 
 ---
 
@@ -375,10 +375,10 @@ You may not assign or transfer these Terms without our written consent. We may a
 Neither party is liable for failure to perform due to circumstances beyond reasonable control, including acts of God, war, terrorism, riots, embargoes, acts of civil or military authorities, fire, floods, earthquakes, pandemic, or strikes.
 
 ### 16.8 Notices
-Legal notices must be sent to:
-- **Kodisha Limited**  
-  [To be provided by legal team]  
-  Email: legal@kodisha.co.ke
+Legal notices & formal correspondence:
+- **Kodisha Limited**
+- Email: kodisha.254.ke@gmail.com
+- WhatsApp (Support): +254796389192
 
 ### 16.9 Language
 These Terms are drafted in English. Any translation is provided for convenience only. In case of conflict, the English version prevails.
@@ -409,12 +409,12 @@ Livestock sales must comply with the Prevention of Cruelty to Animals Act. Anima
 For questions, concerns, or notices regarding these Terms:
 
 **Kodisha Limited**  
-Email: support@kodisha.co.ke  
-Phone: [To be provided]  
-Address: [To be provided by legal team]
+Email: kodisha.254.ke@gmail.com  
+WhatsApp: +254796389192  
+Registered Office: Kenya
 
 **Data Protection Officer**  
-Email: dpo@kodisha.co.ke
+Email: kodisha.254.ke@gmail.com
 
 ---
 
@@ -433,4 +433,4 @@ Email: dpo@kodisha.co.ke
 
 ---
 
-*These Terms of Service are a draft template and should be reviewed and finalized by qualified legal counsel licensed to practice in Kenya before implementation.*
+*Fees and in‑platform payments are currently inactive during launch. Users will be notified before any payment features or listing fees go live.*

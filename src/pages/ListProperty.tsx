@@ -6,6 +6,7 @@ import { PropertyFormData } from '../types/property';
 import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from '../data/kenyaCounties';
 import { initiatePaymentFlow } from '../utils/paymentHelpers';
 import { API_BASE_URL } from '../config/api';
+import { PAYMENTS_ENABLED } from '../config/featureFlags';
 
 const DRAFT_STORAGE_KEY = 'listPropertyDraft';
 const FIRST_LISTING_FREE_KEY = 'kodisha_first_listing_free_used';
@@ -456,7 +457,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
       }
 
       let paymentNote = "";
-      if (totalMonetizationFee > 0 && listingId) {
+      if (PAYMENTS_ENABLED && totalMonetizationFee > 0 && listingId) {
         try {
           await initiatePaymentFlow({
             targetType: "land",
@@ -472,12 +473,11 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
         }
       }
 
-      const feeNote =
-        totalMonetizationFee > 0
-          ? `${monetizationSummaryLabel} for a total of ${formatKenyanPrice(
-              totalMonetizationFee
-            )}.${paymentNote}`
-          : "You used your free listing credit.";
+      const feeNote = !PAYMENTS_ENABLED
+        ? 'Launch period: listing is free. No payment required.'
+        : totalMonetizationFee > 0
+          ? `${monetizationSummaryLabel} for a total of ${formatKenyanPrice(totalMonetizationFee)}.${paymentNote}`
+          : 'You used your free listing credit.';
       alert(
         `Property submitted! An admin will review and verify it shortly. ${feeNote}`
       );
@@ -575,17 +575,19 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
 
       {saleListingsPaused && (
         <div className="mb-6 rounded-lg border-l-4 border-yellow-400 bg-yellow-50 text-yellow-800 px-4 py-3">
-          Note: Listing land for sale is temporarily paused. You can still create rental/lease listings. Contact <a className="font-semibold underline" href="mailto:support@kodisha.app">support@kodisha.app</a> to be notified when sales reopen.
+          Note: Listing land for sale is temporarily paused. You can still create rental/lease listings. Contact <a className="font-semibold underline" href="mailto:kodisha.254.ke@gmail.com">kodisha.254.ke@gmail.com</a> to be notified when sales reopen.
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
         <div className="mb-6 space-y-4 rounded-2xl border border-green-200 bg-green-50/40 p-4">
           <div>
-            <h2 className="text-xl font-semibold text-gray-800">Monetized Listing Options</h2>
-            <p className="text-sm text-gray-600">
-              First listing is free. Paid plans, boosts, and verification tiers add visibility and trust. The total payable after approval is shown below.
-            </p>
+            <h2 className="text-xl font-semibold text-gray-800">Listing Visibility Options</h2>
+            {PAYMENTS_ENABLED ? (
+              <p className="text-sm text-gray-600">First listing is free. Paid plans, boosts, and verification tiers add visibility and trust. The total payable after approval is shown below.</p>
+            ) : (
+              <p className="text-sm text-green-700 font-semibold">Launch Offer: All listing plans, boosts, and verification actions are currently free.</p>
+            )}
           </div>
           <div className="grid gap-3 md:grid-cols-4">
             {LISTING_PLAN_OPTIONS.map((plan) => {
@@ -657,20 +659,15 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
             </label>
           </div>
           <div className="rounded-lg border border-dashed border-green-200 bg-white p-3 text-sm text-gray-700">
-            <p className="font-semibold text-gray-900">
-              Total payable after approval: {formatKenyanPrice(totalMonetizationFee)}
-            </p>
-            <p>
-              {firstListingFreeAvailable
-                ? 'Your first listing credit is still active; you only pay once you opt into a paid plan or boost.'
-                : 'First listing credit used - this listing is covered by paid plans, boosts, and verification fees.'}
-            </p>
-            <p className="text-xs text-gray-500">
-              Payment (M-Pesa STK push) triggers only after an admin approves the listing.
-            </p>
-            <p className="text-xs text-gray-500">
-              Per listing: KSh 99 minimum or 0.5% of the deal value (whichever is higher). Or choose the KSh 699/year unlimited plan.
-            </p>
+            {PAYMENTS_ENABLED ? (
+              <>
+                <p className="font-semibold text-gray-900">Total payable after approval: {formatKenyanPrice(totalMonetizationFee)}</p>
+                <p>{firstListingFreeAvailable ? 'Your first listing credit is still active; you only pay once you opt into a paid plan or boost.' : 'First listing credit used - this listing is covered by paid plans, boosts, and verification fees.'}</p>
+                <p className="text-xs text-gray-500">Payment triggers only after an admin approves the listing.</p>
+              </>
+            ) : (
+              <p className="font-semibold text-green-700">Launch Period: No fees, no payment step. Focus on high-quality, accurate listings.</p>
+            )}
           </div>
         </div>
 
