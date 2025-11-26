@@ -295,7 +295,7 @@ const Login: React.FC = () => {
           onClick={() => switchMode("signup")}
           className="text-green-700 font-semibold hover:text-green-800 hover:underline transition"
         >
-          New to Kodisha? Sign up
+          New to Mamamboga Digital? Sign up
         </button>
         <button
           type="button"
