@@ -231,12 +231,15 @@ const ListingDetails: React.FC = () => {
       if (!id) return;
       const res = await fetch(API_ENDPOINTS.properties.getById(id as string));
       const data = await res.json();
+      console.log('Listing API response:', data);
       if (data.success && data.data) {
         setListing(data.data);
         setListingType(data.data.listingType || "land");
         if (data.data.images && data.data.images.length > 0) {
           setMainImage(data.data.images[0]);
         }
+      } else {
+        console.error('Listing fetch failed:', data);
       }
     } catch (err) {
       console.error("Error fetching listing:", err);
