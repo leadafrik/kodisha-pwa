@@ -109,7 +109,7 @@ const Login: React.FC = () => {
     }
     
     if (!signupData.emailOrPhone.trim()) {
-      setError("Please provide email or phone number.");
+      setError("Email or phone number is required.");
       return;
     }
 
@@ -178,14 +178,24 @@ const Login: React.FC = () => {
         },
       });
       setShowLegalModal(false);
+      
+      // Send OTP based on what was provided
+      if (email) {
+        await requestEmailOtp(email);
+        setOtpEmail(email);
+        setInfo(
+          "We sent a 6-digit code to your email. Check your inbox and spam folder."
+        );
+      } else {
+        setOtpEmail(phone || '');
+        setInfo(
+          "We sent a 6-digit code to your phone via SMS."
+        );
+      }
+      
       setPendingSignupData(null);
-      await requestEmailOtp(pendingSignupData.email);
-      setOtpEmail(pendingSignupData.email);
       setMode("otp-signup");
       startOtpTimer();
-      setInfo(
-        "We sent a 6-digit code to your email. Check your inbox and spam folder."
-      );
     } catch (err: any) {
       setError(err?.message || "Registration failed. Please try again.");
       setShowLegalModal(false);
@@ -336,7 +346,6 @@ const Login: React.FC = () => {
           }
           className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
           placeholder="you@example.com or 0712345678"
-          required
         />
         <p className="text-xs text-gray-500 mt-1">Enter your email or 10-digit phone number</p>
       </div>
@@ -387,9 +396,8 @@ const Login: React.FC = () => {
           }
           className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white"
         >
-          <option value="buyer">Land Buyer / Renter</option>
-          <option value="seller">Land Seller / Landlord</option>
-          <option value="service_provider">Service Provider</option>
+          <option value="buyer">Buyer</option>
+          <option value="seller">Seller</option>
         </select>
       </div>
       <div>

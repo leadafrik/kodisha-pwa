@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import KodishaLogo from "./KodishaLogo";
 
 const Chevron: React.FC = () => (
   <svg className="w-3 h-3" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -25,7 +24,6 @@ const Navbar: React.FC = () => {
           <div className="flex justify-between items-center py-4">
             {/* LOGO */}
             <Link to="/" className="flex items-center gap-3">
-              <KodishaLogo size={42} />
               <span className="text-2xl font-extrabold text-gray-800 tracking-tight">Mamamboga Digital</span>
             </Link>
 

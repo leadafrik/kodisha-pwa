@@ -202,6 +202,7 @@ const AdminControlsSection: React.FC<AdminControlsProps> = ({ listing, onUpdate 
 
 const ListingDetails: React.FC = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [listing, setListing] = useState<any>(null);
   const [markingSold, setMarkingSold] = useState(false);
   const [soldMessage, setSoldMessage] = useState("");
@@ -391,6 +392,15 @@ const ListingDetails: React.FC = () => {
       socket.emit("message:typing", { to: listing.owner._id, listingId: listing._id });
     }
   };
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    const token = getAuthToken();
+    if (!token) {
+      navigate(`/login?next=/listings/${id}`);
+      return;
+    }
+  }, [id, navigate]);
 
   useEffect(() => {
     fetchListing();
