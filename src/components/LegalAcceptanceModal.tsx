@@ -138,7 +138,8 @@ const LegalAcceptanceModal: React.FC<LegalAcceptanceModalProps> = ({
                   
                   <p><strong>Prohibited Activities:</strong> False listings, fraud, harassment, circumventing fees, discriminatory practices, listing land without proper documentation.</p>
                   
-                  <p><strong>Payment Terms:</strong> Land listings from KSh 99, service subscriptions KSh 599/year, product commissions 0.5% or KSh 49 minimum.</p>
+                  {/* <p><strong>Payment Terms:</strong> Land listings from KSh 99, service subscriptions KSh 599/year, product commissions 0.5% or KSh 49 minimum.</p> */}
+                  <p><strong>Payment Terms:</strong> Currently all listings are free during our introductory phase. Listing fees and payment processing will be announced with advance notice before activation.</p>
                   
                   <p><strong>Liability:</strong> Kodisha provides the platform "as is" and is not liable for user conduct, transaction failures, or disputes between users (subject to Kenyan consumer protection law).</p>
                   
