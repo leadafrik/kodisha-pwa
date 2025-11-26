@@ -45,6 +45,7 @@ const Login: React.FC = () => {
   const [signupData, setSignupData] = useState({
     name: "",
     email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
     userType: "buyer" as "buyer" | "seller" | "service_provider",
@@ -103,10 +104,23 @@ const Login: React.FC = () => {
     e.preventDefault();
     resetMessages();
 
-    if (!signupData.name.trim() || !signupData.email.trim() || !signupData.county) {
-      setError("Please fill in name, email, and county.");
+    if (!signupData.name.trim() || !signupData.county) {
+      setError("Please fill in name and county.");
       return;
     }
+    
+    // Require either email OR phone
+    if (!signupData.email.trim() && !signupData.phone.trim()) {
+      setError("Please provide either email or phone number.");
+      return;
+    }
+
+    // Validate phone if provided (must be 10 digits)
+    if (signupData.phone.trim() && !/^\d{10}$/.test(signupData.phone.trim())) {
+      setError("Phone number must be exactly 10 digits (e.g., 712345678)");
+      return;
+    }
+    
     if (!signupData.password || signupData.password.length < 6) {
       setError("Password must be at least 6 characters.");
       return;
@@ -129,11 +143,16 @@ const Login: React.FC = () => {
   }) => {
     if (!pendingSignupData) return;
 
+    // Prepend +254 to phone if provided
+    const formattedPhone = pendingSignupData.phone.trim() 
+      ? `+254${pendingSignupData.phone.trim()}` 
+      : undefined;
+
     try {
       await register({
         name: pendingSignupData.name,
-        phone: pendingSignupData.email || undefined,
-        email: pendingSignupData.email || undefined,
+        phone: formattedPhone,
+        email: pendingSignupData.email.trim() || undefined,
         password: pendingSignupData.password,
         type: pendingSignupData.userType,
         county: pendingSignupData.county,
@@ -291,20 +310,48 @@ const Login: React.FC = () => {
           required
         />
       </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Email *</label>
-        <input
-          type="email"
-          name="email"
-          value={signupData.email}
-          onChange={(e) =>
-            setSignupData((prev) => ({ ...prev, email: e.target.value }))
-          }
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-          placeholder="you@example.com"
-          required
-        />
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Email <span className="text-xs text-gray-500">(Email or Phone required)</span>
+          </label>
+          <input
+            type="email"
+            name="email"
+            value={signupData.email}
+            onChange={(e) =>
+              setSignupData((prev) => ({ ...prev, email: e.target.value }))
+            }
+            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+            placeholder="you@example.com"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Phone Number <span className="text-xs text-gray-500">(or Email)</span>
+          </label>
+          <div className="flex">
+            <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-600 text-sm">
+              +254
+            </span>
+            <input
+              type="tel"
+              name="phone"
+              value={signupData.phone}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                setSignupData((prev) => ({ ...prev, phone: value }))
+              }}
+              className="flex-1 border border-gray-300 rounded-r-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+              placeholder="712345678"
+              maxLength={10}
+            />
+          </div>
+          <p className="text-xs text-gray-500 mt-1">10 digits, e.g., 712345678</p>
+        </div>
       </div>
+      
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-sm font-medium text-gray-700">Password *</label>
