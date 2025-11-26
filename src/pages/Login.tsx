@@ -143,10 +143,16 @@ const Login: React.FC = () => {
   }) => {
     if (!pendingSignupData) return;
 
-    // Prepend +254 to phone if provided
-    const formattedPhone = pendingSignupData.phone.trim() 
-      ? `+254${pendingSignupData.phone.trim()}` 
-      : undefined;
+    // Prepend +254 to phone if provided, strip leading 0 if present
+    let formattedPhone = undefined;
+    if (pendingSignupData.phone.trim()) {
+      let phoneDigits = pendingSignupData.phone.trim();
+      // Remove leading 0 if present (e.g., 0720040812 -> 720040812)
+      if (phoneDigits.startsWith('0')) {
+        phoneDigits = phoneDigits.substring(1);
+      }
+      formattedPhone = `+254${phoneDigits}`;
+    }
 
     try {
       await register({
