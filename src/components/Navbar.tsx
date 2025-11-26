@@ -26,7 +26,7 @@ const Navbar: React.FC = () => {
             {/* LOGO */}
             <Link to="/" className="flex items-center gap-3">
               <KodishaLogo size={42} />
-              <span className="text-2xl font-extrabold text-gray-800 tracking-tight">Kodisha</span>
+              <span className="text-2xl font-extrabold text-gray-800 tracking-tight">Mamamboga Digital</span>
             </Link>
 
             {/* DESKTOP NAV */}

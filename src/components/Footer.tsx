@@ -8,7 +8,7 @@ const Footer: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           {/* Logo and Tagline */}
           <div className="text-center md:text-left">
-            <h3 className="text-lg font-bold text-green-700">Kodisha</h3>
+            <h3 className="text-lg font-bold text-green-700">Mamamboga Digital</h3>
             <p className="text-xs text-gray-600">Connecting Kenya's Agricultural Community</p>
           </div>
 
@@ -44,7 +44,7 @@ const Footer: React.FC = () => {
 
           {/* Copyright */}
           <div className="text-xs text-gray-500 text-center md:text-right">
-            <p>&copy; {new Date().getFullYear()} Kodisha. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} Mamamboga Digital. All rights reserved.</p>
             <p className="mt-1">Data Controller Registration: [Pending]</p>
           </div>
         </div>
@@ -52,7 +52,7 @@ const Footer: React.FC = () => {
         {/* Mobile-Optimized Secondary Info */}
         <div className="mt-4 pt-4 border-t border-gray-200 text-xs text-gray-500 text-center">
           <p>
-            By using Kodisha, you agree to our{' '}
+            By using Mamamboga Digital, you agree to our{' '}
             <Link to="/legal/terms" className="text-green-700 hover:underline">
               Terms of Service
             </Link>{' '}

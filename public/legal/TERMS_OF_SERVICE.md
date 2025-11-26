@@ -4,7 +4,7 @@
 
 ## AGREEMENT TO TERMS
 
-These Terms of Service ("Terms") constitute a legally binding agreement between you ("User," "you," or "your") and Kodisha Limited ("Kodisha," "we," "us," or "our"), a company registered under the laws of the Republic of Kenya, governing your access to and use of the Kodisha platform, including our website, mobile application, and related services (collectively, the "Platform").
+These Terms of Service ("Terms") constitute a legally binding agreement between you ("User," "you," or "your") and Mamamboga Digital Limited ("Mamamboga Digital," "we," "us," or "our"), a company registered under the laws of the Republic of Kenya, governing your access to and use of the Mamamboga Digital platform, including our website, mobile application, and related services (collectively, the "Platform").
 
 **BY CREATING AN ACCOUNT, ACCESSING, OR USING THE PLATFORM, YOU ACKNOWLEDGE THAT YOU HAVE READ, UNDERSTOOD, AND AGREE TO BE BOUND BY THESE TERMS AND OUR PRIVACY POLICY. IF YOU DO NOT AGREE, YOU MUST NOT USE THE PLATFORM.**
 
@@ -52,14 +52,14 @@ We reserve the right to suspend or terminate your account at our discretion if y
 ## 3. PLATFORM DESCRIPTION AND SCOPE
 
 ### 3.1 Nature of Services
-Kodisha operates as an **intermediary platform** that:
+Mamamboga Digital operates as an **intermediary platform** that:
 - Connects agricultural land owners with potential tenants
 - Enables equipment rental and service provider discovery
 - Facilitates agrovet and agricultural product listings
 - Provides communication and payment processing tools
 
 ### 3.2 Platform Limitations
-**KODISHA IS NOT:**
+**MAMAMBOGA DIGITAL IS NOT:**
 - A party to any transaction between Users
 - A real estate agent, broker, or landlord
 - An equipment rental company or service provider
@@ -115,11 +115,11 @@ Land owners must:
 ### 5.2 Rental Agreements
 - All land rentals must be documented in writing
 - Users are responsible for registering lease agreements as required by law
-- Kodisha provides optional standard lease templates but is not responsible for their legal sufficiency
+- Mamamboga Digital provides optional standard lease templates but is not responsible for their legal sufficiency
 - Users should seek independent legal advice before entering agreements
 
 ### 5.3 Land Tenure and Disputes
-- Kodisha does not resolve land ownership or boundary disputes
+- Mamamboga Digital does not resolve land ownership or boundary disputes
 - Users must resolve disputes through appropriate legal channels
 - We may suspend Listings subject to active disputes
 
@@ -161,13 +161,13 @@ Planned future fees (subject to change before activation):
 You will receive at least 30 days' notice before any fee activation. Continued use after notice will constitute acceptance of updated fee terms.
 
 ### 7.3 Payments Status
-In-platform payment flows (e.g., mobile money integration) are currently disabled. Users must independently arrange any off-platform payments. Kodisha does not process, hold, escrow, or guarantee payments during this period.
+In-platform payment flows (e.g., mobile money integration) are currently disabled. Users must independently arrange any off-platform payments. Mamamboga Digital does not process, hold, escrow, or guarantee payments during this period.
 
 ### 7.4 Taxes
 Because fees are not being charged during the launch period, no VAT or commission-related tax withholding applies. Users remain responsible for taxes on any independent transactions they arrange.
 
 ### 7.5 Prohibited Charging
-Users may not misrepresent platform status or imply official Kodisha payment facilitation while payments are not yet active.
+Users may not misrepresent platform status or imply official Mamamboga Digital payment facilitation while payments are not yet active.
 
 ### 7.6 Transition
 When payments go live, updated Terms will replace this section and outline fee structures, payment processing, refund rules, and tax handling.
@@ -196,14 +196,14 @@ When payments go live, updated Terms will replace this section and outline fee s
 ## 9. INTELLECTUAL PROPERTY RIGHTS
 
 ### 9.1 Platform Ownership
-Kodisha owns all rights, title, and interest in the Platform, including:
+Mamamboga Digital owns all rights, title, and interest in the Platform, including:
 - Software, code, and algorithms
 - Trademarks, logos, and branding
 - Design, layout, and user interface
 - Proprietary data and analytics
 
 ### 9.2 User Content License
-By posting Content, you grant Kodisha a worldwide, non-exclusive, royalty-free license to:
+By posting Content, you grant Mamamboga Digital a worldwide, non-exclusive, royalty-free license to:
 - Display, reproduce, and distribute your Content on the Platform
 - Use your Content for marketing and promotional purposes
 - Modify or adapt Content for technical compatibility
@@ -243,13 +243,13 @@ You acknowledge and agree that:
 ### 10.4 Limitation of Liability
 **TO THE MAXIMUM EXTENT PERMITTED BY KENYAN LAW:**
 
-**KODISHA, ITS DIRECTORS, OFFICERS, EMPLOYEES, AND AGENTS SHALL NOT BE LIABLE FOR:**
+**MAMAMBOGA DIGITAL, ITS DIRECTORS, OFFICERS, EMPLOYEES, AND AGENTS SHALL NOT BE LIABLE FOR:**
 - **Indirect, incidental, consequential, or punitive damages**
 - **Loss of profits, revenue, data, or business opportunities**
 - **Personal injury or property damage arising from Platform use**
 - **Fraudulent or criminal conduct by Users**
 - **Disputes between Users**
-- **Losses exceeding fees paid to Kodisha in the preceding 12 months**
+- **Losses exceeding fees paid to Mamamboga Digital in the preceding 12 months**
 
 ### 10.5 Kenyan Consumer Protection
 Nothing in these Terms excludes liability that cannot be excluded under Kenyan consumer protection law, including liability for:
@@ -261,7 +261,7 @@ Nothing in these Terms excludes liability that cannot be excluded under Kenyan c
 
 ## 11. INDEMNIFICATION
 
-You agree to indemnify, defend, and hold harmless Kodisha, its affiliates, and their respective directors, officers, employees, and agents from and against any claims, liabilities, damages, losses, costs, or expenses (including reasonable legal fees) arising from:
+You agree to indemnify, defend, and hold harmless Mamamboga Digital, its affiliates, and their respective directors, officers, employees, and agents from and against any claims, liabilities, damages, losses, costs, or expenses (including reasonable legal fees) arising from:
 
 - Your violation of these Terms
 - Your violation of any law or third-party rights
@@ -319,7 +319,7 @@ You may terminate your account at any time by:
 - Using in-app account deletion features
 - Sending written notice to our registered address
 
-### 14.2 Termination by Kodisha
+### 14.2 Termination by Mamamboga Digital
 We may immediately suspend or terminate your account if:
 - You breach these Terms
 - We suspect fraudulent or illegal activity
@@ -360,7 +360,7 @@ These Terms are governed by and construed in accordance with the laws of the Rep
 Subject to the arbitration provisions, the courts of Kenya shall have exclusive jurisdiction over disputes.
 
 ### 16.3 Entire Agreement
-These Terms, together with the Privacy Policy, constitute the entire agreement between you and Kodisha.
+These Terms, together with the Privacy Policy, constitute the entire agreement between you and Mamamboga Digital.
 
 ### 16.4 Severability
 If any provision is found unenforceable, the remaining provisions remain in full force and effect.
@@ -376,7 +376,7 @@ Neither party is liable for failure to perform due to circumstances beyond reaso
 
 ### 16.8 Notices
 Legal notices & formal correspondence:
-- **Kodisha Limited**
+- **Mamamboga Digital Limited**
 - Email: kodisha.254.ke@gmail.com
 - WhatsApp (Support): +254796389192
 
@@ -384,14 +384,14 @@ Legal notices & formal correspondence:
 These Terms are drafted in English. Any translation is provided for convenience only. In case of conflict, the English version prevails.
 
 ### 16.10 Relationship
-Nothing in these Terms creates a partnership, joint venture, employment, or agency relationship between you and Kodisha.
+Nothing in these Terms creates a partnership, joint venture, employment, or agency relationship between you and Mamamboga Digital.
 
 ---
 
 ## 17. SPECIAL PROVISIONS FOR AGRICULTURAL TRANSACTIONS
 
 ### 17.1 Seasonal Considerations
-Users acknowledge that agricultural activities are subject to weather, pests, disease, and market fluctuations. Kodisha is not responsible for crop failures, natural disasters, or price volatility.
+Users acknowledge that agricultural activities are subject to weather, pests, disease, and market fluctuations. Mamamboga Digital is not responsible for crop failures, natural disasters, or price volatility.
 
 ### 17.2 Environmental Compliance
 Users must comply with the Environmental Management and Coordination Act (1999) and avoid activities that cause environmental degradation.
@@ -408,7 +408,7 @@ Livestock sales must comply with the Prevention of Cruelty to Animals Act. Anima
 
 For questions, concerns, or notices regarding these Terms:
 
-**Kodisha Limited**  
+**Mamamboga Digital Limited**  
 Email: kodisha.254.ke@gmail.com  
 WhatsApp: +254796389192  
 Registered Office: Kenya

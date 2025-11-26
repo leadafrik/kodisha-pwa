@@ -123,8 +123,8 @@ const LegalAcceptanceModal: React.FC<LegalAcceptanceModalProps> = ({
                   <div className="bg-blue-50 p-3 rounded border border-blue-200">
                     <p className="font-semibold text-blue-900">Key Points:</p>
                     <ul className="mt-2 space-y-1 text-blue-800">
-                      <li>• You must be 18+ years old to use Kodisha</li>
-                      <li>• Kodisha is an intermediary platform, not a party to transactions</li>
+                      <li>• You must be 18+ years old to use Mamamboga Digital</li>
+                      <li>• Mamamboga Digital is an intermediary platform, not a party to transactions</li>
                       <li>• You are responsible for the accuracy of your listings</li>
                       <li>• Platform fees apply (details in Section 7)</li>
                       <li>• Disputes are resolved through arbitration in Kenya</li>
@@ -132,7 +132,7 @@ const LegalAcceptanceModal: React.FC<LegalAcceptanceModalProps> = ({
                     </ul>
                   </div>
 
-                  <p><strong>Platform Description:</strong> Kodisha connects land owners, equipment providers, service professionals, and agrovets with farmers and agricultural businesses.</p>
+                  <p><strong>Platform Description:</strong> Mamamboga Digital connects land owners, equipment providers, service professionals, and agrovets with farmers and agricultural businesses.</p>
                   
                   <p><strong>Your Obligations:</strong> Provide accurate information, honor agreements, pay applicable fees, comply with Kenyan laws including the Land Act (2012) and Consumer Protection Act (2012).</p>
                   
@@ -141,7 +141,7 @@ const LegalAcceptanceModal: React.FC<LegalAcceptanceModalProps> = ({
                   {/* <p><strong>Payment Terms:</strong> Land listings from KSh 99, service subscriptions KSh 599/year, product commissions 0.5% or KSh 49 minimum.</p> */}
                   <p><strong>Payment Terms:</strong> Currently all listings are free during our introductory phase. Listing fees and payment processing will be announced with advance notice before activation.</p>
                   
-                  <p><strong>Liability:</strong> Kodisha provides the platform "as is" and is not liable for user conduct, transaction failures, or disputes between users (subject to Kenyan consumer protection law).</p>
+                  <p><strong>Liability:</strong> Mamamboga Digital provides the platform "as is" and is not liable for user conduct, transaction failures, or disputes between users (subject to Kenyan consumer protection law).</p>
                   
                   <p><strong>Dispute Resolution:</strong> Disputes resolved through negotiation, mediation, then arbitration under the Arbitration Act (1995) in Nairobi.</p>
 
@@ -298,7 +298,7 @@ const LegalAcceptanceModal: React.FC<LegalAcceptanceModalProps> = ({
                   className="mt-1 w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
                 />
                 <span className="text-sm text-gray-700 group-hover:text-gray-900">
-                  I agree to receive marketing communications, promotional offers, and newsletters from Kodisha (you can unsubscribe anytime)
+                  I agree to receive marketing communications, promotional offers, and newsletters from Mamamboga Digital (you can unsubscribe anytime)
                 </span>
               </label>
             </div>

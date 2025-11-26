@@ -219,7 +219,7 @@ const Home: React.FC = () => {
           <p className="text-lg text-gray-600 mb-8">
             {user 
               ? "List your products and reach thousands of buyers across Kenya."
-              : "Join thousands of farmers, buyers, and service providers on Kodisha."}
+              : "Join thousands of farmers, buyers, and service providers on Mamamboga Digital."}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -243,7 +243,7 @@ const Home: React.FC = () => {
         <div className="max-w-6xl mx-auto px-4 py-12">
           <div className="grid md:grid-cols-5 gap-8 mb-10">
             <div className="md:col-span-2">
-              <h4 className="text-lg font-bold mb-4 text-white">Kodisha</h4>
+              <h4 className="text-lg font-bold mb-4 text-white">Mamamboga Digital</h4>
               <p className="text-sm leading-relaxed">A focused agricultural marketplace for Kenya—streamlining discovery of land, equipment, professional services, and produce. Currently free while we expand coverage; listing fees and payments will be introduced later.</p>
             </div>
             <div>
@@ -271,7 +271,7 @@ const Home: React.FC = () => {
             </div>
           </div>
           <div className="border-t border-gray-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
-            <p>&copy; {new Date().getFullYear()} Kodisha. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} Mamamboga Digital. All rights reserved.</p>
             <p>Currently free: listing fees and in‑app payments not yet active.</p>
           </div>
         </div>
