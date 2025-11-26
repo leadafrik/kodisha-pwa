@@ -10,9 +10,20 @@ const getAuthToken = (): string | null => {
   return localStorage.getItem("kodisha_token") || localStorage.getItem("kodisha_admin_token");
 };
 
-// Helper: Check if user is admin
+// Helper: Check if user is admin by checking role in stored user data
 const isUserAdmin = (): boolean => {
-  return !!localStorage.getItem("kodisha_admin_token");
+  try {
+    const adminToken = localStorage.getItem("kodisha_admin_token");
+    if (adminToken) return true; // Legacy admin token check
+    
+    const userStr = localStorage.getItem("kodisha_user");
+    if (!userStr) return false;
+    
+    const user = JSON.parse(userStr);
+    return user.role === "admin" || user.type === "admin";
+  } catch {
+    return false;
+  }
 };
 
 interface Message {
@@ -248,9 +259,17 @@ const ListingDetails: React.FC = () => {
     setLoading(false);
   }, [id]);
 
-  // Check if user is admin on mount
+  // Check if user is admin on mount and when storage changes
   useEffect(() => {
     setIsAdmin(isUserAdmin());
+    
+    // Listen for storage changes (e.g., when user logs in/out)
+    const handleStorageChange = () => {
+      setIsAdmin(isUserAdmin());
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const fetchMessages = async (ownerId: string) => {
