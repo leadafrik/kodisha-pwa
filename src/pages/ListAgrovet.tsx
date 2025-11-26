@@ -55,11 +55,20 @@ type ListingPlanOption = {
 const LISTING_PLAN_OPTIONS: ListingPlanOption[] = [
   {
     id: "annual",
+    name: "Standard Listing",
+    price: 0,
+    subtitle: "Post your agrovet listing with all essential features included.",
+    duration: "Active until removed",
+  },
+  /* Future pricing - commented out during free launch phase
+  {
+    id: "annual",
     name: "Annual Subscription",
     price: 599,
     subtitle: "KSh 599/year — recurring exposure plus boosts.",
     duration: "12 months",
   },
+  */
 ];
 
 type BoostOption = {
@@ -72,10 +81,11 @@ type BoostOption = {
 const BOOST_OPTIONS: BoostOption[] = [
   {
     id: "none",
-    name: "Standard placement",
+    name: "Standard Placement",
     price: 0,
-    subtitle: "Appears in the regular feed.",
+    subtitle: "Your listing appears in the regular feed.",
   },
+  /* Future boost options - commented out during free launch phase
   {
     id: "daily",
     name: "KSh 50 / Day Boost",
@@ -94,6 +104,7 @@ const BOOST_OPTIONS: BoostOption[] = [
     price: 499,
     subtitle: "Carousel coverage for a month.",
   },
+  */
 ];
 
 type VerificationTierOption = {
@@ -106,10 +117,11 @@ type VerificationTierOption = {
 const VERIFICATION_TIERS: VerificationTierOption[] = [
   {
     id: "none",
-    name: "Standard verification",
+    name: "Standard Verification",
     price: 0,
-    subtitle: "Kodisha performs manual checks.",
+    subtitle: "All listings include manual verification by our team.",
   },
+  /* Future verification tiers - commented out during free launch phase
   {
     id: "basic",
     name: "KSh 99 Basic Verification",
@@ -128,6 +140,7 @@ const VERIFICATION_TIERS: VerificationTierOption[] = [
     price: 399,
     subtitle: "Full business profile verification.",
   },
+  */
 ];
 
 type ListingPlanId = ListingPlanOption["id"];

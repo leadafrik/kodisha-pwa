@@ -24,26 +24,26 @@ const CATEGORY_CARDS: Array<{
   {
     id: "land",
     title: "Farmland",
-    subtitle: "Rent/lease only. Simple fees with optional verification and boosts.",
-    badge: "Free first listing",
+    subtitle: "List rental or lease land with photos and location details.",
+    badge: "Free",
   },
   {
     id: "service",
     title: "Services & Equipment",
-    subtitle: "Tractors, equipment, or pro services with an annual plan and boosts.",
-    badge: "Annual plan",
+    subtitle: "Offer tractors, machinery, or professional agricultural services.",
+    badge: "Free",
   },
   {
     id: "agrovet",
     title: "Agrovets",
-    subtitle: "Showcase your agrovet store with verification and boosts.",
-    badge: "Annual plan",
+    subtitle: "Showcase your agrovet store with products and services.",
+    badge: "Free",
   },
   {
     id: "product",
     title: "Products & Livestock",
-    subtitle: "Sell produce, inputs, or animals with a tiny commission or annual plan.",
-    badge: "0.5% or KSh 49",
+    subtitle: "Sell produce, farm inputs, or livestock to buyers across Kenya.",
+    badge: "Free",
   },
 ];
 
@@ -146,7 +146,7 @@ const ListUnified: React.FC<ListUnifiedProps> = ({
               Post a listing in one place
             </h1>
             <p className="text-gray-600">
-              Choose what you’re listing and we’ll load the right form, documents, and fees automatically.
+              Choose what you're listing and we'll load the right form and requirements. All listings are currently free.
             </p>
           </div>
           {activeCard && (

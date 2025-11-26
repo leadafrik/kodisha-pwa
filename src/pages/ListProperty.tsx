@@ -27,12 +27,13 @@ type ListingPlanOption = {
 const LISTING_PLAN_OPTIONS: ListingPlanOption[] = [
   {
     id: 'free',
-    name: 'First Listing Free',
+    name: 'Standard Listing',
     price: 0,
-    subtitle: 'One trial listing at no charge; verification still required.',
-    note: 'First listing only',
-    duration: '1 month',
+    subtitle: 'Post your land listing with all essential features included.',
+    note: 'Free',
+    duration: 'Active until sold/rented',
   },
+  /* Future pricing options - commented out during free launch phase
   {
     id: 'verified',
     name: 'Per Listing',
@@ -47,6 +48,7 @@ const LISTING_PLAN_OPTIONS: ListingPlanOption[] = [
     subtitle: 'KSh 699 / year - unlimited listings with priority support and trust badge eligibility.',
     duration: '12 months',
   },
+  */
 ];
 
 type BoostOption = {
@@ -59,10 +61,11 @@ type BoostOption = {
 const BOOST_OPTIONS: BoostOption[] = [
   {
     id: 'none',
-    name: 'Standard placement',
+    name: 'Standard Placement',
     price: 0,
-    subtitle: 'Appears in the regular feed.',
+    subtitle: 'Your listing appears in the regular feed.',
   },
+  /* Future boost options - commented out during free launch phase
   {
     id: 'daily',
     name: 'KSh 50 / Day Boost',
@@ -81,6 +84,7 @@ const BOOST_OPTIONS: BoostOption[] = [
     price: 499,
     subtitle: 'Premium banner and featured carousel for one month.',
   },
+  */
 ];
 
 type VerificationTierOption = {
@@ -93,10 +97,11 @@ type VerificationTierOption = {
 const VERIFICATION_TIERS: VerificationTierOption[] = [
   {
     id: 'none',
-    name: 'Standard verification',
+    name: 'Standard Verification',
     price: 0,
-    subtitle: 'Manual checks by Kodisha; trust builds slowly.',
+    subtitle: 'All listings include manual verification by our team.',
   },
+  /* Future verification tiers - commented out during free launch phase
   {
     id: 'basic',
     name: 'KSh 99 Basic Verification',
@@ -115,6 +120,7 @@ const VERIFICATION_TIERS: VerificationTierOption[] = [
     price: 399,
     subtitle: 'Full business profile verification for premium trust.',
   },
+  */
 ];
 
 type ListingPlanId = ListingPlanOption['id'];

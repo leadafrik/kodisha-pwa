@@ -294,12 +294,13 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
         <div className="flex items-center gap-4 bg-orange-50 rounded-lg border border-orange-100 px-3 py-3">
           <div className="flex-1">
             <p className="text-sm font-semibold text-orange-800">
-              Monetization & Trust
+              Listing Status
             </p>
             <p className="text-xs text-orange-700">
-              Commission {formatPrice(commission)} unless you subscribe (KSh 699/yr). Optional premium badge.
+              All product listings are currently free during our introductory phase.
             </p>
           </div>
+          {/* Future monetization options - commented out during free launch
           <div className="flex flex-col gap-2 text-sm">
             <label className="inline-flex items-center gap-2">
               <input
@@ -318,6 +319,7 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
               <span>Premium badge (+KSh 199)</span>
             </label>
           </div>
+          */}
         </div>
       </div>
 
@@ -367,7 +369,7 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
         {uploading ? "Listing..." : "List Product"}
       </button>
       <p className="text-xs text-gray-500 text-center">
-        ID + selfie verification required. Commission {formatPrice(commission)} unless on subscription (KSh 699/yr). Premium badge optional.
+        ID + selfie verification required. All listings are currently free during our introductory phase.
       </p>
     </form>
   );
