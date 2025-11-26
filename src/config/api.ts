@@ -121,8 +121,17 @@ export const API_ENDPOINTS = {
     initiateStk: `${API_BASE_URL}/payments/stk/initiate`,
   },
   ratings: {
-    submit: `${API_BASE_URL}/api/ratings`,
-    getUserRatings: (userId: string) => `${API_BASE_URL}/api/ratings/user/${userId}`,
+    submit: `${API_BASE_URL}/ratings`,
+    getUserRatings: (userId: string) => `${API_BASE_URL}/ratings/user/${userId}`,
+  },
+  reports: {
+    submit: (sellerId: string) => `${API_BASE_URL}/reports/${sellerId}`,
+  },
+  moderation: {
+    getFlagged: `${API_BASE_URL}/admin/moderation/flagged`,
+    suspend: (userId: string) => `${API_BASE_URL}/admin/moderation/users/${userId}/suspend`,
+    deleteUser: (userId: string) => `${API_BASE_URL}/admin/moderation/users/${userId}`,
+    forgive: (userId: string) => `${API_BASE_URL}/admin/moderation/users/${userId}/forgive`,
   },
 };
 

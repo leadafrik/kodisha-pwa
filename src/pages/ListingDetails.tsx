@@ -498,7 +498,7 @@ const ListingDetails: React.FC = () => {
     try {
       setSubmittingReport(true);
       const token = getAuthToken();
-      const res = await fetch(`${API_BASE_URL}/api/reports/${owner._id}`, {
+      const res = await fetch(API_ENDPOINTS.reports.submit(owner._id), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
