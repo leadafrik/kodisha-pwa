@@ -54,7 +54,7 @@ const Login: React.FC = () => {
   const [otpEmail, setOtpEmail] = useState("");
   const [otpCode, setOtpCode] = useState("");
   const [resetPassword, setResetPassword] = useState({
-    email: "",
+    emailOrPhone: "",
     newPassword: "",
     confirmPassword: "",
   });
@@ -224,16 +224,30 @@ const Login: React.FC = () => {
   const handleForgot = async (e: React.FormEvent) => {
     e.preventDefault();
     resetMessages();
-    if (!resetPassword.email.trim()) {
-      setError("Enter your email to receive a code.");
+    if (!resetPassword.emailOrPhone.trim()) {
+      setError("Enter your email or phone number to receive a code.");
       return;
     }
+
+    const input = resetPassword.emailOrPhone.trim();
+    const isEmail = input.includes('@');
+    const isPhone = /^0?\d{9,10}$/.test(input);
+
+    if (!isEmail && !isPhone) {
+      setError("Please enter a valid email or 10-digit phone number.");
+      return;
+    }
+
     try {
-      await requestEmailOtp(resetPassword.email.trim());
-      setOtpEmail(resetPassword.email.trim());
+      await requestEmailOtp(input);
+      setOtpEmail(input);
       setMode("otp-reset");
       startOtpTimer();
-      setInfo("We sent a code to your email. Enter it with your new password.");
+      if (isEmail) {
+        setInfo("We sent a code to your email. Enter it with your new password.");
+      } else {
+        setInfo("We sent a code to your phone via SMS. Enter it with your new password.");
+      }
     } catch (err: any) {
       setError(err?.message || "Failed to send reset code.");
     }
@@ -507,16 +521,17 @@ const Login: React.FC = () => {
   const renderForgot = () => (
     <form onSubmit={handleForgot} className="space-y-4">
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">Email</label>
+        <label className="block text-sm font-medium text-gray-700">Email or Phone Number</label>
         <input
-          type="email"
-          value={resetPassword.email}
+          type="text"
+          value={resetPassword.emailOrPhone}
           onChange={(e) =>
-            setResetPassword((prev) => ({ ...prev, email: e.target.value }))
+            setResetPassword((prev) => ({ ...prev, emailOrPhone: e.target.value }))
           }
           className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-          placeholder="you@example.com"
+          placeholder="you@example.com or 0712345678"
         />
+        <p className="text-xs text-gray-500 mt-1">Enter your email or phone number</p>
       </div>
       <button
         type="submit"

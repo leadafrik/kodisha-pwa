@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useProperties } from "../contexts/PropertyContext";
+import { useAuth } from "../contexts/AuthContext";
 import { kenyaCounties } from "../data/kenyaCounties";
 
 type Category = "all" | "land" | "service" | "agrovet" | "product";
@@ -41,6 +42,7 @@ const getScore = (item: UnifiedCard) =>
 
 const BrowseListings: React.FC = () => {
   const { properties, serviceListings, productListings, loading } = useProperties();
+  const { user } = useAuth();
 
   const [category, setCategory] = useState<Category>("all");
   const [serviceSub, setServiceSub] = useState<ServiceSubType>("all");
@@ -187,6 +189,26 @@ const BrowseListings: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+      {!user && (
+        <div className="rounded-2xl bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-300 px-6 py-5">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-1">
+                Sign in to buy or list
+              </h2>
+              <p className="text-sm text-gray-700">
+                Create an account to view listing details, contact sellers, and post your own listings.
+              </p>
+            </div>
+            <Link
+              to="/login"
+              className="inline-flex justify-center items-center px-6 py-3 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700 transition whitespace-nowrap"
+            >
+              Sign In / Sign Up
+            </Link>
+          </div>
+        </div>
+      )}
       {process.env.REACT_APP_SALE_LISTINGS_PAUSED === 'true' && (
         <div className="rounded-lg border-l-4 border-yellow-400 bg-yellow-50 text-yellow-800 px-4 py-3">
           Sale listings are temporarily paused — you will only see rental listings. Contact support to be notified when sales reopen.
