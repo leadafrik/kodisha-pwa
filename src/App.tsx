@@ -107,7 +107,7 @@ function App() {
                     />
                     <Route path="/verify-phone" element={<PhoneVerification />} />
                     <Route path="/verify" element={<VerificationWizard />} />
-                    <Route path="/listings/:id" element={<ListingDetails />} />
+                    <Route path="/listings/:id" element={<ProtectedRoute><ListingDetails /></ProtectedRoute>} />
                     <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
                     <Route path="/admin/moderation" element={<Moderation />} />
                     <Route path="/legal/terms" element={<TermsOfService />} />
