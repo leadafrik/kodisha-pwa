@@ -58,7 +58,7 @@ const EquipmentDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
     <h2 className="font-semibold mb-3 text-blue-900">Equipment & Services</h2>
     <div className="space-y-2">
       <p><strong>Services Available:</strong> {Array.isArray(listing.services) ? listing.services.join(', ') : listing.services || '—'}</p>
-      {listing.pricing && <p><strong>Pricing:</strong> {listing.pricing}</p>}
+      {(listing.pricing || listing.price) && <p><strong>Pricing:</strong> {listing.pricing || (typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : listing.price)}</p>}
       {typeof listing.operatorIncluded !== 'undefined' && <p><strong>Operator Included:</strong> {listing.operatorIncluded ? 'Yes' : 'No'}</p>}
       {listing.minHirePeriod && <p><strong>Min Hire Period:</strong> {listing.minHirePeriod}</p>}
       {listing.maxHirePeriod && <p><strong>Max Hire Period:</strong> {listing.maxHirePeriod}</p>}
@@ -73,7 +73,7 @@ const ProfessionalDetailsSection: React.FC<{ listing: any }> = ({ listing }) => 
       <p><strong>Services Offered:</strong> {Array.isArray(listing.services) ? listing.services.join(', ') : listing.services || '—'}</p>
       {listing.experience && <p><strong>Years of Experience:</strong> {listing.experience}</p>}
       {listing.qualifications && <p><strong>Qualifications:</strong> {listing.qualifications}</p>}
-      {listing.pricing && <p><strong>Rate:</strong> {listing.pricing}</p>}
+      {(listing.pricing || listing.price) && <p><strong>Rate:</strong> {listing.pricing || (typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : listing.price)}</p>}
     </div>
   </div>
 );
@@ -83,7 +83,7 @@ const AgrovetDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
     <h2 className="font-semibold mb-3 text-green-900">Agrovet Details</h2>
     <div className="space-y-2">
       <p><strong>Products/Services:</strong> {Array.isArray(listing.services) ? listing.services.join(', ') : listing.services || '—'}</p>
-      {listing.pricing && <p><strong>Pricing Info:</strong> {listing.pricing}</p>}
+      {(listing.pricing || listing.price) && <p><strong>Pricing Info:</strong> {listing.pricing || (typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : listing.price)}</p>}
       {listing.specialization && <p><strong>Specialization:</strong> {listing.specialization}</p>}
       {listing.businessHours && <p><strong>Business Hours:</strong> {listing.businessHours}</p>}
     </div>
@@ -571,7 +571,7 @@ const ListingDetails: React.FC = () => {
               <p className="text-xs text-gray-500 mb-1">Price</p>
               <p className="text-2xl font-extrabold text-green-700">
                 {listing.price || listing.pricing ? (
-                  typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : `KES ${listing.price || listing.pricing}`
+                  typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : (listing.price || listing.pricing)
                 ) : 'Contact for price'}
               </p>
             </div>
