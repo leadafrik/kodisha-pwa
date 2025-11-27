@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useProperties } from "../contexts/PropertyContext";
 import { useAuth } from "../contexts/AuthContext";
 import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from "../data/kenyaCounties";
+import { API_BASE_URL } from "../config/api";
 
 type ProductCategory = "produce" | "livestock" | "inputs";
 
@@ -31,6 +32,12 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
   const [uploading, setUploading] = useState(false);
   const [constituencies, setConstituencies] = useState<{ value: string; label: string }[]>([]);
   const [wards, setWards] = useState<{ value: string; label: string }[]>([]);
+  
+  // Verification document states
+  const [idFrontFile, setIdFrontFile] = useState<File | null>(null);
+  const [idBackFile, setIdBackFile] = useState<File | null>(null);
+  const [selfieFile, setSelfieFile] = useState<File | null>(null);
+  const [docUploading, setDocUploading] = useState(false);
 
   const commission = useMemo(() => {
     const numPrice = Number(price) || 0;
@@ -74,18 +81,81 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
     setSelectedImages((prev) => prev.filter((_, i) => i !== idx));
   };
 
+  const idVerified = !!user?.verification?.idVerified;
+  const selfieVerified = !!user?.verification?.selfieVerified;
+  const idDocsNeeded = !idVerified;
+  const selfieNeeded = !selfieVerified;
+
+  const uploadVerificationDoc = async (type: string, file: File) => {
+    const token = localStorage.getItem('kodisha_token');
+    const userId = (user as any)?._id || (user as any)?.id;
+    if (!token) {
+      throw new Error('You must be logged in to upload verification documents.');
+    }
+    if (!userId) {
+      throw new Error('Missing user id for verification uploads.');
+    }
+
+    const formData = new FormData();
+    formData.append('userId', userId);
+    formData.append('file', file);
+
+    const response = await fetch(`${API_BASE_URL}/verification/upload/${type}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+    const json = await response.json();
+    if (!response.ok || json.success === false) {
+      throw new Error(json.message || 'Failed to upload document');
+    }
+    return json;
+  };
+
+  const ensureDocsUploaded = async () => {
+    const uploads: Array<{ type: string; file: File }> = [];
+
+    if (!idVerified) {
+      if (idFrontFile) uploads.push({ type: 'id-front', file: idFrontFile });
+      if (idBackFile) uploads.push({ type: 'id-back', file: idBackFile });
+    }
+    if (!selfieVerified && selfieFile) {
+      uploads.push({ type: 'selfie', file: selfieFile });
+    }
+
+    if (uploads.length === 0) return;
+
+    setDocUploading(true);
+    try {
+      for (const u of uploads) {
+        await uploadVerificationDoc(u.type, u.file);
+      }
+    } finally {
+      setDocUploading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
       alert("Please log in to list products.");
       return;
     }
-    if (!user.verification?.idVerified || !user.verification?.selfieVerified) {
-      alert("Please verify your ID and selfie before listing products.");
+    
+    // Check if verification documents are provided
+    if (!idVerified && (!idFrontFile || !idBackFile)) {
+      alert("Please upload both sides of your National ID.");
       return;
     }
+    if (!selfieVerified && !selfieFile) {
+      alert("Please upload a selfie holding your ID.");
+      return;
+    }
+
     setUploading(true);
     try {
+      // Upload verification documents first if needed
+      await ensureDocsUploaded();
       const form = new FormData();
       form.append("title", title.trim());
       form.append("description", description.trim());
@@ -320,6 +390,91 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
             </label>
           </div>
           */}
+        </div>
+      </div>
+
+      {/* Verification Documents Section */}
+      <div className="mb-6 space-y-4 rounded-2xl border border-blue-200 bg-blue-50/40 p-4">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-semibold text-gray-800">Verification Documents</h2>
+            <p className="text-sm text-gray-600">
+              Upload your ID and selfie for verification. This is required for all product listings to ensure buyer trust.
+            </p>
+          </div>
+          {docUploading && (
+            <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+              Uploading docs…
+            </span>
+          )}
+        </div>
+
+        {idVerified && selfieVerified ? (
+          <div className="flex items-center space-x-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+            <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <div>
+              <p className="text-green-800 font-semibold">✓ ID Already Verified</p>
+              <p className="text-sm text-green-700">Your identity documents have been verified by our team.</p>
+            </div>
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="block text-sm text-gray-700">
+              <span className="font-semibold text-gray-900">
+                National ID (Front) {idDocsNeeded ? '*' : ''}
+              </span>
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={(e) => setIdFrontFile(e.target.files?.[0] || null)}
+                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                required={!idVerified}
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Required for product listings unless already verified.
+              </p>
+            </label>
+
+            <label className="block text-sm text-gray-700">
+              <span className="font-semibold text-gray-900">
+                National ID (Back) {idDocsNeeded ? '*' : ''}
+              </span>
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={(e) => setIdBackFile(e.target.files?.[0] || null)}
+                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                required={!idVerified}
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Required for product listings unless already verified.
+              </p>
+            </label>
+
+            <label className="block text-sm text-gray-700 md:col-span-2">
+              <span className="font-semibold text-gray-900">
+                Selfie holding ID {selfieNeeded ? '*' : ''}
+              </span>
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={(e) => setSelfieFile(e.target.files?.[0] || null)}
+                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                required={!selfieVerified}
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Take a clear photo holding your ID next to your face. Required unless already verified.
+              </p>
+            </label>
+          </div>
+        )}
+
+        <div className="bg-blue-100/50 border border-blue-200 rounded-lg p-3">
+          <p className="text-xs text-blue-800">
+            <strong>Note:</strong> These documents are reviewed by our admin team. Once verified, you won't need to upload them again for future listings.
+          </p>
         </div>
       </div>
 
