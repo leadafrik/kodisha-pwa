@@ -1,16 +1,17 @@
-# Mamamboga Digital - Agricultural Marketplace Kenya
-# https://mamamboga254.com
-
+# Mamamboga Digital - Robots.txt
 User-agent: *
 Allow: /
-Allow: /browse
-Allow: /listings/
 Disallow: /admin
-Disallow: /login
-Disallow: /profile
+Disallow: /api/
+Disallow: /payment-test
+Disallow: /user/
 
-# Sitemap
 Sitemap: https://mamamboga254.com/sitemap.xml
 
-# Crawl delay
-Crawl-delay: 1
+# Google-specific
+User-agent: Googlebot
+Allow: /
+
+# Bing-specific
+User-agent: Bingbot
+Allow: /
