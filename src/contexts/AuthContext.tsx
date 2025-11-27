@@ -28,8 +28,12 @@ const mapBackendUserToFrontendUser = (apiUser: any): User => {
   const id = apiUser._id?.toString?.() || apiUser.id || "";
   const name = apiUser.fullName || apiUser.name || "User";
 
+  // Map userType directly - no conversion needed now
   let type: User["type"] = "buyer";
-  if (apiUser.userType === "landowner") type = "seller";
+  if (apiUser.userType === "seller") type = "seller";
+  else if (apiUser.userType === "buyer") type = "buyer";
+  // Legacy support for old types
+  else if (apiUser.userType === "landowner") type = "seller";
   else if (apiUser.userType === "farmer") type = "buyer";
   else if (apiUser.role === "admin") type = "admin";
 
