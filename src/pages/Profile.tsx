@@ -173,7 +173,7 @@ const Profile: React.FC = () => {
             <div className="text-purple-100 text-sm">Rent out farm equipment</div>
           </Link>
           <Link
-            to="/products/list"
+            to="/list?category=product"
             className="bg-orange-600 text-white p-6 rounded-xl hover:bg-orange-700 transition duration-300 text-center"
           >
             <div className="font-semibold text-lg">List Product</div>
