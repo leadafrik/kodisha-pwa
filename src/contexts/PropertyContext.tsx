@@ -124,12 +124,19 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
     setLoading(true);
     try {
       const response = await fetch(API_ENDPOINTS.properties.getAll);
-      if (!response.ok) throw new Error("Failed to fetch listings");
+      if (!response.ok) {
+        console.warn("Properties fetch failed:", response.status);
+        setProperties([]);
+        return;
+      }
       const data = await response.json();
-      setProperties(data.data || data.listings || []);
-      console.log("Listings loaded:", data.data?.length || 0);
+      const listings = Array.isArray(data.data) ? data.data : 
+                      Array.isArray(data.listings) ? data.listings : [];
+      setProperties(listings);
+      console.log("Listings loaded:", listings.length);
     } catch (error) {
       console.error("Error loading properties:", error);
+      setProperties([]);
     } finally {
       setLoading(false);
     }
@@ -139,24 +146,31 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
     setLoading(true);
     try {
       const [equipmentRes, professionalRes, agrovetRes] = await Promise.all([
-        fetch(API_ENDPOINTS.services.equipment.list),
-        fetch(API_ENDPOINTS.services.professional.list),
-        fetch(API_ENDPOINTS.services.agrovets.list),
+        fetch(API_ENDPOINTS.services.equipment.list).catch(() => null),
+        fetch(API_ENDPOINTS.services.professional.list).catch(() => null),
+        fetch(API_ENDPOINTS.services.agrovets.list).catch(() => null),
       ]);
 
-      if (!equipmentRes.ok || !professionalRes.ok || !agrovetRes.ok) {
-        throw new Error("Failed to fetch services");
+      const equipment: any[] = [];
+      const professional: any[] = [];
+      const agrovet: any[] = [];
+
+      if (equipmentRes?.ok) {
+        const equipmentJson = await equipmentRes.json().catch(() => ({ data: [] }));
+        equipment.push(...(Array.isArray(equipmentJson.data) ? equipmentJson.data.map(mapServiceRecord) : []));
       }
 
-      const equipmentJson = await equipmentRes.json();
-      const professionalJson = await professionalRes.json();
-      const agrovetJson = await agrovetRes.json();
+      if (professionalRes?.ok) {
+        const professionalJson = await professionalRes.json().catch(() => ({ data: [] }));
+        professional.push(...(Array.isArray(professionalJson.data) ? professionalJson.data.map(mapServiceRecord) : []));
+      }
 
-      const equipment = (equipmentJson.data || []).map(mapServiceRecord);
-      const professional = (professionalJson.data || []).map(mapServiceRecord);
-      const agrovet = (agrovetJson.data || []).map((item: any) =>
-        mapServiceRecord({ ...item, type: "agrovet" })
-      );
+      if (agrovetRes?.ok) {
+        const agrovetJson = await agrovetRes.json().catch(() => ({ data: [] }));
+        agrovet.push(...(Array.isArray(agrovetJson.data) ? agrovetJson.data.map((item: any) =>
+          mapServiceRecord({ ...item, type: "agrovet" })
+        ) : []));
+      }
 
       const combined = [...equipment, ...professional, ...agrovet].sort(
         (a, b) => b.createdAt.getTime() - a.createdAt.getTime()

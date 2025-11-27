@@ -8,13 +8,17 @@ const Profile: React.FC = () => {
   const { properties, serviceListings } = useProperties();
   const navigate = useNavigate();
 
+  // Safety check: ensure properties and serviceListings are arrays
+  const safeProperties = Array.isArray(properties) ? properties : [];
+  const safeServiceListings = Array.isArray(serviceListings) ? serviceListings : [];
+
   if (!user) {
     navigate("/login");
     return null;
   }
 
-  const userProperties = properties.filter((p) => p.listedBy === "Current User");
-  const userServices = serviceListings.filter((s) => s.contact === user.phone);
+  const userProperties = safeProperties.filter((p) => p?.listedBy === "Current User");
+  const userServices = safeServiceListings.filter((s) => s?.contact === user?.phone);
 
   const getVerificationBadge = () => {
     switch (user.verificationStatus) {
@@ -62,14 +66,14 @@ const Profile: React.FC = () => {
     businessVerified?: boolean;
     verificationLevel?: string;
     trustScore?: number;
-  } = user.verification || {};
+  } = user?.verification || {};
 
   const verificationItems = [
-    { label: "Phone verified", value: verificationDetails.phoneVerified },
-    { label: "ID verified", value: verificationDetails.idVerified },
-    { label: "Selfie verified", value: verificationDetails.selfieVerified },
-    { label: "Ownership verified", value: verificationDetails.ownershipVerified },
-    { label: "Business verified", value: verificationDetails.businessVerified },
+    { label: "Phone verified", value: verificationDetails.phoneVerified ?? false },
+    { label: "ID verified", value: verificationDetails.idVerified ?? false },
+    { label: "Selfie verified", value: verificationDetails.selfieVerified ?? false },
+    { label: "Ownership verified", value: verificationDetails.ownershipVerified ?? false },
+    { label: "Business verified", value: verificationDetails.businessVerified ?? false },
   ];
 
   return (
@@ -83,7 +87,10 @@ const Profile: React.FC = () => {
               {getVerificationBadge()}
               <span className="text-gray-600">{getUserTypeLabel()}</span>
             </div>
-            <p className="text-gray-600">{user.phone}</p>
+            {/* Avoid duplicate contact lines when email-only signup stores email in phone */}
+            {user.phone && user.phone !== user.email && (
+              <p className="text-gray-600">{user.phone}</p>
+            )}
             {user.email && <p className="text-gray-600">{user.email}</p>}
           </div>
           <button
@@ -143,7 +150,7 @@ const Profile: React.FC = () => {
       {/* Quick Actions */}
       <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Quick Actions</h2>
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Link
             to="/list?category=land"
             className="bg-green-600 text-white p-6 rounded-xl hover:bg-green-700 transition duration-300 text-center"
@@ -156,7 +163,21 @@ const Profile: React.FC = () => {
             className="bg-blue-600 text-white p-6 rounded-xl hover:bg-blue-700 transition duration-300 text-center"
           >
             <div className="font-semibold text-lg">List Service</div>
-            <div className="text-blue-100 text-sm">Offer equipment or services</div>
+            <div className="text-blue-100 text-sm">Offer professional services</div>
+          </Link>
+          <Link
+            to="/list-service"
+            className="bg-purple-600 text-white p-6 rounded-xl hover:bg-purple-700 transition duration-300 text-center"
+          >
+            <div className="font-semibold text-lg">List Equipment</div>
+            <div className="text-purple-100 text-sm">Rent out farm equipment</div>
+          </Link>
+          <Link
+            to="/products/list"
+            className="bg-orange-600 text-white p-6 rounded-xl hover:bg-orange-700 transition duration-300 text-center"
+          >
+            <div className="font-semibold text-lg">List Product</div>
+            <div className="text-orange-100 text-sm">Sell agricultural products</div>
           </Link>
         </div>
       </div>

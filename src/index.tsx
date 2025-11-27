@@ -11,6 +11,32 @@ initSentry();
 // Enforce HTTPS in production
 enforceHttps();
 
+// Global error handlers
+window.addEventListener('error', (event) => {
+  console.error('Global error:', {
+    message: event.message,
+    filename: event.filename,
+    lineno: event.lineno,
+    colno: event.colno,
+    error: event.error
+  });
+  // Prevent default to avoid double-logging in dev tools
+  if (process.env.NODE_ENV === 'production') {
+    event.preventDefault();
+  }
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled promise rejection:', {
+    reason: event.reason,
+    promise: event.promise
+  });
+  // Prevent default to avoid double-logging
+  if (process.env.NODE_ENV === 'production') {
+    event.preventDefault();
+  }
+});
+
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
