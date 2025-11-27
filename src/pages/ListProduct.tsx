@@ -44,6 +44,13 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
     return Math.max(numPrice * 0.005, 49);
   }, [price]);
 
+  // Pre-fill contact with user's phone
+  useEffect(() => {
+    if (user?.phone && !contact) {
+      setContact(user.phone);
+    }
+  }, [user, contact]);
+
   useEffect(() => {
     if (county) {
       const data = getConstituenciesByCounty(county);
@@ -144,7 +151,7 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
     
     // Check if verification documents are provided
     if (!idVerified && (!idFrontFile || !idBackFile)) {
-      alert("Please upload both sides of your National ID.");
+      alert("Please upload both sides of your National ID (front and back).");
       return;
     }
     if (!selfieVerified && !selfieFile) {
@@ -155,7 +162,14 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
     setUploading(true);
     try {
       // Upload verification documents first if needed
-      await ensureDocsUploaded();
+      try {
+        await ensureDocsUploaded();
+      } catch (err: any) {
+        alert(err.message || "Failed to upload verification documents.");
+        setUploading(false);
+        return;
+      }
+
       const form = new FormData();
       form.append("title", title.trim());
       form.append("description", description.trim());
@@ -175,7 +189,9 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
       selectedImages.forEach((img) => form.append("images", img));
 
       await addProduct(form);
-      alert("Product listed! Boosted/paid/verified listings show first in the marketplace.");
+      alert("Product listed successfully! An admin will review and verify it shortly.");
+      
+      // Reset form fields
       setTitle("");
       setDescription("");
       setPrice("");
@@ -189,6 +205,11 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
       setSelectedImages([]);
       setSubscribed(false);
       setPremiumBadge(false);
+      
+      // Reset document upload fields
+      setIdFrontFile(null);
+      setIdBackFile(null);
+      setSelfieFile(null);
     } catch (err: any) {
       console.error("Product submit error", err);
       alert(err?.message || "Failed to list product.");
@@ -516,15 +537,17 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
 
       <button
         type="submit"
-        disabled={uploading}
+        disabled={uploading || docUploading}
         className={`w-full py-3 rounded-lg font-semibold text-lg transition duration-300 ${
-          uploading ? "bg-gray-400 cursor-not-allowed" : "bg-orange-600 hover:bg-orange-700 text-white"
+          uploading || docUploading ? "bg-gray-400 cursor-not-allowed" : "bg-orange-600 hover:bg-orange-700 text-white"
         }`}
       >
-        {uploading ? "Listing..." : "List Product"}
+        {docUploading ? "Uploading Documents..." : uploading ? "Listing Product..." : "List Product"}
       </button>
       <p className="text-xs text-gray-500 text-center">
-        ID + selfie verification required. All listings are currently free during our introductory phase.
+        {idVerified && selfieVerified 
+          ? "Your identity is verified. All listings are free during our introductory phase." 
+          : "ID + selfie verification required. One-time upload reviewed by admin."}
       </p>
     </form>
   );
