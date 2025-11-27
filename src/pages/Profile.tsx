@@ -184,6 +184,13 @@ const Profile: React.FC = () => {
             <div className="font-semibold text-lg">List Product</div>
             <div className="text-orange-100 text-sm">Sell agricultural products</div>
           </Link>
+          <Link
+            to="/favorites"
+            className="bg-pink-600 text-white p-6 rounded-xl hover:bg-pink-700 transition duration-300 text-center"
+          >
+            <div className="font-semibold text-lg">Saved Listings</div>
+            <div className="text-pink-100 text-sm">View your favorites</div>
+          </Link>
         </div>
       </div>
 

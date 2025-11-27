@@ -246,6 +246,7 @@ const ListingDetails: React.FC = () => {
   const [soldMessage, setSoldMessage] = useState("");
   const [mainImage, setMainImage] = useState<string | null>(null);
   const [listingType, setListingType] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -283,6 +284,22 @@ const ListingDetails: React.FC = () => {
       if (data.success && data.data) {
         setListing(data.data);
         setListingType(data.data.listingType || "land");
+        // After setting listing, check if saved
+        const token = getAuthToken();
+        if (token) {
+          try {
+            const favRes = await fetch('/api/favorites', { headers: { Authorization: `Bearer ${token}` } });
+            if (favRes.ok) {
+              const favData = await favRes.json();
+              if (favData.success && Array.isArray(favData.data)) {
+                const isSaved = favData.data.some((f: any) => f.listingId === data.data._id);
+                setSaved(isSaved);
+              }
+            }
+          } catch (e) {
+            console.error('Favorite check failed', e);
+          }
+        }
         if (Array.isArray(data.data.images) && data.data.images.length > 0) {
           setMainImage(data.data.images[0]);
         }
@@ -699,10 +716,31 @@ const ListingDetails: React.FC = () => {
               Share
             </button>
             <button
-              onClick={() => window.alert('Added to favorites')}
+              onClick={async () => {
+                const token = getAuthToken();
+                if (!token) {
+                  window.location.href = `/login?next=/listings/${id}`;
+                  return;
+                }
+                try {
+                  const resp = await fetch('/api/favorites/toggle', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ listingId: listing._id, listingType: listingType })
+                  });
+                  if (resp.ok) {
+                    const j = await resp.json();
+                    if (j.success) {
+                      setSaved(j.action === 'added');
+                    }
+                  }
+                } catch (err) {
+                  console.error('Toggle favorite error', err);
+                }
+              }}
               className="px-5 py-2 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition"
             >
-              Save
+              {saved ? 'Saved' : 'Save'}
             </button>
             {canMarkSold && !listing.sold && (
               <button

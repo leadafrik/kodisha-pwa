@@ -102,6 +102,9 @@ const Navbar: React.FC = () => {
                       <Link to="/profile" className="block px-4 py-3 hover:bg-gray-50 border-b">
                         <div className="font-semibold">Dashboard</div>
                       </Link>
+                      <Link to="/favorites" className="block px-4 py-3 hover:bg-gray-50 border-b">
+                        <div className="font-semibold">Saved Listings</div>
+                      </Link>
 
                       <div className="border-b">
                         <Link to="/list" className="block px-4 py-2 hover:bg-gray-50 text-sm">Create Listing</Link>
@@ -156,6 +159,7 @@ const Navbar: React.FC = () => {
               {user ? (
                 <>
                   <Link to="/profile" onClick={closeMobile}>Dashboard</Link>
+                  <Link to="/favorites" onClick={closeMobile}>Saved Listings</Link>
                   <Link to="/list" onClick={closeMobile}>Create Listing</Link>
                   <button
                     onClick={() => { logout(); closeMobile(); }}
