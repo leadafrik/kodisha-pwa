@@ -5,12 +5,13 @@ import { useProperties } from "../contexts/PropertyContext";
 
 const Profile: React.FC = () => {
   const { user, logout } = useAuth();
-  const { properties, serviceListings } = useProperties();
+  const { properties, serviceListings, productListings } = useProperties();
   const navigate = useNavigate();
 
-  // Safety check: ensure properties and serviceListings are arrays
+  // Safety check: ensure all listing arrays are valid
   const safeProperties = Array.isArray(properties) ? properties : [];
   const safeServiceListings = Array.isArray(serviceListings) ? serviceListings : [];
+  const safeProductListings = Array.isArray(productListings) ? productListings : [];
 
   if (!user) {
     navigate("/login");
@@ -18,7 +19,9 @@ const Profile: React.FC = () => {
   }
 
   const userProperties = safeProperties.filter((p) => p?.listedBy === "Current User");
-  const userServices = safeServiceListings.filter((s) => s?.contact === user?.phone);
+  const userServices = safeServiceListings.filter((s) => s?.contact === user?.phone || s?.ownerId === user?.id || s?.ownerId === user?._id);
+  const userAgrovets = safeServiceListings.filter((s) => s?.type === "agrovet" && (s?.contact === user?.phone || s?.ownerId === user?.id || s?.ownerId === user?._id));
+  const userProducts = safeProductListings.filter((p) => p?.seller?._id === user?._id || p?.seller?.email === user?.email || p?.contact === user?.phone);
 
   const getVerificationBadge = () => {
     switch (user.verificationStatus) {
@@ -130,20 +133,22 @@ const Profile: React.FC = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div className="bg-white rounded-xl shadow-md p-6 text-center">
           <div className="text-3xl font-bold text-green-600 mb-2">{userProperties.length}</div>
-          <div className="text-gray-600">Land Listings</div>
+          <div className="text-gray-600 text-sm">Land Listings</div>
         </div>
         <div className="bg-white rounded-xl shadow-md p-6 text-center">
           <div className="text-3xl font-bold text-blue-600 mb-2">{userServices.length}</div>
-          <div className="text-gray-600">Service Listings</div>
+          <div className="text-gray-600 text-sm">Services</div>
         </div>
         <div className="bg-white rounded-xl shadow-md p-6 text-center">
-          <div className="text-3xl font-bold text-purple-600 mb-2">
-            {user.verificationStatus === "verified" ? "Verified" : "Not Verified"}
-          </div>
-          <div className="text-gray-600">Account Status</div>
+          <div className="text-3xl font-bold text-purple-600 mb-2">{userAgrovets.length}</div>
+          <div className="text-gray-600 text-sm">Agrovets</div>
+        </div>
+        <div className="bg-white rounded-xl shadow-md p-6 text-center">
+          <div className="text-3xl font-bold text-orange-600 mb-2">{userProducts.length}</div>
+          <div className="text-gray-600 text-sm">Products</div>
         </div>
       </div>
 
@@ -183,7 +188,7 @@ const Profile: React.FC = () => {
       </div>
 
       {/* Recent Listings */}
-      <div className="grid md:grid-cols-2 gap-8">
+      <div className="grid md:grid-cols-2 gap-6">
         {/* Land Listings */}
         <div className="bg-white rounded-2xl shadow-lg p-6">
           <h3 className="text-xl font-bold text-gray-800 mb-4">Your Land Listings</h3>
@@ -195,12 +200,12 @@ const Profile: React.FC = () => {
               </Link>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {userProperties.slice(0, 3).map((property) => (
-                <div key={property.id} className="border rounded-lg p-4">
-                  <h4 className="font-semibold text-gray-800">{property.title}</h4>
-                  <p className="text-green-600 font-bold">KSh {property.price.toLocaleString()}</p>
-                  <p className="text-gray-600 text-sm">{property.county} County</p>
+                <div key={property.id} className="border rounded-lg p-3 hover:shadow-md transition">
+                  <h4 className="font-semibold text-gray-800 text-sm">{property.title}</h4>
+                  <p className="text-green-600 font-bold text-sm">KSh {property.price?.toLocaleString() || 'N/A'}</p>
+                  <p className="text-gray-600 text-xs">{property.county} County</p>
                 </div>
               ))}
             </div>
@@ -218,12 +223,60 @@ const Profile: React.FC = () => {
               </Link>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {userServices.slice(0, 3).map((service) => (
-                <div key={service.id} className="border rounded-lg p-4">
-                  <h4 className="font-semibold text-gray-800">{service.name}</h4>
-                  <p className="text-gray-600 text-sm">{service.type}</p>
-                  <p className="text-gray-600 text-sm">{service.location.county} County</p>
+                <div key={service.id} className="border rounded-lg p-3 hover:shadow-md transition">
+                  <h4 className="font-semibold text-gray-800 text-sm">{service.name}</h4>
+                  <p className="text-gray-600 text-xs">{service.type}</p>
+                  <p className="text-gray-600 text-xs">{service.location?.county} County</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Agrovet Listings */}
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">Your Agrovet Listings</h3>
+          {userAgrovets.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <p>No agrovet listings yet</p>
+              <Link to="/list-agrovet" className="text-purple-600 font-semibold mt-2 inline-block">
+                List your first agrovet
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {userAgrovets.slice(0, 3).map((agrovet) => (
+                <div key={agrovet.id} className="border rounded-lg p-3 hover:shadow-md transition">
+                  <h4 className="font-semibold text-gray-800 text-sm">{agrovet.name}</h4>
+                  <p className="text-gray-600 text-xs">
+                    {Array.isArray(agrovet.services) ? agrovet.services.slice(0, 2).join(', ') : 'Services available'}
+                  </p>
+                  <p className="text-gray-600 text-xs">{agrovet.location?.county} County</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Product Listings */}
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">Your Product Listings</h3>
+          {userProducts.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <p>No product listings yet</p>
+              <Link to="/list?category=product" className="text-orange-600 font-semibold mt-2 inline-block">
+                List your first product
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {userProducts.slice(0, 3).map((product) => (
+                <div key={product._id || product.id} className="border rounded-lg p-3 hover:shadow-md transition">
+                  <h4 className="font-semibold text-gray-800 text-sm">{product.name || product.title}</h4>
+                  <p className="text-orange-600 font-bold text-sm">KSh {product.price?.toLocaleString() || 'N/A'}</p>
+                  <p className="text-gray-600 text-xs">{product.category}</p>
                 </div>
               ))}
             </div>
