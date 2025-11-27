@@ -74,10 +74,9 @@ const VerificationWizard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const isLandOwner =
-    user?.userType === "seller" || user?.userType === "landowner" || user?.type === "seller";
-  const isServiceProvider =
-    user?.userType === "service" || user?.type === "service_provider";
+  // Use the normalized frontend `type` only to avoid enum mismatches
+  const isLandOwner = user?.type === "seller";
+  const isServiceProvider = user?.type === "service_provider";
 
   const steps: StepConfig[] = useMemo(() => {
     const list: StepConfig[] = [];

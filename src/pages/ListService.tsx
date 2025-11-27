@@ -143,6 +143,7 @@ const ListService: React.FC<ListServiceProps> = ({ initialServiceType }) => {
   });
 
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [otherService, setOtherService] = useState<string>("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [constituencies, setConstituencies] = useState<
     { value: string; label: string }[]
@@ -310,7 +311,14 @@ const ListService: React.FC<ListServiceProps> = ({ initialServiceType }) => {
       submitData.append("constituency", formData.constituency);
       submitData.append("ward", formData.ward);
       submitData.append("contact", formData.contact.trim());
-      submitData.append("services", selectedServices.join(","));
+      // Include custom 'Other' text if provided
+      const servicesToSubmit = selectedServices.includes("Other") && otherService.trim()
+        ? [
+            ...selectedServices.filter((s) => s !== "Other"),
+            otherService.trim(),
+          ]
+        : selectedServices;
+      submitData.append("services", servicesToSubmit.join(","));
       submitData.append("listingPlan", selectedPlan);
       submitData.append("listingPlanPrice", String(effectivePlanPrice));
       submitData.append("boostOption", selectedBoost);
@@ -413,6 +421,7 @@ const ListService: React.FC<ListServiceProps> = ({ initialServiceType }) => {
         businessHours: "",
       });
       setSelectedServices([]);
+      setOtherService("");
       setSelectedImages([]);
       setConstituencies([]);
       setWards([]);
@@ -863,6 +872,27 @@ const ListService: React.FC<ListServiceProps> = ({ initialServiceType }) => {
                   <span className="font-medium">{service}</span>
                 </label>
               ))}
+              {/* Other option */}
+              <div className="p-3 border rounded-lg">
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={selectedServices.includes("Other")}
+                    onChange={() => handleServiceToggle("Other")}
+                    className="mr-3"
+                  />
+                  <span className="font-medium">Other</span>
+                </label>
+                {selectedServices.includes("Other") && (
+                  <input
+                    type="text"
+                    value={otherService}
+                    onChange={(e) => setOtherService(e.target.value)}
+                    className="mt-2 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="Describe other service (e.g., Bee Keeping Advisory)"
+                  />
+                )}
+              </div>
             </div>
           </div>
 

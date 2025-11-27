@@ -42,9 +42,9 @@ const Profile: React.FC = () => {
   const getUserTypeLabel = () => {
     switch (user.type) {
       case "buyer":
-        return "Land Buyer/Renter";
+        return "Buyer";
       case "seller":
-        return "Land Seller";
+        return "Seller";
       case "service_provider":
         return "Service Provider";
       case "admin":
