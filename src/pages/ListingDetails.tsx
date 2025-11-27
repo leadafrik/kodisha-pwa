@@ -40,15 +40,15 @@ const LandDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
   <div className="bg-gray-100 p-4 rounded-lg mb-6">
     <h2 className="font-semibold mb-3">Land Details</h2>
     <div className="space-y-2">
-      <p><strong>Size:</strong> {listing.size ?? '—'} {listing.size ? 'acres' : ''}</p>
-      <p><strong>Soil Type:</strong> {listing.soilType || '—'}</p>
-      <p><strong>Water Availability:</strong> {listing.waterAvailability || '—'}</p>
-      <p><strong>Organic Certified:</strong> {listing.organicCertified ? "Yes" : "No"}</p>
-      <p><strong>Previous Crops:</strong> {Array.isArray(listing.previousCrops) ? listing.previousCrops.join(", ") : listing.previousCrops || '—'}</p>
-      {listing.availableFrom && <p><strong>Available From:</strong> {new Date(listing.availableFrom).toLocaleDateString()}</p>}
-      {listing.availableTo && <p><strong>Available Until:</strong> {new Date(listing.availableTo).toLocaleDateString()}</p>}
-      {listing.minLeasePeriod && <p><strong>Min Lease Period:</strong> {listing.minLeasePeriod} months</p>}
-      {listing.maxLeasePeriod && <p><strong>Max Lease Period:</strong> {listing.maxLeasePeriod} months</p>}
+      <p><strong>Size:</strong> {listing?.size ?? '—'} {listing?.size ? 'acres' : ''}</p>
+      <p><strong>Soil Type:</strong> {listing?.soilType || '—'}</p>
+      <p><strong>Water Availability:</strong> {listing?.waterAvailability || '—'}</p>
+      <p><strong>Organic Certified:</strong> {listing?.organicCertified ? "Yes" : "No"}</p>
+      <p><strong>Previous Crops:</strong> {Array.isArray(listing?.previousCrops) ? listing.previousCrops.join(", ") : listing?.previousCrops || '—'}</p>
+      {listing?.availableFrom && <p><strong>Available From:</strong> {new Date(listing.availableFrom).toLocaleDateString()}</p>}
+      {listing?.availableTo && <p><strong>Available Until:</strong> {new Date(listing.availableTo).toLocaleDateString()}</p>}
+      {listing?.minLeasePeriod && <p><strong>Min Lease Period:</strong> {listing.minLeasePeriod} months</p>}
+      {listing?.maxLeasePeriod && <p><strong>Max Lease Period:</strong> {listing.maxLeasePeriod} months</p>}
     </div>
   </div>
 );
@@ -267,23 +267,35 @@ const ListingDetails: React.FC = () => {
   const fetchListing = useCallback(async () => {
     setLoading(true);
     try {
-      if (!id) return;
+      if (!id) {
+        setLoading(false);
+        return;
+      }
       const res = await fetch(API_ENDPOINTS.properties.getById(id as string));
+      if (!res.ok) {
+        console.error('Listing fetch failed with status:', res.status);
+        setListing(null);
+        setLoading(false);
+        return;
+      }
       const data = await res.json();
       console.log('Listing API response:', data);
       if (data.success && data.data) {
         setListing(data.data);
         setListingType(data.data.listingType || "land");
-        if (data.data.images && data.data.images.length > 0) {
+        if (Array.isArray(data.data.images) && data.data.images.length > 0) {
           setMainImage(data.data.images[0]);
         }
       } else {
         console.error('Listing fetch failed:', data);
+        setListing(null);
       }
     } catch (err) {
       console.error("Error fetching listing:", err);
+      setListing(null);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [id]);
 
   // Check if user is admin on mount and when storage changes
@@ -467,7 +479,7 @@ const ListingDetails: React.FC = () => {
         clearTimeout(typingTimeoutRef.current);
       }
     };
-  }, [listing]);
+  }, [listing?.owner?._id]);
 
   if (loading) {
     return <div className="p-4 text-center text-gray-600">Loading listing...</div>;
@@ -475,14 +487,23 @@ const ListingDetails: React.FC = () => {
 
   if (!listing) {
     return (
-      <div className="p-4 text-center text-red-600">
-        Listing not found.
+      <div className="p-4 text-center">
+        <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow">
+          <h2 className="text-xl font-bold text-red-600 mb-2">Listing Not Found</h2>
+          <p className="text-gray-600 mb-4">This listing may have been removed or is no longer available.</p>
+          <button
+            onClick={() => navigate('/marketplace')}
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+          >
+            Back to Marketplace
+          </button>
+        </div>
       </div>
     );
   }
 
   const owner = listing.owner || {};
-  const coords = listing.coordinates;
+  const coords = listing.coordinates || listing.location?.coordinates;
 
   // Determine owner/admin privileges for marking sold
   const currentUserRaw = localStorage.getItem('kodisha_user');
@@ -591,7 +612,7 @@ const ListingDetails: React.FC = () => {
                 {listing.title || listing.name}
               </h1>
               <p className="text-sm text-gray-600">
-                {listing.location?.county}, {listing.location?.constituency}, {listing.location?.ward}
+                {[listing.location?.county, listing.location?.constituency, listing.location?.ward].filter(Boolean).join(', ') || 'Location not specified'}
               </p>
             </div>
             <div className="text-right">
@@ -605,13 +626,16 @@ const ListingDetails: React.FC = () => {
           </div>
 
           {/* Image gallery with main image and selectable thumbnails */}
-          {listing.images && listing.images.length > 0 && (
+          {Array.isArray(listing.images) && listing.images.length > 0 && (
             <div className="mb-6">
               <div className="rounded-lg overflow-hidden bg-gray-100 mb-3">
                 <img
                   src={mainImage || listing.images[0]}
                   alt="Listing main"
                   className="w-full h-96 object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x600?text=Image+Not+Available';
+                  }}
                 />
               </div>
               <div className="grid grid-cols-4 gap-2">
@@ -623,7 +647,14 @@ const ListingDetails: React.FC = () => {
                       mainImage === img ? 'border-green-600' : 'border-gray-200 hover:border-gray-400'
                     }`}
                   >
-                    <img src={img} alt={`Thumbnail ${i + 1}`} className="w-full h-full object-cover" />
+                    <img 
+                      src={img} 
+                      alt={`Thumbnail ${i + 1}`} 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/200x200?text=No+Image';
+                      }}
+                    />
                   </button>
                 ))}
               </div>
@@ -703,7 +734,7 @@ const ListingDetails: React.FC = () => {
           <div className="mt-6">
             <h2 className="font-semibold mb-2">Map Location</h2>
 
-            {!coords ? (
+            {!coords || !coords.lat || !coords.lng ? (
               <p className="text-gray-500 text-sm">No map location was provided for this listing.</p>
             ) : (
               <>
