@@ -99,22 +99,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (userData: UserFormData): Promise<User | null> => {
     setLoading(true);
     try {
-      // Map frontend types to backend types
-      // Backend expects: "farmer" | "landowner" | "service"
-      // Frontend uses: "buyer" | "seller" | "service_provider"
-      const userTypeMap: Record<string, "farmer" | "landowner" | "service"> = {
-        buyer: "farmer",
-        seller: "landowner",
-        service_provider: "service"
-      };
-      const userType = userTypeMap[userData.type || "buyer"] || "farmer";
-
       const payload = {
         phone: userData.phone,
         email: userData.email,
         fullName: userData.name,
         password: userData.password,
-        userType,
+        userType: userData.type || "buyer",
         county: userData.county,
         constituency: userData.constituency,
         ward: userData.ward,
