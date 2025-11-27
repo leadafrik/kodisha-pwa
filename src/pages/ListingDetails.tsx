@@ -78,17 +78,44 @@ const ProfessionalDetailsSection: React.FC<{ listing: any }> = ({ listing }) => 
   </div>
 );
 
-const AgrovetDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
-  <div className="bg-green-50 p-4 rounded-lg mb-6">
-    <h2 className="font-semibold mb-3 text-green-900">Agrovet Details</h2>
-    <div className="space-y-2">
-      <p><strong>Products/Services:</strong> {Array.isArray(listing.services) ? listing.services.join(', ') : listing.services || '—'}</p>
-      {(listing.pricing || listing.price) && <p><strong>Pricing Info:</strong> {listing.pricing || (typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : listing.price)}</p>}
-      {listing.specialization && <p><strong>Specialization:</strong> {listing.specialization}</p>}
-      {listing.businessHours && <p><strong>Business Hours:</strong> {listing.businessHours}</p>}
+const AgrovetDetailsSection: React.FC<{ listing: any }> = ({ listing }) => {
+  // Handle services - could be array, object, or string
+  const renderServices = () => {
+    if (!listing.services) return '—';
+    
+    // If it's an array
+    if (Array.isArray(listing.services)) {
+      return listing.services.join(', ');
+    }
+    
+    // If it's an object (e.g., {seeds: [...], fertilizers: [...]})
+    if (typeof listing.services === 'object') {
+      const servicesList: string[] = [];
+      Object.entries(listing.services).forEach(([key, value]) => {
+        if (Array.isArray(value) && value.length > 0) {
+          const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+          servicesList.push(`${formattedKey}: ${value.join(', ')}`);
+        }
+      });
+      return servicesList.length > 0 ? servicesList.join(' • ') : '—';
+    }
+    
+    // If it's a string
+    return String(listing.services);
+  };
+
+  return (
+    <div className="bg-green-50 p-4 rounded-lg mb-6">
+      <h2 className="font-semibold mb-3 text-green-900">Agrovet Details</h2>
+      <div className="space-y-2">
+        <p><strong>Products/Services:</strong> {renderServices()}</p>
+        {(listing.pricing || listing.price) && <p><strong>Pricing Info:</strong> {listing.pricing || (typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : listing.price)}</p>}
+        {listing.specialization && <p><strong>Specialization:</strong> {listing.specialization}</p>}
+        {listing.businessHours && <p><strong>Business Hours:</strong> {listing.businessHours}</p>}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const ProductDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
   <div className="bg-orange-50 p-4 rounded-lg mb-6">
