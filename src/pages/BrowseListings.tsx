@@ -218,7 +218,7 @@ const BrowseListings: React.FC = () => {
             <h1 className="text-3xl font-bold text-gray-900">
               Browse Marketplace
             </h1>
-            <p className="text-gray-600 text-sm">
+            <p className="text-gray-700 text-base font-medium">
               Land, services, agrovets & products. Filter by category and county.
             </p>
           </div>
