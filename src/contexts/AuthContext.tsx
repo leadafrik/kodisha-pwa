@@ -102,10 +102,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Map frontend types to backend types
       // Backend expects: "farmer" | "landowner" | "service"
       // Frontend uses: "buyer" | "seller" | "service_provider"
-      let userType: "farmer" | "landowner" | "service" = "farmer";
-      if (userData.type === "seller") userType = "landowner";
-      if (userData.type === "buyer") userType = "farmer";
-      if (userData.type === "service_provider") userType = "service";
+      const userTypeMap: Record<string, "farmer" | "landowner" | "service"> = {
+        buyer: "farmer",
+        seller: "landowner",
+        service_provider: "service"
+      };
+      const userType = userTypeMap[userData.type || "buyer"] || "farmer";
 
       const payload = {
         phone: userData.phone,

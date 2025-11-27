@@ -47,7 +47,7 @@ const Login: React.FC = () => {
     emailOrPhone: "",
     password: "",
     confirmPassword: "",
-    userType: "buyer" as "buyer" | "seller" | "service_provider",
+    userType: "buyer" as "buyer" | "seller",
     county: "",
   });
 
