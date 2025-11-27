@@ -190,21 +190,16 @@ const BrowseListings: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
       {!user && (
-        <div className="rounded-2xl bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-300 px-6 py-5">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-1">
-                Sign in to buy or list
-              </h2>
-              <p className="text-sm text-gray-700">
-                Create an account to view listing details, contact sellers, and post your own listings.
-              </p>
-            </div>
+        <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3">
+          <div className="flex items-center justify-between gap-4">
+            <p className="text-sm text-gray-700">
+              Sign in to view details and contact sellers
+            </p>
             <Link
               to="/login"
-              className="inline-flex justify-center items-center px-6 py-3 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700 transition whitespace-nowrap"
+              className="inline-flex items-center px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition whitespace-nowrap"
             >
-              Sign In / Sign Up
+              Sign In
             </Link>
           </div>
         </div>
@@ -221,10 +216,10 @@ const BrowseListings: React.FC = () => {
               Marketplace
             </p>
             <h1 className="text-3xl font-bold text-gray-900">
-              Browse Land, Services, and Agrovets
+              Browse Marketplace
             </h1>
             <p className="text-gray-600 text-sm">
-              Filter by category and county. Verified, paid, and boosted listings show first.
+              Land, services, agrovets & products. Filter by category and county.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">

@@ -28,9 +28,9 @@ const Home: React.FC = () => {
                 </span>
               </h1>
               <p className="text-lg sm:text-xl text-gray-600 max-w-2xl leading-relaxed">
-                One platform for land, equipment, services, and produce across Kenya—built for clarity, trust, and speed.
+                Lease/rent land for short-term farming • List agricultural products & livestock • Rent or sell equipment • Find agrovets • Hire agricultural professionals
                 {!PAYMENTS_ENABLED && (
-                  <span className="block mt-3 font-semibold text-green-700">Introductory Phase: Listing is free while we onboard early users.</span>
+                  <span className="block mt-3 font-semibold text-green-700">Introductory Phase: All listings are free while we onboard early users.</span>
                 )}
               </p>
             </div>
@@ -44,7 +44,7 @@ const Home: React.FC = () => {
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-                Explore Marketplace
+                Browse Marketplace
               </Link>
               <Link
                 to={user ? "/list" : "/login?next=/list"}
@@ -150,7 +150,7 @@ const Home: React.FC = () => {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">Fast Listings</h3>
               <p className="text-gray-600">
-                List land, equipment, services, or produce in under 2 minutes. Go live instantly.
+                List land, equipment, agrovets, services, or products in under 2 minutes. Go live instantly.
               </p>
             </div>
 
@@ -174,23 +174,24 @@ const Home: React.FC = () => {
       <section className="py-20 px-4 bg-gray-50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">What Can You Buy?</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">What's Available</h2>
             <p className="text-lg text-gray-600">
-              From land and equipment to services and farm produce
+              Everything you need for agricultural success in one marketplace
             </p>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
             {[
-              { title: "Agricultural Land", emoji: "🌾", desc: "For rent / lease" },
-              { title: "Equipment & Tools", emoji: "🚜", desc: "Tractors & machinery" },
-              { title: "Professional Services", emoji: "👨‍💼", desc: "Farm consulting" },
-              { title: "Farm Produce", emoji: "🥕", desc: "Fresh from farmers" },
+              { title: "Land Lease & Rent", emoji: "🌾", desc: "Short-term farming plots" },
+              { title: "Equipment Rental", emoji: "🚜", desc: "Tractors & machinery" },
+              { title: "Farm Products", emoji: "🥕", desc: "Produce & livestock" },
+              { title: "Agrovets", emoji: "🏪", desc: "Farm inputs & supplies" },
+              { title: "Ag Services", emoji: "👨‍🌾", desc: "Professionals & experts" },
             ].map((cat, idx) => (
-              <div key={idx} className="p-8 bg-white rounded-2xl border border-gray-200 text-center hover:shadow-lg transition">
-                <div className="text-5xl mb-4">{cat.emoji}</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-1">{cat.title}</h3>
-                <p className="text-sm text-gray-600 mb-4">{cat.desc}</p>
+              <div key={idx} className="p-6 bg-white rounded-2xl border border-gray-200 text-center hover:shadow-lg transition">
+                <div className="text-4xl mb-3">{cat.emoji}</div>
+                <h3 className="text-lg font-bold text-gray-900 mb-1">{cat.title}</h3>
+                <p className="text-xs text-gray-600 mb-4">{cat.desc}</p>
                 <Link to="/browse" className="text-green-600 font-semibold hover:text-green-700 text-sm">
                   Browse →
                 </Link>

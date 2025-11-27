@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useProperties } from '../contexts/PropertyContext';
-import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from '../data/kenyaCounties';
 import { initiatePaymentFlow } from '../utils/paymentHelpers';
 import { PAYMENTS_ENABLED } from '../config/featureFlags';
@@ -152,6 +152,7 @@ const formatKenyanPrice = (value: number) =>
 
 const ListAgrovet: React.FC = () => {
   const { addService } = useProperties();
+  const { user } = useAuth();
   const [formData, setFormData] = useState<AgrovetFormData>({
     name: '',
     description: '',
@@ -317,7 +318,9 @@ const ListAgrovet: React.FC = () => {
     setSubmitting(true);
     
     try {
-      if (!idFrontFile || !idBackFile || !selfieFile) {
+      // Only require ID upload if not already verified
+      const isIdVerified = user?.verification?.idVerified && user?.verification?.selfieVerified;
+      if (!isIdVerified && (!idFrontFile || !idBackFile || !selfieFile)) {
         alert('Please upload ID front, ID back, and a selfie with your ID to list an agrovet.');
         setSubmitting(false);
         return;
@@ -352,9 +355,9 @@ const ListAgrovet: React.FC = () => {
       submitData.append('totalMonetizationFee', String(totalMonetizationFee));
       submitData.append('approximateLocation', formData.approximateLocation);
 
-      submitData.append('idFront', idFrontFile);
-      submitData.append('idBack', idBackFile);
-      submitData.append('selfie', selfieFile);
+      if (idFrontFile) submitData.append('idFront', idFrontFile);
+      if (idBackFile) submitData.append('idBack', idBackFile);
+      if (selfieFile) submitData.append('selfie', selfieFile);
       if (businessPermitFile) {
         submitData.append('businessPermit', businessPermitFile);
       }
@@ -947,51 +950,84 @@ const ListAgrovet: React.FC = () => {
 
         <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
           <h3 className="font-semibold text-gray-800 mb-2">
-            Identity & Business Verification (Required)
+            Identity & Business Verification
           </h3>
-          <p className="text-sm text-gray-600 mb-4">
-            Upload clear photos of your ID front and back, plus a selfie holding your ID. A business permit is optional but recommended.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-gray-700 mb-2">ID Front *</label>
-              <input
-                type="file"
-                accept="image/*"
-                required
-                onChange={(e) => setIdFrontFile(e.target.files?.[0] || null)}
-                className="w-full border rounded-lg px-3 py-2"
-              />
+          
+          {user?.verification?.idVerified && user?.verification?.selfieVerified ? (
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <div>
+                  <p className="text-green-800 font-semibold">✓ ID Already Verified</p>
+                  <p className="text-sm text-green-700">Your identity documents have been verified by our team. You won't need to upload ID again for future agrovet or service listings.</p>
+                </div>
+              </div>
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  💡 <strong>One-time verification:</strong> We verify IDs once to reduce fraud and impersonation. Your future listings will be published faster.
+                </p>
+              </div>
             </div>
-            <div>
-              <label className="block text-gray-700 mb-2">ID Back *</label>
-              <input
-                type="file"
-                accept="image/*"
-                required
-                onChange={(e) => setIdBackFile(e.target.files?.[0] || null)}
-                className="w-full border rounded-lg px-3 py-2"
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 mb-2">Selfie with ID *</label>
-              <input
-                type="file"
-                accept="image/*"
-                required
-                onChange={(e) => setSelfieFile(e.target.files?.[0] || null)}
-                className="w-full border rounded-lg px-3 py-2"
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 mb-2">Business Permit (Optional)</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setBusinessPermitFile(e.target.files?.[0] || null)}
-                className="w-full border rounded-lg px-3 py-2"
-              />
-            </div>
+          ) : (
+            <>
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  🔒 <strong>Why we verify:</strong> We verify IDs once to reduce fraud and impersonation. After approval, you skip ID uploads for future listings.
+                </p>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">
+                Upload clear photos of your ID front and back, plus a selfie holding your ID.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-gray-700 mb-2">ID Front *</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    required
+                    onChange={(e) => setIdFrontFile(e.target.files?.[0] || null)}
+                    className="w-full border rounded-lg px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 mb-2">ID Back *</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    required
+                    onChange={(e) => setIdBackFile(e.target.files?.[0] || null)}
+                    className="w-full border rounded-lg px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 mb-2">Selfie with ID *</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    required
+                    onChange={(e) => setSelfieFile(e.target.files?.[0] || null)}
+                    className="w-full border rounded-lg px-3 py-2"
+                  />
+                </div>
+              </div>
+            </>
+          )}
+          
+          <div className="mt-4">
+            <label className="block text-gray-700 mb-2">Business Permit (Optional - Boosts Trust Score)</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setBusinessPermitFile(e.target.files?.[0] || null)}
+              className="w-full border rounded-lg px-3 py-2"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              {user?.verification?.businessVerified 
+                ? "✓ Business permit verified. Upload a new one only if it has changed."
+                : "Upload once to boost your trust score. You won't need to resubmit for future listings."}
+            </p>
           </div>
         </div>
 

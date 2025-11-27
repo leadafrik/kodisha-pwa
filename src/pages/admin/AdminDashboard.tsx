@@ -42,6 +42,13 @@ interface AdminListing {
   createdAt?: string;
   ownerTrustScore?: number;
   ownerTrustLevel?: "very_low" | "low" | "medium" | "high" | "very_high";
+  owner?: {
+    _id: string;
+    phone?: string;
+    email?: string;
+    contact?: string;
+  };
+  ownerId?: string;
 }
 
 const listingTypeMeta: Record<
@@ -128,6 +135,13 @@ const AdminDashboard: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [documentViewer, setDocumentViewer] = useState<{
+    isOpen: boolean;
+    userId: string | null;
+    userName: string;
+  }>({ isOpen: false, userId: null, userName: '' });
+  const [documents, setDocuments] = useState<any>(null);
+  const [loadingDocs, setLoadingDocs] = useState(false);
 
   const normalizeListing = (listing: any): AdminListing => {
     const rawType = (listing.listingType || listing.type) as string;
@@ -253,6 +267,41 @@ const AdminDashboard: React.FC = () => {
     } catch (error: any) {
       console.error('Error deleting listing:', error);
       setError(error?.message || 'Error deleting listing');
+    }
+  };
+
+  const openDocumentViewer = async (userId: string, userName: string) => {
+    setDocumentViewer({ isOpen: true, userId, userName });
+    setLoadingDocs(true);
+    try {
+      const response = await adminApiRequest(`/api/verification/status/${userId}`, {
+        method: 'GET',
+      });
+      if (response.success) {
+        setDocuments(response.data);
+      }
+    } catch (error: any) {
+      console.error('Error fetching documents:', error);
+      alert('Failed to load documents: ' + (error?.message || 'Unknown error'));
+    } finally {
+      setLoadingDocs(false);
+    }
+  };
+
+  const verifyUserID = async (userId: string) => {
+    if (!window.confirm('Verify this user\'s ID documents? This will give them the "ID Verified" badge.')) return;
+    try {
+      const response = await adminApiRequest(`/api/admin/users/${userId}/verify-id`, {
+        method: 'PUT',
+      });
+      if (response.success) {
+        alert('User ID verified successfully!');
+        setDocumentViewer({ isOpen: false, userId: null, userName: '' });
+        fetchDashboardData(); // Refresh listings to show updated trust scores
+      }
+    } catch (error: any) {
+      console.error('Error verifying user ID:', error);
+      alert('Failed to verify ID: ' + (error?.message || 'Unknown error'));
     }
   };
 
@@ -527,6 +576,20 @@ const AdminDashboard: React.FC = () => {
                       {/* Action Buttons */}
                       <div className="flex flex-col sm:flex-row lg:flex-col gap-2 lg:gap-3">
                         <button
+                          onClick={() => {
+                            const userId = listing.ownerId || listing.owner?._id;
+                            const userName = listing.contact || listing.owner?.phone || 'User';
+                            if (userId) {
+                              openDocumentViewer(userId, userName);
+                            } else {
+                              alert('Owner ID not available for this listing');
+                            }
+                          }}
+                          className="inline-flex items-center justify-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md shadow-sm text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                          📄 View Documents
+                        </button>
+                        <button
                           onClick={() => verifyListing(listing._id, 'approved')}
                           className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                         >
@@ -625,6 +688,179 @@ const AdminDashboard: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Document Viewer Modal */}
+      {documentViewer.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">
+                Documents for {documentViewer.userName}
+              </h2>
+              <button
+                onClick={() => setDocumentViewer({ isOpen: false, userId: null, userName: '' })}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="p-6">
+              {loadingDocs ? (
+                <div className="text-center py-8">
+                  <div className="text-gray-600">Loading documents...</div>
+                </div>
+              ) : documents ? (
+                <div className="space-y-6">
+                  {/* ID Documents */}
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h3 className="font-semibold text-lg mb-3 flex items-center">
+                      {documents.idVerified ? (
+                        <span className="text-green-600 mr-2">✓</span>
+                      ) : (
+                        <span className="text-gray-400 mr-2">○</span>
+                      )}
+                      Identity Documents
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {documents.idData?.idFront && (
+                        <div>
+                          <p className="text-sm font-medium text-gray-700 mb-2">ID Front</p>
+                          <img
+                            src={documents.idData.idFront}
+                            alt="ID Front"
+                            className="w-full h-48 object-cover rounded border cursor-pointer hover:opacity-90"
+                            onClick={() => window.open(documents.idData.idFront, '_blank')}
+                          />
+                        </div>
+                      )}
+                      {documents.idData?.idBack && (
+                        <div>
+                          <p className="text-sm font-medium text-gray-700 mb-2">ID Back</p>
+                          <img
+                            src={documents.idData.idBack}
+                            alt="ID Back"
+                            className="w-full h-48 object-cover rounded border cursor-pointer hover:opacity-90"
+                            onClick={() => window.open(documents.idData.idBack, '_blank')}
+                          />
+                        </div>
+                      )}
+                      {documents.idData?.selfie && (
+                        <div>
+                          <p className="text-sm font-medium text-gray-700 mb-2">Selfie with ID</p>
+                          <img
+                            src={documents.idData.selfie}
+                            alt="Selfie"
+                            className="w-full h-48 object-cover rounded border cursor-pointer hover:opacity-90"
+                            onClick={() => window.open(documents.idData.selfie, '_blank')}
+                          />
+                        </div>
+                      )}
+                    </div>
+                    {!documents.idVerified && documents.idData?.idFront && documentViewer.userId && (
+                      <button
+                        onClick={() => verifyUserID(documentViewer.userId!)}
+                        className="mt-4 px-6 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700"
+                      >
+                        ✓ Verify ID Documents
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Other Documents */}
+                  {documents.documents && documents.documents.length > 0 && (
+                    <div className="border border-gray-200 rounded-lg p-4">
+                      <h3 className="font-semibold text-lg mb-3">Supporting Documents</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {documents.documents.map((doc: any, index: number) => (
+                          <div key={index} className="border border-gray-100 rounded p-3">
+                            <div className="flex items-start justify-between mb-2">
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">
+                                  {doc.type.replace(/_/g, ' ').toUpperCase()}
+                                </p>
+                                {doc.description && (
+                                  <p className="text-xs text-gray-500">{doc.description}</p>
+                                )}
+                              </div>
+                              {doc.verified && (
+                                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                                  Verified
+                                </span>
+                              )}
+                            </div>
+                            <img
+                              src={doc.url}
+                              alt={doc.type}
+                              className="w-full h-32 object-cover rounded cursor-pointer hover:opacity-90"
+                              onClick={() => window.open(doc.url, '_blank')}
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                              {new Date(doc.uploadedAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Trust Score Info */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h3 className="font-semibold text-blue-900 mb-2">Verification Status</h3>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <span className="text-gray-600">Phone:</span>{' '}
+                        <span className={documents.phoneVerified ? 'text-green-600' : 'text-gray-400'}>
+                          {documents.phoneVerified ? '✓ Verified' : '○ Not verified'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Email:</span>{' '}
+                        <span className={documents.emailVerified ? 'text-green-600' : 'text-gray-400'}>
+                          {documents.emailVerified ? '✓ Verified' : '○ Not verified'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">ID:</span>{' '}
+                        <span className={documents.idVerified ? 'text-green-600' : 'text-gray-400'}>
+                          {documents.idVerified ? '✓ Verified' : '○ Not verified'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Selfie:</span>{' '}
+                        <span className={documents.selfieVerified ? 'text-green-600' : 'text-gray-400'}>
+                          {documents.selfieVerified ? '✓ Verified' : '○ Not verified'}
+                        </span>
+                      </div>
+                      <div className="col-span-2 mt-2 pt-2 border-t border-blue-200">
+                        <span className="text-gray-600">Trust Score:</span>{' '}
+                        <span className="font-bold text-blue-900">
+                          {documents.trustScore}/100 ({documents.verificationLevel})
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-600">
+                  No documents available
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 border-t border-gray-200 bg-gray-50">
+              <button
+                onClick={() => setDocumentViewer({ isOpen: false, userId: null, userName: '' })}
+                className="px-6 py-2 bg-gray-600 text-white font-semibold rounded-md hover:bg-gray-700"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

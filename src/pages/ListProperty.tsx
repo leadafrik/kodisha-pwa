@@ -692,104 +692,131 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
             )}
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <label className="block text-sm text-gray-700">
-              <span className="font-semibold text-gray-900">
-                National ID (Front) {idDocsNeeded ? '*' : ''}
-              </span>
-              <input
-                type="file"
-                accept="image/*,application/pdf"
-                onChange={(e) => setIdFrontFile(e.target.files?.[0] || null)}
-                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                required={!idVerified}
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                Required for rent/lease unless already verified.
-              </p>
-            </label>
+          {user?.verification?.idVerified && user?.verification?.selfieVerified ? (
+            <div className="flex items-center space-x-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <div>
+                <p className="text-green-800 font-semibold">✓ ID Already Verified</p>
+                <p className="text-sm text-green-700">Your identity documents have been verified by our team.</p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              <label className="block text-sm text-gray-700">
+                <span className="font-semibold text-gray-900">
+                  National ID (Front) {idDocsNeeded ? '*' : ''}
+                </span>
+                <input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => setIdFrontFile(e.target.files?.[0] || null)}
+                  className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  required={!idVerified}
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  Required for rent/lease unless already verified.
+                </p>
+              </label>
 
-            <label className="block text-sm text-gray-700">
-              <span className="font-semibold text-gray-900">
-                National ID (Back) {idDocsNeeded ? '*' : ''}
-              </span>
-              <input
-                type="file"
-                accept="image/*,application/pdf"
-                onChange={(e) => setIdBackFile(e.target.files?.[0] || null)}
-                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                required={!idVerified}
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                Required for rent/lease unless already verified.
-              </p>
-            </label>
+              <label className="block text-sm text-gray-700">
+                <span className="font-semibold text-gray-900">
+                  National ID (Back) {idDocsNeeded ? '*' : ''}
+                </span>
+                <input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => setIdBackFile(e.target.files?.[0] || null)}
+                  className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  required={!idVerified}
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  Required for rent/lease unless already verified.
+                </p>
+              </label>
 
-            <label className="block text-sm text-gray-700">
-              <span className="font-semibold text-gray-900">
-                Selfie holding ID {selfieNeeded ? '*' : ''}
-              </span>
-              <input
-                type="file"
-                accept="image/*,application/pdf"
-                onChange={(e) => setSelfieFile(e.target.files?.[0] || null)}
-                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                required={!selfieVerified}
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                Needed for trust & fraud checks; already verified users can skip.
-              </p>
-            </label>
+              <label className="block text-sm text-gray-700">
+                <span className="font-semibold text-gray-900">
+                  Selfie holding ID {selfieNeeded ? '*' : ''}
+                </span>
+                <input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => setSelfieFile(e.target.files?.[0] || null)}
+                  className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  required={!selfieVerified}
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  Needed for trust & fraud checks; already verified users can skip.
+                </p>
+              </label>
+            </div>
+          )}
 
-            <label className="block text-sm text-gray-700">
-              <span className="font-semibold text-gray-900">
-                Title Deed (optional)
-              </span>
-              <input
-                type="file"
-                accept="image/*,application/pdf"
-                onChange={(e) => setTitleDeedFile(e.target.files?.[0] || null)}
-                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                required={false}
-                disabled={false}
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                Optional but increases trust for your lease listing.
-              </p>
-            </label>
+          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <h3 className="font-semibold text-blue-900 mb-2 flex items-center">
+              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              Optional Ownership Documents (Boosts Trust Score +20%)
+            </h3>
+            <p className="text-sm text-blue-800 mb-4">
+              Upload any of these documents to significantly increase your listing's trust score and attract more serious buyers. These are optional even for verified users!
+            </p>
 
-            <label className="block text-sm text-gray-700">
-              <span className="font-semibold text-gray-900">
-                Land Search Report (optional)
-              </span>
-              <input
-                type="file"
-                accept="image/*,application/pdf"
-                onChange={(e) => setLandSearchFile(e.target.files?.[0] || null)}
-                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                disabled={false}
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                Optional supporting document to further boost trust.
-              </p>
-            </label>
+            <div className="grid gap-4 md:grid-cols-3">
+              <label className="block text-sm text-gray-700">
+                <span className="font-semibold text-gray-900">
+                  Title Deed (optional)
+                </span>
+                <input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => setTitleDeedFile(e.target.files?.[0] || null)}
+                  className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  required={false}
+                  disabled={false}
+                />
+                <p className="mt-1 text-xs text-green-600 font-medium">
+                  +20 trust points
+                </p>
+              </label>
 
-            <label className="block text-sm text-gray-700">
-              <span className="font-semibold text-gray-900">
-                Chief&apos;s Letter (optional alternative)
-              </span>
-              <input
-                type="file"
-                accept="image/*,application/pdf"
-                onChange={(e) => setChiefLetterFile(e.target.files?.[0] || null)}
-                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                disabled={false}
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                Optional fallback if you don&apos;t have a land search document.
-              </p>
-            </label>
+              <label className="block text-sm text-gray-700">
+                <span className="font-semibold text-gray-900">
+                  Land Search Report (optional)
+                </span>
+                <input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => setLandSearchFile(e.target.files?.[0] || null)}
+                  className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  disabled={false}
+                />
+                <p className="mt-1 text-xs text-green-600 font-medium">
+                  +20 trust points
+                </p>
+              </label>
+
+              <label className="block text-sm text-gray-700">
+                <span className="font-semibold text-gray-900">
+                  Chief&apos;s Letter (optional)
+                </span>
+                <input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => setChiefLetterFile(e.target.files?.[0] || null)}
+                  className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  disabled={false}
+                />
+                <p className="mt-1 text-xs text-green-600 font-medium">
+                  +20 trust points
+                </p>
+              </label>
+            </div>
           </div>
+
           <p className="text-xs text-gray-600">
             We store these securely and auto-verify your profile so the listing can be approved without sending you away from this page.
           </p>
