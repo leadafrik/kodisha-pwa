@@ -291,7 +291,11 @@ const ListingDetails: React.FC = () => {
             if (favRes.ok) {
               const favData = await favRes.json();
               if (favData.success && Array.isArray(favData.data)) {
-                const isSaved = favData.data.some((f: any) => f.listingId.toString?.() === data.data._id.toString?.() || f.listingId === data.data._id);
+                const listingIdStr = data.data._id.toString?.() || String(data.data._id);
+                const isSaved = favData.data.some((f: any) => {
+                  const favIdStr = f.listingId.toString?.() || String(f.listingId);
+                  return favIdStr === listingIdStr && f.listingType === (data.data.listingType || 'land');
+                });
                 setSaved(isSaved);
               }
             }
@@ -690,23 +694,35 @@ const ListingDetails: React.FC = () => {
                   return;
                 }
                 try {
+                  if (!listing || !listing._id) {
+                    console.error('Listing not loaded properly');
+                    return;
+                  }
+                  const listingIdToSend = listing._id.toString?.() || String(listing._id);
+                  const listingTypeToSend = listing.listingType || listingType || 'land';
+                  console.log('Toggling favorite:', { listingIdToSend, listingTypeToSend });
+                  
                   const resp = await fetch('/api/favorites/toggle', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                     body: JSON.stringify({ 
-                      listingId: listing._id.toString?.() || listing._id, 
-                      listingType: listingType || 'land'
+                      listingId: listingIdToSend, 
+                      listingType: listingTypeToSend
                     })
                   });
+                  console.log('Toggle response:', resp.status);
                   if (resp.ok) {
                     const j = await resp.json();
+                    console.log('Toggle response data:', j);
                     if (j.success) {
                       setSaved(j.action === 'added');
+                      console.log('Favorite toggled, action:', j.action);
                     } else {
                       console.error('Toggle failed:', j);
                     }
                   } else {
-                    console.error('Toggle response not ok:', resp.status);
+                    const errorData = await resp.text();
+                    console.error('Toggle response not ok:', resp.status, errorData);
                   }
                 } catch (err) {
                   console.error('Toggle favorite error', err);
