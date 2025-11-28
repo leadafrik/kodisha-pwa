@@ -1,6 +1,8 @@
 import { API_ENDPOINTS } from '../config/api';
 
-const token = localStorage.getItem('kodisha_token');
+const getAuthToken = (): string | null => {
+  return localStorage.getItem('kodisha_token');
+};
 
 export interface Favorite {
   listingId: string;
@@ -13,6 +15,7 @@ export interface Favorite {
  * Get all user's saved/favorite listings
  */
 export const getFavorites = async (): Promise<Favorite[]> => {
+  const token = getAuthToken();
   if (!token) {
     throw new Error('Authentication required');
   }
@@ -41,6 +44,7 @@ export const toggleFavorite = async (
   listingId: string,
   listingType: 'land' | 'product' | 'equipment' | 'service' | 'agrovet'
 ): Promise<{ action: 'added' | 'removed' }> => {
+  const token = getAuthToken();
   if (!token) {
     throw new Error('Authentication required');
   }
