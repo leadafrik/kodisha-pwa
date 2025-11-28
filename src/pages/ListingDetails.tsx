@@ -773,8 +773,12 @@ const ListingDetails: React.FC = () => {
           {/* Seller card - improved with avatar and verification */}
           <div className="bg-white p-4 rounded-lg border shadow-sm">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-lg font-bold text-gray-700">
-                {owner.name ? owner.name[0].toUpperCase() : (owner.fullName ? owner.fullName[0].toUpperCase() : 'S')}
+              <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-lg font-bold text-gray-700 overflow-hidden">
+                {owner.profilePicture ? (
+                  <img src={owner.profilePicture} alt={owner.fullName || owner.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-white">{owner.name ? owner.name[0].toUpperCase() : (owner.fullName ? owner.fullName[0].toUpperCase() : 'S')}</span>
+                )}
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-gray-900">{owner.fullName || owner.name || 'Seller'}</h3>
