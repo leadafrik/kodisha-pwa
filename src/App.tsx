@@ -28,6 +28,7 @@ const Moderation = lazy(() => import('./pages/Moderation'));
 const Favorites = lazy(() => import('./pages/Favorites'));
 const Messages = lazy(() => import('./pages/Messages'));
 const AdminProfileVerification = lazy(() => import('./pages/admin/ProfileVerification'));
+const AdminReports = lazy(() => import('./pages/admin/Reports'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -113,6 +114,7 @@ function App() {
                     <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
                     <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
                     <Route path="/admin/moderation" element={<Moderation />} />
+                    <Route path="/admin/reports" element={<ProtectedRoute><AdminReports /></ProtectedRoute>} />
                     <Route path="/admin/profile-verification" element={<ProtectedRoute><AdminProfileVerification /></ProtectedRoute>} />
                     <Route path="/legal/terms" element={<TermsOfService />} />
                     <Route path="/legal/privacy" element={<PrivacyPolicy />} />
