@@ -5,10 +5,15 @@ import { useProperties } from "../contexts/PropertyContext";
 import ProfilePictureUpload from "../components/ProfilePictureUpload";
 
 const Profile: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, updateProfile } = useAuth();
   const { properties, serviceListings, productListings } = useProperties();
   const navigate = useNavigate();
   const [userProfilePicture, setUserProfilePicture] = useState<string | undefined>(user?.profilePicture);
+
+  // Update local state when user context changes
+  React.useEffect(() => {
+    setUserProfilePicture(user?.profilePicture);
+  }, [user?.profilePicture]);
 
   // Safety check: ensure all listing arrays are valid
   const safeProperties = Array.isArray(properties) ? properties : [];
@@ -101,8 +106,16 @@ const Profile: React.FC = () => {
           <div className="flex flex-col items-end gap-4">
             <ProfilePictureUpload 
               currentPicture={userProfilePicture}
-              onUploadSuccess={(picture) => setUserProfilePicture(picture)}
-              onDeleteSuccess={() => setUserProfilePicture(undefined)}
+              onUploadSuccess={(picture) => {
+                setUserProfilePicture(picture);
+                // Update user context to persist the change
+                updateProfile({ profilePicture: picture });
+              }}
+              onDeleteSuccess={() => {
+                setUserProfilePicture(undefined);
+                // Update user context
+                updateProfile({ profilePicture: undefined });
+              }}
             />
             <button
               onClick={logout}

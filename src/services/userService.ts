@@ -1,6 +1,8 @@
 import { API_ENDPOINTS } from '../config/api';
 
-const token = localStorage.getItem('kodisha_token');
+const getAuthToken = (): string | null => {
+  return localStorage.getItem('kodisha_token');
+};
 
 export interface UserProfile {
   _id: string;
@@ -43,6 +45,7 @@ export const getUserProfile = async (userId: string): Promise<UserProfile> => {
 export const uploadProfilePicture = async (
   file: File
 ): Promise<{ profilePicture: string }> => {
+  const token = getAuthToken();
   if (!token) {
     throw new Error('Authentication required');
   }
@@ -73,6 +76,7 @@ export const uploadProfilePicture = async (
  * Delete profile picture
  */
 export const deleteProfilePicture = async (): Promise<void> => {
+  const token = getAuthToken();
   if (!token) {
     throw new Error('Authentication required');
   }
@@ -98,6 +102,7 @@ export const scheduleAccountDeletion = async (): Promise<{
   message: string;
   scheduledDeletionAt: string;
 }> => {
+  const token = getAuthToken();
   if (!token) {
     throw new Error('Authentication required');
   }
@@ -126,6 +131,7 @@ export const reactivateAccount = async (): Promise<{
   message: string;
   reactivatedAt: string;
 }> => {
+  const token = getAuthToken();
   if (!token) {
     throw new Error('Authentication required');
   }

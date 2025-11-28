@@ -86,8 +86,12 @@ const Navbar: React.FC = () => {
                   {/* USER DROPDOWN */}
                   <div className="group relative">
                     <button className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition flex items-center gap-2 font-semibold text-gray-800">
-                      <span className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
-                        {user.name ? user.name[0].toUpperCase() : "U"}
+                      <span className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden">
+                        {user.profilePicture ? (
+                          <img src={user.profilePicture} alt={user.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="font-semibold text-white">{user.name ? user.name[0].toUpperCase() : "U"}</span>
+                        )}
                       </span>
                       {user.name ? user.name.split(" ")[0] : "Profile"}
                       <Chevron />
