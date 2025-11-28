@@ -68,7 +68,7 @@ export const toggleFavorite = async (
 
   const data = await response.json();
   return {
-    action: data.message === 'added' ? 'added' : 'removed',
+    action: data.action || 'removed',
   };
 };
 

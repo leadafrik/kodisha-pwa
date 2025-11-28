@@ -5,6 +5,7 @@ import ListingMap from "../components/ListingMap";
 import ReportModal from "../components/ReportModal";
 import { API_ENDPOINTS, API_BASE_URL, adminApiRequest } from "../config/api";
 import { io, Socket } from "socket.io-client";
+import { favoritesService } from "../services/favoritesService";
 
 // Helper: Get auth token (user or admin)
 const getAuthToken = (): string | null => {
@@ -287,20 +288,16 @@ const ListingDetails: React.FC = () => {
         const token = getAuthToken();
         if (token) {
           try {
-            const favRes = await fetch('/api/favorites', { headers: { Authorization: `Bearer ${token}` } });
-            if (favRes.ok) {
-              const favData = await favRes.json();
-              if (favData.success && Array.isArray(favData.data)) {
-                const listingIdStr = data.data._id.toString?.() || String(data.data._id);
-                const isSaved = favData.data.some((f: any) => {
-                  const favIdStr = f.listingId.toString?.() || String(f.listingId);
-                  return favIdStr === listingIdStr && f.listingType === (data.data.listingType || 'land');
-                });
-                setSaved(isSaved);
-              }
-            }
+            const favorites = await favoritesService.getFavorites();
+            const listingIdStr = data.data._id.toString?.() || String(data.data._id);
+            const isSaved = favorites.some((f: any) => {
+              const favIdStr = f.listingId.toString?.() || String(f.listingId);
+              return favIdStr === listingIdStr && f.listingType === (data.data.listingType || 'land');
+            });
+            setSaved(isSaved);
+            console.log('🔍 Favorite check:', { isSaved, listingIdStr, favoritesCount: favorites.length });
           } catch (e) {
-            console.error('Favorite check failed', e);
+            console.error('❌ Favorite check failed', e);
           }
         }
         if (Array.isArray(data.data.images) && data.data.images.length > 0) {
@@ -699,33 +696,15 @@ const ListingDetails: React.FC = () => {
                     return;
                   }
                   const listingIdToSend = listing._id.toString?.() || String(listing._id);
-                  const listingTypeToSend = listing.listingType || listingType || 'land';
-                  console.log('Toggling favorite:', { listingIdToSend, listingTypeToSend });
+                  const listingTypeToSend = (listing.listingType || listingType || 'land') as 'land' | 'product' | 'equipment' | 'service' | 'agrovet';
                   
-                  const resp = await fetch('/api/favorites/toggle', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                    body: JSON.stringify({ 
-                      listingId: listingIdToSend, 
-                      listingType: listingTypeToSend
-                    })
-                  });
-                  console.log('Toggle response:', resp.status);
-                  if (resp.ok) {
-                    const j = await resp.json();
-                    console.log('Toggle response data:', j);
-                    if (j.success) {
-                      setSaved(j.action === 'added');
-                      console.log('Favorite toggled, action:', j.action);
-                    } else {
-                      console.error('Toggle failed:', j);
-                    }
-                  } else {
-                    const errorData = await resp.text();
-                    console.error('Toggle response not ok:', resp.status, errorData);
-                  }
+                  console.log('🔖 Toggling favorite:', { listingIdToSend, listingTypeToSend, currentlySaved: saved });
+                  
+                  const result = await favoritesService.toggleFavorite(listingIdToSend, listingTypeToSend);
+                  console.log('✅ Toggle successful, action:', result.action);
+                  setSaved(result.action === 'added');
                 } catch (err) {
-                  console.error('Toggle favorite error', err);
+                  console.error('❌ Toggle favorite error', err);
                 }
               }}
               className="px-5 py-2 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition"
