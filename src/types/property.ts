@@ -204,6 +204,7 @@ export interface User {
   name: string;
   phone: string;
   email?: string;
+  profilePicture?: string;
   verificationStatus: "pending" | "verified" | "rejected";
   idPhoto?: string;
   listings: string[];

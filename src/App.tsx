@@ -26,6 +26,8 @@ const TermsOfService = lazy(() => import('./pages/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const Moderation = lazy(() => import('./pages/Moderation'));
 const Favorites = lazy(() => import('./pages/Favorites'));
+const Messages = lazy(() => import('./pages/Messages'));
+const AdminProfileVerification = lazy(() => import('./pages/admin/ProfileVerification'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -109,7 +111,9 @@ function App() {
                     <Route path="/verify" element={<VerificationWizard />} />
                     <Route path="/listings/:id" element={<ProtectedRoute><ListingDetails /></ProtectedRoute>} />
                     <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
+                    <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
                     <Route path="/admin/moderation" element={<Moderation />} />
+                    <Route path="/admin/profile-verification" element={<ProtectedRoute><AdminProfileVerification /></ProtectedRoute>} />
                     <Route path="/legal/terms" element={<TermsOfService />} />
                     <Route path="/legal/privacy" element={<PrivacyPolicy />} />
                     <Route path="/error" element={<ServerError />} />

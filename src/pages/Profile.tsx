@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useProperties } from "../contexts/PropertyContext";
+import ProfilePictureUpload from "../components/ProfilePictureUpload";
 
 const Profile: React.FC = () => {
   const { user, logout } = useAuth();
   const { properties, serviceListings, productListings } = useProperties();
   const navigate = useNavigate();
+  const [userProfilePicture, setUserProfilePicture] = useState<string | undefined>(user?.profilePicture);
 
   // Safety check: ensure all listing arrays are valid
   const safeProperties = Array.isArray(properties) ? properties : [];
@@ -83,8 +85,8 @@ const Profile: React.FC = () => {
     <div className="max-w-6xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
-          <div>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+          <div className="flex-1">
             <h1 className="text-3xl font-bold text-gray-800 mb-2">{user.name}</h1>
             <div className="flex items-center gap-4 mb-2">
               {getVerificationBadge()}
@@ -96,12 +98,19 @@ const Profile: React.FC = () => {
             )}
             {user.email && <p className="text-gray-600">{user.email}</p>}
           </div>
-          <button
-            onClick={logout}
-            className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition duration-300"
-          >
-            Logout
-          </button>
+          <div className="flex flex-col items-end gap-4">
+            <ProfilePictureUpload 
+              currentPicture={userProfilePicture}
+              onUploadSuccess={(picture) => setUserProfilePicture(picture)}
+              onDeleteSuccess={() => setUserProfilePicture(undefined)}
+            />
+            <button
+              onClick={logout}
+              className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition duration-300"
+            >
+              Logout
+            </button>
+          </div>
         </div>
 
         <div className="mt-6 grid md:grid-cols-3 gap-4">

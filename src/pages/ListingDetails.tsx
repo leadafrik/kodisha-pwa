@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import GoogleMapsLoader from "../components/GoogleMapsLoader";
 import ListingMap from "../components/ListingMap";
+import ReportModal from "../components/ReportModal";
 import { API_ENDPOINTS, API_BASE_URL, adminApiRequest } from "../config/api";
 import { io, Socket } from "socket.io-client";
 
@@ -256,8 +257,6 @@ const ListingDetails: React.FC = () => {
   const [ownerOnline, setOwnerOnline] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
-  const [reportReason, setReportReason] = useState('');
-  const [submittingReport, setSubmittingReport] = useState(false);
   const [ratingScore, setRatingScore] = useState(0);
   const [ratingReview, setRatingReview] = useState("");
   const [submittingRating, setSubmittingRating] = useState(false);
@@ -583,38 +582,6 @@ const ListingDetails: React.FC = () => {
       window.alert(err.message);
     } finally {
       setSubmittingRating(false);
-    }
-  };
-
-  const handleReportSubmit = async () => {
-    if (!getAuthToken()) {
-      window.location.href = '/login';
-      return;
-    }
-    if (reportReason.trim().length < 10) return;
-    try {
-      setSubmittingReport(true);
-      const token = getAuthToken();
-      const res = await fetch(API_ENDPOINTS.reports.submit(owner._id), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: token ? `Bearer ${token}` : '',
-        },
-        body: JSON.stringify({ reason: reportReason.trim() }),
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        alert(data?.message || 'Failed to submit report');
-      } else {
-        alert('Report submitted. Our admins will review if multiple reports are received.');
-        setShowReportModal(false);
-        setReportReason('');
-      }
-    } catch (e) {
-      alert('Network error while submitting report');
-    } finally {
-      setSubmittingReport(false);
     }
   };
 
@@ -997,44 +964,18 @@ const ListingDetails: React.FC = () => {
       )}
 
       {/* Report Modal */}
-      {showReportModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h3 className="text-xl font-bold mb-4">Report {owner.fullName || 'Seller'}</h3>
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">Reason (required)</label>
-              <textarea
-                value={reportReason}
-                onChange={(e) => setReportReason(e.target.value)}
-                className="w-full border rounded-lg px-3 py-2 text-sm resize-none"
-                rows={4}
-                placeholder="Describe the issue (fraud, misrepresentation, harassment, etc.)"
-              />
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => {
-                  setShowReportModal(false);
-                  setReportReason('');
-                }}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleReportSubmit}
-                disabled={submittingReport || reportReason.trim().length < 10}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {submittingReport ? 'Submitting...' : 'Submit Report'}
-              </button>
-            </div>
-            <p className="text-[11px] text-gray-500 mt-3">
-              Reports require a written reason. 5 reports trigger admin review.
-            </p>
-          </div>
-        </div>
-      )}
+      <ReportModal 
+        isOpen={showReportModal}
+        sellerId={owner?._id}
+        sellerName={owner?.fullName || owner?.name || 'Seller'}
+        listingId={listing?._id}
+        listingType={listingType || undefined}
+        onClose={() => setShowReportModal(false)}
+        onSubmitSuccess={() => {
+          setShowReportModal(false);
+          alert('Report submitted successfully. Thank you for helping keep Kodisha safe.');
+        }}
+      />
     </div>
   );
 };

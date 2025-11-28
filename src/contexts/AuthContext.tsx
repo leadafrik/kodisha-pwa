@@ -46,6 +46,7 @@ const mapBackendUserToFrontendUser = (apiUser: any): User => {
     name,
     phone: apiUser.phone,
     email: apiUser.email,
+    profilePicture: apiUser.profilePicture,
     verificationStatus,
     idPhoto: undefined,
     listings: [],

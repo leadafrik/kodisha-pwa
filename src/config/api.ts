@@ -63,6 +63,10 @@ export const API_ENDPOINTS = {
     resendVerification: `${API_BASE_URL}/auth/resend-verification`,
     registerAdmin: `${API_BASE_URL}/auth/register-admin`,
   },
+  verification: {
+    send: `${API_BASE_URL}/verification/send`,
+    verify: `${API_BASE_URL}/verification/verify`,
+  },
   properties: {
     getAll: `${API_BASE_URL}/listings`,
     create: `${API_BASE_URL}/listings`,
@@ -93,10 +97,19 @@ export const API_ENDPOINTS = {
     threads: `${API_BASE_URL}/messages/threads`,
     withUser: (id: string) => `${API_BASE_URL}/messages/with/${id}`,
   },
-  verification: {
-    send: `${API_BASE_URL}/verification/send-verification`,
-    verify: `${API_BASE_URL}/verification/verify-phone`,
-    status: (userId: string) => `${API_BASE_URL}/verification/status/${userId}`,
+  favorites: {
+    list: `${API_BASE_URL}/favorites`,
+    toggle: `${API_BASE_URL}/favorites/toggle`,
+  },
+  reports: {
+    submit: (sellerId: string) => `${API_BASE_URL}/reports/${sellerId}`,
+  },
+  users: {
+    getProfile: (userId: string) => `${API_BASE_URL}/users/${userId}`,
+    uploadProfilePicture: `${API_BASE_URL}/users/profile-picture/upload`,
+    deleteProfilePicture: `${API_BASE_URL}/users/profile-picture`,
+    deleteAccount: `${API_BASE_URL}/users/delete-account`,
+    reactivateAccount: `${API_BASE_URL}/users/reactivate-account`,
   },
   admin: {
     login: `${API_BASE_URL}/admin-auth/login`,
@@ -116,6 +129,19 @@ export const API_ENDPOINTS = {
       toggleActive: (id: string) => `${API_BASE_URL}/admin/users/${id}/active`,
       verify: (id: string) => `${API_BASE_URL}/admin/users/${id}/verify`,
     },
+    profiles: {
+      getPending: `${API_BASE_URL}/admin/profiles/pending`,
+      verify: (userId: string) => `${API_BASE_URL}/admin/profiles/${userId}/verify`,
+      reject: (userId: string) => `${API_BASE_URL}/admin/profiles/${userId}/reject`,
+    },
+    reports: {
+      getAll: `${API_BASE_URL}/admin/reports`,
+      getByUser: (userId: string) => `${API_BASE_URL}/admin/reports/user/${userId}`,
+      updateStatus: (reportId: string) => `${API_BASE_URL}/admin/reports/${reportId}`,
+    },
+    sellers: {
+      getDocuments: (sellerId: string) => `${API_BASE_URL}/admin/sellers/${sellerId}/documents`,
+    },
   },
   payments: {
     initiateStk: `${API_BASE_URL}/payments/stk/initiate`,
@@ -123,9 +149,6 @@ export const API_ENDPOINTS = {
   ratings: {
     submit: `${API_BASE_URL}/ratings`,
     getUserRatings: (userId: string) => `${API_BASE_URL}/ratings/user/${userId}`,
-  },
-  reports: {
-    submit: (sellerId: string) => `${API_BASE_URL}/reports/${sellerId}`,
   },
   moderation: {
     getFlagged: `${API_BASE_URL}/admin/moderation/flagged`,
