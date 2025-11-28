@@ -135,9 +135,9 @@ export const API_ENDPOINTS = {
       reject: (userId: string) => `${API_BASE_URL}/admin/profiles/${userId}/reject`,
     },
     reports: {
-      getAll: `${API_BASE_URL}/admin/reports`,
-      getByUser: (userId: string) => `${API_BASE_URL}/admin/reports/user/${userId}`,
-      updateStatus: (reportId: string) => `${API_BASE_URL}/admin/reports/${reportId}`,
+      getAll: `${API_BASE_URL}/reports`,
+      getByUser: (userId: string) => `${API_BASE_URL}/reports/user/${userId}`,
+      updateStatus: (reportId: string) => `${API_BASE_URL}/reports/${reportId}`,
     },
     sellers: {
       getDocuments: (sellerId: string) => `${API_BASE_URL}/admin/sellers/${sellerId}/documents`,

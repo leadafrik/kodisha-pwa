@@ -67,7 +67,7 @@ const AdminReports: React.FC = () => {
     setUpdatingStatus(true);
     try {
       const data = await adminApiRequest(API_ENDPOINTS.admin.reports.updateStatus(reportId), {
-        method: 'PUT',
+        method: 'PATCH',
         body: JSON.stringify({ status: newStatus })
       });
       
