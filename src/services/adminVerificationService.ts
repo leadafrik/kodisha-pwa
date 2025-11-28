@@ -1,7 +1,8 @@
 import { API_ENDPOINTS } from '../config/api';
 
-const token = localStorage.getItem('kodisha_token');
-const adminToken = localStorage.getItem('kodisha_admin_token') || token;
+const getAdminToken = (): string | null => {
+  return localStorage.getItem('kodisha_admin_token') || localStorage.getItem('kodisha_token');
+};
 
 export interface PendingProfile {
   _id: string;
@@ -52,6 +53,7 @@ export const getPendingProfiles = async (
   page = 1,
   limit = 20
 ): Promise<{ profiles: PendingProfile[]; total: number; pages: number }> => {
+  const adminToken = getAdminToken();
   if (!adminToken) {
     throw new Error('Admin authentication required');
   }
@@ -90,6 +92,7 @@ export const getPendingProfiles = async (
  * Verify a user's profile (admin only)
  */
 export const verifyProfile = async (userId: string): Promise<void> => {
+  const adminToken = getAdminToken();
   if (!adminToken) {
     throw new Error('Admin authentication required');
   }
@@ -115,6 +118,7 @@ export const rejectProfile = async (
   userId: string,
   reason?: string
 ): Promise<void> => {
+  const adminToken = getAdminToken();
   if (!adminToken) {
     throw new Error('Admin authentication required');
   }
@@ -142,6 +146,7 @@ export const rejectProfile = async (
 export const getSellerDocuments = async (
   sellerId: string
 ): Promise<SellerDocuments> => {
+  const adminToken = getAdminToken();
   if (!adminToken) {
     throw new Error('Admin authentication required');
   }
