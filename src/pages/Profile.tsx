@@ -3,12 +3,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useProperties } from "../contexts/PropertyContext";
 import ProfilePictureUpload from "../components/ProfilePictureUpload";
+import { scheduleAccountDeletion } from "../services/userService";
 
 const Profile: React.FC = () => {
   const { user, logout, updateProfile } = useAuth();
   const { properties, serviceListings, productListings } = useProperties();
   const navigate = useNavigate();
   const [userProfilePicture, setUserProfilePicture] = useState<string | undefined>(user?.profilePicture);
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // Update local state when user context changes
   React.useEffect(() => {
@@ -310,6 +313,38 @@ const Profile: React.FC = () => {
               ))}
             </div>
           )}
+        </div>
+
+        {/* Account Management - Subtle Section */}
+        <div className="mt-8 border-t pt-6">
+          {deleteError && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded text-sm">
+              {deleteError}
+            </div>
+          )}
+          <button
+            onClick={async () => {
+              if (window.confirm('Are you sure you want to delete your account? This will:\n\n• Remove all your listings\n• Delete all your data\n• Unverify your account\n\nThis action cannot be undone.')) {
+                if (window.confirm('Type "DELETE" to confirm account deletion. Once deleted, your account cannot be recovered.')) {
+                  setDeletingAccount(true);
+                  setDeleteError(null);
+                  try {
+                    await scheduleAccountDeletion();
+                    window.alert('Your account has been scheduled for deletion. You have 30 days to reactivate it before permanent deletion.');
+                    logout();
+                    navigate('/login');
+                  } catch (err: any) {
+                    setDeleteError(err.message || 'Failed to delete account');
+                    setDeletingAccount(false);
+                  }
+                }
+              }
+            }}
+            disabled={deletingAccount}
+            className="text-sm text-gray-500 hover:text-red-600 disabled:text-gray-400 transition duration-300 underline disabled:cursor-not-allowed"
+          >
+            {deletingAccount ? 'Deleting account...' : 'Delete Account'}
+          </button>
         </div>
       </div>
     </div>
