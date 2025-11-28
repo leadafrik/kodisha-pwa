@@ -291,7 +291,7 @@ const ListingDetails: React.FC = () => {
             if (favRes.ok) {
               const favData = await favRes.json();
               if (favData.success && Array.isArray(favData.data)) {
-                const isSaved = favData.data.some((f: any) => f.listingId === data.data._id);
+                const isSaved = favData.data.some((f: any) => f.listingId.toString?.() === data.data._id.toString?.() || f.listingId === data.data._id);
                 setSaved(isSaved);
               }
             }
@@ -693,13 +693,20 @@ const ListingDetails: React.FC = () => {
                   const resp = await fetch('/api/favorites/toggle', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                    body: JSON.stringify({ listingId: listing._id, listingType: listingType })
+                    body: JSON.stringify({ 
+                      listingId: listing._id.toString?.() || listing._id, 
+                      listingType: listingType || 'land'
+                    })
                   });
                   if (resp.ok) {
                     const j = await resp.json();
                     if (j.success) {
                       setSaved(j.action === 'added');
+                    } else {
+                      console.error('Toggle failed:', j);
                     }
+                  } else {
+                    console.error('Toggle response not ok:', resp.status);
                   }
                 } catch (err) {
                   console.error('Toggle favorite error', err);
