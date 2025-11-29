@@ -4,6 +4,7 @@ import App from './App';
 import './index.css';
 import { enforceHttps } from './utils/security';
 import { initSentry } from './config/sentry';
+import { register as registerServiceWorker } from './serviceWorkerRegistration';
 
 // Initialize Sentry error tracking
 initSentry();
@@ -46,3 +47,13 @@ root.render(
     <App />
   </React.StrictMode>
 );
+
+// Register service worker for offline support and app installation
+registerServiceWorker({
+  onSuccess: (registration) => {
+    console.log('Service Worker registered successfully:', registration);
+  },
+  onUpdate: (registration) => {
+    console.log('Service Worker updated:', registration);
+  }
+});
