@@ -186,15 +186,29 @@ const Login: React.FC = () => {
         setOtpEmail(email);
         setOtpType('email');
         setInfo(
-          "We sent a 6-digit code to your email. Check your inbox and spam folder."
+          "✅ Code sent to your email. Please check your inbox and spam folder."
         );
       } else {
-        await requestEmailOtp(phone || '');
-        setOtpEmail(phone || '');
-        setOtpType('phone');
-        setInfo(
-          "We sent a 6-digit code to your phone via SMS."
-        );
+        // Try to send SMS
+        try {
+          await requestEmailOtp(phone || '');
+          setOtpEmail(phone || '');
+          setOtpType('phone');
+          setInfo(
+            "✅ Verification code sent to your phone via SMS."
+          );
+        } catch (smsError: any) {
+          // If SMS fails, fall back to email suggestion
+          if (smsError?.message?.includes('Failed to send SMS')) {
+            setError(null);
+            setOtpType('email');
+            setInfo(
+              "⚠️ SMS is currently unavailable. To complete registration, please use email verification instead."
+            );
+          } else {
+            throw smsError;
+          }
+        }
       }
       
       setPendingSignupData(null);
@@ -249,12 +263,32 @@ const Login: React.FC = () => {
       setMode("otp-reset");
       startOtpTimer();
       if (isEmail) {
-        setInfo("We sent a code to your email. Enter it with your new password.");
+        setInfo("✅ Code sent to your email. Check your inbox and spam folder.");
       } else {
-        setInfo("We sent a code to your phone via SMS. Enter it with your new password.");
+        setInfo("✅ Code sent to your phone via SMS.");
       }
     } catch (err: any) {
-      setError(err?.message || "Failed to send reset code.");
+      // If SMS fails, fall back to email verification
+      if (err?.message?.includes('Failed to send SMS') && !isEmail) {
+        try {
+          // Automatically retry with email
+          const emailInput = input.replace(/^\+\d+/, '').replace(/^0/, '');
+          await requestEmailOtp(emailInput);
+          setOtpEmail(emailInput);
+          setOtpType('email');
+          setMode("otp-reset");
+          startOtpTimer();
+          setError(null);
+          setInfo("⚠️ SMS is currently unavailable. We sent a code to your email instead. Check your inbox and spam folder.");
+        } catch (emailErr: any) {
+          setError(emailErr?.message || "Could not send verification code");
+        }
+      } else if (err?.message?.includes('Failed to send SMS')) {
+        setError(null);
+        setInfo("⚠️ SMS currently unavailable. To complete password reset, please use email verification instead.");
+      } else {
+        setError(err?.message || "Failed to send reset code.");
+      }
     }
   };
 
@@ -480,6 +514,11 @@ const Login: React.FC = () => {
         <p className="text-sm text-gray-600">
           We sent a 6-digit code to {otpType === 'email' ? 'your email' : 'your phone via SMS'}: <span className="font-semibold text-gray-800">{otpEmail}</span>
         </p>
+        {otpType === 'email' && (
+          <p className="text-xs text-amber-600 bg-amber-50 rounded p-2 mt-2">
+            💡 Tip: If you don't see the email, check your spam/junk folder.
+          </p>
+        )}
       </div>
       <div className="flex flex-col gap-3">
         <input
@@ -578,6 +617,11 @@ const Login: React.FC = () => {
         <p className="text-sm text-gray-600">
           Enter the code sent to {otpType === 'email' ? 'your email' : 'your phone'}: <span className="font-semibold text-gray-800">{otpEmail}</span> and your new password.
         </p>
+        {otpType === 'email' && (
+          <p className="text-xs text-amber-600 bg-amber-50 rounded p-2">
+            💡 Tip: If you don't see the email, check your spam/junk folder.
+          </p>
+        )}
       </div>
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">Verification code</label>
