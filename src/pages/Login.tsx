@@ -189,18 +189,18 @@ const Login: React.FC = () => {
           "✅ Code sent to your email. Please check your inbox and spam folder."
         );
       } else {
-        // Try to send SMS
+        // Try to send WhatsApp/SMS with fallback
         try {
           await requestEmailOtp(phone || '');
           setOtpEmail(phone || '');
           setOtpType('phone');
           setInfo(
-            "✅ Verification code sent to your phone via SMS."
+            "✅ Verification code sent to your phone via WhatsApp or SMS."
           );
         } catch (smsError: any) {
-          // If SMS fails, inform user
-          if (smsError?.message?.includes('Failed to send SMS')) {
-            setError("SMS is currently unavailable. Please try again later or use email verification instead.");
+          // If both WhatsApp and SMS fail, inform user
+          if (smsError?.message?.includes('Failed')) {
+            setError("Verification is currently unavailable. Please try again later or use email verification instead.");
             setShowLegalModal(true); // Show form again to let user try with email
           } else {
             throw smsError;
@@ -262,14 +262,14 @@ const Login: React.FC = () => {
       if (isEmail) {
         setInfo("✅ Code sent to your email. Check your inbox and spam folder.");
       } else {
-        setInfo("✅ Code sent to your phone via SMS.");
+        setInfo("✅ Code sent to your phone via WhatsApp or SMS.");
       }
     } catch (err: any) {
-      // If SMS fails, inform user to try email instead
-      if (err?.message?.includes('Failed to send SMS') && !isEmail) {
+      // If WhatsApp/SMS fails, inform user to try email instead
+      if (err?.message?.includes('Failed') && !isEmail) {
         setError(null);
-        setInfo("⚠️ SMS is currently unavailable. Please go back and request a code using your email address instead.");
-      } else if (err?.message?.includes('Failed to send SMS')) {
+        setInfo("⚠️ Phone verification is currently unavailable. Please go back and request a code using your email address instead.");
+      } else if (err?.message?.includes('Failed')) {
         // Email OTP also failed
         setError("Could not send verification code. Please try again.");
       } else {
@@ -498,11 +498,16 @@ const Login: React.FC = () => {
           {otpType === 'email' ? 'Verify your email' : 'Verify your phone'}
         </h3>
         <p className="text-sm text-gray-600">
-          We sent a 6-digit code to {otpType === 'email' ? 'your email' : 'your phone via SMS'}: <span className="font-semibold text-gray-800">{otpEmail}</span>
+          We sent a 6-digit code to {otpType === 'email' ? 'your email' : 'your phone via WhatsApp or SMS'}: <span className="font-semibold text-gray-800">{otpEmail}</span>
         </p>
         {otpType === 'email' && (
           <p className="text-xs text-amber-600 bg-amber-50 rounded p-2 mt-2">
             💡 Tip: If you don't see the email, check your spam/junk folder.
+          </p>
+        )}
+        {otpType === 'phone' && (
+          <p className="text-xs text-blue-600 bg-blue-50 rounded p-2 mt-2">
+            💡 Code sent via WhatsApp. Check your WhatsApp messages.
           </p>
         )}
       </div>
@@ -606,6 +611,11 @@ const Login: React.FC = () => {
         {otpType === 'email' && (
           <p className="text-xs text-amber-600 bg-amber-50 rounded p-2">
             💡 Tip: If you don't see the email, check your spam/junk folder.
+          </p>
+        )}
+        {otpType === 'phone' && (
+          <p className="text-xs text-blue-600 bg-blue-50 rounded p-2">
+            💡 Code sent via WhatsApp. Check your WhatsApp messages.
           </p>
         )}
       </div>
