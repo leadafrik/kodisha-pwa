@@ -375,7 +375,7 @@ const Login: React.FC = () => {
       </div>
       
       <div>
-        <label className="block text-sm font-medium text-gray-700">Email or Phone Number *</label>
+        <label className="block text-sm font-medium text-gray-700">Email or WhatsApp Number *</label>
         <input
           type="text"
           name="emailOrPhone"
@@ -386,7 +386,7 @@ const Login: React.FC = () => {
           className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
           placeholder="you@example.com or 0712345678"
         />
-        <p className="text-xs text-gray-500 mt-1">Enter your email or 10-digit phone number</p>
+        <p className="text-xs text-gray-500 mt-1">We'll send a code to your WhatsApp or email</p>
       </div>
       
       <div className="grid grid-cols-2 gap-3">
@@ -564,7 +564,7 @@ const Login: React.FC = () => {
   const renderForgot = () => (
     <form onSubmit={handleForgot} className="space-y-4">
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">Email or Phone Number</label>
+        <label className="block text-sm font-medium text-gray-700">Email or WhatsApp Number</label>
         <input
           type="text"
           value={resetPassword.emailOrPhone}
@@ -574,7 +574,7 @@ const Login: React.FC = () => {
           className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
           placeholder="you@example.com or 0712345678"
         />
-        <p className="text-xs text-gray-500 mt-1">Enter your email or phone number</p>
+        <p className="text-xs text-gray-500 mt-1">We'll send a code to your WhatsApp or email</p>
       </div>
       <button
         type="submit"
