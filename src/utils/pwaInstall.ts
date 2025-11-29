@@ -8,6 +8,22 @@ export interface DeviceInfo {
 
 let deferredPrompt: Event | null = null;
 
+// Initialize the install prompt listener
+export function initInstallPrompt() {
+  if (typeof window !== 'undefined') {
+    window.addEventListener('beforeinstallprompt', (e: Event) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      console.log('Install prompt available');
+    });
+
+    window.addEventListener('appinstalled', () => {
+      console.log('App successfully installed');
+      deferredPrompt = null;
+    });
+  }
+}
+
 // Detect device type
 export function detectDevice(): DeviceInfo['deviceType'] {
   const ua = navigator.userAgent.toLowerCase();
@@ -20,14 +36,6 @@ export function detectDevice(): DeviceInfo['deviceType'] {
 // Check if PWA can be installed
 export function checkPWAInstallability(): DeviceInfo {
   const deviceType = detectDevice();
-  const userAgent = navigator.userAgent.toLowerCase();
-  
-  // Store the beforeinstallprompt event
-  window.addEventListener('beforeinstallprompt', (e: any) => {
-    e.preventDefault();
-    deferredPrompt = e;
-  });
-
   const canInstall = deferredPrompt !== null || deviceType !== 'desktop';
 
   return {
@@ -35,6 +43,11 @@ export function checkPWAInstallability(): DeviceInfo {
     canInstall,
     installPrompt: deferredPrompt || undefined
   };
+}
+
+// Get current deferred prompt
+export function getDeferredPrompt(): Event | null {
+  return deferredPrompt;
 }
 
 // Get installation instructions based on device
@@ -78,17 +91,27 @@ export function getInstallInstructions(deviceType: DeviceInfo['deviceType']): {
 
 // Handle installation
 export async function installApp(): Promise<boolean> {
-  if (!deferredPrompt) {
+  // Get current prompt state
+  const prompt = getDeferredPrompt();
+  
+  if (!prompt) {
+    console.warn('Install prompt not available');
     return false;
   }
 
   try {
-    (deferredPrompt as any).prompt();
-    const { outcome } = await (deferredPrompt as any).userChoice;
+    // Show the install prompt
+    (prompt as any).prompt();
+    
+    // Wait for user's choice
+    const { outcome } = await (prompt as any).userChoice;
+    console.log('Install outcome:', outcome);
     
     if (outcome === 'accepted') {
       deferredPrompt = null;
       return true;
+    } else if (outcome === 'dismissed') {
+      return false;
     }
     return false;
   } catch (error) {

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { detectDevice, getInstallInstructions, installApp, isInstalledAsApp } from '../utils/pwaInstall';
+import React, { useState, useEffect } from 'react';
+import { detectDevice, getInstallInstructions, installApp, isInstalledAsApp, initInstallPrompt } from '../utils/pwaInstall';
 
 interface InstallPromptProps {
   isOpen: boolean;
@@ -8,20 +8,31 @@ interface InstallPromptProps {
 
 const InstallPrompt: React.FC<InstallPromptProps> = ({ isOpen, onClose }) => {
   const [isInstalling, setIsInstalling] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const deviceType = detectDevice();
   const instructions = getInstallInstructions(deviceType);
   const alreadyInstalled = isInstalledAsApp();
 
+  // Initialize install prompt listener when component mounts
+  useEffect(() => {
+    initInstallPrompt();
+  }, []);
+
   const handleInstall = async () => {
     setIsInstalling(true);
+    setError(null);
     try {
       const success = await installApp();
-      if (!success && deviceType !== 'desktop') {
-        // If automated install fails, we'll show instructions
-        console.log('Please follow the steps below to install');
-      } else if (success) {
+      if (success) {
         onClose();
+      } else if (deviceType === 'desktop') {
+        setError('Installation failed. You may need to use the install icon in your address bar instead.');
+      } else {
+        setError('Installation was cancelled. Please follow the manual steps below.');
       }
+    } catch (err) {
+      setError('Installation error: ' + (err instanceof Error ? err.message : 'Unknown error'));
+      console.error('Install error:', err);
     } finally {
       setIsInstalling(false);
     }
@@ -51,6 +62,13 @@ const InstallPrompt: React.FC<InstallPromptProps> = ({ isOpen, onClose }) => {
       <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6 max-h-96 overflow-y-auto">
         <h2 className="text-2xl font-bold mb-2">{instructions.title}</h2>
         <p className="text-gray-600 mb-4">{instructions.description}</p>
+
+        {/* Error message */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+            {error}
+          </div>
+        )}
 
         {/* Instructions for manual installation */}
         <div className="mb-6 bg-gray-50 p-4 rounded-lg">
