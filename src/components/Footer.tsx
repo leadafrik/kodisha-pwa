@@ -45,7 +45,7 @@ const Footer: React.FC = () => {
           {/* Copyright */}
           <div className="text-xs text-gray-500 text-center md:text-right">
             <p>&copy; {new Date().getFullYear()} Mamamboga Digital. All rights reserved.</p>
-            <p className="mt-1">Data Controller Registration: [Pending]</p>
+            {/* <p className="mt-1">Data Controller Registration: [Pending]</p> */}
           </div>
         </div>
 
