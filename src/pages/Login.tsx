@@ -198,13 +198,10 @@ const Login: React.FC = () => {
             "✅ Verification code sent to your phone via SMS."
           );
         } catch (smsError: any) {
-          // If SMS fails, fall back to email suggestion
+          // If SMS fails, inform user
           if (smsError?.message?.includes('Failed to send SMS')) {
-            setError(null);
-            setOtpType('email');
-            setInfo(
-              "⚠️ SMS is currently unavailable. To complete registration, please use email verification instead."
-            );
+            setError("SMS is currently unavailable. Please try again later or use email verification instead.");
+            setShowLegalModal(true); // Show form again to let user try with email
           } else {
             throw smsError;
           }
@@ -268,24 +265,13 @@ const Login: React.FC = () => {
         setInfo("✅ Code sent to your phone via SMS.");
       }
     } catch (err: any) {
-      // If SMS fails, fall back to email verification
+      // If SMS fails, inform user to try email instead
       if (err?.message?.includes('Failed to send SMS') && !isEmail) {
-        try {
-          // Automatically retry with email
-          const emailInput = input.replace(/^\+\d+/, '').replace(/^0/, '');
-          await requestEmailOtp(emailInput);
-          setOtpEmail(emailInput);
-          setOtpType('email');
-          setMode("otp-reset");
-          startOtpTimer();
-          setError(null);
-          setInfo("⚠️ SMS is currently unavailable. We sent a code to your email instead. Check your inbox and spam folder.");
-        } catch (emailErr: any) {
-          setError(emailErr?.message || "Could not send verification code");
-        }
-      } else if (err?.message?.includes('Failed to send SMS')) {
         setError(null);
-        setInfo("⚠️ SMS currently unavailable. To complete password reset, please use email verification instead.");
+        setInfo("⚠️ SMS is currently unavailable. Please go back and request a code using your email address instead.");
+      } else if (err?.message?.includes('Failed to send SMS')) {
+        // Email OTP also failed
+        setError("Could not send verification code. Please try again.");
       } else {
         setError(err?.message || "Failed to send reset code.");
       }
