@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { kenyaCounties } from "../data/kenyaCounties";
 import LegalAcceptanceModal from "../components/LegalAcceptanceModal";
 
+// Build: SMS verification only (Nov 29, 2025)
 type Mode = "login" | "signup" | "otp-signup" | "forgot" | "otp-reset";
 
 const formatCountyName = (name: string) =>
