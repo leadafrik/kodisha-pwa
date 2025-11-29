@@ -189,18 +189,18 @@ const Login: React.FC = () => {
           "✅ Code sent to your email. Please check your inbox and spam folder."
         );
       } else {
-        // Try to send WhatsApp/SMS with fallback
+        // Send SMS verification code
         try {
           await requestEmailOtp(phone || '');
           setOtpEmail(phone || '');
           setOtpType('phone');
           setInfo(
-            "✅ Verification code sent to your phone via WhatsApp or SMS."
+            "✅ Verification code sent to your phone via SMS."
           );
         } catch (smsError: any) {
-          // If both WhatsApp and SMS fail, inform user
+          // If SMS fails, inform user
           if (smsError?.message?.includes('Failed')) {
-            setError("Verification is currently unavailable. Please try again later or use email verification instead.");
+            setError("SMS verification is currently unavailable. Please try again later or use email verification instead.");
             setShowLegalModal(true); // Show form again to let user try with email
           } else {
             throw smsError;
@@ -262,13 +262,13 @@ const Login: React.FC = () => {
       if (isEmail) {
         setInfo("✅ Code sent to your email. Check your inbox and spam folder.");
       } else {
-        setInfo("✅ Code sent to your phone via WhatsApp or SMS.");
+        setInfo("✅ Code sent to your phone via SMS.");
       }
     } catch (err: any) {
-      // If WhatsApp/SMS fails, inform user to try email instead
+      // If SMS fails, inform user to try email instead
       if (err?.message?.includes('Failed') && !isEmail) {
         setError(null);
-        setInfo("⚠️ Phone verification is currently unavailable. Please go back and request a code using your email address instead.");
+        setInfo("⚠️ SMS verification is currently unavailable. Please go back and request a code using your email address instead.");
       } else if (err?.message?.includes('Failed')) {
         // Email OTP also failed
         setError("Could not send verification code. Please try again.");
@@ -375,7 +375,7 @@ const Login: React.FC = () => {
       </div>
       
       <div>
-        <label className="block text-sm font-medium text-gray-700">Email or WhatsApp Number *</label>
+        <label className="block text-sm font-medium text-gray-700">Email or Phone Number *</label>
         <input
           type="text"
           name="emailOrPhone"
@@ -386,7 +386,7 @@ const Login: React.FC = () => {
           className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
           placeholder="you@example.com or 0712345678"
         />
-        <p className="text-xs text-gray-500 mt-1">We'll send a code to your WhatsApp or email</p>
+        <p className="text-xs text-gray-500 mt-1">We'll send a verification code to your email or SMS</p>
       </div>
       
       <div className="grid grid-cols-2 gap-3">
@@ -498,7 +498,7 @@ const Login: React.FC = () => {
           {otpType === 'email' ? 'Verify your email' : 'Verify your phone'}
         </h3>
         <p className="text-sm text-gray-600">
-          We sent a 6-digit code to {otpType === 'email' ? 'your email' : 'your phone via WhatsApp or SMS'}: <span className="font-semibold text-gray-800">{otpEmail}</span>
+          We sent a 6-digit code to {otpType === 'email' ? 'your email' : 'your phone'}: <span className="font-semibold text-gray-800">{otpEmail}</span>
         </p>
         {otpType === 'email' && (
           <p className="text-xs text-amber-600 bg-amber-50 rounded p-2 mt-2">
@@ -507,7 +507,7 @@ const Login: React.FC = () => {
         )}
         {otpType === 'phone' && (
           <p className="text-xs text-blue-600 bg-blue-50 rounded p-2 mt-2">
-            💡 Code sent via WhatsApp. Check your WhatsApp messages.
+            💡 Code sent via SMS. Check your messages.
           </p>
         )}
       </div>
@@ -564,7 +564,7 @@ const Login: React.FC = () => {
   const renderForgot = () => (
     <form onSubmit={handleForgot} className="space-y-4">
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">Email or WhatsApp Number</label>
+        <label className="block text-sm font-medium text-gray-700">Email or Phone Number</label>
         <input
           type="text"
           value={resetPassword.emailOrPhone}
@@ -574,7 +574,7 @@ const Login: React.FC = () => {
           className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
           placeholder="you@example.com or 0712345678"
         />
-        <p className="text-xs text-gray-500 mt-1">We'll send a code to your WhatsApp or email</p>
+        <p className="text-xs text-gray-500 mt-1">We'll send a code to verify your identity</p>
       </div>
       <button
         type="submit"
@@ -614,8 +614,8 @@ const Login: React.FC = () => {
           </p>
         )}
         {otpType === 'phone' && (
-          <p className="text-xs text-blue-600 bg-blue-50 rounded p-2">
-            💡 Code sent via WhatsApp. Check your WhatsApp messages.
+          <p className="text-xs text-blue-600 bg-blue-50 rounded p-2 mt-2">
+            💡 Code sent via SMS. Check your text messages.
           </p>
         )}
       </div>
