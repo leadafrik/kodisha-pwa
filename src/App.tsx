@@ -13,6 +13,7 @@ import NotFound from './pages/NotFound';
 import ServerError from './pages/ServerError';
 import Offline from './pages/Offline';
 import ProtectedRoute from "./routes/ProtectedRoute";
+import WhatsAppFloatingButton from './components/WhatsAppFloatingButton';
 
 // Lazy load heavy components
 const Profile = lazy(() => import('./pages/Profile'));
@@ -125,6 +126,7 @@ function App() {
                   </Suspense>
                 </div>
                               <Footer />
+                <WhatsAppFloatingButton />
               </div>
             </Router>
           </VerificationProvider>
