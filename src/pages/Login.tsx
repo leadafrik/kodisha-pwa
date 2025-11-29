@@ -52,6 +52,7 @@ const Login: React.FC = () => {
   });
 
   const [otpEmail, setOtpEmail] = useState("");
+  const [otpType, setOtpType] = useState<'email' | 'phone'>('email');
   const [otpCode, setOtpCode] = useState("");
   const [resetPassword, setResetPassword] = useState({
     emailOrPhone: "",
@@ -183,11 +184,14 @@ const Login: React.FC = () => {
       if (email) {
         await requestEmailOtp(email);
         setOtpEmail(email);
+        setOtpType('email');
         setInfo(
           "We sent a 6-digit code to your email. Check your inbox and spam folder."
         );
       } else {
+        await requestEmailOtp(phone || '');
         setOtpEmail(phone || '');
+        setOtpType('phone');
         setInfo(
           "We sent a 6-digit code to your phone via SMS."
         );
@@ -241,6 +245,7 @@ const Login: React.FC = () => {
     try {
       await requestEmailOtp(input);
       setOtpEmail(input);
+      setOtpType(isEmail ? 'email' : 'phone');
       setMode("otp-reset");
       startOtpTimer();
       if (isEmail) {
@@ -459,13 +464,21 @@ const Login: React.FC = () => {
     <div className="space-y-4">
       <div className="text-center space-y-2">
         <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 mx-auto">
-          <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
+          {otpType === 'email' ? (
+            <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          ) : (
+            <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 00.948-.684l1.498-4.493a1 1 0 011.502-.684l1.498 4.493a1 1 0 00.948.684H19a2 2 0 012 2v2a2 2 0 01-2 2H5a2 2 0 01-2-2V5z" />
+            </svg>
+          )}
         </div>
-        <h3 className="text-lg font-semibold text-gray-800">Verify your email</h3>
+        <h3 className="text-lg font-semibold text-gray-800">
+          {otpType === 'email' ? 'Verify your email' : 'Verify your phone'}
+        </h3>
         <p className="text-sm text-gray-600">
-          We sent a 6-digit code to <span className="font-semibold text-gray-800">{otpEmail}</span>
+          We sent a 6-digit code to {otpType === 'email' ? 'your email' : 'your phone via SMS'}: <span className="font-semibold text-gray-800">{otpEmail}</span>
         </p>
       </div>
       <div className="flex flex-col gap-3">
@@ -563,7 +576,7 @@ const Login: React.FC = () => {
         </div>
         <h3 className="text-lg font-semibold text-gray-800">Reset password</h3>
         <p className="text-sm text-gray-600">
-          Enter the code sent to <span className="font-semibold text-gray-800">{otpEmail}</span> and your new password.
+          Enter the code sent to {otpType === 'email' ? 'your email' : 'your phone'}: <span className="font-semibold text-gray-800">{otpEmail}</span> and your new password.
         </p>
       </div>
       <div className="space-y-2">
