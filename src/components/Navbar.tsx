@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import InstallPrompt from "./InstallPrompt";
-import { isInstalledAsApp } from "../utils/pwaInstall";
 
 const Chevron: React.FC = () => (
   <svg className="w-3 h-3" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -13,23 +11,6 @@ const Chevron: React.FC = () => (
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [showInstall, setShowInstall] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
-
-  useEffect(() => {
-    setIsInstalled(isInstalledAsApp());
-    
-    // Listen for app installation
-    window.addEventListener('appinstalled', () => {
-      setIsInstalled(true);
-    });
-    
-    // Check on display mode change
-    const mediaQuery = window.matchMedia('(display-mode: standalone)');
-    mediaQuery.addEventListener('change', (e) => {
-      setIsInstalled(e.matches);
-    });
-  }, []);
 
   const closeMobile = () => setMobileOpen(false);
 
@@ -158,14 +139,6 @@ const Navbar: React.FC = () => {
                 </div>
               ) : (
                 <div className="flex items-center gap-4">
-                  {!isInstalled && (
-                    <button
-                      onClick={() => setShowInstall(true)}
-                      className="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition"
-                    >
-                      Download App
-                    </button>
-                  )}
                   <Link to="/login" className="px-5 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 font-semibold transition">
                     Login
                   </Link>
@@ -222,17 +195,6 @@ const Navbar: React.FC = () => {
                 </>
               ) : (
                 <>
-                  {!isInstalled && (
-                    <button
-                      onClick={() => {
-                        setShowInstall(true);
-                        closeMobile();
-                      }}
-                      className="text-left px-4 py-2 hover:bg-green-50 text-green-600 font-semibold"
-                    >
-                      Download App
-                    </button>
-                  )}
                   <Link to="/login" onClick={closeMobile}>Login</Link>
                   <Link to="/login?next=/list" onClick={closeMobile}>List</Link>
                 </>
@@ -241,9 +203,6 @@ const Navbar: React.FC = () => {
           </div>
         </div>
       )}
-
-      {/* Install Prompt Modal */}
-      <InstallPrompt isOpen={showInstall} onClose={() => setShowInstall(false)} />
     </>
   );
 };

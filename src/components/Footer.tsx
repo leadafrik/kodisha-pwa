@@ -1,7 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import InstallPrompt from './InstallPrompt';
+import { isInstalledAsApp } from '../utils/pwaInstall';
 
 const Footer: React.FC = () => {
+  const [showInstall, setShowInstall] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
+
+  useEffect(() => {
+    setIsInstalled(isInstalledAsApp());
+    
+    // Listen for app installation
+    window.addEventListener('appinstalled', () => {
+      setIsInstalled(true);
+    });
+    
+    // Check on display mode change
+    const mediaQuery = window.matchMedia('(display-mode: standalone)');
+    mediaQuery.addEventListener('change', (e) => {
+      setIsInstalled(e.matches);
+    });
+  }, []);
   return (
     <footer className="bg-gray-50 border-t border-gray-200 mt-auto">
       <div className="max-w-7xl mx-auto px-4 py-6">
@@ -47,6 +66,16 @@ const Footer: React.FC = () => {
             <p>&copy; {new Date().getFullYear()} Mamamboga Digital. All rights reserved.</p>
             {/* <p className="mt-1">Data Controller Registration: [Pending]</p> */}
           </div>
+
+          {/* Download App Button */}
+          {!isInstalled && (
+            <button
+              onClick={() => setShowInstall(true)}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition text-sm"
+            >
+              Download App
+            </button>
+          )}
         </div>
 
         {/* Mobile-Optimized Secondary Info */}
@@ -69,6 +98,9 @@ const Footer: React.FC = () => {
           </p>
         </div>
       </div>
+
+      {/* Install Prompt Modal */}
+      <InstallPrompt isOpen={showInstall} onClose={() => setShowInstall(false)} />
     </footer>
   );
 };
