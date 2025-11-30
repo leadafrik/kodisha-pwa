@@ -3,6 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { kenyaCounties } from "../data/kenyaCounties";
 import LegalAcceptanceModal from "../components/LegalAcceptanceModal";
+import { isValidKenyanPhone, formatKenyanPhone } from "../utils/security";
 
 // Build: SMS verification only (Nov 29, 2025)
 type Mode = "login" | "signup" | "otp-signup" | "forgot" | "otp-reset";
@@ -118,10 +119,10 @@ const Login: React.FC = () => {
     // Detect if input is email or phone
     const input = signupData.emailOrPhone.trim();
     const isEmail = input.includes('@');
-    const isPhone = /^0?\d{9,10}$/.test(input); // Matches 0720040812 or 720040812
+    const isPhone = isValidKenyanPhone(input);
 
     if (!isEmail && !isPhone) {
-      setError("Please enter a valid email or 10-digit phone number.");
+      setError("Please enter a valid email or Kenyan phone number.");
       return;
     }
     
@@ -156,12 +157,8 @@ const Login: React.FC = () => {
     if (isEmail) {
       email = input;
     } else {
-      // It's a phone number - strip leading 0 and add +254
-      let phoneDigits = input;
-      if (phoneDigits.startsWith('0')) {
-        phoneDigits = phoneDigits.substring(1);
-      }
-      phone = `+254${phoneDigits}`;
+      // Normalize to +254 format
+      phone = formatKenyanPhone(input);
     }
 
     try {
