@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import NotificationCenter from "./NotificationCenter";
 
 const Chevron: React.FC = () => (
   <svg className="w-3 h-3" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -46,6 +47,13 @@ const Navbar: React.FC = () => {
                 </Link>
               </div>
 
+              <Link 
+                to="/about" 
+                className="px-4 py-2 rounded-lg hover:bg-gray-100 transition text-gray-700 font-semibold text-sm"
+              >
+                ℹ️ About
+              </Link>
+
               <div className="group relative">
                 <button className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition font-semibold flex items-center gap-2">
                   + List <Chevron />
@@ -81,6 +89,9 @@ const Navbar: React.FC = () => {
 
               {user ? (
                 <div className="flex items-center gap-6">
+                  {/* NOTIFICATION CENTER */}
+                  <NotificationCenter />
+
                   {/* USER DROPDOWN */}
                   <div className="group relative">
                     <button className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition flex items-center gap-2 font-semibold text-gray-800">
@@ -184,6 +195,9 @@ const Navbar: React.FC = () => {
                   🛒 Browse Buy Requests
                 </Link>
               </div>
+              <Link to="/about" onClick={closeMobile} className="px-3 py-2 font-semibold">
+                ℹ️ About Agrisoko
+              </Link>
               <hr />
 
               {user ? (

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { PropertyProvider } from './contexts/PropertyContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { VerificationProvider } from './contexts/VerificationContext';
+import { NotificationsProvider } from './contexts/NotificationsContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import Home from './pages/Home';
 import BrowseListings from './pages/BrowseListings';
@@ -54,11 +55,12 @@ function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <PropertyProvider>
-          <VerificationProvider>
-            <Router>
-              <div className="min-h-screen bg-gray-50 flex flex-col">
-                <Navbar />
+        <NotificationsProvider>
+          <PropertyProvider>
+            <VerificationProvider>
+              <Router>
+                <div className="min-h-screen bg-gray-50 flex flex-col">
+                  <Navbar />
                 <div className="flex-1 py-4">
                   <Suspense fallback={<LoadingFallback />}>
                     <Routes>
@@ -136,6 +138,7 @@ function App() {
             </Router>
           </VerificationProvider>
         </PropertyProvider>
+        </NotificationsProvider>
       </AuthProvider>
     </ErrorBoundary>
   );
