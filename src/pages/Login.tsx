@@ -565,7 +565,7 @@ const Login: React.FC = () => {
           onClick={() => switchMode("login")}
           className="text-green-700 font-semibold hover:text-green-800 hover:underline transition"
         >
-          Back to login
+          Go to login
         </button>
       </div>
     </form>
