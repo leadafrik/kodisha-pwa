@@ -222,7 +222,7 @@ const Profile: React.FC = () => {
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Quick Actions</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
           <Link
-            to="/list?category=land"
+            to="/list-property"
             className="bg-green-600 text-white p-6 rounded-xl hover:bg-green-700 transition duration-300 text-center"
           >
             <div className="font-semibold text-lg">List Land</div>
@@ -255,6 +255,13 @@ const Profile: React.FC = () => {
           >
             <div className="font-semibold text-lg">Post Need</div>
             <div className="text-indigo-100 text-sm">Post what you're looking for</div>
+          </Link>
+          <Link
+            to="/list-agrovet"
+            className="bg-amber-600 text-white p-6 rounded-xl hover:bg-amber-700 transition duration-300 text-center"
+          >
+            <div className="font-semibold text-lg">List Agrovet</div>
+            <div className="text-amber-100 text-sm">Register your agro-business</div>
           </Link>
           <Link
             to="/favorites"
