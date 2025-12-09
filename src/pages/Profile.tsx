@@ -295,18 +295,6 @@ const Profile: React.FC = () => {
             </div>
           )}
         </div>
-          ) : (
-            <div className="space-y-3">
-              {userProducts.slice(0, 3).map((product) => (
-                <div key={product._id || product.id} className="border rounded-lg p-3 hover:shadow-md transition">
-                  <h4 className="font-semibold text-gray-800 text-sm">{product.name || product.title}</h4>
-                  <p className="text-orange-600 font-bold text-sm">KSh {product.price?.toLocaleString() || 'N/A'}</p>
-                  <p className="text-gray-600 text-xs">{product.category}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
 
         {/* Account Management - Subtle Section */}
         <div className="mt-8 border-t pt-6">
