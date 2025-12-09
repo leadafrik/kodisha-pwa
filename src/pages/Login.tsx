@@ -31,7 +31,7 @@ const Login: React.FC = () => {
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get("next") || "/profile";
 
-  const [mode, setMode] = useState<Mode>("login");
+  const [mode, setMode] = useState<Mode>("signup");
   const [info, setInfo] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [otpTimer, setOtpTimer] = useState(0);
@@ -120,6 +120,23 @@ const Login: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [signupData.emailOrPhone, mode]);
+
+  // Auto-switch to login if email/phone exists
+  useEffect(() => {
+    if (mode === 'signup' && emailOrPhoneExists) {
+      // Show info message and auto-switch
+      setInfo("Account found! Switching to Sign In...");
+      const timer = setTimeout(() => {
+        setMode('login');
+        setLoginData(prev => ({
+          ...prev,
+          emailOrPhone: signupData.emailOrPhone
+        }));
+        setInfo(null);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [emailOrPhoneExists, mode]);
 
   const switchMode = (next: Mode) => {
     resetMessages();
