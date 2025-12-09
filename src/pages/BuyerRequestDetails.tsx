@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -51,6 +51,7 @@ const BuyerRequestDetails: React.FC = () => {
   const [replyMessage, setReplyMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [markingFulfilled, setMarkingFulfilled] = useState(false);
 
   // Try to get request from location state first
   const initialRequest = (location.state as any)?.request;
@@ -182,6 +183,50 @@ const BuyerRequestDetails: React.FC = () => {
     }
   };
 
+  const handleMarkFulfilled = async () => {
+    if (!request) return;
+
+    setMarkingFulfilled(true);
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/buyer-requests/${request._id}/mark-fulfilled`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getAuthToken()}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to mark as fulfilled');
+      }
+
+      const data = await response.json();
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+      }, 3000);
+
+      // Navigate back to requests page
+      setTimeout(() => {
+        navigate('/request');
+      }, 2000);
+    } catch (err) {
+      console.error('Error marking as fulfilled:', err);
+      setError(err instanceof Error ? err.message : 'Failed to mark as fulfilled');
+      try {
+        Sentry.captureException(err);
+      } catch {
+        // Sentry error - ignore
+      }
+    } finally {
+      setMarkingFulfilled(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -222,7 +267,9 @@ const BuyerRequestDetails: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Navbar />
+      <div className="sticky top-0 z-50">
+        <Navbar />
+      </div>
 
       <div className="flex-1 py-8">
         <div className="max-w-4xl mx-auto px-4">
@@ -347,6 +394,37 @@ const BuyerRequestDetails: React.FC = () => {
                   )}
                 </div>
               </div>
+
+              {/* Mark as Fulfilled Button */}
+              {(isOwnRequest || user?.role === 'admin') && (
+                <div className="bg-white rounded-lg shadow-md p-6 mb-6 border-l-4 border-orange-600">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-800">Order Status</h3>
+                      <p className="text-sm text-gray-600 mt-1">Mark this order as fulfilled when complete</p>
+                    </div>
+                    <button
+                      onClick={handleMarkFulfilled}
+                      disabled={markingFulfilled}
+                      className={`${
+                        markingFulfilled
+                          ? 'bg-gray-400 cursor-not-allowed'
+                          : 'bg-orange-600 hover:bg-orange-700'
+                      } text-white font-semibold py-2 px-6 rounded-lg transition flex items-center gap-2`}
+                    >
+                      {markingFulfilled ? (
+                        <>
+                          <span className="animate-spin">⏳</span> Marking...
+                        </>
+                      ) : (
+                        <>
+                          <span>✓</span> Mark as Fulfilled
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Responses Section */}
               {request.responses && request.responses.length > 0 && (
