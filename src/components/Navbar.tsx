@@ -101,6 +101,9 @@ const Navbar: React.FC = () => {
 
                       {user.role === 'admin' || user.type === 'admin' ? (
                         <>
+                          <Link to="/admin/listings-approval" className="block px-4 py-3 hover:bg-gray-50 border-b">
+                            <div className="font-semibold">Listing Approvals</div>
+                          </Link>
                           <Link to="/admin/reports" className="block px-4 py-3 hover:bg-gray-50 border-b">
                             <div className="font-semibold">User Reports</div>
                           </Link>
@@ -167,6 +170,7 @@ const Navbar: React.FC = () => {
                   <Link to="/favorites" onClick={closeMobile}>Saved Listings</Link>
                   {user.role === 'admin' || user.type === 'admin' ? (
                     <>
+                      <Link to="/admin/listings-approval" onClick={closeMobile}>Listing Approvals</Link>
                       <Link to="/admin/reports" onClick={closeMobile}>User Reports</Link>
                       <Link to="/admin/profile-verification" onClick={closeMobile}>Profile Verification</Link>
                     </>

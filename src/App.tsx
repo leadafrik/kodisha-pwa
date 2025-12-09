@@ -28,6 +28,7 @@ const PaymentTestPanel = lazy(() => import('./pages/PaymentTestPanel'));
 const TermsOfService = lazy(() => import('./pages/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const Moderation = lazy(() => import('./pages/Moderation'));
+const AdminListingsApproval = lazy(() => import('./pages/AdminListingsApproval'));
 const Favorites = lazy(() => import('./pages/Favorites'));
 const Messages = lazy(() => import('./pages/Messages'));
 const AdminProfileVerification = lazy(() => import('./pages/admin/ProfileVerification'));
@@ -140,6 +141,7 @@ function App() {
                     <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
                     <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
                     <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+                    <Route path="/admin/listings-approval" element={<ProtectedRoute><AdminListingsApproval /></ProtectedRoute>} />
                     <Route path="/admin/moderation" element={<Moderation />} />
                     <Route path="/admin/reports" element={<ProtectedRoute><AdminReports /></ProtectedRoute>} />
                     <Route path="/admin/profile-verification" element={<ProtectedRoute><AdminProfileVerification /></ProtectedRoute>} />
