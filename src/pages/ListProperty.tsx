@@ -29,26 +29,10 @@ const LISTING_PLAN_OPTIONS: ListingPlanOption[] = [
     id: 'free',
     name: 'Standard Listing',
     price: 0,
-    subtitle: 'Post your land listing with all essential features included.',
-    note: 'Free',
+    subtitle: 'Free for your first 3 months. After 3 months, 2.5% commission (minimum KSh 49).',
+    note: 'Free → 2.5% after 90 days',
     duration: 'Active until sold/rented',
   },
-  /* Future pricing options - commented out during free launch phase
-  {
-    id: 'verified',
-    name: 'Per Listing',
-    price: 99,
-    subtitle: 'KSh 99 or 0.5% of deal value (whichever is higher). Includes verification & priority review.',
-    duration: 'Listing lifecycle',
-  },
-  {
-    id: 'premium',
-    name: 'Annual Subscription',
-    price: 699,
-    subtitle: 'KSh 699 / year - unlimited listings with priority support and trust badge eligibility.',
-    duration: '12 months',
-  },
-  */
 ];
 
 type BoostOption = {

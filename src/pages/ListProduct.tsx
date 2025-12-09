@@ -259,7 +259,7 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
             className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
           />
           <p className="text-xs text-gray-500 mt-1">
-            Commission: {formatPrice(commission)} or waived with subscription.
+            Free for 3 months. After that: {formatPrice(commission)} commission (2.5% of price, minimum KSh 49).
           </p>
         </div>
         <div>
@@ -388,7 +388,7 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
               Listing Status
             </p>
             <p className="text-xs text-orange-700">
-              All product listings are currently free during our introductory phase.
+              New accounts enjoy free listings for the first 3 months. After that, a 2.5% commission applies (minimum KSh 49).
             </p>
           </div>
           {/* Future monetization options - commented out during free launch
@@ -546,7 +546,7 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
       </button>
       <p className="text-xs text-gray-500 text-center">
         {idVerified && selfieVerified 
-          ? "Your identity is verified. All listings are free during our introductory phase." 
+          ? "Your identity is verified. Free listings for 3 months, then 2.5% commission applies." 
           : "ID + selfie verification required. One-time upload reviewed by admin."}
       </p>
     </form>

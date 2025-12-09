@@ -57,17 +57,10 @@ const LISTING_PLAN_OPTIONS: ListingPlanOption[] = [
     id: "annual",
     name: "Standard Listing",
     price: 0,
-    subtitle: "Post your agrovet listing with all essential features included.",
+    subtitle: "Free for your first 3 months. After 3 months, 2.5% commission (minimum KSh 49).",
     duration: "Active until removed",
   },
-  /* Future pricing - commented out during free launch phase
-  {
-    id: "annual",
-    name: "Annual Subscription",
-    price: 599,
-    subtitle: "KSh 599/year — recurring exposure plus boosts.",
-    duration: "12 months",
-  },
+];
   */
 ];
 
@@ -384,10 +377,10 @@ const ListAgrovet: React.FC = () => {
       }
 
       const feeNote = !PAYMENTS_ENABLED
-        ? 'Launch period: listing is free. No payment required.'
+        ? 'Free for your first 3 months. After that, 2.5% commission applies.'
         : totalMonetizationFee > 0
           ? `${monetizationSummaryLabel} for ${formatKenyanPrice(totalMonetizationFee)}.${paymentNote}`
-          : 'You used your free listing credit.';
+          : 'Free listing during 3-month trial period.';
       alert(
         `Agrovet listed successfully! It will appear after verification. ${feeNote}`
       );
@@ -498,7 +491,7 @@ const ListAgrovet: React.FC = () => {
             {PAYMENTS_ENABLED ? (
               <p className="text-sm text-gray-600">Annual subscription unlocks boosted exposure; add optional verification and boosts.</p>
             ) : (
-              <p className="text-sm text-green-700 font-semibold">Launch Offer: All plans and boosts are free while we onboard early partners.</p>
+              <p className="text-sm text-green-700 font-semibold">Free for your first 3 months. After 3 months, 2.5% commission applies (minimum KSh 49).</p>
             )}
           </div>
           <div className="grid gap-3 md:grid-cols-4">

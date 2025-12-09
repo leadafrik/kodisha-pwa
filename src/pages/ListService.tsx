@@ -28,18 +28,9 @@ const LISTING_PLAN_OPTIONS: SubscriptionPlanOption[] = [
     id: "annual",
     name: "Standard Listing",
     price: 0,
-    subtitle: "Post your professional service listing with all essential features included.",
+    subtitle: "Free for your first 3 months. After 3 months, 2.5% commission (minimum KSh 49).",
     duration: "Active until removed",
   },
-  /* Future pricing - commented out during free launch phase
-  {
-    id: "annual",
-    name: "Annual Subscription",
-    price: 599,
-    subtitle: "KSh 599/year — recurring visibility + boosts.",
-    duration: "12 months",
-  },
-  */
 ];
 
 type BoostOption = {
