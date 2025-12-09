@@ -7,6 +7,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import Home from './pages/Home';
 import BrowseListings from './pages/BrowseListings';
 import Login from './pages/Login';
+import AboutUs from './pages/AboutUs';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import NotFound from './pages/NotFound';
@@ -91,6 +92,7 @@ function App() {
                     />
                     <Route path="/browse" element={<BrowseListings />} />
                     <Route path="/find-services" element={<BrowseListings />} />
+                    <Route path="/about" element={<AboutUs />} />
                     <Route path="/login" element={<Login />} />
                     <Route
                       path="/profile"
