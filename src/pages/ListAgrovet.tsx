@@ -597,7 +597,7 @@ const ListAgrovet: React.FC = () => {
 
           {/* Agrovet Photos Section */}
           <div className="md:col-span-2 border-l-4 border-orange-500 pl-4 bg-orange-50 rounded-r-lg p-4">
-            <h3 className="font-semibold text-gray-800 mb-3">📸 Agrovet Photos (Optional)</h3>
+            <h3 className="font-semibold text-gray-800 mb-3">Agrovet Photos (Optional)</h3>
             <p className="text-sm text-gray-600 mb-4">
               Add photos of your agrovet storefront, products, or services to attract more customers. Maximum 8 photos, 5MB each.
             </p>
@@ -730,7 +730,7 @@ const ListAgrovet: React.FC = () => {
                   className="mr-3"
                 />
                 <div>
-                  <div className="font-semibold">🛒 Products</div>
+                  <div className="font-semibold">Products</div>
                   <div className="text-xs text-gray-500">Seeds, fertilizers, feeds</div>
                 </div>
               </label>
@@ -744,7 +744,7 @@ const ListAgrovet: React.FC = () => {
                   className="mr-3"
                 />
                 <div>
-                  <div className="font-semibold">💊 Animal Health</div>
+                  <div className="font-semibold">Animal Health</div>
                   <div className="text-xs text-gray-500">Dewormers, vaccines</div>
                 </div>
               </label>
@@ -758,7 +758,7 @@ const ListAgrovet: React.FC = () => {
                   className="mr-3"
                 />
                 <div>
-                  <div className="font-semibold">🌱 Crop Protection</div>
+                  <div className="font-semibold">Crop Protection</div>
                   <div className="text-xs text-gray-500">Pesticides, herbicides</div>
                 </div>
               </label>
@@ -772,7 +772,7 @@ const ListAgrovet: React.FC = () => {
                   className="mr-3"
                 />
                 <div>
-                  <div className="font-semibold">🔧 Equipment</div>
+                  <div className="font-semibold">Equipment</div>
                   <div className="text-xs text-gray-500">Tools, sprayers, pumps</div>
                 </div>
               </label>
@@ -782,7 +782,7 @@ const ListAgrovet: React.FC = () => {
           {/* Products Section */}
           {formData.products && (
             <div className="md:col-span-2 border-l-4 border-green-500 pl-4">
-              <h3 className="font-semibold text-gray-800 mb-3">🛒 Products & Supplies</h3>
+              <h3 className="font-semibold text-gray-800 mb-3">Products & Supplies</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm text-gray-600 mb-1">Seeds Available</label>
@@ -824,7 +824,7 @@ const ListAgrovet: React.FC = () => {
           {/* Animal Health Section */}
           {formData.animalHealth && (
             <div className="md:col-span-2 border-l-4 border-blue-500 pl-4">
-              <h3 className="font-semibold text-gray-800 mb-3">💊 Animal Health Services</h3>
+              <h3 className="font-semibold text-gray-800 mb-3">Animal Health Services</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {[
                   { name: 'dewormers', label: 'Dewormers' },
@@ -851,7 +851,7 @@ const ListAgrovet: React.FC = () => {
           {/* Crop Protection Section */}
           {formData.cropProtection && (
             <div className="md:col-span-2 border-l-4 border-yellow-500 pl-4">
-              <h3 className="font-semibold text-gray-800 mb-3">🌱 Crop Protection</h3>
+              <h3 className="font-semibold text-gray-800 mb-3">Crop Protection</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {[
                   { name: 'pesticides', label: 'Pesticides' },
@@ -876,7 +876,7 @@ const ListAgrovet: React.FC = () => {
           {/* Equipment Section */}
           {formData.equipment && (
             <div className="md:col-span-2 border-l-4 border-purple-500 pl-4">
-              <h3 className="font-semibold text-gray-800 mb-3">🔧 Equipment & Tools</h3>
+              <h3 className="font-semibold text-gray-800 mb-3">Equipment & Tools</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[
                   { name: 'sprayers', label: 'Sprayers' },
@@ -957,7 +957,7 @@ const ListAgrovet: React.FC = () => {
               </div>
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm text-blue-800">
-                  💡 <strong>One-time verification:</strong> We verify IDs once to reduce fraud and impersonation. Your future listings will be published faster.
+                  <strong>One-time verification:</strong> We verify IDs once to reduce fraud and impersonation. Your future listings will be published faster.
                 </p>
               </div>
             </div>
@@ -965,7 +965,7 @@ const ListAgrovet: React.FC = () => {
             <>
               <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm text-blue-800">
-                  🔒 <strong>Why we verify:</strong> We verify IDs once to reduce fraud and impersonation. After approval, you skip ID uploads for future listings.
+                  <strong>Why we verify:</strong> We verify IDs once to reduce fraud and impersonation. After approval, you skip ID uploads for future listings.
                 </p>
               </div>
               <p className="text-sm text-gray-600 mb-4">
@@ -1024,7 +1024,7 @@ const ListAgrovet: React.FC = () => {
 
         <div className="mt-6 p-4 bg-blue-50 rounded-lg">
           <p className="text-blue-800 text-sm">
-            💡 <strong>Note:</strong> Your agrovet will be verified before appearing in search results. 
+            <strong>Note:</strong> Your agrovet will be verified before appearing in search results. 
             {formData.photos.length > 0 && ' Photos help farmers trust your business.'}
           </p>
         </div>

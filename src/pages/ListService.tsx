@@ -973,7 +973,7 @@ const ListService: React.FC<ListServiceProps> = ({ initialServiceType }) => {
               </div>
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm text-blue-800">
-                  💡 <strong>One-time verification:</strong> We verify IDs once to reduce fraud and impersonation. Your future listings will be published faster.
+                  <strong>One-time verification:</strong> We verify IDs once to reduce fraud and impersonation. Your future listings will be published faster.
                 </p>
               </div>
             </div>
@@ -981,7 +981,7 @@ const ListService: React.FC<ListServiceProps> = ({ initialServiceType }) => {
             <>
               <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm text-blue-800">
-                  🔒 <strong>Why we verify:</strong> We verify IDs once to reduce fraud and impersonation. After approval, you skip ID uploads for future listings.
+                  <strong>Why we verify:</strong> We verify IDs once to reduce fraud and impersonation. After approval, you skip ID uploads for future listings.
                 </p>
               </div>
               <p className="text-sm text-gray-600 mb-4">

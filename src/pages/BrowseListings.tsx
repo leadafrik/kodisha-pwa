@@ -322,7 +322,7 @@ const BrowseListings: React.FC = () => {
 
       {!loading && filtered.length === 0 && (
         <div className="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl border border-dashed border-gray-300">
-          <div className="text-5xl mb-4">🚜</div>
+          <div className="text-5xl mb-4">📋</div>
           <h3 className="text-2xl font-bold text-gray-800 mb-2">
             No listings found
           </h3>
@@ -370,7 +370,7 @@ const BrowseListings: React.FC = () => {
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center text-gray-400 text-sm font-medium">
-                    <div className="text-4xl">📦</div>
+                    <div className="text-gray-300">No image</div>
                   </div>
                 )}
                 
@@ -378,7 +378,7 @@ const BrowseListings: React.FC = () => {
                 <div className="absolute top-3 left-3 inline-flex items-center gap-2 flex-wrap max-w-[calc(100%-1.5rem)]">
                   {card.isDemo && (
                     <span className="rounded-full bg-blue-100 text-blue-800 text-[11px] font-bold px-2.5 py-1 whitespace-nowrap">
-                      📋 Sample Listing
+                      Sample Listing
                     </span>
                   )}
                   {card.boosted && (
@@ -476,13 +476,13 @@ const BrowseListings: React.FC = () => {
               to="/request"
               className="inline-flex justify-center items-center px-6 py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
             >
-              🛒 View Buy Requests
+              View Buy Requests
             </Link>
             <Link
               to={user ? "/create-listing" : "/login?next=/create-listing"}
               className="inline-flex justify-center items-center px-6 py-3 rounded-lg border-2 border-blue-600 text-blue-600 font-semibold hover:bg-blue-50 transition"
             >
-              ✨ Post Your Products
+              Post Your Products
             </Link>
           </div>
         </div>

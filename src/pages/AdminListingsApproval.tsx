@@ -173,7 +173,9 @@ const AdminListingsApproval: React.FC = () => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <span className="text-4xl">📦</span>
+                    <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
+                      <span className="text-sm">No image</span>
+                    </div>
                   )}
                   {listing.isDemo && (
                     <div className="absolute top-2 left-2 bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded">

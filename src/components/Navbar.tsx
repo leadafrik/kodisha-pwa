@@ -37,13 +37,13 @@ const Navbar: React.FC = () => {
                   to="/browse" 
                   className="px-4 py-2 rounded-md transition font-semibold text-sm hover:bg-white"
                 >
-                  📦 Listings
+                  Listings
                 </Link>
                 <Link 
                   to="/request" 
                   className="px-4 py-2 rounded-md transition font-semibold text-sm hover:bg-white"
                 >
-                  🛒 Buy Requests
+                  Buy Requests
                 </Link>
               </div>
 
@@ -51,7 +51,7 @@ const Navbar: React.FC = () => {
                 to="/about" 
                 className="px-4 py-2 rounded-lg hover:bg-gray-100 transition text-gray-700 font-semibold text-sm"
               >
-                ℹ️ About
+                About
               </Link>
 
               <div className="group relative">
@@ -62,24 +62,24 @@ const Navbar: React.FC = () => {
                   {user ? (
                     <>
                       <Link to="/create-listing" className="block px-4 py-3 hover:bg-green-50 border-b">
-                        <div className="font-semibold text-green-700">✨ Create Listing</div>
+                        <div className="font-semibold text-green-700">Create Listing</div>
                         <p className="text-sm text-gray-600">Products, livestock, inputs</p>
                       </Link>
                       <hr className="my-2" />
                       <Link to="/request/new" className="block px-4 py-3 hover:bg-blue-50">
-                        <div className="font-semibold text-blue-700">🛒 Post Buyer Request</div>
+                        <div className="font-semibold text-blue-700">Post Buyer Request</div>
                         <p className="text-sm text-gray-600">Looking to buy something?</p>
                       </Link>
                     </>
                   ) : (
                     <>
                       <Link to="/login?next=/create-listing" className="block px-4 py-3 hover:bg-green-50 border-b">
-                        <div className="font-semibold text-green-700">✨ Create Listing</div>
+                        <div className="font-semibold text-green-700">Create Listing</div>
                         <p className="text-sm text-gray-600">Products, livestock, inputs</p>
                       </Link>
                       <hr className="my-2" />
                       <Link to="/login?next=/request/new" className="block px-4 py-3 hover:bg-blue-50">
-                        <div className="font-semibold text-blue-700">🛒 Post Buyer Request</div>
+                        <div className="font-semibold text-blue-700">Post Buyer Request</div>
                         <p className="text-sm text-gray-600">Looking to buy something?</p>
                       </Link>
                     </>
@@ -189,14 +189,14 @@ const Navbar: React.FC = () => {
               {/* Browse Toggle for Mobile */}
               <div className="flex flex-col gap-2 bg-gray-100 rounded-lg p-2">
                 <Link to="/browse" onClick={closeMobile} className="px-3 py-2 rounded hover:bg-white transition font-semibold">
-                  📦 Browse Listings
+                  Browse Listings
                 </Link>
                 <Link to="/request" onClick={closeMobile} className="px-3 py-2 rounded hover:bg-white transition font-semibold">
-                  🛒 Browse Buy Requests
+                  Browse Buy Requests
                 </Link>
               </div>
               <Link to="/about" onClick={closeMobile} className="px-3 py-2 font-semibold">
-                ℹ️ About Agrisoko
+                About Agrisoko
               </Link>
               <hr />
 

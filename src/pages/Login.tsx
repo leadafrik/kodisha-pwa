@@ -323,7 +323,7 @@ const Login: React.FC = () => {
       // If SMS fails, inform user to try email instead
       if (err?.message?.includes('Failed') && !isEmail) {
         setError(null);
-        setInfo("⚠️ SMS verification is currently unavailable. Please go back and request a code using your email address instead.");
+        setInfo("SMS verification is currently unavailable. Please go back and request a code using your email address instead.");
       } else if (err?.message?.includes('Failed')) {
         // Email OTP also failed
         setError("Could not send verification code. Please try again.");
@@ -455,7 +455,7 @@ const Login: React.FC = () => {
         {emailOrPhoneExists && signupData.emailOrPhone.trim() && (
           <div className="mt-2 p-3 rounded-lg bg-blue-50 border border-blue-200 text-sm">
             <p className="text-blue-900 font-medium mb-2">
-              📝 Account already exists with this email/phone
+              Account already exists with this email/phone
             </p>
             <p className="text-blue-800 text-xs mb-3">
               It looks like you already have an account. Please sign in instead to access your account.
@@ -593,12 +593,12 @@ const Login: React.FC = () => {
         </p>
         {otpType === 'email' && (
           <p className="text-xs text-amber-600 bg-amber-50 rounded p-2 mt-2">
-            💡 Tip: If you don't see the email, check your spam/junk folder.
+            Tip: If you don't see the email, check your spam/junk folder.
           </p>
         )}
         {otpType === 'phone' && (
           <p className="text-xs text-blue-600 bg-blue-50 rounded p-2 mt-2">
-            💡 Code sent via SMS. Check your messages.
+            Code sent via SMS. Check your messages.
           </p>
         )}
       </div>
@@ -701,12 +701,12 @@ const Login: React.FC = () => {
         </p>
         {otpType === 'email' && (
           <p className="text-xs text-amber-600 bg-amber-50 rounded p-2">
-            💡 Tip: If you don't see the email, check your spam/junk folder.
+            <strong>Tip:</strong> If you don't see the email, check your spam/junk folder.
           </p>
         )}
         {otpType === 'phone' && (
           <p className="text-xs text-blue-600 bg-blue-50 rounded p-2 mt-2">
-            💡 Code sent via SMS. Check your text messages.
+            <strong>Tip:</strong> Code sent via SMS. Check your text messages.
           </p>
         )}
       </div>

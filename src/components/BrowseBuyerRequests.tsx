@@ -379,13 +379,13 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                 to="/browse"
                 className="inline-flex justify-center items-center px-6 py-3 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition"
               >
-                📦 Browse Listings
+                Browse Listings
               </Link>
               <Link
                 to={user ? "/create-listing" : "/login?next=/create-listing"}
                 className="inline-flex justify-center items-center px-6 py-3 rounded-lg border-2 border-green-600 text-green-600 font-semibold hover:bg-green-50 transition"
               >
-                🛒 Post a Buy Request
+                Post a Buy Request
               </Link>
             </div>
           </div>

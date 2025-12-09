@@ -38,12 +38,6 @@ const INPUTS_SUBCATEGORIES: InputsSubcategory[] = ["fertilizer", "pesticides", "
 
 const UNITS = ["kg", "bag", "ton", "bunch", "dozen", "piece", "liter", "gallon", "box", "crate"];
 
-const CATEGORY_ICONS = {
-  produce: "🌾",
-  livestock: "🐄",
-  inputs: "🌱",
-};
-
 const CATEGORY_DESCRIPTIONS = {
   produce: "Agricultural products like crops, fruits, and vegetables",
   livestock: "Livestock including cattle, poultry, goats, and more",
@@ -367,8 +361,8 @@ const CreateListing: React.FC = () => {
               <h2 className="text-xl font-bold text-gray-900 mb-6">What do you want to do?</h2>
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  { type: "sell" as const, label: "Sell", icon: "📤", desc: "Sell your products" },
-                  { type: "buy" as const, label: "Buy", icon: "📥", desc: "Request to buy" },
+                  { type: "sell" as const, label: "Sell", icon: "", desc: "Sell your products" },
+                  { type: "buy" as const, label: "Buy", icon: "", desc: "Request to buy" },
                 ].map(({ type, label, icon, desc }) => (
                   <button
                     key={type}
@@ -412,7 +406,6 @@ const CreateListing: React.FC = () => {
                     }`}
                   >
                     <p className="font-bold text-gray-900">
-                      <span className="mr-2">{CATEGORY_ICONS[cat]}</span>
                       {cat.charAt(0).toUpperCase() + cat.slice(1)}
                     </p>
                     <p className="text-sm text-gray-600 mt-1">{CATEGORY_DESCRIPTIONS[cat]}</p>

@@ -159,7 +159,7 @@ const AdminDashboard: React.FC = () => {
 
         {/* Guidelines */}
         <div className="mt-12 bg-blue-50 border border-blue-200 rounded-lg p-8">
-          <h3 className="text-xl font-bold text-blue-900 mb-4">🛡️ Fraud Prevention Guidelines</h3>
+          <h3 className="text-xl font-bold text-blue-900 mb-4">Fraud Prevention Guidelines</h3>
           <ul className="space-y-2 text-blue-800">
             <li>• <strong>Document Everything:</strong> Keep detailed records of all actions taken on user accounts</li>
             <li>• <strong>Investigate Thoroughly:</strong> Don't suspend without proper investigation - use the flag system first</li>

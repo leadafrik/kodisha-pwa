@@ -435,7 +435,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
           {/* Fraud Info */}
           {user.fraudFlags && user.fraudFlags > 0 && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="font-semibold text-red-900 mb-2">⚠️ Fraud Flags: {user.fraudFlags}</p>
+              <p className="font-semibold text-red-900 mb-2">Fraud Flags: {user.fraudFlags}</p>
               <p className="text-red-800 text-sm">This user has been flagged for suspicious activity</p>
             </div>
           )}
