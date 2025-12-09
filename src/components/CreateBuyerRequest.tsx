@@ -144,6 +144,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             >
               <option value="produce">Agricultural Produce</option>
+              <option value="inputs">Farm Inputs</option>
               <option value="service">Agricultural Services</option>
             </select>
           </div>

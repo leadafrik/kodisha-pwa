@@ -8,7 +8,7 @@ interface BuyerRequest {
   _id: string;
   title: string;
   description: string;
-  category: "produce" | "service";
+  category: "produce" | "service" | "inputs";
   productType?: string;
   budget?: { min: number; max: number; currency: string };
   quantity?: number;
@@ -166,6 +166,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
               >
                 <option value="">All Categories</option>
                 <option value="produce">Agricultural Produce</option>
+                <option value="inputs">Farm Inputs</option>
                 <option value="service">Agricultural Services</option>
               </select>
             </div>
@@ -260,6 +261,8 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                       <span className="inline-block px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full capitalize">
                         {request.category === "produce"
                           ? "Produce"
+                          : request.category === "inputs"
+                          ? "Farm Inputs"
                           : "Services"}
                       </span>
                       <span
