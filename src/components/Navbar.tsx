@@ -129,7 +129,7 @@ const Navbar: React.FC = () => {
                       ) : null}
 
                       <div className="border-b">
-                        <Link to="/list" className="block px-4 py-2 hover:bg-gray-50 text-sm">Create Listing</Link>
+                        <Link to="/create-listing" className="block px-4 py-2 hover:bg-gray-50 text-sm">Create Listing</Link>
                       </div>
 
                       <button
@@ -199,7 +199,7 @@ const Navbar: React.FC = () => {
                       <Link to="/admin/profile-verification" onClick={closeMobile}>Profile Verification</Link>
                     </>
                   ) : null}
-                  <Link to="/list" onClick={closeMobile}>Create Listing</Link>
+                  <Link to="/create-listing" onClick={closeMobile}>Create Listing</Link>
                   <button
                     onClick={() => { logout(); closeMobile(); }}
                     className="text-left text-red-600 font-semibold mt-4"
@@ -210,7 +210,7 @@ const Navbar: React.FC = () => {
               ) : (
                 <>
                   <Link to="/login" onClick={closeMobile}>Login</Link>
-                  <Link to="/login?next=/list" onClick={closeMobile}>List</Link>
+                  <Link to="/login?next=/create-listing" onClick={closeMobile}>List</Link>
                 </>
               )}
             </div>

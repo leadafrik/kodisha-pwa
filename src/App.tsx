@@ -18,7 +18,6 @@ import WhatsAppFloatingButton from './components/WhatsAppFloatingButton';
 
 // Lazy load heavy components
 const Profile = lazy(() => import('./pages/Profile'));
-const ListUnified = lazy(() => import('./pages/ListUnified'));
 const CreateListing = lazy(() => import('./pages/CreateListing'));
 const BackendTest = lazy(() => import('./components/BackendTest'));
 const PhoneVerification = lazy(() => import('./pages/PhoneVerification'));
@@ -69,41 +68,6 @@ function App() {
                       element={
                         <ProtectedRoute>
                           <CreateListing />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/list"
-                      element={
-                        <ProtectedRoute>
-                          <ListUnified />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/list-property"
-                      element={
-                        <ProtectedRoute>
-                          <ListUnified initialCategory="land" initialLandType="rental" />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/list-service"
-                      element={
-                        <ProtectedRoute>
-                          <ListUnified
-                            initialCategory="service"
-                            initialServiceType="equipment"
-                          />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/list-agrovet"
-                      element={
-                        <ProtectedRoute>
-                          <ListUnified initialCategory="agrovet" />
                         </ProtectedRoute>
                       }
                     />

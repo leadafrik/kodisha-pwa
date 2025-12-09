@@ -198,77 +198,41 @@ const Profile: React.FC = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mb-8">
         <div className="bg-white rounded-xl shadow-md p-6 text-center">
-          <div className="text-3xl font-bold text-green-600 mb-2">{userProperties.length}</div>
-          <div className="text-gray-600 text-sm">Land Listings</div>
+          <div className="text-3xl font-bold text-green-600 mb-2">{userProducts.length + userServices.length + userProperties.length}</div>
+          <div className="text-gray-600 text-sm">Marketplace Listings</div>
         </div>
         <div className="bg-white rounded-xl shadow-md p-6 text-center">
-          <div className="text-3xl font-bold text-blue-600 mb-2">{userServices.length}</div>
-          <div className="text-gray-600 text-sm">Services</div>
-        </div>
-        <div className="bg-white rounded-xl shadow-md p-6 text-center">
-          <div className="text-3xl font-bold text-purple-600 mb-2">{userAgrovets.length}</div>
-          <div className="text-gray-600 text-sm">Agrovets</div>
-        </div>
-        <div className="bg-white rounded-xl shadow-md p-6 text-center">
-          <div className="text-3xl font-bold text-orange-600 mb-2">{userProducts.length}</div>
-          <div className="text-gray-600 text-sm">Products</div>
+          <div className="text-3xl font-bold text-blue-600 mb-2">{userAgrovets.length}</div>
+          <div className="text-gray-600 text-sm">Agrovet Listings</div>
         </div>
       </div>
 
       {/* Quick Actions */}
       <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Quick Actions</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Link
-            to="/list-property"
+            to="/create-listing"
             className="bg-green-600 text-white p-6 rounded-xl hover:bg-green-700 transition duration-300 text-center"
           >
-            <div className="font-semibold text-lg">List Land</div>
-            <div className="text-green-100 text-sm">Sell or rent out your land</div>
-          </Link>
-          <Link
-            to="/list?category=service"
-            className="bg-blue-600 text-white p-6 rounded-xl hover:bg-blue-700 transition duration-300 text-center"
-          >
-            <div className="font-semibold text-lg">List Service</div>
-            <div className="text-blue-100 text-sm">Offer professional services</div>
-          </Link>
-          <Link
-            to="/list-service"
-            className="bg-purple-600 text-white p-6 rounded-xl hover:bg-purple-700 transition duration-300 text-center"
-          >
-            <div className="font-semibold text-lg">List Equipment</div>
-            <div className="text-purple-100 text-sm">Rent out farm equipment</div>
-          </Link>
-          <Link
-            to="/list?category=product"
-            className="bg-orange-600 text-white p-6 rounded-xl hover:bg-orange-700 transition duration-300 text-center"
-          >
-            <div className="font-semibold text-lg">List Product</div>
-            <div className="text-orange-100 text-sm">Sell agricultural products</div>
+            <div className="font-semibold text-lg">List Item</div>
+            <div className="text-green-100 text-sm">Sell products or offer services</div>
           </Link>
           <Link
             to="/create-buyer-request"
-            className="bg-indigo-600 text-white p-6 rounded-xl hover:bg-indigo-700 transition duration-300 text-center"
+            className="bg-blue-600 text-white p-6 rounded-xl hover:bg-blue-700 transition duration-300 text-center"
           >
             <div className="font-semibold text-lg">Post Need</div>
-            <div className="text-indigo-100 text-sm">Post what you're looking for</div>
-          </Link>
-          <Link
-            to="/list-agrovet"
-            className="bg-amber-600 text-white p-6 rounded-xl hover:bg-amber-700 transition duration-300 text-center"
-          >
-            <div className="font-semibold text-lg">List Agrovet</div>
-            <div className="text-amber-100 text-sm">Register your agro-business</div>
+            <div className="text-blue-100 text-sm">Post what you're looking for</div>
           </Link>
           <Link
             to="/favorites"
-            className="bg-pink-600 text-white p-6 rounded-xl hover:bg-pink-700 transition duration-300 text-center"
+            className="bg-purple-600 text-white p-6 rounded-xl hover:bg-purple-700 transition duration-300 text-center"
           >
             <div className="font-semibold text-lg">Saved Listings</div>
-            <div className="text-pink-100 text-sm">View your favorites</div>
+            <div className="text-purple-100 text-sm">View your favorites</div>
           </Link>
           {user.type === "admin" && (
             <Link
@@ -284,57 +248,23 @@ const Profile: React.FC = () => {
 
       {/* Recent Listings */}
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Land Listings */}
+        {/* Marketplace Listings */}
         <div className="bg-white rounded-2xl shadow-lg p-6">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">Your Land Listings</h3>
-          {userProperties.length === 0 ? (
+          <h3 className="text-xl font-bold text-gray-800 mb-4">Your Marketplace Listings</h3>
+          {userProducts.length === 0 && userProperties.length === 0 && userServices.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              <p>No land listings yet</p>
-              <Link to="/list?category=land" className="text-green-600 font-semibold mt-2 inline-block">
-                List your first property
+              <p>No marketplace listings yet</p>
+              <Link to="/create-listing" className="text-green-600 font-semibold mt-2 inline-block">
+                Create your first listing
               </Link>
             </div>
           ) : (
             <div className="space-y-3">
-              {userProperties.slice(0, 3).map((property) => (
-                <div key={property.id} className="border rounded-lg p-3 hover:shadow-md transition">
-                  <h4 className="font-semibold text-gray-800 text-sm">{property.title}</h4>
-                  <p className="text-green-600 font-bold text-sm">KSh {property.price?.toLocaleString() || 'N/A'}</p>
-                  <p className="text-gray-600 text-xs">{property.county} County</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Buyer Requests Posted */}
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">Your Buyer Requests</h3>
-          <div className="text-center py-8 text-gray-500">
-            <p>View and manage your posted needs</p>
-            <Link to="/buyer-requests" className="text-indigo-600 font-semibold mt-2 inline-block">
-              View your requests
-            </Link>
-          </div>
-        </div>
-
-        {/* Service Listings */}
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">Your Service Listings</h3>
-          {userServices.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <p>No service listings yet</p>
-              <Link to="/list?category=service" className="text-blue-600 font-semibold mt-2 inline-block">
-                List your first service
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {userServices.slice(0, 3).map((service) => (
-                <div key={service.id} className="border rounded-lg p-3 hover:shadow-md transition">
-                  <h4 className="font-semibold text-gray-800 text-sm">{service.name}</h4>
-                  <p className="text-gray-600 text-xs">{service.type}</p>
-                  <p className="text-gray-600 text-xs">{service.location?.county} County</p>
+              {[...userProducts, ...userProperties, ...userServices].slice(0, 5).map((listing) => (
+                <div key={listing.id} className="border rounded-lg p-3 hover:shadow-md transition">
+                  <h4 className="font-semibold text-gray-800 text-sm">{listing.title || listing.name}</h4>
+                  <p className="text-green-600 font-bold text-sm">KSh {listing.price?.toLocaleString() || listing.pricing || 'N/A'}</p>
+                  <p className="text-gray-600 text-xs">{listing.location?.county || listing.county} County</p>
                 </div>
               ))}
             </div>
@@ -347,8 +277,8 @@ const Profile: React.FC = () => {
           {userAgrovets.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <p>No agrovet listings yet</p>
-              <Link to="/list-agrovet" className="text-purple-600 font-semibold mt-2 inline-block">
-                List your first agrovet
+              <Link to="/create-listing" className="text-purple-600 font-semibold mt-2 inline-block">
+                Create an agrovet listing
               </Link>
             </div>
           ) : (
@@ -365,17 +295,6 @@ const Profile: React.FC = () => {
             </div>
           )}
         </div>
-
-        {/* Product Listings */}
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">Your Product Listings</h3>
-          {userProducts.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <p>No product listings yet</p>
-              <Link to="/list?category=product" className="text-orange-600 font-semibold mt-2 inline-block">
-                List your first product
-              </Link>
-            </div>
           ) : (
             <div className="space-y-3">
               {userProducts.slice(0, 3).map((product) => (
