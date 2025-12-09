@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import { useProperties } from "../contexts/PropertyContext";
 import { useAuth } from "../contexts/AuthContext";
 import { kenyaCounties } from "../data/kenyaCounties";
+import { Search, Filter } from "lucide-react";
 
-type Category = "all" | "land" | "service" | "agrovet" | "product";
+type Category = "all" | "produce" | "livestock" | "inputs" | "service";
 type ServiceSubType = "all" | "equipment" | "professional_services";
 
 type UnifiedCard = {
@@ -50,43 +51,48 @@ const BrowseListings: React.FC = () => {
   const [search, setSearch] = useState<string>("");
 
   const cards = useMemo<UnifiedCard[]>(() => {
-    const landCards =
-      properties?.map((p: any) => {
-        const status = p.status;
-        if (status === "rejected" || status === "archived") return null;
-        if (p.type === "sale") return null; // temporarily hide sale listings
-        const boostFlag =
-          p.isFeatured ||
-          (p.monetization?.boostOption &&
-            p.monetization?.boostOption !== "none");
-        const paidFlag = p.payment?.paymentStatus === "paid";
-        const verifiedFlag = !!p.verified;
+    // Product listings: Produce, Livestock, Inputs
+    const productCards =
+      (productListings as any[])?.map((p: any) => {
+        const boostFlag = p.monetization?.premiumBadge;
+        const paidFlag = p.payment?.paymentStatus === "paid" || p.monetization?.subscriptionActive;
+        const verifiedFlag = !!p.isVerified;
+        
+        let categoryLabel: Category = "produce";
+        let typeLabel = "Produce";
+        if (p.category === "livestock") {
+          categoryLabel = "livestock";
+          typeLabel = "Livestock";
+        } else if (p.category === "inputs") {
+          categoryLabel = "inputs";
+          typeLabel = "Farm Inputs";
+        }
+        
         return {
           id: p._id || p.id,
-          category: "land" as Category,
-          subCategory: p.type,
+          category: categoryLabel,
+          subCategory: p.subcategory,
           title: p.title,
           description: p.description,
           county: p.location?.county || "",
           locationLabel: buildLocation(p.location || {}),
           priceLabel: formatPrice(p.price),
-          sizeLabel: p.size ? `${p.size} ${p.sizeUnit || "acres"}` : undefined,
-          typeLabel: "For Rent/Lease",
+          typeLabel,
           verified: verifiedFlag,
           paid: !!paidFlag,
           boosted: !!boostFlag,
           createdAt: p.createdAt ? new Date(p.createdAt) : undefined,
           image: p.images?.[0],
-          ownerId: p.owner?._id || p.owner?._id?.toString?.() || p.owner,
+          ownerId: p.owner?._id || p.ownerId || p.owner,
           contact: p.contact || p.owner?.phone || p.owner?.email,
         } as UnifiedCard;
       }) || [];
 
+    // Service listings
     const serviceCards =
       (serviceListings as any[])?.map((s: any) => {
         const status = s.publishStatus || s.status;
         if (status === "rejected" || status === "draft") return null;
-        const isAgrovet = s.type === "agrovet";
         const boostFlag =
           s.monetization?.boostOption &&
           s.monetization?.boostOption !== "none";
@@ -95,15 +101,13 @@ const BrowseListings: React.FC = () => {
         const locationLabel = buildLocation(s.location || {});
         return {
           id: s._id || s.id,
-          category: isAgrovet ? ("agrovet" as Category) : ("service" as Category),
+          category: "service" as Category,
           subCategory: s.type,
           title: s.name,
           description: s.description,
           county: s.location?.county || "",
           locationLabel,
-          typeLabel: isAgrovet
-            ? "Agrovet"
-            : s.type === "equipment"
+          typeLabel: s.type === "equipment"
             ? "Equipment Hire"
             : "Professional Service",
           verified: verifiedFlag,
@@ -116,40 +120,10 @@ const BrowseListings: React.FC = () => {
         } as UnifiedCard;
       }) || [];
 
-    const productCards =
-      (productListings as any[])?.map((p: any) => {
-        const boostFlag = p.monetization?.premiumBadge;
-        const paidFlag = p.payment?.paymentStatus === "paid" || p.monetization?.subscriptionActive;
-        const verifiedFlag = !!p.isVerified;
-        return {
-          id: p._id || p.id,
-          category: "product" as Category,
-          subCategory: p.category,
-          title: p.title,
-          description: p.description,
-          county: p.location?.county || "",
-          locationLabel: buildLocation(p.location || {}),
-          priceLabel: formatPrice(p.price),
-          typeLabel:
-            p.category === "produce"
-              ? "Produce"
-              : p.category === "livestock"
-              ? "Livestock"
-              : "Farm Input",
-          verified: verifiedFlag,
-          paid: !!paidFlag,
-          boosted: !!boostFlag,
-          createdAt: p.createdAt ? new Date(p.createdAt) : undefined,
-          image: p.images?.[0],
-          ownerId: p.owner?._id || p.ownerId || p.owner,
-          contact: p.contact || p.owner?.phone || p.owner?.email,
-        } as UnifiedCard;
-      }) || [];
-
-    return [...landCards, ...serviceCards, ...productCards].filter(
+    return [...productCards, ...serviceCards].filter(
       (c): c is UnifiedCard => !!c && !!c.id
     );
-  }, [properties, serviceListings, productListings]);
+  }, [productListings, serviceListings]);
 
   const filtered = useMemo(() => {
     const searchTerm = search.trim().toLowerCase();
@@ -179,12 +153,12 @@ const BrowseListings: React.FC = () => {
       });
   }, [cards, category, serviceSub, county, search]);
 
-  const categoryPills: Array<{ id: Category; label: string }> = [
+  const categoryPills: Array<{ id: Category; label: string; icon?: string }> = [
     { id: "all", label: "All" },
-    { id: "land", label: "Land" },
+    { id: "produce", label: "Produce" },
+    { id: "livestock", label: "Livestock" },
+    { id: "inputs", label: "Farm Inputs" },
     { id: "service", label: "Services" },
-    { id: "agrovet", label: "Agrovets" },
-    { id: "product", label: "Products" },
   ];
 
   return (
@@ -204,46 +178,72 @@ const BrowseListings: React.FC = () => {
           </div>
         </div>
       )}
-      {process.env.REACT_APP_SALE_LISTINGS_PAUSED === 'true' && (
-        <div className="rounded-lg border-l-4 border-yellow-400 bg-yellow-50 text-yellow-800 px-4 py-3">
-          Sale listings are temporarily paused — you will only see rental listings. Contact support to be notified when sales reopen.
-        </div>
-      )}
-      <div className="bg-white rounded-3xl border border-green-100 shadow-sm p-6 md:p-8">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      
+      {/* Header Section */}
+      <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-3xl border border-green-100 shadow-sm p-6 md:p-8">
+        <div className="flex flex-col gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-green-700">
+            <p className="text-xs font-semibold uppercase tracking-wide text-green-700 mb-1">
               Marketplace
             </p>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Browse Marketplace
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">
+              Browse & Buy
             </h1>
-            <p className="text-gray-700 text-base font-medium">
-              Land, services, agrovets & products. Filter by category and county.
+            <p className="text-gray-700 text-base font-medium max-w-2xl">
+              Discover fresh produce, livestock, farm inputs, and professional agricultural services. Direct connections with verified sellers across Kenya.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {categoryPills.map((pill) => {
-              const active = category === pill.id;
-              return (
-                <button
-                  key={pill.id}
-                  type="button"
-                  onClick={() => setCategory(pill.id)}
-                  className={`rounded-full px-4 py-2 text-sm font-semibold border transition ${
-                    active
-                      ? "border-green-600 bg-green-50 text-green-700"
-                      : "border-gray-200 bg-white text-gray-700 hover:border-green-400"
-                  }`}
-                >
-                  {pill.label}
-                </button>
-              );
-            })}
+          
+          {/* Search Bar */}
+          <div className="flex gap-3 mt-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search by title, location, or description…"
+                  className="w-full rounded-lg border border-gray-200 pl-10 pr-4 py-2.5 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200 transition"
+                />
+              </div>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div className="mt-4 grid gap-3 md:grid-cols-4">
+      {/* Category Pills */}
+      <div className="flex flex-wrap gap-2">
+        {categoryPills.map((pill) => {
+          const active = category === pill.id;
+          return (
+            <button
+              key={pill.id}
+              type="button"
+              onClick={() => {
+                setCategory(pill.id);
+                setServiceSub("all");
+              }}
+              className={`rounded-full px-4 py-2 text-sm font-semibold border transition ${
+                active
+                  ? "border-green-600 bg-green-600 text-white shadow-md"
+                  : "border-gray-200 bg-white text-gray-700 hover:border-green-400 hover:bg-green-50"
+              }`}
+            >
+              {pill.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+        <div className="flex items-center gap-2 mb-4">
+          <Filter className="w-5 h-5 text-gray-600" />
+          <h3 className="font-semibold text-gray-900">Filters</h3>
+        </div>
+        
+        <div className="grid gap-3 md:grid-cols-3">
           <div className="space-y-1">
             <label className="text-xs font-semibold text-gray-600">
               County
@@ -264,17 +264,6 @@ const BrowseListings: React.FC = () => {
             </select>
           </div>
 
-          {category === "land" && (
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-gray-600">
-                Land type
-              </label>
-              <div className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm bg-gray-50 text-gray-700">
-                Rent / Lease only (sales temporarily disabled)
-              </div>
-            </div>
-          )}
-
           {category === "service" && (
             <div className="space-y-1">
               <label className="text-xs font-semibold text-gray-600">
@@ -293,42 +282,50 @@ const BrowseListings: React.FC = () => {
               </select>
             </div>
           )}
-
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-gray-600">
-              Search
-            </label>
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by title, description, location"
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200"
-            />
-          </div>
+          
+          {(county || search) && (
+            <div className="flex items-end">
+              <button
+                onClick={() => {
+                  setCounty("");
+                  setSearch("");
+                  setCategory("all");
+                  setServiceSub("all");
+                }}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+              >
+                Clear filters
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="flex items-center justify-between text-sm text-gray-600">
-        <span>
+      {/* Results Info */}
+      <div className="flex items-center justify-between text-sm text-gray-600 bg-white rounded-xl p-4 border border-gray-100">
+        <span className="font-semibold">
           {filtered.length} listing{filtered.length === 1 ? "" : "s"} found
         </span>
         <span className="text-xs text-gray-500">
-          Boosted, paid, and verified listings are shown first.
+          Verified & boosted listings shown first
         </span>
       </div>
 
       {loading && (
-        <div className="text-center text-gray-600">Loading listings…</div>
+        <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-200">
+          <div className="inline-flex h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-green-600 mb-3"></div>
+          <p className="text-gray-600">Loading listings…</p>
+        </div>
       )}
 
       {!loading && filtered.length === 0 && (
-        <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-800 mb-2">
+        <div className="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl border border-dashed border-gray-300">
+          <div className="text-5xl mb-4">🚜</div>
+          <h3 className="text-2xl font-bold text-gray-800 mb-2">
             No listings found
           </h3>
-          <p className="text-sm text-gray-600 mb-4">
-            Try removing some filters or searching a different county.
+          <p className="text-gray-600 mb-6 max-w-md mx-auto">
+            {search ? "Try a different search term or remove filters." : "Try adjusting your filters or browsing other categories."}
           </p>
           <button
             onClick={() => {
@@ -337,86 +334,95 @@ const BrowseListings: React.FC = () => {
               setCounty("");
               setSearch("");
             }}
-            className="px-5 py-2 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700"
+            className="inline-flex px-6 py-3 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition shadow-md"
           >
-            Clear filters
+            Browse all listings
           </button>
         </div>
       )}
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+      {/* Listings Grid */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filtered.map((card) => {
-          const badgeColor =
-            card.category === "land"
-              ? "bg-blue-50 text-blue-700"
-            : card.category === "agrovet"
-            ? "bg-green-50 text-green-700"
-            : card.category === "product"
-            ? "bg-orange-50 text-orange-700"
-            : "bg-purple-50 text-purple-700";
+          const categoryColors: Record<Category, string> = {
+            all: "bg-gray-50 text-gray-700",
+            produce: "bg-orange-50 text-orange-700",
+            livestock: "bg-red-50 text-red-700",
+            inputs: "bg-blue-50 text-blue-700",
+            service: "bg-purple-50 text-purple-700",
+          };
+          const badgeColor = categoryColors[card.category] || categoryColors.produce;
 
           return (
             <div
               key={card.id}
-              className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden flex flex-col hover:shadow-md hover:border-green-200 transition"
+              className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden flex flex-col hover:shadow-lg hover:border-green-200 transition-all duration-200 group"
             >
-              <div className="h-40 bg-gray-100 relative">
+              {/* Image Section */}
+              <div className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
                 {card.image ? (
                   <img
                     src={card.image}
                     alt={card.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 ) : (
-                  <div className="flex h-full items-center justify-center text-gray-400 text-sm">
-                    No image
+                  <div className="flex h-full items-center justify-center text-gray-400 text-sm font-medium">
+                    <div className="text-4xl">📦</div>
                   </div>
                 )}
-                <div className="absolute top-3 left-3 inline-flex items-center gap-2">
+                
+                {/* Status Badges */}
+                <div className="absolute top-3 left-3 inline-flex items-center gap-2 flex-wrap max-w-[calc(100%-1.5rem)]">
                   {card.boosted && (
-                    <span className="rounded-full bg-yellow-100 text-yellow-800 text-[10px] font-semibold px-2 py-1">
-                      Boosted
+                    <span className="rounded-full bg-yellow-100 text-yellow-800 text-[11px] font-bold px-2.5 py-1 whitespace-nowrap">
+                      ⭐ Boosted
                     </span>
                   )}
                   {card.verified && (
-                    <span className="rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-semibold px-2 py-1">
-                      Verified
-                    </span>
-                  )}
-                  {card.paid && (
-                    <span className="rounded-full bg-blue-100 text-blue-700 text-[10px] font-semibold px-2 py-1">
-                      Paid
+                    <span className="rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-bold px-2.5 py-1 whitespace-nowrap">
+                      ✓ Verified
                     </span>
                   )}
                 </div>
               </div>
 
-              <div className="p-4 flex flex-col gap-2 flex-1">
-                <div className="flex items-center justify-between">
-                  <span className={`text-[11px] font-semibold px-2 py-1 rounded-full ${badgeColor}`}>
+              {/* Content Section */}
+              <div className="p-4 flex flex-col gap-3 flex-1">
+                {/* Category Badge & Price */}
+                <div className="flex items-start justify-between gap-2">
+                  <span className={`text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap ${badgeColor}`}>
                     {card.typeLabel}
                   </span>
                   {card.priceLabel && (
-                    <span className="text-sm font-bold text-gray-900">
+                    <span className="text-base font-bold text-green-700 whitespace-nowrap">
                       {card.priceLabel}
                     </span>
                   )}
                 </div>
 
-                <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">
+                {/* Title */}
+                <h3 className="text-lg font-bold text-gray-900 line-clamp-2 leading-tight">
                   {card.title}
                 </h3>
+
+                {/* Description */}
                 <p className="text-sm text-gray-600 line-clamp-2">
                   {card.description || "No description provided."}
                 </p>
-                <p className="text-xs text-gray-500">{card.locationLabel || "Location pending"}</p>
-                {card.sizeLabel && (
-                  <p className="text-xs text-gray-500">{card.sizeLabel}</p>
-                )}
-                <div className="mt-3 flex flex-wrap gap-2">
+
+                {/* Location */}
+                <div className="pt-2 border-t border-gray-100">
+                  <p className="text-xs text-gray-500 font-medium">
+                    📍 {card.locationLabel || "Location pending"}
+                  </p>
+                </div>
+
+                {/* CTA Buttons */}
+                <div className="mt-3 flex gap-2">
                   <Link
-                    to={`/listings/${card.id}`}
-                    className="inline-flex items-center justify-center rounded-lg bg-green-600 px-3 py-2 text-xs font-semibold text-white hover:bg-green-700"
+                    to={user ? `/listings/${card.id}` : "/login"}
+                    className="flex-1 text-center rounded-lg bg-green-600 px-3 py-2.5 text-xs font-bold text-white hover:bg-green-700 transition shadow-sm"
                   >
                     View details
                   </Link>
@@ -424,16 +430,16 @@ const BrowseListings: React.FC = () => {
                     user ? (
                       <a
                         href={`tel:${card.contact}`}
-                        className="inline-flex items-center justify-center rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 hover:border-green-400"
+                        className="flex-1 text-center rounded-lg border border-gray-300 px-3 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition"
                       >
-                        Contact seller
+                        Call
                       </a>
                     ) : (
                       <Link
                         to="/login"
-                        className="inline-flex items-center justify-center rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 hover:border-green-400"
+                        className="flex-1 text-center rounded-lg border border-gray-300 px-3 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition"
                       >
-                        Contact seller
+                        Call
                       </Link>
                     )
                   )}
@@ -443,6 +449,13 @@ const BrowseListings: React.FC = () => {
           );
         })}
       </div>
+
+      {/* Empty state placeholder */}
+      {!loading && filtered.length > 0 && (
+        <div className="text-center py-8 text-gray-500 text-sm">
+          Showing {filtered.length} of {cards.length} listings
+        </div>
+      )}
     </div>
   );
 };
