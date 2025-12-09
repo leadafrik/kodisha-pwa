@@ -58,9 +58,11 @@ const AdminIDVerification: React.FC = () => {
         method: "GET",
       });
 
-      if (response.success) {
+      if (response && response.success) {
         const data = Array.isArray(response.verifications)
           ? response.verifications
+          : Array.isArray(response.data)
+          ? response.data
           : [response.verification].filter(Boolean);
 
         const filtered =
@@ -70,11 +72,16 @@ const AdminIDVerification: React.FC = () => {
 
         setVerifications(filtered);
         setFilteredVerifications(filtered);
+      } else if (response && response.message) {
+        setError(response.message);
       } else {
-        setError(response.message || "Failed to load verifications");
+        setError("Unable to load verifications. Please check your connection and try again.");
       }
     } catch (err: any) {
-      setError(err.message || "Failed to load verifications");
+      console.error("Error loading verifications:", err);
+      setError(
+        "Unable to load verifications. Please ensure you have the proper permissions and try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -141,20 +148,23 @@ const AdminIDVerification: React.FC = () => {
     switch (status) {
       case "pending":
         return (
-          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 text-sm font-semibold">
-            <Clock size={14} /> Pending Review
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-sm font-semibold">
+            <div className="w-2 h-2 bg-amber-600 rounded-full"></div>
+            Pending
           </span>
         );
       case "approved":
         return (
-          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-semibold">
-            <CheckCircle size={14} /> Approved
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-semibold">
+            <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+            Approved
           </span>
         );
       case "rejected":
         return (
-          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-100 text-red-800 text-sm font-semibold">
-            <XCircle size={14} /> Rejected
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-100 text-red-800 text-sm font-semibold">
+            <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+            Rejected
           </span>
         );
       default:
@@ -201,8 +211,12 @@ const AdminIDVerification: React.FC = () => {
 
       {/* Error */}
       {error && (
-        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
-          {error}
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+          <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
+          <div className="flex-1">
+            <p className="text-red-800 font-medium">Verification Load Error</p>
+            <p className="text-red-700 text-sm mt-1">{error}</p>
+          </div>
         </div>
       )}
 
@@ -252,132 +266,192 @@ const AdminIDVerification: React.FC = () => {
       {/* Detail Modal */}
       {selectedVerification && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
             {/* Header */}
-            <div className="sticky top-0 bg-gradient-to-r from-green-600 to-green-700 text-white p-6 flex items-center justify-between">
-              <h2 className="text-2xl font-bold">ID Verification Review</h2>
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">ID Verification</h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  Review application from {selectedVerification.userId.name}
+                </p>
+              </div>
               <button
                 onClick={() => {
                   setSelectedVerification(null);
                   setReviewNotes("");
                 }}
-                className="text-2xl font-bold hover:text-green-200"
+                className="text-gray-400 hover:text-gray-600 transition p-2"
               >
-                ×
+                <XCircle size={24} />
               </button>
             </div>
 
             {/* Content */}
             <div className="p-6 space-y-6">
               {/* User Info */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="font-bold text-gray-900 mb-3">User Information</h3>
+              <div className="border border-gray-200 rounded-lg p-4">
+                <h3 className="font-bold text-gray-900 mb-4">Applicant Information</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-600">Name</p>
-                    <p className="font-semibold">{selectedVerification.userId.name}</p>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Full Name</p>
+                    <p className="text-gray-900 font-medium">{selectedVerification.userId.name}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Email</p>
-                    <p className="font-semibold">{selectedVerification.userId.email}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Phone</p>
-                    <p className="font-semibold">{selectedVerification.userId.phone}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Status</p>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Status</p>
                     {getStatusBadge(selectedVerification.status)}
                   </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Email Address</p>
+                    <p className="text-gray-900 font-medium">{selectedVerification.userId.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Phone Number</p>
+                    <p className="text-gray-900 font-medium">{selectedVerification.userId.phone}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Submitted Date</p>
+                    <p className="text-gray-900 font-medium">
+                      {new Date(selectedVerification.submittedAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                  {selectedVerification.reviewedAt && (
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Reviewed Date</p>
+                      <p className="text-gray-900 font-medium">
+                        {new Date(selectedVerification.reviewedAt).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Documents */}
-              <div>
-                <h3 className="font-bold text-gray-900 mb-3">ID Document</h3>
-                {selectedVerification.idDocumentUrl ? (
-                  <img
-                    src={selectedVerification.idDocumentUrl}
-                    alt="ID Document"
-                    className="w-full max-h-96 object-contain rounded-lg border border-gray-200"
-                  />
-                ) : (
-                  <p className="text-gray-500">No ID document provided</p>
-                )}
-              </div>
+              {/* Documents Section */}
+              <div className="space-y-6">
+                <div>
+                  <h3 className="font-bold text-gray-900 mb-3">Government ID Document</h3>
+                  <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50 p-4">
+                    {selectedVerification.idDocumentUrl ? (
+                      <img
+                        src={selectedVerification.idDocumentUrl}
+                        alt="ID Document"
+                        className="w-full max-h-80 object-contain"
+                      />
+                    ) : (
+                      <div className="h-48 flex items-center justify-center">
+                        <p className="text-gray-500">No ID document provided</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
 
-              <div>
-                <h3 className="font-bold text-gray-900 mb-3">Selfie with ID</h3>
-                {selectedVerification.selfieUrl ? (
-                  <img
-                    src={selectedVerification.selfieUrl}
-                    alt="Selfie"
-                    className="w-full max-h-96 object-contain rounded-lg border border-gray-200"
-                  />
-                ) : (
-                  <p className="text-gray-500">No selfie provided</p>
-                )}
+                <div>
+                  <h3 className="font-bold text-gray-900 mb-3">Selfie with ID</h3>
+                  <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50 p-4">
+                    {selectedVerification.selfieUrl ? (
+                      <img
+                        src={selectedVerification.selfieUrl}
+                        alt="Selfie"
+                        className="w-full max-h-80 object-contain"
+                      />
+                    ) : (
+                      <div className="h-48 flex items-center justify-center">
+                        <p className="text-gray-500">No selfie provided</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* Review Notes */}
               {selectedVerification.status === "pending" && (
                 <>
-                  <div>
-                    <label className="block font-bold text-gray-900 mb-2">Review Notes</label>
+                  <div className="border-t border-gray-200 pt-6">
+                    <label className="block font-bold text-gray-900 mb-3">Review Notes (Optional)</label>
                     <textarea
                       value={reviewNotes}
                       onChange={(e) => setReviewNotes(e.target.value)}
-                      placeholder="Add notes about this verification (optional)..."
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+                      placeholder="Document reasons for approval or rejection. This helps maintain consistency in verification standards..."
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 text-sm text-gray-700"
                       rows={4}
                     />
+                    <p className="text-xs text-gray-500 mt-2">Notes will be recorded in the applicant's verification history.</p>
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex gap-3">
+                  <div className="border-t border-gray-200 pt-6 flex gap-3">
                     <button
                       onClick={() => {
                         setSelectedVerification(null);
                         setReviewNotes("");
                       }}
-                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg font-semibold text-gray-900 hover:bg-gray-50 transition"
+                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition"
                     >
-                      Close
+                      Cancel
                     </button>
                     <button
                       onClick={() => handleReview(selectedVerification._id, "rejected")}
                       disabled={reviewingId === selectedVerification._id}
-                      className="flex-1 px-4 py-3 rounded-lg bg-red-600 text-white font-bold hover:bg-red-700 disabled:bg-gray-400 transition flex items-center justify-center gap-2"
+                      className="flex-1 px-4 py-3 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 disabled:bg-gray-400 transition flex items-center justify-center gap-2"
                     >
                       {reviewingId === selectedVerification._id && reviewingStatus === "rejected" ? (
                         <>
-                          <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
-                          Rejecting...
+                          <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                          Processing...
                         </>
                       ) : (
                         <>
-                          <XCircle size={20} /> Reject
+                          <XCircle size={18} />
+                          Reject Application
                         </>
                       )}
                     </button>
                     <button
                       onClick={() => handleReview(selectedVerification._id, "approved")}
                       disabled={reviewingId === selectedVerification._id}
-                      className="flex-1 px-4 py-3 rounded-lg bg-green-600 text-white font-bold hover:bg-green-700 disabled:bg-gray-400 transition flex items-center justify-center gap-2"
+                      className="flex-1 px-4 py-3 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 disabled:bg-gray-400 transition flex items-center justify-center gap-2"
                     >
                       {reviewingId === selectedVerification._id && reviewingStatus === "approved" ? (
                         <>
-                          <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
-                          Approving...
+                          <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                          Processing...
                         </>
                       ) : (
                         <>
-                          <CheckCircle size={20} /> Approve
+                          <CheckCircle size={18} />
+                          Approve Application
                         </>
                       )}
                     </button>
                   </div>
                 </>
+              )}
+
+              {/* Reviewed Status */}
+              {selectedVerification.status !== "pending" && (
+                <div className="border-t border-gray-200 pt-6">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Review Status</p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        {getStatusBadge(selectedVerification.status)}
+                        {selectedVerification.notes && (
+                          <div className="mt-3">
+                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Notes</p>
+                            <p className="text-gray-700 text-sm">{selectedVerification.notes}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
           </div>
