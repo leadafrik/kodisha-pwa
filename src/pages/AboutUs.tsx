@@ -54,56 +54,83 @@ const AboutUs: React.FC = () => {
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-gray-800 mb-12 text-center">What We Offer</h2>
           
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-3 gap-8">
             {/* Produce */}
             <div className="bg-gradient-to-br from-yellow-50 to-green-50 rounded-lg shadow p-8 hover:shadow-lg transition">
               <div className="text-5xl mb-4">🌾</div>
               <h3 className="text-2xl font-bold text-gray-800 mb-4">Agricultural Produce</h3>
-              <p className="text-gray-700 mb-4">
+              <p className="text-gray-700 mb-4 text-sm">
                 Buy and sell fresh agricultural produce directly from farmers and producers across Kenya.
               </p>
-              <ul className="space-y-2 text-gray-700">
+              <ul className="space-y-2 text-gray-700 text-sm">
                 <li className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <span className="text-green-600 mr-2 font-bold">✓</span>
                   <span>Fresh vegetables and fruits</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <span className="text-green-600 mr-2 font-bold">✓</span>
                   <span>Livestock and animal products</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <span className="text-green-600 mr-2 font-bold">✓</span>
                   <span>Grains and cereals</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <span className="text-green-600 mr-2 font-bold">✓</span>
                   <span>Direct farm-to-buyer connections</span>
                 </li>
               </ul>
             </div>
 
-            {/* Services */}
+            {/* Agricultural Inputs */}
             <div className="bg-gradient-to-br from-blue-50 to-green-50 rounded-lg shadow p-8 hover:shadow-lg transition">
+              <div className="text-5xl mb-4">🌱</div>
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">Agricultural Inputs</h3>
+              <p className="text-gray-700 mb-4 text-sm">
+                Access quality farming inputs and supplies from trusted suppliers nationwide.
+              </p>
+              <ul className="space-y-2 text-gray-700 text-sm">
+                <li className="flex items-start">
+                  <span className="text-green-600 mr-2 font-bold">✓</span>
+                  <span>Seeds and seedlings</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-green-600 mr-2 font-bold">✓</span>
+                  <span>Fertilizers and soil nutrients</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-green-600 mr-2 font-bold">✓</span>
+                  <span>Pesticides and herbicides</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-green-600 mr-2 font-bold">✓</span>
+                  <span>Farm equipment and tools</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Services */}
+            <div className="bg-gradient-to-br from-purple-50 to-green-50 rounded-lg shadow p-8 hover:shadow-lg transition">
               <div className="text-5xl mb-4">🔧</div>
               <h3 className="text-2xl font-bold text-gray-800 mb-4">Agricultural Services</h3>
-              <p className="text-gray-700 mb-4">
+              <p className="text-gray-700 mb-4 text-sm">
                 Connect with professional and skilled service providers for all your agricultural needs.
               </p>
-              <ul className="space-y-2 text-gray-700">
+              <ul className="space-y-2 text-gray-700 text-sm">
                 <li className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <span className="text-green-600 mr-2 font-bold">✓</span>
                   <span>Land surveying and mapping</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <span className="text-green-600 mr-2 font-bold">✓</span>
                   <span>Transportation and logistics</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <span className="text-green-600 mr-2 font-bold">✓</span>
                   <span>Equipment rental and leasing</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
+                  <span className="text-green-600 mr-2 font-bold">✓</span>
                   <span>Landscaping and land preparation</span>
                 </li>
               </ul>
@@ -273,7 +300,7 @@ const AboutUs: React.FC = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a 
-              href="mailto:support@agrisoko.com" 
+              href="mailto:kodisha.254.ke@gmail.com" 
               className="bg-green-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-green-700 transition"
             >
               Email Support
@@ -289,6 +316,82 @@ const AboutUs: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Statistics Section */}
+      <section className="bg-green-700 text-white py-16 px-4">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold mb-12 text-center">Our Impact</h2>
+          <div className="grid md:grid-cols-4 gap-8 text-center">
+            <div>
+              <div className="text-4xl font-bold mb-2">47</div>
+              <p className="text-green-100">Counties Reach</p>
+            </div>
+            <div>
+              <div className="text-4xl font-bold mb-2">1000+</div>
+              <p className="text-green-100">Active Users</p>
+            </div>
+            <div>
+              <div className="text-4xl font-bold mb-2">100%</div>
+              <p className="text-green-100">Verified Profiles</p>
+            </div>
+            <div>
+              <div className="text-4xl font-bold mb-2">24/7</div>
+              <p className="text-green-100">Support Available</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer Section */}
+      <footer className="bg-gray-900 text-gray-300 py-12 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <h4 className="text-white font-bold mb-4">Agrisoko</h4>
+              <p className="text-sm">Connecting Kenya's Agricultural Community</p>
+            </div>
+            <div>
+              <h4 className="text-white font-bold mb-4">Links</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link to="/" className="hover:text-white transition">Home</Link></li>
+                <li><Link to="/browse" className="hover:text-white transition">Browse Listings</Link></li>
+                <li><Link to="/request" className="hover:text-white transition">Buy Requests</Link></li>
+                <li><Link to="/create-listing" className="hover:text-white transition">List Products</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-white font-bold mb-4">Legal</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#" className="hover:text-white transition">Terms of Service</a></li>
+                <li><a href="#" className="hover:text-white transition">Privacy Policy</a></li>
+                <li><a href="#" className="hover:text-white transition">Data Protection</a></li>
+                <li><a href="#" className="hover:text-white transition">ODPC</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-white font-bold mb-4">Contact</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="mailto:kodisha.254.ke@gmail.com" className="hover:text-white transition">Email Support</a></li>
+                <li><a href="https://chat.whatsapp.com/HzCaV5YVz86CjwajiOHR5i" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">WhatsApp Community</a></li>
+                <li><a href="#" className="hover:text-white transition">Contact Support</a></li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-700 pt-8">
+            <div className="text-center text-sm mb-4">
+              <p className="text-gray-400 mb-2">© 2025 Agrisoko. All rights reserved.</p>
+              <p className="text-gray-500 mb-4">By using Agrisoko, you agree to our Terms of Service and Privacy Policy</p>
+              <p className="text-gray-500">For data protection inquiries: <a href="mailto:kodisha.254.ke@gmail.com" className="text-green-400 hover:text-green-300 transition">kodisha.254.ke@gmail.com</a></p>
+            </div>
+            <div className="flex justify-center gap-4 mt-6">
+              <a href="#" className="text-green-400 hover:text-green-300 transition font-semibold text-sm">Download App</a>
+              <span className="text-gray-600">|</span>
+              <a href="#" className="text-green-400 hover:text-green-300 transition font-semibold text-sm">Web Version</a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
