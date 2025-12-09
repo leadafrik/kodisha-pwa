@@ -5,17 +5,18 @@ import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from
 import { API_BASE_URL } from "../config/api";
 import { AlertCircle, CheckCircle2, MapPin, Package, Tag, Calendar, Camera, FileText } from "lucide-react";
 
-type ListingCategory = "produce" | "livestock" | "inputs";
+type ListingCategory = "produce" | "livestock" | "inputs" | "service";
 type ListingType = "sell" | "buy";
 type ProduceSubcategory = "crops" | "fruits" | "vegetables" | "grains" | "other";
 type LivestockSubcategory = "cattle" | "poultry" | "goats" | "pigs" | "sheep" | "other";
 type InputsSubcategory = "fertilizer" | "pesticides" | "seeds" | "tools" | "equipment" | "feeds" | "other";
+type ServiceSubcategory = "equipment_rental" | "consulting" | "labor" | "transportation" | "processing" | "other";
 
 interface ListingFormData {
   step: number;
   listingType: ListingType | null;
   category: ListingCategory | null;
-  subcategory: ProduceSubcategory | LivestockSubcategory | InputsSubcategory | null;
+  subcategory: ProduceSubcategory | LivestockSubcategory | InputsSubcategory | ServiceSubcategory | null;
   title: string;
   description: string;
   county: string;
@@ -35,6 +36,7 @@ interface ListingFormData {
 const PRODUCE_SUBCATEGORIES: ProduceSubcategory[] = ["crops", "fruits", "vegetables", "grains", "other"];
 const LIVESTOCK_SUBCATEGORIES: LivestockSubcategory[] = ["cattle", "poultry", "goats", "pigs", "sheep", "other"];
 const INPUTS_SUBCATEGORIES: InputsSubcategory[] = ["fertilizer", "pesticides", "seeds", "tools", "equipment", "feeds", "other"];
+const SERVICE_SUBCATEGORIES: ServiceSubcategory[] = ["equipment_rental", "consulting", "labor", "transportation", "processing", "other"];
 
 const UNITS = ["kg", "bag", "ton", "bunch", "dozen", "piece", "liter", "gallon", "box", "crate"];
 
@@ -42,6 +44,7 @@ const CATEGORY_DESCRIPTIONS = {
   produce: "Agricultural products like crops, fruits, and vegetables",
   livestock: "Livestock including cattle, poultry, goats, and more",
   inputs: "Agricultural inputs: fertilizers, pesticides, seeds, tools, equipment",
+  service: "Agricultural services including equipment rental, consulting, and labor",
 };
 
 const CreateListing: React.FC = () => {
@@ -122,6 +125,8 @@ const CreateListing: React.FC = () => {
         return LIVESTOCK_SUBCATEGORIES;
       case "inputs":
         return INPUTS_SUBCATEGORIES;
+      case "service":
+        return SERVICE_SUBCATEGORIES;
       default:
         return [];
     }
@@ -391,7 +396,7 @@ const CreateListing: React.FC = () => {
             <div className="bg-white rounded-lg p-8 border border-gray-200 shadow-sm">
               <h2 className="text-xl font-bold text-gray-900 mb-6">What are you listing?</h2>
               <div className="space-y-4 mb-8">
-                {(["produce", "livestock", "inputs"] as const).map((cat) => (
+                {(["produce", "livestock", "inputs", "service"] as const).map((cat) => (
                   <button
                     key={cat}
                     type="button"
