@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { MapPin, TrendingUp, AlertCircle, Loader, Plus } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
@@ -71,9 +71,9 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
   });
 
   const [page, setPage] = useState(1);
-  const [pagination, setPagination] = useState({ pages: 1, total: 0 });
+  const [pagination, setPagination] = useState({ pages: 1, total: 0, page: 1 });
 
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
@@ -85,25 +85,40 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
         params.append("county", filters.county);
       if (filters.urgency) params.append("urgency", filters.urgency);
 
+      console.log(`🔍 Fetching buyer requests from: ${API_BASE_URL}/buyer-requests?${params}`);
+      
       const response = await fetch(
         `${API_BASE_URL}/buyer-requests?${params}`
       );
 
-      if (!response.ok) throw new Error("Failed to fetch buyer requests");
+      console.log("📡 Response status:", response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("❌ API Error Response:", errorText);
+        throw new Error(`Failed to fetch buyer requests: ${response.status} ${response.statusText}`);
+      }
 
       const data = await response.json();
+      console.log("✅ Data received:", data);
+      
+      if (!data.success) {
+        throw new Error(data.message || "API returned unsuccessful response");
+      }
+      
       setRequests(data.data || []);
-      setPagination(data.pagination);
+      setPagination(data.pagination || { total: 0, pages: 1, page: 1 });
     } catch (err: any) {
-      setError(err.message || "An error occurred");
+      console.error("🚨 Error fetching requests:", err);
+      setError(err.message || "An error occurred while fetching buyer requests");
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, filters]);
 
   useEffect(() => {
     fetchRequests();
-  }, [page, filters]);
+  }, [fetchRequests]);
 
   const handleFilterChange = (
     filterName: string,
