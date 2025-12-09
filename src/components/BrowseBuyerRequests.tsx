@@ -70,6 +70,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
       const params = new URLSearchParams();
       params.append("page", page.toString());
       params.append("limit", "12");
+      params.append("status", "active"); // Only show active requests, not fulfilled
       if (filters.category) params.append("category", filters.category);
       if (filters.county !== "All Counties")
         params.append("county", filters.county);
@@ -278,18 +279,25 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                   {/* Header with Category & Urgency */}
                   <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 border-b border-gray-200">
                     <div className="flex items-start justify-between gap-2 mb-2">
-                      <span className="inline-block px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full capitalize">
-                        {request.category === "produce"
-                          ? "Produce"
-                          : request.category === "inputs"
-                          ? "Farm Inputs"
-                          : "Services"}
-                      </span>
-                      <span
-                        className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${URGENCY_COLORS[request.urgency]}`}
-                      >
-                        {URGENCY_LABELS[request.urgency]}
-                      </span>
+                      <div className="flex gap-2 flex-wrap">
+                        <span className="inline-block px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full capitalize">
+                          {request.category === "produce"
+                            ? "Produce"
+                            : request.category === "inputs"
+                            ? "Farm Inputs"
+                            : "Services"}
+                        </span>
+                        <span
+                          className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${URGENCY_COLORS[request.urgency]}`}
+                        >
+                          {URGENCY_LABELS[request.urgency]}
+                        </span>
+                        {request.status === 'fulfilled' && (
+                          <span className="inline-block px-3 py-1 bg-purple-100 text-purple-800 text-xs font-semibold rounded-full">
+                            ✓ Fulfilled
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <h3 className="text-lg font-bold text-gray-900 line-clamp-2">
                       {request.title}
