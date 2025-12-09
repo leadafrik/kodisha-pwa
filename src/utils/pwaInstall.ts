@@ -58,8 +58,8 @@ export function getInstallInstructions(deviceType: DeviceInfo['deviceType']): {
 } {
   const instructions: Record<string, any> = {
     android: {
-      title: 'Install Mamamboga Digital',
-      description: 'Add Mamamboga Digital to your home screen for quick access',
+      title: 'Install Agrisoko',
+      description: 'Add Agrisoko to your home screen for quick access',
       steps: [
         'Tap the menu button (three dots) in Chrome',
         'Select "Install app" or "Add to Home screen"',
@@ -68,7 +68,7 @@ export function getInstallInstructions(deviceType: DeviceInfo['deviceType']): {
     },
     ios: {
       title: 'Add to Home Screen',
-      description: 'Add Mamamboga Digital to your iPhone home screen',
+      description: 'Add Agrisoko to your iPhone home screen',
       steps: [
         'Tap the Share button (square with arrow)',
         'Scroll and tap "Add to Home Screen"',
@@ -76,7 +76,7 @@ export function getInstallInstructions(deviceType: DeviceInfo['deviceType']): {
       ]
     },
     desktop: {
-      title: 'Install Mamamboga Digital',
+      title: 'Install Agrisoko',
       description: 'Install our app for a better experience',
       steps: [
         'Click the install icon in your address bar',

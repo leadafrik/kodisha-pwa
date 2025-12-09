@@ -1,4 +1,4 @@
-# Mamamboga Digital - Robots.txt
+# Agrisoko - Robots.txt
 User-agent: *
 Allow: /
 Disallow: /admin

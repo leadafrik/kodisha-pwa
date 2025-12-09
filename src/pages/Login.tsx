@@ -399,7 +399,7 @@ const Login: React.FC = () => {
           onClick={() => switchMode("signup")}
           className="text-green-700 font-semibold hover:text-green-800 hover:underline transition"
         >
-          New to Mamamboga Digital? Sign up
+          New to Agrisoko? Sign up
         </button>
         <button
           type="button"

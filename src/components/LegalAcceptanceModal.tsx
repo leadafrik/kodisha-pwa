@@ -54,7 +54,7 @@ const LegalAcceptanceModal: React.FC<LegalAcceptanceModalProps> = ({
           {/* Key Info */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
             <p className="text-xs text-blue-900 font-medium">
-              By checking the boxes below, you agree to our Terms of Service and Privacy Policy, which govern how you use Mamamboga Digital and how we handle your data.
+              By checking the boxes below, you agree to our Terms of Service and Privacy Policy, which govern how you use Agrisoko and how we handle your data.
             </p>
           </div>
 
