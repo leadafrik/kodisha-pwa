@@ -31,6 +31,9 @@ const Favorites = lazy(() => import('./pages/Favorites'));
 const Messages = lazy(() => import('./pages/Messages'));
 const AdminProfileVerification = lazy(() => import('./pages/admin/ProfileVerification'));
 const AdminReports = lazy(() => import('./pages/admin/Reports'));
+const AdminUserManagement = lazy(() => import('./pages/admin/UserManagement'));
+const AdminReportsManagement = lazy(() => import('./pages/admin/ReportsManagement'));
+const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
 const PostBuyRequest = lazy(() => import('./pages/PostBuyRequest'));
 const BrowseBuyerRequestsPage = lazy(() => import('./pages/BrowseBuyerRequestsPage'));
 
@@ -127,9 +130,12 @@ function App() {
                     <Route path="/listings/:id" element={<ProtectedRoute><ListingDetails /></ProtectedRoute>} />
                     <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
                     <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+                    <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
                     <Route path="/admin/moderation" element={<Moderation />} />
                     <Route path="/admin/reports" element={<ProtectedRoute><AdminReports /></ProtectedRoute>} />
                     <Route path="/admin/profile-verification" element={<ProtectedRoute><AdminProfileVerification /></ProtectedRoute>} />
+                    <Route path="/admin/users" element={<ProtectedRoute><AdminUserManagement /></ProtectedRoute>} />
+                    <Route path="/admin/reports-management" element={<ProtectedRoute><AdminReportsManagement /></ProtectedRoute>} />
                     <Route path="/legal/terms" element={<TermsOfService />} />
                     <Route path="/legal/privacy" element={<PrivacyPolicy />} />
                     <Route path="/error" element={<ServerError />} />
