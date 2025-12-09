@@ -295,6 +295,7 @@ const Profile: React.FC = () => {
             </div>
           )}
         </div>
+      </div>
 
         {/* Account Management - Subtle Section */}
         <div className="mt-8 border-t pt-6">
