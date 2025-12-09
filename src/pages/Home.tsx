@@ -309,7 +309,7 @@ const Home: React.FC = () => {
               Browse Listings
             </Link>
             <Link
-              to={user ? "/list" : "/login?next=/list"}
+              to={user ? "/create-listing" : "/login?next=/create-listing"}
               className="inline-flex justify-center items-center px-8 py-4 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700 shadow-lg transition"
             >
               {user ? "Create a Listing" : "Create Account"}
@@ -330,7 +330,7 @@ const Home: React.FC = () => {
               <h5 className="font-semibold mb-3 text-white">Platform</h5>
               <ul className="space-y-2 text-sm">
                 <li><Link to="/browse" className="hover:text-white">Browse Listings</Link></li>
-                <li><Link to={user ? "/list" : "/login"} className="hover:text-white">Create Listing</Link></li>
+                <li><Link to={user ? "/create-listing" : "/login"} className="hover:text-white">Create Listing</Link></li>
                 <li><Link to="/profile" className="hover:text-white">Your Profile</Link></li>
               </ul>
             </div>

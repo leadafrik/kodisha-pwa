@@ -666,8 +666,8 @@ const AdminDashboard: React.FC = () => {
                       )}
                     </div>
                     <div className="flex gap-2 flex-wrap">
-                      <a
-                        href={`/listing/${listing._id}`}
+                    <a
+                        href={`/listings/${listing._id}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="px-3 py-1 text-xs rounded bg-blue-100 text-blue-700 hover:bg-blue-200"

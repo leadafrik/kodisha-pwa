@@ -442,7 +442,7 @@ const FindServices: React.FC = () => {
               Try adjusting your filters or be the first to list a service in this area.
             </p>
             <Link
-              to="/list?category=service"
+              to="/create-listing"
               className="inline-flex items-center bg-emerald-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors"
             >
               List your service/equipment
@@ -584,7 +584,7 @@ const FindServices: React.FC = () => {
           bookings through Kodisha.
         </p>
         <Link
-          to="/list?category=service"
+          to="/create-listing"
           className="inline-flex items-center bg-white text-emerald-700 px-7 py-2.5 rounded-lg font-semibold text-sm hover:bg-emerald-50 transition-colors"
         >
           List Your Service/Equipment
