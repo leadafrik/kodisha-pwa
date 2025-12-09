@@ -75,7 +75,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
         return;
       }
 
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("kodisha_token");
       const response = await fetch(
         `${API_BASE_URL}/buyer-requests`,
         {
