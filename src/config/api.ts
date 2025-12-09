@@ -96,6 +96,7 @@ export const API_ENDPOINTS = {
     send: `${API_BASE_URL}/messages`,
     threads: `${API_BASE_URL}/messages/threads`,
     withUser: (id: string) => `${API_BASE_URL}/messages/with/${id}`,
+    markRead: (id: string) => `${API_BASE_URL}/messages/mark-read/${id}`,
   },
   favorites: {
     list: `${API_BASE_URL}/favorites`,

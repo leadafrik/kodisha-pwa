@@ -8,6 +8,8 @@ export interface Message {
   to: string;
   body: string;
   read: boolean;
+  readAt?: string;
+  status?: "sent" | "delivered" | "read";
   createdAt: string;
   listing?: string;
 }
@@ -104,8 +106,31 @@ export const getConversation = async (userId: string): Promise<Message[]> => {
   return data.data || [];
 };
 
+/**
+ * Mark all messages from a user as read
+ */
+export const markMessagesAsRead = async (userId: string): Promise<void> => {
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+
+  const response = await fetch(API_ENDPOINTS.messages.markRead(userId), {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to mark messages as read');
+  }
+};
+
 export const messageService = {
   sendMessage,
   getMessageThreads,
   getConversation,
+  markMessagesAsRead,
 };
