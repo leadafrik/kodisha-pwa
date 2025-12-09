@@ -21,14 +21,14 @@ const Home: React.FC = () => {
             {/* Headline */}
             <div className="space-y-4">
               <h1 className="text-5xl sm:text-6xl font-extrabold text-gray-900 leading-tight">
-                Agriculture. Simplified.
+                Digitizing Kenya's
                 <br />
                 <span className="bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
-                  Discover • List • Connect
+                  Agricultural Marketplace
                 </span>
               </h1>
               <p className="text-lg sm:text-xl text-gray-600 max-w-2xl leading-relaxed">
-                Lease/rent land for short-term farming • List agricultural products & livestock • Rent or sell equipment • Find agrovets • Hire agricultural professionals
+                Buy and sell agricultural produce directly from farmers and producers. Connect with professional agricultural service providers across all 47 counties.
                 {!PAYMENTS_ENABLED && (
                   <span className="block mt-3 font-semibold text-green-700">Introductory Phase: All listings are free while we onboard early users.</span>
                 )}
@@ -74,8 +74,8 @@ const Home: React.FC = () => {
       <section className="py-20 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Built For Agricultural Trade</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">Identity verification, discovery, communication, and trust features are live. Payments will be introduced later with notice.</p>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">A Professional, Simple Marketplace</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">Verified sellers, direct connections, fair prices. Everything you need to buy and sell agricultural products and services with confidence.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -150,7 +150,7 @@ const Home: React.FC = () => {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">Fast Listings</h3>
               <p className="text-gray-600">
-                List land, equipment, agrovets, services, or products in under 2 minutes. Go live instantly.
+                List agricultural products and services in under 2 minutes. Go live instantly across Kenya.
               </p>
             </div>
 
@@ -176,27 +176,30 @@ const Home: React.FC = () => {
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">What's Available</h2>
             <p className="text-lg text-gray-600">
-              Everything you need for agricultural success in one marketplace
+              Two categories of opportunity in Kenya's agricultural marketplace
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
-            {[
-              { title: "Land Lease & Rent", emoji: "🌾", desc: "Short-term farming plots" },
-              { title: "Equipment Rental", emoji: "🚜", desc: "Tractors & machinery" },
-              { title: "Farm Products", emoji: "🥕", desc: "Produce & livestock" },
-              { title: "Agrovets", emoji: "🏪", desc: "Farm inputs & supplies" },
-              { title: "Ag Services", emoji: "👨‍🌾", desc: "Professionals & experts" },
-            ].map((cat, idx) => (
-              <div key={idx} className="p-6 bg-white rounded-2xl border border-gray-200 text-center hover:shadow-lg transition">
-                <div className="text-4xl mb-3">{cat.emoji}</div>
-                <h3 className="text-lg font-bold text-gray-900 mb-1">{cat.title}</h3>
-                <p className="text-xs text-gray-600 mb-4">{cat.desc}</p>
-                <Link to="/browse" className="text-green-600 font-semibold hover:text-green-700 text-sm">
-                  Browse →
-                </Link>
-              </div>
-            ))}
+          <div className="grid sm:grid-cols-2 gap-8 max-w-3xl mx-auto">
+            {/* Produce */}
+            <div className="p-8 bg-white rounded-2xl border border-gray-200 text-center hover:shadow-lg transition">
+              <div className="text-6xl mb-4">🌾</div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Agricultural Produce</h3>
+              <p className="text-gray-600 mb-6">Fresh vegetables, fruits, grains, and livestock directly from farmers and producers</p>
+              <Link to="/browse" className="inline-block bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700 transition">
+                Browse Produce
+              </Link>
+            </div>
+
+            {/* Services */}
+            <div className="p-8 bg-white rounded-2xl border border-gray-200 text-center hover:shadow-lg transition">
+              <div className="text-6xl mb-4">🔧</div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Agricultural Services</h3>
+              <p className="text-gray-600 mb-6">Professional services: land surveying, transportation, equipment rental, landscaping and more</p>
+              <Link to="/browse" className="inline-block bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700 transition">
+                Browse Services
+              </Link>
+            </div>
           </div>
         </div>
       </section>
