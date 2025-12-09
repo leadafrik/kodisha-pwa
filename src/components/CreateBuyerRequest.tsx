@@ -309,8 +309,8 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
               <option value="">Select Constituency</option>
               {formData.location.county && 
                 getConstituenciesByCounty(formData.location.county).map((c) => (
-                  <option key={c.name} value={c.name}>
-                    {c.name}
+                  <option key={c.label} value={c.label}>
+                    {c.label}
                   </option>
                 ))}
             </select>
@@ -330,8 +330,8 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
               <option value="">Select Ward</option>
               {formData.location.county && formData.location.constituency &&
                 getWardsByConstituency(formData.location.county, formData.location.constituency).map((w) => (
-                  <option key={w.code} value={w.name}>
-                    {w.name}
+                  <option key={w.label} value={w.label}>
+                    {w.label}
                   </option>
                 ))}
             </select>

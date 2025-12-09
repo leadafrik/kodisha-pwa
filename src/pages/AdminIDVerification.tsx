@@ -41,18 +41,6 @@ const AdminIDVerification: React.FC = () => {
   const [reviewingId, setReviewingId] = useState<string | null>(null);
   const [reviewingStatus, setReviewingStatus] = useState<"approved" | "rejected" | null>(null);
 
-  // Check admin authorization
-  if (user?.type !== "admin" && user?.role !== "admin") {
-    return (
-      <div className="max-w-4xl mx-auto pt-8 px-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-          <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
-          <p className="text-red-800 font-semibold">Not authorized to access this page</p>
-        </div>
-      </div>
-    );
-  }
-
   // Load verifications
   useEffect(() => {
     loadVerifications();
@@ -102,6 +90,18 @@ const AdminIDVerification: React.FC = () => {
     );
     setFilteredVerifications(filtered);
   }, [searchTerm, verifications]);
+
+  // Check admin authorization - AFTER all hooks
+  if (user?.type !== "admin" && user?.role !== "admin") {
+    return (
+      <div className="max-w-4xl mx-auto pt-8 px-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+          <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
+          <p className="text-red-800 font-semibold">Not authorized to access this page</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleReview = async (verificationId: string, status: "approved" | "rejected") => {
     try {

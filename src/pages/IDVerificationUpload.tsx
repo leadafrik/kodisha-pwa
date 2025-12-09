@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { apiRequest, API_ENDPOINTS } from "../config/api";
+import { API_BASE_URL } from "../config/api";
 import { Upload, CheckCircle, AlertCircle, Shield } from "lucide-react";
 
 const IDVerificationUpload: React.FC = () => {
@@ -49,7 +49,7 @@ const IDVerificationUpload: React.FC = () => {
 
       // Upload to verification endpoint
       const response = await fetch(
-        `${API_ENDPOINTS.base || "http://localhost:5000/api"}/verification/submit-documents`,
+        `${API_BASE_URL}/verification/id/submit-documents`,
         {
           method: "POST",
           headers: {
