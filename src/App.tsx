@@ -38,6 +38,8 @@ const AdminReportsManagement = lazy(() => import('./pages/admin/ReportsManagemen
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
 const PostBuyRequest = lazy(() => import('./pages/PostBuyRequest'));
 const BrowseBuyerRequestsPage = lazy(() => import('./pages/BrowseBuyerRequestsPage'));
+const IDVerificationUpload = lazy(() => import('./pages/IDVerificationUpload'));
+const AdminIDVerification = lazy(() => import('./pages/AdminIDVerification'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -137,11 +139,20 @@ function App() {
                     />
                     <Route path="/verify-phone" element={<PhoneVerification />} />
                     <Route path="/verify" element={<VerificationWizard />} />
+                    <Route 
+                      path="/verify-id" 
+                      element={
+                        <ProtectedRoute>
+                          <IDVerificationUpload />
+                        </ProtectedRoute>
+                      } 
+                    />
                     <Route path="/listings/:id" element={<ProtectedRoute><ListingDetails /></ProtectedRoute>} />
                     <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
                     <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
                     <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
                     <Route path="/admin/listings-approval" element={<ProtectedRoute><AdminListingsApproval /></ProtectedRoute>} />
+                    <Route path="/admin/id-verification" element={<ProtectedRoute><AdminIDVerification /></ProtectedRoute>} />
                     <Route path="/admin/moderation" element={<Moderation />} />
                     <Route path="/admin/reports" element={<ProtectedRoute><AdminReports /></ProtectedRoute>} />
                     <Route path="/admin/profile-verification" element={<ProtectedRoute><AdminProfileVerification /></ProtectedRoute>} />

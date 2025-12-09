@@ -79,6 +79,73 @@ const Home: React.FC = () => {
         </div>
       </section>
 
+      {/* QUICK NAVIGATION FOR BUYERS vs SELLERS */}
+      <section className="py-16 px-4 bg-gradient-to-br from-green-50 to-blue-50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">What's Your Goal Today?</h2>
+            <p className="text-gray-600 text-lg">Quickly jump to what you're looking for</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* BUYERS - Looking for Listings */}
+            <Link 
+              to="/browse"
+              className="group relative p-8 rounded-2xl bg-white shadow-md hover:shadow-2xl transition-all border-2 border-transparent hover:border-green-500"
+            >
+              <div className="flex items-start gap-4">
+                <div className="text-5xl">📦</div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">I'm Looking to Buy</h3>
+                  <p className="text-gray-600 mb-4">
+                    Browse thousands of agricultural products, livestock, and services from verified sellers across all 47 Kenya counties.
+                  </p>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>✓ Fresh produce & livestock</li>
+                    <li>✓ Farm inputs & equipment</li>
+                    <li>✓ Professional services</li>
+                    <li>✓ Direct farmer connections</li>
+                  </ul>
+                  <div className="mt-4 inline-block px-4 py-2 rounded-lg bg-green-100 text-green-700 font-semibold group-hover:bg-green-200 transition">
+                    Browse Listings →
+                  </div>
+                </div>
+              </div>
+            </Link>
+
+            {/* SELLERS - Looking for Buy Requests */}
+            <Link 
+              to="/request"
+              className="group relative p-8 rounded-2xl bg-white shadow-md hover:shadow-2xl transition-all border-2 border-transparent hover:border-blue-500"
+            >
+              <div className="flex items-start gap-4">
+                <div className="text-5xl">🛒</div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">I'm Looking to Sell</h3>
+                  <p className="text-gray-600 mb-4">
+                    Find buyers actively looking for what you produce or offer. Respond to buy requests and connect directly with demand.
+                  </p>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>✓ Real buyer demand</li>
+                    <li>✓ Multiple buyer inquiries</li>
+                    <li>✓ Quick response opportunities</li>
+                    <li>✓ Direct buyer negotiation</li>
+                  </ul>
+                  <div className="mt-4 inline-block px-4 py-2 rounded-lg bg-blue-100 text-blue-700 font-semibold group-hover:bg-blue-200 transition">
+                    View Buy Requests →
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </div>
+
+          {/* Additional Help */}
+          <div className="mt-8 text-center text-sm text-gray-600">
+            <p>Need to post your own products or services? Use the <strong>"+ List"</strong> button in the top navigation.</p>
+          </div>
+        </div>
+      </section>
+
       {/* FEATURES SECTION */}
       <section className="py-20 px-4 bg-white">
         <div className="max-w-6xl mx-auto">

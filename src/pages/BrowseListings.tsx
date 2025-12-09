@@ -463,6 +463,30 @@ const BrowseListings: React.FC = () => {
           Showing {filtered.length} of {cards.length} listings
         </div>
       )}
+
+      {/* Alternative Action - For Sellers */}
+      <div className="mt-16 p-8 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
+        <div className="max-w-4xl mx-auto text-center">
+          <h3 className="text-2xl font-bold text-gray-900 mb-3">Looking to Sell Instead?</h3>
+          <p className="text-gray-600 mb-6">
+            Find buyers actively looking for what you offer. Browse buy requests from customers across Kenya who need your products or services.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/request"
+              className="inline-flex justify-center items-center px-6 py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+            >
+              🛒 View Buy Requests
+            </Link>
+            <Link
+              to={user ? "/create-listing" : "/login?next=/create-listing"}
+              className="inline-flex justify-center items-center px-6 py-3 rounded-lg border-2 border-blue-600 text-blue-600 font-semibold hover:bg-blue-50 transition"
+            >
+              ✨ Post Your Products
+            </Link>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

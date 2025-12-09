@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { MapPin, TrendingUp, AlertCircle, Loader, Plus } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -365,6 +365,30 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
             )}
           </>
         )}
+
+        {/* Alternative Action - For Buyers */}
+        <div className="mt-16 p-8 rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200">
+          <div className="max-w-4xl mx-auto text-center">
+            <h3 className="text-2xl font-bold text-gray-900 mb-3">Looking to Buy Instead?</h3>
+            <p className="text-gray-600 mb-6">
+              Browse thousands of products and services from verified sellers across Kenya. Find exactly what you need with direct connections to farmers and producers.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                to="/browse"
+                className="inline-flex justify-center items-center px-6 py-3 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition"
+              >
+                📦 Browse Listings
+              </Link>
+              <Link
+                to={user ? "/create-listing" : "/login?next=/create-listing"}
+                className="inline-flex justify-center items-center px-6 py-3 rounded-lg border-2 border-green-600 text-green-600 font-semibold hover:bg-green-50 transition"
+              >
+                🛒 Post a Buy Request
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

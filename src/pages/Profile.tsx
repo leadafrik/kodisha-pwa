@@ -4,6 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useProperties } from "../contexts/PropertyContext";
 import ProfilePictureUpload from "../components/ProfilePictureUpload";
 import { scheduleAccountDeletion } from "../services/userService";
+import { Shield } from "lucide-react";
 
 const Profile: React.FC = () => {
   const { user, logout, updateProfile } = useAuth();
@@ -154,6 +155,45 @@ const Profile: React.FC = () => {
               ))}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* ID Verification Card */}
+      <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              <Shield className="text-green-600" size={28} />
+              <h2 className="text-2xl font-bold text-gray-800">Identity Verification</h2>
+            </div>
+            <p className="text-gray-600 mb-4">
+              {verificationDetails.idVerified
+                ? "✓ Your identity has been verified"
+                : "Verify your identity to build trust and unlock premium features"}
+            </p>
+            {!verificationDetails.idVerified && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800 mb-4">
+                <p className="font-semibold mb-2">Benefits of ID verification:</p>
+                <ul className="list-disc list-inside space-y-1 text-xs">
+                  <li>Display an "ID Verified" badge on your profile and listings</li>
+                  <li>Increase buyer confidence and trust</li>
+                  <li>Higher visibility in marketplace search results</li>
+                  <li>Priority support from the Agrisoko team</li>
+                </ul>
+              </div>
+            )}
+          </div>
+          <Link
+            to="/verify-id"
+            className={`px-6 py-2 rounded-lg font-semibold transition whitespace-nowrap ${
+              verificationDetails.idVerified
+                ? "bg-gray-200 text-gray-600 cursor-not-allowed"
+                : "bg-green-600 text-white hover:bg-green-700"
+            }`}
+            onClick={(e) => verificationDetails.idVerified && e.preventDefault()}
+          >
+            {verificationDetails.idVerified ? "Verified" : "Get Verified"}
+          </Link>
         </div>
       </div>
 

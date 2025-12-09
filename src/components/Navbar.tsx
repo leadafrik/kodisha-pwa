@@ -30,9 +30,21 @@ const Navbar: React.FC = () => {
 
             {/* DESKTOP NAV */}
             <div className="hidden lg:flex items-center gap-10 font-semibold text-gray-700">
-              <Link to="/browse" className="hover:text-black hover:underline underline-offset-4 transition">
-                Marketplace
-              </Link>
+              {/* Browse Toggle - Easy navigation between Listings and Buy Requests */}
+              <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+                <Link 
+                  to="/browse" 
+                  className="px-4 py-2 rounded-md transition font-semibold text-sm hover:bg-white"
+                >
+                  📦 Listings
+                </Link>
+                <Link 
+                  to="/request" 
+                  className="px-4 py-2 rounded-md transition font-semibold text-sm hover:bg-white"
+                >
+                  🛒 Buy Requests
+                </Link>
+              </div>
 
               <div className="group relative">
                 <button className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition font-semibold flex items-center gap-2">
@@ -104,6 +116,9 @@ const Navbar: React.FC = () => {
                           <Link to="/admin/listings-approval" className="block px-4 py-3 hover:bg-gray-50 border-b">
                             <div className="font-semibold">Listing Approvals</div>
                           </Link>
+                          <Link to="/admin/id-verification" className="block px-4 py-3 hover:bg-gray-50 border-b">
+                            <div className="font-semibold">ID Verification</div>
+                          </Link>
                           <Link to="/admin/reports" className="block px-4 py-3 hover:bg-gray-50 border-b">
                             <div className="font-semibold">User Reports</div>
                           </Link>
@@ -160,7 +175,15 @@ const Navbar: React.FC = () => {
             </div>
 
             <div className="flex flex-col gap-4 text-lg font-medium">
-              <Link to="/browse" onClick={closeMobile}>Marketplace</Link>
+              {/* Browse Toggle for Mobile */}
+              <div className="flex flex-col gap-2 bg-gray-100 rounded-lg p-2">
+                <Link to="/browse" onClick={closeMobile} className="px-3 py-2 rounded hover:bg-white transition font-semibold">
+                  📦 Browse Listings
+                </Link>
+                <Link to="/request" onClick={closeMobile} className="px-3 py-2 rounded hover:bg-white transition font-semibold">
+                  🛒 Browse Buy Requests
+                </Link>
+              </div>
               <hr />
 
               {user ? (
@@ -171,6 +194,7 @@ const Navbar: React.FC = () => {
                   {user.role === 'admin' || user.type === 'admin' ? (
                     <>
                       <Link to="/admin/listings-approval" onClick={closeMobile}>Listing Approvals</Link>
+                      <Link to="/admin/id-verification" onClick={closeMobile}>ID Verification</Link>
                       <Link to="/admin/reports" onClick={closeMobile}>User Reports</Link>
                       <Link to="/admin/profile-verification" onClick={closeMobile}>Profile Verification</Link>
                     </>
