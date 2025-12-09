@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { MapPin, TrendingUp, AlertCircle, Loader, Plus } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import { API_BASE_URL } from "../config/api";
 
 interface BuyerRequest {
   _id: string;
@@ -85,7 +86,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
       if (filters.urgency) params.append("urgency", filters.urgency);
 
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/buyer-requests?${params}`
+        `${API_BASE_URL}/buyer-requests?${params}`
       );
 
       if (!response.ok) throw new Error("Failed to fetch buyer requests");

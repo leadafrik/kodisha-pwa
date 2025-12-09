@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { Heart, MapPin, AlertCircle } from "lucide-react";
 import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from "../data/kenyaCounties";
+import { API_BASE_URL } from "../config/api";
 
 const UNITS = ["kg", "tonnes", "bags", "units", "liters", "crates"];
 
@@ -76,7 +77,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
 
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/buyer-requests`,
+        `${API_BASE_URL}/buyer-requests`,
         {
           method: "POST",
           headers: {

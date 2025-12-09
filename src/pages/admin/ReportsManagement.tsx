@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AlertTriangle, CheckCircle, Clock, MessageSquare, Trash2 } from 'lucide-react';
+import { API_BASE_URL } from '../../config/api';
 
 interface Report {
   _id: string;
@@ -40,7 +41,7 @@ const AdminReportsManagement: React.FC = () => {
       params.append('limit', '15');
 
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/admin/reports?${params}`,
+        `${API_BASE_URL}/admin/reports?${params}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -61,7 +62,7 @@ const AdminReportsManagement: React.FC = () => {
   const handleUpdateStatus = async (reportId: string, newStatus: string, resolution?: string) => {
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/admin/reports/${reportId}`,
+        `${API_BASE_URL}/admin/reports/${reportId}`,
         {
           method: 'PUT',
           headers: {

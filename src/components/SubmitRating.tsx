@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 
 interface SubmitRatingProps {
   ratedUserId: string;
@@ -30,7 +31,7 @@ const SubmitRating: React.FC<SubmitRatingProps> = ({
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${process.env.REACT_APP_API_URL}/ratings`,
+        `${API_BASE_URL}/ratings`,
         {
           ratedUserId,
           listingId,

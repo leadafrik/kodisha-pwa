@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Search, AlertTriangle, CheckCircle, XCircle, Lock, Unlock, Flag } from 'lucide-react';
+import { API_BASE_URL } from '../../config/api';
 
 interface User {
   _id: string;
@@ -40,7 +41,7 @@ const AdminUserManagement: React.FC = () => {
       params.append('sortBy', 'createdAt');
 
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/admin/users/search?${params}`,
+        `${API_BASE_URL}/admin/users/search?${params}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -67,7 +68,7 @@ const AdminUserManagement: React.FC = () => {
 
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/admin/users/${userId}/suspend`,
+        `${API_BASE_URL}/admin/users/${userId}/suspend`,
         {
           method: 'PUT',
           headers: {
@@ -91,7 +92,7 @@ const AdminUserManagement: React.FC = () => {
   const handleUnsuspend = async (userId: string) => {
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/admin/users/${userId}/unsuspend`,
+        `${API_BASE_URL}/admin/users/${userId}/unsuspend`,
         {
           method: 'PUT',
           headers: {
@@ -119,7 +120,7 @@ const AdminUserManagement: React.FC = () => {
 
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/admin/users/${userId}/flag`,
+        `${API_BASE_URL}/admin/users/${userId}/flag`,
         {
           method: 'PUT',
           headers: {
@@ -143,7 +144,7 @@ const AdminUserManagement: React.FC = () => {
   const handleClearFlags = async (userId: string) => {
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/admin/users/${userId}/clear-flags`,
+        `${API_BASE_URL}/admin/users/${userId}/clear-flags`,
         {
           method: 'PUT',
           headers: {

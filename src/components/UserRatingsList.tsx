@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 import UserRatingBadge from './UserRatingBadge';
 
 interface Rating {
@@ -29,7 +30,7 @@ const UserRatingsList: React.FC<UserRatingsListProps> = ({ userId, maxReviews = 
     const fetchRatings = async () => {
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/ratings/user/${userId}`
+          `${API_BASE_URL}/ratings/user/${userId}`
         );
         setRatings(response.data.data.ratings);
         setAggregate(response.data.data.aggregate);
