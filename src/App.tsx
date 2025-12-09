@@ -38,6 +38,7 @@ const AdminReportsManagement = lazy(() => import('./pages/admin/ReportsManagemen
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
 const PostBuyRequest = lazy(() => import('./pages/PostBuyRequest'));
 const BrowseBuyerRequestsPage = lazy(() => import('./pages/BrowseBuyerRequestsPage'));
+const BuyerRequestDetails = lazy(() => import('./pages/BuyerRequestDetails'));
 const IDVerificationUpload = lazy(() => import('./pages/IDVerificationUpload'));
 const AdminIDVerification = lazy(() => import('./pages/AdminIDVerification'));
 
@@ -76,6 +77,14 @@ function App() {
                     <Route path="/browse" element={<BrowseListings />} />
                     <Route path="/find-services" element={<BrowseListings />} />
                     <Route path="/request" element={<BrowseBuyerRequestsPage />} />
+                    <Route 
+                      path="/request/:id" 
+                      element={
+                        <ProtectedRoute>
+                          <BuyerRequestDetails />
+                        </ProtectedRoute>
+                      } 
+                    />
                     <Route 
                       path="/request/new" 
                       element={
