@@ -220,7 +220,7 @@ const Profile: React.FC = () => {
       {/* Quick Actions */}
       <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Quick Actions</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
           <Link
             to="/list?category=land"
             className="bg-green-600 text-white p-6 rounded-xl hover:bg-green-700 transition duration-300 text-center"
@@ -250,12 +250,28 @@ const Profile: React.FC = () => {
             <div className="text-orange-100 text-sm">Sell agricultural products</div>
           </Link>
           <Link
+            to="/create-buyer-request"
+            className="bg-indigo-600 text-white p-6 rounded-xl hover:bg-indigo-700 transition duration-300 text-center"
+          >
+            <div className="font-semibold text-lg">Post Need</div>
+            <div className="text-indigo-100 text-sm">Post what you're looking for</div>
+          </Link>
+          <Link
             to="/favorites"
             className="bg-pink-600 text-white p-6 rounded-xl hover:bg-pink-700 transition duration-300 text-center"
           >
             <div className="font-semibold text-lg">Saved Listings</div>
             <div className="text-pink-100 text-sm">View your favorites</div>
           </Link>
+          {user.type === "admin" && (
+            <Link
+              to="/admin/dashboard"
+              className="bg-red-600 text-white p-6 rounded-xl hover:bg-red-700 transition duration-300 text-center"
+            >
+              <div className="font-semibold text-lg">Admin Panel</div>
+              <div className="text-red-100 text-sm">Manage marketplace</div>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -282,6 +298,17 @@ const Profile: React.FC = () => {
               ))}
             </div>
           )}
+        </div>
+
+        {/* Buyer Requests Posted */}
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">Your Buyer Requests</h3>
+          <div className="text-center py-8 text-gray-500">
+            <p>View and manage your posted needs</p>
+            <Link to="/buyer-requests" className="text-indigo-600 font-semibold mt-2 inline-block">
+              View your requests
+            </Link>
+          </div>
         </div>
 
         {/* Service Listings */}
