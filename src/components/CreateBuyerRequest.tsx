@@ -1,19 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { Heart, MapPin, AlertCircle } from "lucide-react";
-
-const COUNTIES = [
-  "Nairobi",
-  "Mombasa",
-  "Kisumu",
-  "Nakuru",
-  "Eldoret",
-  "Naivasha",
-  "Kilifi",
-  "Meru",
-  "Nyeri",
-  "Murang'a",
-];
+import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from "../data/kenyaCounties";
 
 const UNITS = ["kg", "tonnes", "bags", "units", "liters", "crates"];
 
@@ -273,7 +261,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
         </div>
 
         {/* Location */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
               <MapPin size={16} /> County
@@ -281,12 +269,20 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
             <select
               name="location.county"
               value={formData.location.county}
-              onChange={handleChange}
+              onChange={(e) => {
+                handleChange(e);
+                // Reset constituency and ward when county changes
+                setFormData(prev => ({
+                  ...prev,
+                  location: { county: e.target.value, constituency: "", ward: "" }
+                }));
+              }}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             >
-              {COUNTIES.map((county) => (
-                <option key={county} value={county}>
-                  {county}
+              <option value="">Select County</option>
+              {kenyaCounties.map((county) => (
+                <option key={county.name} value={county.name}>
+                  {county.name}
                 </option>
               ))}
             </select>
@@ -296,29 +292,50 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Constituency
             </label>
-            <input
-              type="text"
+            <select
               name="location.constituency"
               value={formData.location.constituency}
-              onChange={handleChange}
-              placeholder="e.g., Westlands"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
+              onChange={(e) => {
+                handleChange(e);
+                // Reset ward when constituency changes
+                setFormData(prev => ({
+                  ...prev,
+                  location: { ...prev.location, ward: "" }
+                }));
+              }}
+              disabled={!formData.location.county}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-100"
+            >
+              <option value="">Select Constituency</option>
+              {formData.location.county && 
+                getConstituenciesByCounty(formData.location.county).map((c) => (
+                  <option key={c.name} value={c.name}>
+                    {c.name}
+                  </option>
+                ))}
+            </select>
           </div>
-        </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Ward (Optional)
-          </label>
-          <input
-            type="text"
-            name="location.ward"
-            value={formData.location.ward}
-            onChange={handleChange}
-            placeholder="e.g., Karura"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Ward
+            </label>
+            <select
+              name="location.ward"
+              value={formData.location.ward}
+              onChange={handleChange}
+              disabled={!formData.location.constituency}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-100"
+            >
+              <option value="">Select Ward</option>
+              {formData.location.county && formData.location.constituency &&
+                getWardsByConstituency(formData.location.county, formData.location.constituency).map((w) => (
+                  <option key={w.code} value={w.name}>
+                    {w.name}
+                  </option>
+                ))}
+            </select>
+          </div>
         </div>
 
         {/* Buttons */}

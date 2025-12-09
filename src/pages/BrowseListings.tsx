@@ -22,6 +22,7 @@ type UnifiedCard = {
   verified: boolean;
   paid: boolean;
   boosted: boolean;
+  isDemo?: boolean;
   ownerId?: string;
   contact?: string;
   createdAt?: Date;
@@ -81,6 +82,7 @@ const BrowseListings: React.FC = () => {
           verified: verifiedFlag,
           paid: !!paidFlag,
           boosted: !!boostFlag,
+          isDemo: !!p.isDemo,
           createdAt: p.createdAt ? new Date(p.createdAt) : undefined,
           image: p.images?.[0],
           ownerId: p.owner?._id || p.ownerId || p.owner,
@@ -374,6 +376,11 @@ const BrowseListings: React.FC = () => {
                 
                 {/* Status Badges */}
                 <div className="absolute top-3 left-3 inline-flex items-center gap-2 flex-wrap max-w-[calc(100%-1.5rem)]">
+                  {card.isDemo && (
+                    <span className="rounded-full bg-blue-100 text-blue-800 text-[11px] font-bold px-2.5 py-1 whitespace-nowrap">
+                      📋 Sample Listing
+                    </span>
+                  )}
                   {card.boosted && (
                     <span className="rounded-full bg-yellow-100 text-yellow-800 text-[11px] font-bold px-2.5 py-1 whitespace-nowrap">
                       ⭐ Boosted
