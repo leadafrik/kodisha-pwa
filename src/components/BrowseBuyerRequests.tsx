@@ -260,6 +260,15 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
               Try adjusting your filters or check back later!
             </p>
           </div>
+        ) : !Array.isArray(requests) ? (
+          <div className="text-center py-12">
+            <p className="text-red-600 text-lg">
+              Error: Invalid data format received from server
+            </p>
+            <p className="text-gray-500">
+              Please refresh the page or contact support
+            </p>
+          </div>
         ) : (
           <>
             {/* Request Cards Grid */}
@@ -299,14 +308,16 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                     </p>
 
                     {/* Location */}
-                    <div className="flex items-center gap-2 text-gray-700">
-                      <MapPin size={16} className="text-green-600 flex-shrink-0" />
-                      <span className="text-sm font-medium">
-                        {request.location.county}
-                        {request.location.constituency &&
-                          `, ${request.location.constituency}`}
-                      </span>
-                    </div>
+                    {request.location && (
+                      <div className="flex items-center gap-2 text-gray-700">
+                        <MapPin size={16} className="text-green-600 flex-shrink-0" />
+                        <span className="text-sm font-medium">
+                          {request.location.county}
+                          {request.location.constituency &&
+                            `, ${request.location.constituency}`}
+                        </span>
+                      </div>
+                    )}
 
                     {/* Quantity & Budget */}
                     <div className="bg-gray-50 rounded p-3 space-y-2">
@@ -329,17 +340,17 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                     {/* Buyer Info */}
                     <div className="flex items-center gap-2 pt-2 border-t border-gray-200">
                       <div className="w-8 h-8 bg-green-200 rounded-full flex items-center justify-center text-sm font-bold text-green-800">
-                        {request.userId.fullName?.charAt(0) || "U"}
+                        {request.userId && request.userId.fullName?.charAt(0) || "U"}
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-medium text-gray-900">
-                          {request.userId.fullName || "Anonymous"}
+                          {request.userId?.fullName || "Anonymous"}
                         </p>
                         <p className="text-xs text-gray-500">
                           Posted {formatDate(request.createdAt)}
                         </p>
                       </div>
-                      {request.userId.ratings && (
+                      {request.userId?.ratings && (
                         <div className="flex items-center gap-1">
                           <TrendingUp size={14} className="text-yellow-500" />
                           <span className="text-sm font-semibold">
