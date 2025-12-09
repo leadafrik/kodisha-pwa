@@ -53,6 +53,7 @@ export const API_ENDPOINTS = {
   auth: {
     register: `${API_BASE_URL}/auth/register`,
     login: `${API_BASE_URL}/auth/login`,
+    checkExists: `${API_BASE_URL}/auth/check-exists`,
     loginOtpRequest: `${API_BASE_URL}/auth/login-otp/request`,
     loginOtpVerify: `${API_BASE_URL}/auth/login-otp/verify`,
     emailOtpRequest: `${API_BASE_URL}/auth/email-otp/request`,

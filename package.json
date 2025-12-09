@@ -8,6 +8,7 @@
     "@sentry/tracing": "^7.120.4",
     "axios": "^1.13.2",
     "cra-template-pwa-typescript": "2.0.0",
+    "lucide-react": "^0.556.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-dropzone": "^14.3.8",

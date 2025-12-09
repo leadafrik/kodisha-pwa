@@ -53,7 +53,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
       const [parent, child] = name.split(".");
       setFormData((prev) => ({
         ...prev,
-        [parent]: { ...prev[parent as keyof typeof formData], [child]: value },
+        [parent]: { ...(prev[parent as keyof typeof formData] as any), [child]: value },
       }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));

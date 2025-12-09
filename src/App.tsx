@@ -19,6 +19,7 @@ import WhatsAppFloatingButton from './components/WhatsAppFloatingButton';
 // Lazy load heavy components
 const Profile = lazy(() => import('./pages/Profile'));
 const ListUnified = lazy(() => import('./pages/ListUnified'));
+const CreateListing = lazy(() => import('./pages/CreateListing'));
 const BackendTest = lazy(() => import('./components/BackendTest'));
 const PhoneVerification = lazy(() => import('./pages/PhoneVerification'));
 const VerificationWizard = lazy(() => import('./pages/VerificationWizard'));
@@ -60,6 +61,14 @@ function App() {
                   <Suspense fallback={<LoadingFallback />}>
                     <Routes>
                     <Route path="/" element={<Home />} />
+                    <Route
+                      path="/create-listing"
+                      element={
+                        <ProtectedRoute>
+                          <CreateListing />
+                        </ProtectedRoute>
+                      }
+                    />
                     <Route
                       path="/list"
                       element={

@@ -38,6 +38,8 @@ const Login: React.FC = () => {
   const [canResendOtp, setCanResendOtp] = useState(true);
   const [showLegalModal, setShowLegalModal] = useState(false);
   const [pendingSignupData, setPendingSignupData] = useState<any>(null);
+  const [checkingEmailOrPhone, setCheckingEmailOrPhone] = useState(false);
+  const [emailOrPhoneExists, setEmailOrPhoneExists] = useState(false);
 
   const [loginData, setLoginData] = useState({
     emailOrPhone: "",
@@ -82,9 +84,47 @@ const Login: React.FC = () => {
     setCanResendOtp(false);
   };
 
+  // Check if email/phone already exists in database
+  const checkEmailOrPhoneExists = async (emailOrPhone: string) => {
+    if (!emailOrPhone.trim()) {
+      setEmailOrPhoneExists(false);
+      return;
+    }
+
+    setCheckingEmailOrPhone(true);
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/auth/check-exists`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ emailOrPhone: emailOrPhone.trim() }),
+        }
+      );
+      const data = await response.json();
+      setEmailOrPhoneExists(data.exists || false);
+    } catch (err) {
+      console.error('Error checking email/phone:', err);
+      setEmailOrPhoneExists(false);
+    } finally {
+      setCheckingEmailOrPhone(false);
+    }
+  };
+
+  // Debounced check (runs after user stops typing)
+  useEffect(() => {
+    if (mode === 'signup') {
+      const timer = setTimeout(() => {
+        checkEmailOrPhoneExists(signupData.emailOrPhone);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [signupData.emailOrPhone, mode]);
+
   const switchMode = (next: Mode) => {
     resetMessages();
     setMode(next);
+    setEmailOrPhoneExists(false);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -374,17 +414,53 @@ const Login: React.FC = () => {
       
       <div>
         <label className="block text-sm font-medium text-gray-700">Email or Phone Number *</label>
-        <input
-          type="text"
-          name="emailOrPhone"
-          value={signupData.emailOrPhone}
-          onChange={(e) =>
-            setSignupData((prev) => ({ ...prev, emailOrPhone: e.target.value }))
-          }
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
-          placeholder="you@example.com or 0712345678"
-        />
-        <p className="text-xs text-gray-500 mt-1">We'll send a verification code to your email or SMS</p>
+        <div className="relative">
+          <input
+            type="text"
+            name="emailOrPhone"
+            value={signupData.emailOrPhone}
+            onChange={(e) =>
+              setSignupData((prev) => ({ ...prev, emailOrPhone: e.target.value }))
+            }
+            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+            placeholder="you@example.com or 0712345678"
+          />
+          {checkingEmailOrPhone && (
+            <div className="absolute right-3 top-3">
+              <svg className="animate-spin h-5 w-5 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </div>
+          )}
+        </div>
+        
+        {emailOrPhoneExists && signupData.emailOrPhone.trim() && (
+          <div className="mt-2 p-3 rounded-lg bg-blue-50 border border-blue-200 text-sm">
+            <p className="text-blue-900 font-medium mb-2">
+              📝 Account already exists with this email/phone
+            </p>
+            <p className="text-blue-800 text-xs mb-3">
+              It looks like you already have an account. Please sign in instead to access your account.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setLoginData({ emailOrPhone: signupData.emailOrPhone, password: '' });
+                switchMode('login');
+              }}
+              className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition text-sm"
+            >
+              ✓ Sign In Instead
+            </button>
+          </div>
+        )}
+        
+        {!emailOrPhoneExists && signupData.emailOrPhone.trim() && !checkingEmailOrPhone && (
+          <p className="text-xs text-green-600 mt-2 font-medium">✓ Email/phone is available</p>
+        )}
+        
+        <p className="text-xs text-gray-500 mt-2">We'll send a verification code to your email or SMS</p>
       </div>
       
       <div className="grid grid-cols-2 gap-3">

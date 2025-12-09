@@ -15,8 +15,9 @@ const getAuthToken = (): string | null => {
 // Helper: Check if user is admin by checking role in stored user data
 const isUserAdmin = (): boolean => {
   try {
-    const adminToken = localStorage.getItem("kodisha_admin_token");
-    if (adminToken) return true; // Legacy admin token check
+    // Legacy: kodisha_admin_token no longer used - all auth goes through kodisha_token with role
+    // const adminToken = localStorage.getItem("kodisha_admin_token");
+    // if (adminToken) return true;
     
     const userStr = localStorage.getItem("kodisha_user");
     if (!userStr) return false;

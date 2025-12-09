@@ -22,15 +22,177 @@ const LegalAcceptanceModal: React.FC<LegalAcceptanceModalProps> = ({
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [marketingConsent, setMarketingConsent] = useState(false);
-  const [dataProcessingConsent, setDataProcessingConsent] = useState(false);
-  const [hasScrolledTerms, setHasScrolledTerms] = useState(false);
-  const [hasScrolledPrivacy, setHasScrolledPrivacy] = useState(false);
-  const [showTerms, setShowTerms] = useState(false);
-  const [showPrivacy, setShowPrivacy] = useState(false);
 
   if (!isOpen) return null;
 
-  const allRequiredAccepted = termsAccepted && privacyAccepted && dataProcessingConsent;
+  const allRequiredAccepted = termsAccepted && privacyAccepted;
+
+  const handleSubmit = () => {
+    if (allRequiredAccepted) {
+      onAccept({
+        termsAccepted,
+        privacyAccepted,
+        marketingConsent,
+        dataProcessingConsent: true, // Always true (included in term reading)
+      });
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4">
+          <h2 className="text-2xl font-bold text-white">Legal Terms & Agreements</h2>
+          <p className="text-green-50 text-sm mt-1">
+            Please review and accept to create your account
+          </p>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* Key Info Box */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <svg className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <div>
+                <h3 className="font-semibold text-blue-900">What You're Agreeing To</h3>
+                <p className="text-sm text-blue-800 mt-1">
+                  By checking the boxes below, you agree to our Terms of Service and Privacy Policy, which govern how you use Agrisoko and how we handle your data.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Required Consents */}
+          <div className="space-y-4">
+            <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-green-100 text-green-700 text-sm font-bold">1</span>
+              Required
+            </h3>
+            
+            {/* Terms of Service */}
+            <label className="flex items-start gap-3 cursor-pointer p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+              <input
+                type="checkbox"
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+                className="mt-1 w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500 flex-shrink-0"
+              />
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-gray-900">Terms of Service</span>
+                  <span className="text-red-600 text-lg">*</span>
+                </div>
+                <p className="text-xs text-gray-600 mt-1">
+                  I agree to the{' '}
+                  <Link to="/legal/terms" target="_blank" className="text-green-600 hover:text-green-700 font-semibold underline">
+                    Terms of Service
+                  </Link>
+                  {' '}including platform rules, user obligations, and dispute resolution
+                </p>
+              </div>
+            </label>
+
+            {/* Privacy Policy */}
+            <label className="flex items-start gap-3 cursor-pointer p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+              <input
+                type="checkbox"
+                checked={privacyAccepted}
+                onChange={(e) => setPrivacyAccepted(e.target.checked)}
+                className="mt-1 w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500 flex-shrink-0"
+              />
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-gray-900">Privacy & Data Processing</span>
+                  <span className="text-red-600 text-lg">*</span>
+                </div>
+                <p className="text-xs text-gray-600 mt-1">
+                  I agree to the{' '}
+                  <Link to="/legal/privacy" target="_blank" className="text-green-600 hover:text-green-700 font-semibold underline">
+                    Privacy Policy
+                  </Link>
+                  {' '}and consent to processing of my personal data (as required by the Data Protection Act, 2019)
+                </p>
+              </div>
+            </label>
+          </div>
+
+          {/* Optional Consent */}
+          <div className="pt-4 border-t space-y-3">
+            <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-200 text-gray-700 text-sm font-bold">2</span>
+              Optional
+            </h3>
+            
+            {/* Marketing Consent */}
+            <label className="flex items-start gap-3 cursor-pointer p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+              <input
+                type="checkbox"
+                checked={marketingConsent}
+                onChange={(e) => setMarketingConsent(e.target.checked)}
+                className="mt-1 w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500 flex-shrink-0"
+              />
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-gray-900">Monthly Newsletter & Updates</span>
+                  <span className="text-gray-500 text-xs">(optional)</span>
+                </div>
+                <p className="text-xs text-gray-600 mt-1">
+                  Get monthly newsletters with tips, new features, and promotions. You can unsubscribe anytime from any email we send.
+                </p>
+              </div>
+            </label>
+          </div>
+
+          {/* Help Section */}
+          <div className="bg-gray-50 rounded-lg p-4 text-xs text-gray-600 space-y-2">
+            <p className="font-semibold text-gray-900">Have questions?</p>
+            <p>Email us: <a href="mailto:kodisha.254.ke@gmail.com" className="text-green-600 hover:underline font-medium">kodisha.254.ke@gmail.com</a></p>
+            <p>Data Protection Commissioner: <a href="https://www.odpc.go.ke" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:underline font-medium">www.odpc.go.ke</a></p>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="border-t bg-gray-50 px-6 py-4 flex items-center justify-between gap-3">
+          <button
+            onClick={onCancel}
+            disabled={loading}
+            className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={!allRequiredAccepted || loading}
+            className="px-8 py-2.5 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 active:bg-green-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {loading ? (
+              <>
+                <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Creating Account...
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                Create My Account
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default LegalAcceptanceModal;
 
   const handleTermsScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const element = e.currentTarget;

@@ -35,46 +35,32 @@ const Navbar: React.FC = () => {
               </Link>
 
               <div className="group relative">
-                <button className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition font-semibold flex items-center gap-2">
-                  List <Chevron />
+                <button className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition font-semibold flex items-center gap-2">
+                  + List <Chevron />
                 </button>
                 <div className="absolute hidden group-hover:block bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 z-50">
                   {user ? (
                     <>
-                      <Link to="/list?category=land" className="block px-4 py-3 hover:bg-gray-50 border-b">
-                        <div className="font-semibold">List Land</div>
-                        <p className="text-sm text-gray-600">Rent only — sale listings paused</p>
+                      <Link to="/create-listing" className="block px-4 py-3 hover:bg-green-50 border-b">
+                        <div className="font-semibold text-green-700">✨ Create Listing</div>
+                        <p className="text-sm text-gray-600">Products, livestock, inputs</p>
                       </Link>
-                      <Link to="/list?category=service" className="block px-4 py-3 hover:bg-gray-50 border-b">
-                        <div className="font-semibold">List Service</div>
-                        <p className="text-sm text-gray-600">Equipment or professional</p>
-                      </Link>
-                      <Link to="/list?category=agrovet" className="block px-4 py-3 hover:bg-gray-50 border-b">
-                        <div className="font-semibold">List Agrovet</div>
-                        <p className="text-sm text-gray-600">Inputs & store</p>
-                      </Link>
-                      <Link to="/list?category=product" className="block px-4 py-3 hover:bg-gray-50">
-                        <div className="font-semibold">List Products</div>
-                        <p className="text-sm text-gray-600">Produce / livestock</p>
+                      <hr className="my-2" />
+                      <Link to="/request/new" className="block px-4 py-3 hover:bg-blue-50">
+                        <div className="font-semibold text-blue-700">🛒 Post Buyer Request</div>
+                        <p className="text-sm text-gray-600">Looking to buy something?</p>
                       </Link>
                     </>
                   ) : (
                     <>
-                      <Link to="/login?next=/list?category=land" className="block px-4 py-3 hover:bg-gray-50 border-b">
-                        <div className="font-semibold">List Land</div>
-                        <p className="text-sm text-gray-600">Rent only — sale listings paused</p>
+                      <Link to="/login?next=/create-listing" className="block px-4 py-3 hover:bg-green-50 border-b">
+                        <div className="font-semibold text-green-700">✨ Create Listing</div>
+                        <p className="text-sm text-gray-600">Products, livestock, inputs</p>
                       </Link>
-                      <Link to="/login?next=/list?category=service" className="block px-4 py-3 hover:bg-gray-50 border-b">
-                        <div className="font-semibold">List Service</div>
-                        <p className="text-sm text-gray-600">Equipment or professional</p>
-                      </Link>
-                      <Link to="/login?next=/list?category=agrovet" className="block px-4 py-3 hover:bg-gray-50 border-b">
-                        <div className="font-semibold">List Agrovet</div>
-                        <p className="text-sm text-gray-600">Inputs & store</p>
-                      </Link>
-                      <Link to="/login?next=/list?category=product" className="block px-4 py-3 hover:bg-gray-50">
-                        <div className="font-semibold">List Products</div>
-                        <p className="text-sm text-gray-600">Produce / livestock</p>
+                      <hr className="my-2" />
+                      <Link to="/login?next=/request/new" className="block px-4 py-3 hover:bg-blue-50">
+                        <div className="font-semibold text-blue-700">🛒 Post Buyer Request</div>
+                        <p className="text-sm text-gray-600">Looking to buy something?</p>
                       </Link>
                     </>
                   )}
