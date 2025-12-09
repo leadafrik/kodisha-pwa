@@ -131,17 +131,17 @@ const Profile: React.FC = () => {
         </div>
 
         <div className="mt-6 grid md:grid-cols-3 gap-4">
-          <div className="rounded-xl border border-gray-100 bg-gray-50 p-4">
-            <p className="text-xs font-semibold text-gray-500 uppercase">Verification level</p>
-            <p className="text-lg font-semibold text-gray-900">
+          <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 shadow-sm">
+            <p className="text-xs font-semibold text-blue-700 uppercase">Verification level</p>
+            <p className="text-lg font-bold text-blue-900 mt-2">
               {verificationDetails.verificationLevel || "Not set"}
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-blue-600 mt-1">
               Trust score: {verificationDetails.trustScore ?? "N/A"}
             </p>
           </div>
-          <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 md:col-span-2">
-            <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Verification checklist</p>
+          <div className="rounded-xl border border-green-200 bg-green-50 p-4 shadow-sm md:col-span-2">
+            <p className="text-xs font-semibold text-green-700 uppercase mb-3">Verification checklist</p>
             <div className="grid sm:grid-cols-2 gap-2">
               {verificationItems.map((item) => (
                 <div key={item.label} className="flex items-center gap-2 text-sm text-gray-800">
@@ -262,7 +262,7 @@ const Profile: React.FC = () => {
           {userProperties.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <p>No land listings yet</p>
-              <Link to="/list?category=land" className="text-green-600 font-semibold mt-2 inline-block">
+              <Link to="/create-listing" className="text-green-600 font-semibold mt-2 inline-block">
                 List your first property
               </Link>
             </div>
@@ -296,7 +296,7 @@ const Profile: React.FC = () => {
           {userServices.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <p>No service listings yet</p>
-              <Link to="/list?category=service" className="text-blue-600 font-semibold mt-2 inline-block">
+              <Link to="/create-listing" className="text-blue-600 font-semibold mt-2 inline-block">
                 List your first service
               </Link>
             </div>
@@ -319,7 +319,7 @@ const Profile: React.FC = () => {
           {userAgrovets.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <p>No agrovet listings yet</p>
-              <Link to="/list-agrovet" className="text-purple-600 font-semibold mt-2 inline-block">
+              <Link to="/create-listing" className="text-purple-600 font-semibold mt-2 inline-block">
                 List your first agrovet
               </Link>
             </div>
@@ -344,7 +344,7 @@ const Profile: React.FC = () => {
           {userProducts.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <p>No product listings yet</p>
-              <Link to="/list?category=product" className="text-orange-600 font-semibold mt-2 inline-block">
+              <Link to="/create-listing" className="text-orange-600 font-semibold mt-2 inline-block">
                 List your first product
               </Link>
             </div>
@@ -361,36 +361,44 @@ const Profile: React.FC = () => {
           )}
         </div>
 
-        {/* Account Management - Subtle Section */}
+        {/* Account Management - Danger Zone */}
         <div className="mt-8 border-t pt-6">
+          <h3 className="text-lg font-bold text-gray-800 mb-4">Account Settings</h3>
           {deleteError && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded text-sm">
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm font-medium">
               {deleteError}
             </div>
           )}
-          <button
-            onClick={async () => {
-              if (window.confirm('Are you sure you want to delete your account? This will:\n\n• Remove all your listings\n• Delete all your data\n• Unverify your account\n\nThis action cannot be undone.')) {
-                if (window.confirm('Type "DELETE" to confirm account deletion. Once deleted, your account cannot be recovered.')) {
-                  setDeletingAccount(true);
-                  setDeleteError(null);
-                  try {
-                    await scheduleAccountDeletion();
-                    window.alert('Your account has been scheduled for deletion. You have 30 days to reactivate it before permanent deletion.');
-                    logout();
-                    navigate('/login');
-                  } catch (err: any) {
-                    setDeleteError(err.message || 'Failed to delete account');
-                    setDeletingAccount(false);
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-sm text-gray-700 mb-4">
+              Once you delete your account, there is no going back. Your account, listings, and messages will be permanently deleted.
+            </p>
+            <button
+              onClick={async () => {
+                const confirmDelete = window.confirm('Are you sure you want to delete your account? This action cannot be undone.');
+                if (confirmDelete) {
+                  const confirmType = window.confirm('Type DELETE to confirm account deletion. Once deleted, your account cannot be recovered.');
+                  if (confirmType) {
+                    setDeletingAccount(true);
+                    setDeleteError(null);
+                    try {
+                      await scheduleAccountDeletion();
+                      window.alert('Your account has been scheduled for deletion. You have 30 days to reactivate it before permanent deletion.');
+                      logout();
+                      navigate('/login');
+                    } catch (err: any) {
+                      setDeleteError(err.message || 'Failed to delete account');
+                      setDeletingAccount(false);
+                    }
                   }
                 }
-              }
-            }}
-            disabled={deletingAccount}
-            className="text-sm text-gray-500 hover:text-red-600 disabled:text-gray-400 transition duration-300 underline disabled:cursor-not-allowed"
-          >
-            {deletingAccount ? 'Deleting account...' : 'Delete Account'}
-          </button>
+              }}
+              disabled={deletingAccount}
+              className="bg-red-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700 transition duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              {deletingAccount ? 'Deleting account...' : 'Delete Account'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
