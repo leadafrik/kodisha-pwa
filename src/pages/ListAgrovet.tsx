@@ -61,8 +61,6 @@ const LISTING_PLAN_OPTIONS: ListingPlanOption[] = [
     duration: "Active until removed",
   },
 ];
-  */
-];
 
 type BoostOption = {
   id: "none" | "daily" | "weekly" | "monthly";

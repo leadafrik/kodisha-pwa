@@ -32,7 +32,6 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [preferences, setPreferences] = useState<NotificationPreferences | null>(null);
   const [loading, setLoading] = useState(false);
-  const [cleanupReminder, setCleanupReminder] = useState<(() => void) | null>(null);
 
   // Fetch notifications on user login
   const fetchNotifications = useCallback(async () => {
@@ -67,7 +66,6 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // Initialize monthly reminder scheduler
     const cleanup = initializeMonthlyReminderScheduler(user.id);
-    setCleanupReminder(() => cleanup);
 
     return () => {
       cleanup();

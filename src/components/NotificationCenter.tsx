@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNotifications } from '../contexts/NotificationsContext';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -7,8 +7,6 @@ const NotificationCenter: React.FC = () => {
   const { notifications, unreadCount, markAsRead, preferences } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
-
-  const unreadNotifications = notifications.filter((n) => !n.read);
 
   const handleMarkAsRead = async (notificationId: string) => {
     await markAsRead(notificationId);
