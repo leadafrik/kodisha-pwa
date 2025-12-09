@@ -47,13 +47,13 @@ const Home: React.FC = () => {
                 Browse Marketplace
               </Link>
               <Link
-                to={user ? "/request" : "/login?next=/request"}
+                to="/request"
                 className="inline-flex justify-center items-center px-8 py-4 rounded-xl border-2 border-green-600 text-green-600 font-semibold hover:bg-green-50 active:bg-green-100 transition duration-200"
               >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
-                {user ? "Post Buy Request" : "Sign In to Post"}
+                Browse Buy Requests
               </Link>
               <Link
                 to={user ? "/list" : "/login?next=/list"}

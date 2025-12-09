@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { MapPin, TrendingUp, AlertCircle, Loader } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { MapPin, TrendingUp, AlertCircle, Loader, Plus } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 
 interface BuyerRequest {
   _id: string;
@@ -55,6 +57,8 @@ const URGENCY_LABELS: Record<string, string> = {
 export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
   onSelectRequest,
 }) => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [requests, setRequests] = useState<BuyerRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -124,12 +128,25 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-4xl font-bold text-gray-900 mb-2">
-          Browse Buy Requests
-        </h2>
-        <p className="text-gray-600 mb-8">
-          See what buyers are looking for and connect with new customers
-        </p>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <div>
+            <h2 className="text-4xl font-bold text-gray-900 mb-2">
+              Browse Buy Requests
+            </h2>
+            <p className="text-gray-600">
+              See what buyers are looking for and connect with new customers
+            </p>
+          </div>
+          <button
+            onClick={() =>
+              navigate(user ? "/request/new" : "/login?next=/request/new")
+            }
+            className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition whitespace-nowrap"
+          >
+            <Plus size={20} />
+            Post a Request
+          </button>
+        </div>
 
         {/* Filters */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">

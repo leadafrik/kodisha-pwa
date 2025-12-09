@@ -31,8 +31,8 @@ const Favorites = lazy(() => import('./pages/Favorites'));
 const Messages = lazy(() => import('./pages/Messages'));
 const AdminProfileVerification = lazy(() => import('./pages/admin/ProfileVerification'));
 const AdminReports = lazy(() => import('./pages/admin/Reports'));
-const CreateBuyerRequest = lazy(() => import('./components/CreateBuyerRequest'));
-const BrowseBuyerRequests = lazy(() => import('./components/BrowseBuyerRequests'));
+const PostBuyRequest = lazy(() => import('./pages/PostBuyRequest'));
+const BrowseBuyerRequestsPage = lazy(() => import('./pages/BrowseBuyerRequestsPage'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -94,12 +94,12 @@ function App() {
                     />
                     <Route path="/browse" element={<BrowseListings />} />
                     <Route path="/find-services" element={<BrowseListings />} />
-                    <Route path="/request" element={<BrowseBuyerRequests />} />
+                    <Route path="/request" element={<BrowseBuyerRequestsPage />} />
                     <Route 
                       path="/request/new" 
                       element={
                         <ProtectedRoute>
-                          <CreateBuyerRequest />
+                          <PostBuyRequest />
                         </ProtectedRoute>
                       } 
                     />
