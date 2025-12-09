@@ -198,14 +198,22 @@ const Profile: React.FC = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div className="bg-white rounded-xl shadow-md p-6 text-center">
-          <div className="text-3xl font-bold text-green-600 mb-2">{userProducts.length + userServices.length + userProperties.length}</div>
-          <div className="text-gray-600 text-sm">Marketplace Listings</div>
+          <div className="text-3xl font-bold text-green-600 mb-2">{userProperties.length}</div>
+          <div className="text-gray-600 text-sm">Land Listings</div>
         </div>
         <div className="bg-white rounded-xl shadow-md p-6 text-center">
-          <div className="text-3xl font-bold text-blue-600 mb-2">{userAgrovets.length}</div>
-          <div className="text-gray-600 text-sm">Agrovet Listings</div>
+          <div className="text-3xl font-bold text-blue-600 mb-2">{userServices.length}</div>
+          <div className="text-gray-600 text-sm">Services</div>
+        </div>
+        <div className="bg-white rounded-xl shadow-md p-6 text-center">
+          <div className="text-3xl font-bold text-purple-600 mb-2">{userAgrovets.length}</div>
+          <div className="text-gray-600 text-sm">Agrovets</div>
+        </div>
+        <div className="bg-white rounded-xl shadow-md p-6 text-center">
+          <div className="text-3xl font-bold text-orange-600 mb-2">{userProducts.length}</div>
+          <div className="text-gray-600 text-sm">Products</div>
         </div>
       </div>
 
@@ -248,23 +256,57 @@ const Profile: React.FC = () => {
 
       {/* Recent Listings */}
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Marketplace Listings */}
+        {/* Land Listings */}
         <div className="bg-white rounded-2xl shadow-lg p-6">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">Your Marketplace Listings</h3>
-          {userProducts.length === 0 && userProperties.length === 0 && userServices.length === 0 ? (
+          <h3 className="text-xl font-bold text-gray-800 mb-4">Your Land Listings</h3>
+          {userProperties.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              <p>No marketplace listings yet</p>
-              <Link to="/create-listing" className="text-green-600 font-semibold mt-2 inline-block">
-                Create your first listing
+              <p>No land listings yet</p>
+              <Link to="/list?category=land" className="text-green-600 font-semibold mt-2 inline-block">
+                List your first property
               </Link>
             </div>
           ) : (
             <div className="space-y-3">
-              {[...userProducts, ...userProperties, ...userServices].slice(0, 5).map((listing) => (
-                <div key={listing.id} className="border rounded-lg p-3 hover:shadow-md transition">
-                  <h4 className="font-semibold text-gray-800 text-sm">{listing.title || listing.name}</h4>
-                  <p className="text-green-600 font-bold text-sm">KSh {listing.price?.toLocaleString() || listing.pricing || 'N/A'}</p>
-                  <p className="text-gray-600 text-xs">{listing.location?.county || listing.county} County</p>
+              {userProperties.slice(0, 3).map((property) => (
+                <div key={property.id} className="border rounded-lg p-3 hover:shadow-md transition">
+                  <h4 className="font-semibold text-gray-800 text-sm">{property.title}</h4>
+                  <p className="text-green-600 font-bold text-sm">KSh {property.price?.toLocaleString() || 'N/A'}</p>
+                  <p className="text-gray-600 text-xs">{property.county} County</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Buyer Requests Posted */}
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">Your Buyer Requests</h3>
+          <div className="text-center py-8 text-gray-500">
+            <p>View and manage your posted needs</p>
+            <Link to="/buyer-requests" className="text-indigo-600 font-semibold mt-2 inline-block">
+              View your requests
+            </Link>
+          </div>
+        </div>
+
+        {/* Service Listings */}
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">Your Service Listings</h3>
+          {userServices.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <p>No service listings yet</p>
+              <Link to="/list?category=service" className="text-blue-600 font-semibold mt-2 inline-block">
+                List your first service
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {userServices.slice(0, 3).map((service) => (
+                <div key={service.id} className="border rounded-lg p-3 hover:shadow-md transition">
+                  <h4 className="font-semibold text-gray-800 text-sm">{service.name}</h4>
+                  <p className="text-gray-600 text-xs">{service.type}</p>
+                  <p className="text-gray-600 text-xs">{service.location?.county} County</p>
                 </div>
               ))}
             </div>
@@ -277,8 +319,8 @@ const Profile: React.FC = () => {
           {userAgrovets.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <p>No agrovet listings yet</p>
-              <Link to="/create-listing" className="text-purple-600 font-semibold mt-2 inline-block">
-                Create an agrovet listing
+              <Link to="/list-agrovet" className="text-purple-600 font-semibold mt-2 inline-block">
+                List your first agrovet
               </Link>
             </div>
           ) : (
@@ -295,38 +337,61 @@ const Profile: React.FC = () => {
             </div>
           )}
         </div>
-      </div>
 
-      {/* Account Management - Subtle Section */}
-      <div className="mt-8 border-t pt-6">
-        {deleteError && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded text-sm">
-            {deleteError}
-          </div>
-        )}
-        <button
-          onClick={async () => {
-            if (window.confirm('Are you sure you want to delete your account? This will:\n\n• Remove all your listings\n• Delete all your data\n• Unverify your account\n\nThis action cannot be undone.')) {
-              if (window.confirm('Type "DELETE" to confirm account deletion. Once deleted, your account cannot be recovered.')) {
-                setDeletingAccount(true);
-                setDeleteError(null);
-                try {
-                  await scheduleAccountDeletion();
-                  window.alert('Your account has been scheduled for deletion. You have 30 days to reactivate it before permanent deletion.');
-                  logout();
-                  navigate('/login');
-                } catch (err: any) {
-                  setDeleteError(err.message || 'Failed to delete account');
-                  setDeletingAccount(false);
+        {/* Product Listings */}
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">Your Product Listings</h3>
+          {userProducts.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <p>No product listings yet</p>
+              <Link to="/list?category=product" className="text-orange-600 font-semibold mt-2 inline-block">
+                List your first product
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {userProducts.slice(0, 3).map((product) => (
+                <div key={product._id || product.id} className="border rounded-lg p-3 hover:shadow-md transition">
+                  <h4 className="font-semibold text-gray-800 text-sm">{product.name || product.title}</h4>
+                  <p className="text-orange-600 font-bold text-sm">KSh {product.price?.toLocaleString() || 'N/A'}</p>
+                  <p className="text-gray-600 text-xs">{product.category}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Account Management - Subtle Section */}
+        <div className="mt-8 border-t pt-6">
+          {deleteError && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded text-sm">
+              {deleteError}
+            </div>
+          )}
+          <button
+            onClick={async () => {
+              if (window.confirm('Are you sure you want to delete your account? This will:\n\n• Remove all your listings\n• Delete all your data\n• Unverify your account\n\nThis action cannot be undone.')) {
+                if (window.confirm('Type "DELETE" to confirm account deletion. Once deleted, your account cannot be recovered.')) {
+                  setDeletingAccount(true);
+                  setDeleteError(null);
+                  try {
+                    await scheduleAccountDeletion();
+                    window.alert('Your account has been scheduled for deletion. You have 30 days to reactivate it before permanent deletion.');
+                    logout();
+                    navigate('/login');
+                  } catch (err: any) {
+                    setDeleteError(err.message || 'Failed to delete account');
+                    setDeletingAccount(false);
+                  }
                 }
               }
-            }
-          }}
-          disabled={deletingAccount}
-          className="text-sm text-gray-500 hover:text-red-600 disabled:text-gray-400 transition duration-300 underline disabled:cursor-not-allowed"
-        >
-          {deletingAccount ? 'Deleting account...' : 'Delete Account'}
-        </button>
+            }}
+            disabled={deletingAccount}
+            className="text-sm text-gray-500 hover:text-red-600 disabled:text-gray-400 transition duration-300 underline disabled:cursor-not-allowed"
+          >
+            {deletingAccount ? 'Deleting account...' : 'Delete Account'}
+          </button>
+        </div>
       </div>
     </div>
   );
