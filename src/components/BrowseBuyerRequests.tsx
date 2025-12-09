@@ -359,16 +359,14 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
 
                   {/* Footer */}
                   <div className="bg-green-50 px-4 py-3 border-t border-gray-200">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Navigate to detail page for full view and response options
-                        navigate(`/request/${request._id}`, { state: { request } });
-                      }}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition text-sm"
+                    <Link
+                      to={`/request/${request._id}`}
+                      state={{ request }}
+                      className="block text-center bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition text-sm"
+                      aria-label={`View details and reply to ${request.title}`}
                     >
                       View Details & Reply
-                    </button>
+                    </Link>
                   </div>
                 </div>
               ))}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -105,7 +105,12 @@ const BuyerRequestDetails: React.FC = () => {
         console.error('Error fetching buyer request:', err);
         setError(err instanceof Error ? err.message : 'Failed to load request');
         setLoading(false);
-        Sentry.captureException(err);
+        // Report to Sentry for monitoring
+        try {
+          Sentry.captureException(err);
+        } catch (e) {
+          // Silently ignore Sentry errors
+        }
       }
     };
 
@@ -324,7 +329,7 @@ const BuyerRequestDetails: React.FC = () => {
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-xl font-bold text-gray-800">{request.userId.fullName}</p>
-                    {request.userId.ratings && (
+                    {typeof request.userId.ratings === 'number' && (
                       <p className="text-sm text-gray-600 mt-1">
                         ⭐ Rating: {request.userId.ratings.toFixed(1)}
                       </p>
@@ -453,4 +458,4 @@ const BuyerRequestDetails: React.FC = () => {
   );
 };
 
-export default Sentry.withProfiler(BuyerRequestDetails);
+export default BuyerRequestDetails;
