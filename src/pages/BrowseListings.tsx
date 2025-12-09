@@ -39,8 +39,25 @@ const buildLocation = (loc: any) =>
     .filter(Boolean)
     .join(", ");
 
-const getScore = (item: UnifiedCard) =>
-  (item.boosted ? 3 : 0) + (item.paid ? 2 : 0) + (item.verified ? 1 : 0);
+const getScore = (item: UnifiedCard) => {
+  // Sort by: boosted (3) > paid (2) > verified (1), then by freshness
+  // Boost indicator: items with boost=true appear first
+  const boost = item.boosted ? 3 : 0;
+  const paid = item.paid ? 2 : 0;
+  const verified = item.verified ? 1 : 0;
+  return boost + paid + verified;
+};
+
+/**
+ * Format phone number for tel: URI
+ * Removes spaces, hyphens, and other non-alphanumeric characters
+ * Preserves international + prefix
+ */
+const formatPhoneForUri = (contact: string): string => {
+  if (!contact) return "";
+  // Remove spaces, hyphens, parentheses, periods
+  return contact.replace(/[\s\-().\s]/g, "");
+};
 
 const BrowseListings: React.FC = () => {
   const { properties, serviceListings, productListings, loading } = useProperties();
@@ -138,7 +155,7 @@ const BrowseListings: React.FC = () => {
           card.subCategory !== serviceSub
         )
           return false;
-        if (county && card.county.toLowerCase() !== county.toLowerCase())
+        if (county && card.county !== county)
           return false;
         if (searchTerm) {
           const haystack = `${card.title} ${card.description} ${card.locationLabel}`.toLowerCase();
@@ -194,6 +211,14 @@ const BrowseListings: React.FC = () => {
             <p className="text-gray-700 text-base font-medium max-w-2xl">
               Discover fresh produce, livestock, farm inputs, and professional agricultural services. Direct connections with verified sellers across Kenya.
             </p>
+            <div className="flex gap-3 mt-4">
+              <Link
+                to="/about"
+                className="inline-flex items-center px-4 py-2 bg-white text-green-700 font-semibold rounded-lg border border-green-300 hover:bg-green-50 transition text-sm"
+              >
+                Learn About Agrisoko
+              </Link>
+            </div>
           </div>
           
           {/* Search Bar */}
@@ -205,7 +230,7 @@ const BrowseListings: React.FC = () => {
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search by title, location, or description…"
+                  placeholder="Search by title, location, or description"
                   className="w-full rounded-lg border border-gray-200 pl-10 pr-4 py-2.5 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200 transition"
                 />
               </div>
@@ -436,7 +461,7 @@ const BrowseListings: React.FC = () => {
                   {card.contact && (
                     user ? (
                       <a
-                        href={`tel:${card.contact}`}
+                        href={`tel:${formatPhoneForUri(card.contact)}`}
                         className="flex-1 text-center rounded-lg border border-gray-300 px-3 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition"
                       >
                         Call

@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { MapPin, TrendingUp, AlertCircle, Loader, Plus } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { API_BASE_URL } from "../config/api";
+import { kenyaCounties } from "../data/kenyaCounties";
 
 interface BuyerRequest {
   _id: string;
@@ -29,19 +30,8 @@ interface BrowseBuyerRequestsProps {
   onSelectRequest?: (request: BuyerRequest) => void;
 }
 
-const COUNTIES = [
-  "All Counties",
-  "Nairobi",
-  "Mombasa",
-  "Kisumu",
-  "Nakuru",
-  "Eldoret",
-  "Naivasha",
-  "Kilifi",
-  "Meru",
-  "Nyeri",
-  "Murang'a",
-];
+// Use all 47 Kenyan counties from data source
+const COUNTIES = ["All Counties", ...kenyaCounties.map(c => c.name)];
 
 const URGENCY_COLORS: Record<string, string> = {
   low: "bg-blue-100 text-blue-800",
@@ -85,31 +75,37 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
         params.append("county", filters.county);
       if (filters.urgency) params.append("urgency", filters.urgency);
 
-      console.log(`🔍 Fetching buyer requests from: ${API_BASE_URL}/buyer-requests?${params}`);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Dev] Fetching buyer requests:', { page, filters });
+      }
       
       const response = await fetch(
         `${API_BASE_URL}/buyer-requests?${params}`
       );
 
-      console.log("📡 Response status:", response.status, response.statusText);
-
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("❌ API Error Response:", errorText);
         throw new Error(`Failed to fetch buyer requests: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
-      console.log("✅ Data received:", data);
       
+      // Validate API response structure
       if (!data.success) {
         throw new Error(data.message || "API returned unsuccessful response");
       }
       
-      setRequests(data.data || []);
+      if (!Array.isArray(data.data)) {
+        throw new Error("Invalid response data: expected array of requests");
+      }
+      
+      if (!data.pagination || typeof data.pagination !== 'object') {
+        throw new Error("Invalid response structure: missing or malformed pagination");
+      }
+      
+      setRequests(data.data);
       setPagination(data.pagination || { total: 0, pages: 1, page: 1 });
     } catch (err: any) {
-      console.error("🚨 Error fetching requests:", err);
       setError(err.message || "An error occurred while fetching buyer requests");
     } finally {
       setLoading(false);
@@ -350,11 +346,11 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                           Posted {formatDate(request.createdAt)}
                         </p>
                       </div>
-                      {request.userId?.ratings && (
+                      {request.userId?.ratings && typeof request.userId.ratings === 'number' && (
                         <div className="flex items-center gap-1">
                           <TrendingUp size={14} className="text-yellow-500" />
                           <span className="text-sm font-semibold">
-                            {request.userId.ratings}
+                            {request.userId.ratings.toFixed(1)}
                           </span>
                         </div>
                       )}
@@ -363,7 +359,14 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
 
                   {/* Footer */}
                   <div className="bg-green-50 px-4 py-3 border-t border-gray-200">
-                    <button className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition text-sm">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Navigate to detail page for full view and response options
+                        navigate(`/request/${request._id}`, { state: { request } });
+                      }}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition text-sm"
+                    >
                       View Details & Reply
                     </button>
                   </div>
