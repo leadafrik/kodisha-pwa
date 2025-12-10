@@ -382,16 +382,6 @@ const BuyerRequestDetails: React.FC = () => {
                       </p>
                     )}
                   </div>
-                  {request.userId.phone && !isOwnRequest && (
-                    <a
-                      href={`https://wa.me/${request.userId.phone.replace(/\D/g, '')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center gap-2"
-                    >
-                      <span>💬</span> WhatsApp
-                    </a>
-                  )}
                 </div>
               </div>
 

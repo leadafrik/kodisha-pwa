@@ -208,6 +208,10 @@ const CreateListing: React.FC = () => {
         setError("Please enter a quantity");
         return false;
       }
+      if (!form.contact.trim()) {
+        setError("Please enter a phone number");
+        return false;
+      }
       if (!form.images.length) {
         setError("Please upload at least one image");
         return false;
@@ -612,6 +616,19 @@ const CreateListing: React.FC = () => {
                     onChange={(e) => setForm((prev) => ({ ...prev, availableFrom: e.target.value }))}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
+                </div>
+
+                {/* Contact Number */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">Phone Number *</label>
+                  <input
+                    type="tel"
+                    placeholder="+254712345678"
+                    value={form.contact}
+                    onChange={(e) => setForm((prev) => ({ ...prev, contact: e.target.value }))}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                  <p className="text-xs text-gray-600 mt-1">Your phone number will be visible to potential buyers</p>
                 </div>
 
                 {/* Images */}
