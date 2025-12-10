@@ -87,6 +87,7 @@ const Login: React.FC = () => {
   };
 
   // Check if email/phone already exists in database
+  // IMPORTANT: Normalize input the same way backend does (lowercase email, format phone)
   const checkEmailOrPhoneExists = async (emailOrPhone: string) => {
     if (!emailOrPhone.trim()) {
       setEmailOrPhoneExists(false);
@@ -95,18 +96,30 @@ const Login: React.FC = () => {
 
     setCheckingEmailOrPhone(true);
     try {
+      const input = emailOrPhone.trim();
+      const isEmail = input.includes('@');
+      
+      // Normalize the same way backend does
+      let normalizedInput = input;
+      if (isEmail) {
+        normalizedInput = input.toLowerCase(); // lowercase email
+      } else if (/^[0-9]{9,10}$/.test(input) || /^\+254\d{9}$/.test(input)) {
+        normalizedInput = formatKenyanPhone(input); // format phone
+      }
+
       const response = await fetch(
         `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/auth/check-exists`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ emailOrPhone: emailOrPhone.trim() }),
+          body: JSON.stringify({ emailOrPhone: normalizedInput }),
         }
       );
       const data = await response.json();
       setEmailOrPhoneExists(data.exists || false);
     } catch (err) {
       console.error('Error checking email/phone:', err);
+      // On network error, assume not exists (don't block signup)
       setEmailOrPhoneExists(false);
     } finally {
       setCheckingEmailOrPhone(false);
@@ -123,22 +136,15 @@ const Login: React.FC = () => {
     }
   }, [signupData.emailOrPhone, mode]);
 
-  // Auto-switch to login if email/phone exists
+  // Account exists: show message but let user decide (don't auto-switch)
+  // User can explicitly click "Sign In Instead" if they want to switch
   useEffect(() => {
-    if (mode === 'signup' && emailOrPhoneExists) {
-      // Show info message and auto-switch
-      setInfo("Account found! Switching to Sign In...");
-      const timer = setTimeout(() => {
-        setMode('login');
-        setLoginData(prev => ({
-          ...prev,
-          emailOrPhone: signupData.emailOrPhone
-        }));
-        setInfo(null);
-      }, 500);
-      return () => clearTimeout(timer);
+    if (mode === 'signup' && emailOrPhoneExists && signupData.emailOrPhone.trim()) {
+      // Just show the message - don't force a switch
+      // User can click the button to sign in if they want
+      resetMessages();
     }
-  }, [emailOrPhoneExists, mode]);
+  }, [emailOrPhoneExists, mode, signupData.emailOrPhone]);
 
   const switchMode = (next: Mode) => {
     resetMessages();
@@ -221,7 +227,10 @@ const Login: React.FC = () => {
       phone = formatKenyanPhone(input);
     }
 
+    resetMessages();
+
     try {
+      // STEP 1: Register the user
       await register({
         name: pendingSignupData.name,
         phone: phone,
@@ -236,42 +245,79 @@ const Login: React.FC = () => {
           dataProcessingConsent: consents.dataProcessingConsent,
         },
       });
+      
+      // Registration succeeded - close modal, keep pendingSignupData for OTP
       setShowLegalModal(false);
       
-      // Send OTP based on what was provided
-      if (email) {
-        await requestEmailOtp(email);
-        setOtpEmail(email);
-        setOtpType('email');
-        setInfo(
-          "✅ Code sent to your email. Please check your inbox and spam folder."
-        );
-      } else {
-        // Send SMS verification code
-        try {
+      // STEP 2: Send OTP (separate try/catch so OTP failures don't close form)
+      try {
+        if (email) {
+          await requestEmailOtp(email);
+          setOtpEmail(email);
+          setOtpType('email');
+          setInfo(
+            "✅ Code sent to your email. Please check your inbox and spam folder."
+          );
+        } else {
+          // Send SMS verification code
           await requestSmsOtp(phone || '');
           setOtpEmail(phone || '');
           setOtpType('phone');
           setInfo(
             "✅ Verification code sent to your phone via SMS."
           );
-        } catch (smsError: any) {
-          // If SMS fails, inform user
-          if (smsError?.message?.includes('Failed')) {
-            setError("SMS verification is currently unavailable. Please try again later or use email verification instead.");
-            setShowLegalModal(true); // Show form again to let user try with email
-          } else {
-            throw smsError;
-          }
         }
+        
+        // OTP sent successfully - move to OTP entry mode
+        setPendingSignupData(null);
+        setMode("otp-signup");
+        startOtpTimer();
+      } catch (otpError: any) {
+        // OTP send failed - show recovery message but keep user in this mode
+        const errorMsg = otpError?.message || "Failed to send verification code";
+        
+        if (errorMsg.includes('SMS') || errorMsg.includes('Twilio')) {
+          // SMS-specific failure
+          setError(
+            "SMS verification temporarily unavailable. Please request an email code instead, or contact support if email fails."
+          );
+          // Keep pendingSignupData so user can retry
+          // Add a retry button or suggest contacting support
+        } else if (errorMsg.includes('Email') || errorMsg.includes('Gmail')) {
+          // Email-specific failure
+          setError(
+            "Email verification failed. Please check your email address is correct and try again, or contact support."
+          );
+          // Keep pendingSignupData so user can retry
+        } else {
+          // Generic OTP failure
+          setError(
+            `Verification failed: ${errorMsg}. Please try again or contact support.`
+          );
+        }
+        
+        // Show legal modal again so user can retry or modify email/phone
+        // But don't lose their data
+        setShowLegalModal(true);
+      }
+    } catch (regError: any) {
+      // Registration failed - surface backend error message
+      const errorMsg = regError?.message || "Registration failed. Please try again.";
+      
+      // Distinguish between different error types for better UX
+      if (errorMsg.includes('already') || errorMsg.includes('exists') || errorMsg.includes('duplicate')) {
+        setError("This email or phone is already registered. Please sign in instead.");
+      } else if (errorMsg.includes('invalid') || errorMsg.includes('Invalid')) {
+        setError(`Registration error: ${errorMsg}. Please check your information and try again.`);
+      } else if (errorMsg.includes('required') || errorMsg.includes('Required')) {
+        setError(`Missing required field: ${errorMsg}`);
+      } else {
+        setError(errorMsg);
       }
       
-      setPendingSignupData(null);
-      setMode("otp-signup");
-      startOtpTimer();
-    } catch (err: any) {
-      setError(err?.message || "Registration failed. Please try again.");
-      setShowLegalModal(false);
+      // Keep legal modal open so user can fix data and try again
+      setShowLegalModal(true);
+      // Keep pendingSignupData so they don't lose their info
     }
   };
 
