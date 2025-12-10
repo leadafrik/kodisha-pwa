@@ -217,15 +217,25 @@ export const adminApiRequest = async (
     });
 
     console.log(`[adminApiRequest] Response status: ${response.status}`);
+    console.log(`[adminApiRequest] Response content-type: ${response.headers.get('content-type')}`);
 
     let data: any = null;
+    const responseText = await response.text();
+    console.log(`[adminApiRequest] Response text length: ${responseText?.length || 0}, Content: ${responseText?.substring(0, 200) || 'EMPTY'}`);
+    
     try {
-      data = await response.json();
-    } catch (_) {
-      // ignore JSON parse errors for non-JSON responses
+      if (responseText) {
+        data = JSON.parse(responseText);
+      }
+    } catch (parseError) {
+      console.error(`[adminApiRequest] JSON parse error:`, parseError);
+      // If response was ok but not JSON, that's a problem
+      if (response.ok && responseText) {
+        console.error(`[adminApiRequest] Response was OK (${response.status}) but not valid JSON`);
+      }
     }
 
-    console.log(`[adminApiRequest] Response data:`, data);
+    console.log(`[adminApiRequest] Parsed response data:`, data);
 
     if (!response.ok) {
       if (response.status === 401 || response.status === 403) {
