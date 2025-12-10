@@ -58,10 +58,15 @@ const AdminIDVerification: React.FC = () => {
 
       // Use the correct backend endpoint with status filter
       const endpoint = `/admin/profiles/pending?status=${filterStatus}`;
+      console.log(`[AdminIDVerification] Fetching from endpoint: ${endpoint}`);
+      console.log(`[AdminIDVerification] Filter status: ${filterStatus}`);
+      console.log(`[AdminIDVerification] Auth token present:`, !!localStorage.getItem("kodisha_token"));
 
       const response = await adminApiRequest(endpoint, {
         method: "GET",
       });
+
+      console.log(`[AdminIDVerification] Response:`, response);
 
       if (response && response.success) {
         const data = Array.isArray(response.data)
@@ -70,15 +75,23 @@ const AdminIDVerification: React.FC = () => {
           ? response.verifications
           : [];
 
+        console.log(`[AdminIDVerification] Data loaded successfully, count:`, data.length);
         setVerifications(data);
         setFilteredVerifications(data);
       } else if (response && response.message) {
+        console.log(`[AdminIDVerification] Response had a message:`, response.message);
         setError(response.message);
       } else {
+        console.log(`[AdminIDVerification] Unexpected response format:`, response);
         setError("Unable to load verifications. Please check your connection and try again.");
       }
     } catch (err: any) {
       console.error("Error loading verifications:", err);
+      console.error("Error details:", {
+        message: err.message,
+        stack: err.stack,
+        response: err.response,
+      });
       setError(
         "Unable to load verifications. Please ensure you have the proper permissions and try again."
       );

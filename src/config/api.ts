@@ -206,12 +206,17 @@ export const adminApiRequest = async (
       headers["Content-Type"] = "application/json";
     }
 
+    console.log(`[adminApiRequest] Calling: ${url}`);
+    console.log(`[adminApiRequest] Token present: ${!!token}, Token length: ${token?.length}`);
+
     const response = await fetch(url, {
       headers,
       mode: "cors",
       credentials: options.credentials ?? "include",
       ...options,
     });
+
+    console.log(`[adminApiRequest] Response status: ${response.status}`);
 
     let data: any = null;
     try {
@@ -220,8 +225,11 @@ export const adminApiRequest = async (
       // ignore JSON parse errors for non-JSON responses
     }
 
+    console.log(`[adminApiRequest] Response data:`, data);
+
     if (!response.ok) {
       if (response.status === 401 || response.status === 403) {
+        console.log(`[adminApiRequest] Auth error (${response.status}), clearing tokens`);
         localStorage.removeItem("kodisha_admin_token");
         localStorage.removeItem("kodisha_token");
         localStorage.removeItem("token");
@@ -243,9 +251,7 @@ export const adminApiRequest = async (
     return data;
   } catch (error: any) {
     // Log errors in development
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Admin API Request Error:', { url, error });
-    }
+    console.error('[adminApiRequest] Error:', { url, error: error.message });
     throw error;
   }
 };
