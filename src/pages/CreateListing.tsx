@@ -313,7 +313,7 @@ const CreateListing: React.FC = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Create a Listing</h1>
-          <p className="text-gray-600">List your agricultural products, livestock, or inputs in a few simple steps</p>
+          <p className="text-gray-600">List your agricultural products, livestock, inputs, or services in a few simple steps</p>
         </div>
 
         {/* Progress Indicator */}
