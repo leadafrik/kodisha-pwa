@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Users, AlertTriangle, FileText, Shield, BarChart3, Lock, FileEdit } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const AdminDashboard: React.FC = () => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
+
+  // Refresh user data on component mount to ensure role is up-to-date
+  useEffect(() => {
+    refreshUser();
+  }, []);
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">

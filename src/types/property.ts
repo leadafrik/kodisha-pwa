@@ -234,10 +234,13 @@ export interface AuthContextType {
   login: (identifier: string, password: string) => Promise<void>;
    requestEmailOtp: (email: string) => Promise<void>;
    verifyEmailOtp: (email: string, code: string) => Promise<void>;
+  requestSmsOtp: (phone: string) => Promise<void>;
+  verifySmsOtp: (phone: string, code: string) => Promise<void>;
   resetPasswordWithEmail: (params: { email: string; code: string; newPassword: string }) => Promise<void>;
   logout: () => void;
   updateProfile: (userData: Partial<User>) => void;
   register: (userData: UserFormData) => Promise<User | null>;
+  refreshUser: () => Promise<User | null>;
   loading: boolean;
 }
 

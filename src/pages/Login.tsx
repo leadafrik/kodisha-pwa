@@ -23,6 +23,8 @@ const Login: React.FC = () => {
     login,
     requestEmailOtp,
     verifyEmailOtp,
+    requestSmsOtp,
+    verifySmsOtp,
     resetPasswordWithEmail,
     register,
     loading,
@@ -212,7 +214,8 @@ const Login: React.FC = () => {
     let phone = undefined;
 
     if (isEmail) {
-      email = input;
+      // Normalize email to lowercase to match backend
+      email = input.toLowerCase();
     } else {
       // Normalize to +254 format
       phone = formatKenyanPhone(input);
@@ -246,7 +249,7 @@ const Login: React.FC = () => {
       } else {
         // Send SMS verification code
         try {
-          await requestEmailOtp(phone || '');
+          await requestSmsOtp(phone || '');
           setOtpEmail(phone || '');
           setOtpType('phone');
           setInfo(
@@ -280,11 +283,15 @@ const Login: React.FC = () => {
   const handleVerifySignupOtp = async () => {
     resetMessages();
     if (!otpEmail.trim() || !otpCode.trim()) {
-      setError("Enter both email and code.");
+      setError("Enter both email/phone and code.");
       return;
     }
     try {
-      await verifyEmailOtp(otpEmail.trim(), otpCode.trim());
+      if (otpType === 'phone') {
+        await verifySmsOtp(otpEmail.trim(), otpCode.trim());
+      } else {
+        await verifyEmailOtp(otpEmail.trim(), otpCode.trim());
+      }
       navigate(redirectTo);
     } catch (err: any) {
       setError(err?.message || "Invalid code.");

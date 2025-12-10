@@ -194,6 +194,47 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const requestSmsOtp = async (phone: string) => {
+    setLoading(true);
+    try {
+      const res: any = await apiRequest(API_ENDPOINTS.auth.smsOtpRequest, {
+        method: "POST",
+        body: JSON.stringify({ phone }),
+      });
+      if (!res.success) {
+        throw new Error(res.message || "Failed to send SMS OTP.");
+      }
+    } catch (error) {
+      console.error("SMS OTP request error:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifySmsOtp = async (phone: string, code: string) => {
+    setLoading(true);
+    try {
+      const res: any = await apiRequest(API_ENDPOINTS.auth.smsOtpVerify, {
+        method: "POST",
+        body: JSON.stringify({ phone, code }),
+      });
+      if (!res.success || !res.user || !res.token) {
+        throw new Error(res.message || "Invalid code.");
+      }
+
+      const mappedUser = mapBackendUserToFrontendUser(res.user);
+      setUser(mappedUser);
+      localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
+      localStorage.setItem("kodisha_token", res.token);
+    } catch (error) {
+      console.error("SMS OTP verify error:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const resetPasswordWithEmail = async ({
     email,
     code,
@@ -232,6 +273,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem("kodisha_token");
   };
 
+  const refreshUser = async () => {
+    try {
+      const res: any = await apiRequest(API_ENDPOINTS.auth.me);
+      if (res.success && res.user) {
+        const mappedUser = mapBackendUserToFrontendUser(res.user);
+        setUser(mappedUser);
+        localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
+        return mappedUser;
+      }
+    } catch (err) {
+      console.error("Failed to refresh user:", err);
+    }
+    return null;
+  };
+
   const updateProfile = (userData: Partial<User>) => {
     if (user) {
       const updatedUser = { ...user, ...userData };
@@ -259,9 +315,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         login,
         requestEmailOtp,
         verifyEmailOtp,
+        requestSmsOtp,
+        verifySmsOtp,
         resetPasswordWithEmail,
         logout,
         updateProfile,
+        refreshUser,
         register,
         loading,
       }}
