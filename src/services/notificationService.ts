@@ -42,7 +42,16 @@ export const getNotificationPreferences = async (
     const response = await apiRequest(
       `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/users/${userId}/notification-preferences`
     );
-    return response;
+    // API returns { success: true, data: { ... preferences ... } }
+    if (response && response.data) {
+      return response.data as NotificationPreferences;
+    }
+    // Fallback for direct response
+    if (response && response.userId) {
+      return response as NotificationPreferences;
+    }
+    // If response is the preferences object directly
+    return response as NotificationPreferences;
   } catch (error) {
     console.error('Failed to fetch notification preferences:', error);
     // Return default preferences
@@ -81,7 +90,14 @@ export const updateNotificationPreferences = async (
         body: JSON.stringify(preferences),
       }
     );
-    return response;
+    // API returns { success: true, data: { ... preferences ... } }
+    if (response && response.data) {
+      return response.data as NotificationPreferences;
+    }
+    if (response && response.userId) {
+      return response as NotificationPreferences;
+    }
+    return response as NotificationPreferences;
   } catch (error) {
     console.error('Failed to update notification preferences:', error);
     throw error;
@@ -106,7 +122,18 @@ export const getNotifications = async (
         },
       }
     );
-    return response;
+    // API returns { success: true, data: { notifications: [], total: 0, ... } }
+    if (response && response.data && Array.isArray(response.data.notifications)) {
+      return response.data.notifications;
+    }
+    // Fallback for different response structures
+    if (Array.isArray(response)) {
+      return response;
+    }
+    if (response && Array.isArray(response.notifications)) {
+      return response.notifications;
+    }
+    return [];
   } catch (error) {
     console.error('Failed to fetch notifications:', error);
     return [];
