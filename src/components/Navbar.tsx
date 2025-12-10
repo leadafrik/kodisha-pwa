@@ -63,7 +63,7 @@ const Navbar: React.FC = () => {
                     <>
                       <Link to="/create-listing" className="block px-4 py-3 hover:bg-green-50 border-b">
                         <div className="font-semibold text-green-700">Create Listing</div>
-                        <p className="text-sm text-gray-600">Products, livestock, inputs</p>
+                        <p className="text-sm text-gray-600">Products, livestock, inputs, services</p>
                       </Link>
                       <hr className="my-2" />
                       <Link to="/request/new" className="block px-4 py-3 hover:bg-blue-50">
@@ -75,7 +75,7 @@ const Navbar: React.FC = () => {
                     <>
                       <Link to="/login?next=/create-listing" className="block px-4 py-3 hover:bg-green-50 border-b">
                         <div className="font-semibold text-green-700">Create Listing</div>
-                        <p className="text-sm text-gray-600">Products, livestock, inputs</p>
+                        <p className="text-sm text-gray-600">Products, livestock, inputs, services</p>
                       </Link>
                       <hr className="my-2" />
                       <Link to="/login?next=/request/new" className="block px-4 py-3 hover:bg-blue-50">
