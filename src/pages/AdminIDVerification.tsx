@@ -56,8 +56,8 @@ const AdminIDVerification: React.FC = () => {
       setLoading(true);
       setError("");
 
-      // Use the correct backend endpoint for profile verification
-      const endpoint = "/admin/profiles/pending";
+      // Use the correct backend endpoint with status filter
+      const endpoint = `/admin/profiles/pending?status=${filterStatus}`;
 
       const response = await adminApiRequest(endpoint, {
         method: "GET",
@@ -70,11 +70,8 @@ const AdminIDVerification: React.FC = () => {
           ? response.verifications
           : [];
 
-        // Filter by status - only show pending verification profiles
-        const filtered = data.filter((v: IDVerification) => v.profileVerificationStatus === "pending_verification");
-
-        setVerifications(filtered);
-        setFilteredVerifications(filtered);
+        setVerifications(data);
+        setFilteredVerifications(data);
       } else if (response && response.message) {
         setError(response.message);
       } else {
@@ -101,7 +98,18 @@ const AdminIDVerification: React.FC = () => {
     setFilteredVerifications(filtered);
   }, [searchTerm, verifications]);
 
-  // Check admin authorization - AFTER all hooks
+  // Check admin authorization - AFTER all hooks and BEFORE rendering
+  // Show loading state if user data is still being loaded from localStorage
+  if (!user) {
+    return (
+      <div className="max-w-4xl mx-auto pt-8 px-4">
+        <div className="flex justify-center items-center py-12">
+          <Clock className="w-8 h-8 text-gray-400 animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
   if (user?.type !== "admin" && user?.role !== "admin") {
     return (
       <div className="max-w-4xl mx-auto pt-8 px-4">
