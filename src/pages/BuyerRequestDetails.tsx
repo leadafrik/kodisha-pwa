@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 import { API_BASE_URL } from '../config/api';
 import * as Sentry from '@sentry/react';
 
@@ -262,12 +260,7 @@ const BuyerRequestDetails: React.FC = () => {
   const isOwnRequest = user?._id === request.userId._id;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <div className="sticky top-0 z-50">
-        <Navbar />
-      </div>
-
-      <div className="flex-1 py-8">
+    <div className="flex-1 py-8">
         <div className="max-w-4xl mx-auto px-4">
           {/* Back Button */}
           <button
@@ -524,11 +517,8 @@ const BuyerRequestDetails: React.FC = () => {
                 </div>
               )}
             </div>
-          </div>
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 };
