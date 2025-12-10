@@ -21,11 +21,12 @@ const LegalAcceptanceModal: React.FC<LegalAcceptanceModalProps> = ({
 }) => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
+  const [dataProcessingConsent, setDataProcessingConsent] = useState(false);
   const [marketingConsent, setMarketingConsent] = useState(false);
 
   if (!isOpen) return null;
 
-  const allRequiredAccepted = termsAccepted && privacyAccepted;
+  const allRequiredAccepted = termsAccepted && privacyAccepted && dataProcessingConsent;
 
   const handleSubmit = () => {
     if (allRequiredAccepted) {
@@ -33,7 +34,7 @@ const LegalAcceptanceModal: React.FC<LegalAcceptanceModalProps> = ({
         termsAccepted,
         privacyAccepted,
         marketingConsent,
-        dataProcessingConsent: true,
+        dataProcessingConsent,
       });
     }
   };
@@ -93,6 +94,23 @@ const LegalAcceptanceModal: React.FC<LegalAcceptanceModalProps> = ({
                   <span className="text-red-600">*</span>
                 </div>
                 <p className="text-xs text-gray-600 mt-0.5">How we handle your personal data</p>
+              </div>
+            </label>
+
+            {/* Data Processing */}
+            <label className="flex items-start gap-3 cursor-pointer p-3 rounded hover:bg-gray-50">
+              <input
+                type="checkbox"
+                checked={dataProcessingConsent}
+                onChange={(e) => setDataProcessingConsent(e.target.checked)}
+                className="mt-1 w-5 h-5 text-green-600 rounded"
+              />
+              <div>
+                <div className="font-semibold text-gray-900 text-sm flex items-center gap-1">
+                  I consent to data processing
+                  <span className="text-red-600">*</span>
+                </div>
+                <p className="text-xs text-gray-600 mt-0.5">Consent to process your personal information as described in the privacy policy</p>
               </div>
             </label>
 
