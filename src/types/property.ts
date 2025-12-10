@@ -216,7 +216,7 @@ export interface User {
   userType?: "farmer" | "landowner" | "buyer" | "service provider";
   county?: string;
   isVerified?: boolean;
-  role?: "user" | "admin" | "moderator";
+  role?: "user" | "admin" | "moderator" | "super_admin";
 
   verification?: {
     phoneVerified: boolean;

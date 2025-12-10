@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Users, AlertTriangle, FileText, Shield, BarChart3, Lock } from 'lucide-react';
+import { Users, AlertTriangle, FileText, Shield, BarChart3, Lock, FileEdit } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 const AdminDashboard: React.FC = () => {
+  const { user } = useAuth();
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -97,6 +99,29 @@ const AdminDashboard: React.FC = () => {
               <p>✓ Track moderation history</p>
             </div>
           </Link>
+
+          {/* Content Editor (Super Admin Only) */}
+          {user?.role === 'super_admin' && (
+            <Link
+              to="/admin/content-editor"
+              className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg shadow-lg p-8 hover:shadow-xl hover:-translate-y-1 transition group border-2 border-green-500"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center group-hover:bg-green-200 transition">
+                  <FileEdit className="text-green-600" size={28} />
+                </div>
+                <span className="text-xs font-semibold px-3 py-1 bg-green-100 text-green-700 rounded-full">SUPER ADMIN</span>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Website Content Editor</h2>
+              <p className="text-gray-600 mb-4">Edit all website text and content without redeploying</p>
+              <div className="space-y-2 text-sm text-gray-600">
+                <p>✓ Edit hero headlines</p>
+                <p>✓ Update page descriptions</p>
+                <p>✓ Manage CTA buttons</p>
+                <p>✓ Changes apply immediately</p>
+              </div>
+            </Link>
+          )}
 
           {/* Listing Management */}
           <div className="bg-white rounded-lg shadow-lg p-8 opacity-50 cursor-not-allowed">

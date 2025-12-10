@@ -40,6 +40,7 @@ const BrowseBuyerRequestsPage = lazy(() => import('./pages/BrowseBuyerRequestsPa
 const BuyerRequestDetails = lazy(() => import('./pages/BuyerRequestDetails'));
 const IDVerificationUpload = lazy(() => import('./pages/IDVerificationUpload'));
 const AdminIDVerification = lazy(() => import('./pages/AdminIDVerification'));
+const AdminContentEditor = lazy(() => import('./pages/admin/AdminContentEditor'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -132,6 +133,7 @@ function App() {
                     <Route path="/admin/profile-verification" element={<ProtectedRoute><AdminProfileVerification /></ProtectedRoute>} />
                     <Route path="/admin/users" element={<ProtectedRoute><AdminUserManagement /></ProtectedRoute>} />
                     <Route path="/admin/reports-management" element={<ProtectedRoute><AdminReportsManagement /></ProtectedRoute>} />
+                    <Route path="/admin/content-editor" element={<ProtectedRoute><AdminContentEditor /></ProtectedRoute>} />
                     <Route path="/legal/terms" element={<TermsOfService />} />
                     <Route path="/legal/privacy" element={<PrivacyPolicy />} />
                     <Route path="/error" element={<ServerError />} />

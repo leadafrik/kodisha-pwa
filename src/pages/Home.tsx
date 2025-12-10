@@ -2,9 +2,23 @@ import React from 'react';
 import { PAYMENTS_ENABLED } from '../config/featureFlags';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { usePageContent } from '../hooks/usePageContent';
 
 const Home: React.FC = () => {
   const { user } = useAuth();
+  
+  // Fetch dynamic content with fallbacks
+  const { content: heroHeadline } = usePageContent('home.hero.headline');
+  const { content: heroDescription } = usePageContent('home.hero.description');
+  const { content: ctaPrimary } = usePageContent('home.hero.cta_primary');
+  const { content: announcementText } = usePageContent('home.announcement.banner');
+  
+  // Set defaults if content is empty
+  const displayHeadline = heroHeadline || 'Digitizing Kenya\'s\nAgricultural Marketplace';
+  const displayDescription = heroDescription || 'Buy and sell agricultural produce directly from farmers and producers. Connect with professional agricultural service providers across all 47 counties.';
+  const displayCtaPrimary = ctaPrimary || 'Browse Marketplace';
+  const displayAnnouncement = announcementText || 'Introductory Phase: All listings are free while we onboard early users.';
+
 
   return (
     <main className="min-h-screen bg-white">
@@ -20,17 +34,26 @@ const Home: React.FC = () => {
 
             {/* Headline */}
             <div className="space-y-4">
-              <h1 className="text-5xl sm:text-6xl font-extrabold text-gray-900 leading-tight">
-                Digitizing Kenya's
-                <br />
-                <span className="bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
-                  Agricultural Marketplace
-                </span>
+              <h1 className="text-5xl sm:text-6xl font-extrabold text-gray-900 leading-tight whitespace-pre-line">
+                {displayHeadline.split('\n').map((line, idx) => (
+                  <React.Fragment key={idx}>
+                    {idx === displayHeadline.split('\n').length - 1 ? (
+                      <span className="bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
+                        {line}
+                      </span>
+                    ) : (
+                      <>
+                        {line}
+                        <br />
+                      </>
+                    )}
+                  </React.Fragment>
+                ))}
               </h1>
               <p className="text-lg sm:text-xl text-gray-600 max-w-2xl leading-relaxed">
-                Buy and sell agricultural produce directly from farmers and producers. Connect with professional agricultural service providers across all 47 counties.
+                {displayDescription}
                 {!PAYMENTS_ENABLED && (
-                  <span className="block mt-3 font-semibold text-green-700">Introductory Phase: All listings are free while we onboard early users.</span>
+                  <span className="block mt-3 font-semibold text-green-700">{displayAnnouncement}</span>
                 )}
               </p>
             </div>
@@ -44,7 +67,7 @@ const Home: React.FC = () => {
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-                Browse Marketplace
+                {displayCtaPrimary}
               </Link>
               <Link
                 to={user ? "/create-listing" : "/login?next=/create-listing"}
