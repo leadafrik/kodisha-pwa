@@ -206,10 +206,13 @@ export const adminApiRequest = async (
       headers["Content-Type"] = "application/json";
     }
 
-    console.log(`[adminApiRequest] Calling: ${url}`);
+    // Convert relative path to absolute URL if needed
+    const absoluteUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+    
+    console.log(`[adminApiRequest] Calling: ${absoluteUrl}`);
     console.log(`[adminApiRequest] Token present: ${!!token}, Token length: ${token?.length}`);
 
-    const response = await fetch(url, {
+    const response = await fetch(absoluteUrl, {
       headers,
       mode: "cors",
       credentials: options.credentials ?? "include",
