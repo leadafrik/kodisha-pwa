@@ -40,7 +40,7 @@ const ReportModal: React.FC<ReportModalProps> = ({
       setLoading(true);
       setError(null);
 
-      await submitReport(
+      const result = await submitReport(
         sellerId,
         reason,
         description,
@@ -49,6 +49,10 @@ const ReportModal: React.FC<ReportModalProps> = ({
         severity
       );
 
+      if (!result || !result._id) {
+        throw new Error('Failed to submit report');
+      }
+
       // Success
       setReason('');
       setDescription('');
@@ -56,7 +60,9 @@ const ReportModal: React.FC<ReportModalProps> = ({
       onSubmitSuccess?.();
       onClose();
     } catch (err) {
-      setError((err as Error).message);
+      const message = (err as Error).message;
+      setError(message || 'Failed to submit report. Please try again.');
+      console.error('Report submission error:', err);
     } finally {
       setLoading(false);
     }

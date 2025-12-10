@@ -77,18 +77,18 @@ function App() {
                     <Route path="/find-services" element={<BrowseListings />} />
                     <Route path="/request" element={<BrowseBuyerRequestsPage />} />
                     <Route 
-                      path="/request/:id" 
-                      element={
-                        <ProtectedRoute>
-                          <BuyerRequestDetails />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
                       path="/request/new" 
                       element={
                         <ProtectedRoute>
                           <PostBuyRequest />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/request/:id" 
+                      element={
+                        <ProtectedRoute>
+                          <BuyerRequestDetails />
                         </ProtectedRoute>
                       } 
                     />

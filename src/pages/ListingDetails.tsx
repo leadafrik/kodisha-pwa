@@ -815,12 +815,18 @@ const ListingDetails: React.FC = () => {
             )}
 
             <div className="flex gap-2">
-              <a
-                href={`tel:${owner.phone || ''}`}
-                className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 text-center"
-              >
-                Call
-              </a>
+              {listing.owner.phone ? (
+                <a
+                  href={`tel:${listing.owner.phone}`}
+                  className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 text-center"
+                >
+                  Call
+                </a>
+              ) : (
+                <div className="flex-1 px-3 py-2 bg-gray-300 text-gray-600 rounded-lg text-sm font-semibold text-center cursor-not-allowed">
+                  Call Unavailable
+                </div>
+              )}
               <button
                 onClick={() => {
                   const el = document.querySelector('textarea');
