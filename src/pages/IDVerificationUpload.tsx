@@ -12,14 +12,8 @@ const IDVerificationUpload: React.FC = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // Debug logging
-  React.useEffect(() => {
-    console.log('IDVerificationUpload mounted, user:', user);
-  }, [user]);
-
   try {
     if (!user) {
-      console.warn('IDVerificationUpload: No user found, returning null');
       return null;
     }
 

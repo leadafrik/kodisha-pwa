@@ -40,15 +40,6 @@ const getSocketUrl = (): string => {
 export const API_BASE_URL = getApiBaseUrl();
 export const SOCKET_URL = getSocketUrl();
 
-// Log configuration in development
-if (process.env.NODE_ENV === 'development') {
-  console.log('🔧 API Configuration:', {
-    apiUrl: API_BASE_URL,
-    socketUrl: SOCKET_URL,
-    environment: process.env.NODE_ENV,
-  });
-}
-
 export const API_ENDPOINTS = {
   auth: {
     register: `${API_BASE_URL}/auth/register`,

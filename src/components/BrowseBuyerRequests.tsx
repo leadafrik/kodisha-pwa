@@ -76,10 +76,6 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
         params.append("county", filters.county);
       if (filters.urgency) params.append("urgency", filters.urgency);
 
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[Dev] Fetching buyer requests:', { page, filters });
-      }
-      
       const response = await fetch(
         `${API_BASE_URL}/buyer-requests?${params}`
       );

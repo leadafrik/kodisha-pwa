@@ -281,7 +281,6 @@ const ListingDetails: React.FC = () => {
         return;
       }
       const data = await res.json();
-      console.log('Listing API response:', data);
       if (data.success && data.data) {
         setListing(data.data);
         setListingType(data.data.listingType || "land");
@@ -296,9 +295,8 @@ const ListingDetails: React.FC = () => {
               return favIdStr === listingIdStr && f.listingType === (data.data.listingType || 'land');
             });
             setSaved(isSaved);
-            console.log('🔍 Favorite check:', { isSaved, listingIdStr, favoritesCount: favorites.length });
           } catch (e) {
-            console.error('❌ Favorite check failed', e);
+            // Silently handle favorite check failures
           }
         }
         if (Array.isArray(data.data.images) && data.data.images.length > 0) {
@@ -699,13 +697,10 @@ const ListingDetails: React.FC = () => {
                   const listingIdToSend = listing._id.toString?.() || String(listing._id);
                   const listingTypeToSend = (listing.listingType || listingType || 'land') as 'land' | 'product' | 'equipment' | 'service' | 'agrovet';
                   
-                  console.log('🔖 Toggling favorite:', { listingIdToSend, listingTypeToSend, currentlySaved: saved });
-                  
                   const result = await favoritesService.toggleFavorite(listingIdToSend, listingTypeToSend);
-                  console.log('✅ Toggle successful, action:', result.action);
                   setSaved(result.action === 'added');
                 } catch (err) {
-                  console.error('❌ Toggle favorite error', err);
+                  // Handle toggle error
                 }
               }}
               className="px-5 py-2 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition"

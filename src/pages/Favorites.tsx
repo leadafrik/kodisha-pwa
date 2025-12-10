@@ -24,12 +24,9 @@ const Favorites: React.FC = () => {
         return; 
       }
       try {
-        console.log('📂 Fetching favorites...');
         const favorites = await favoritesService.getFavorites();
-        console.log('✅ Favorites loaded:', favorites.length, 'items');
         setItems(favorites);
       } catch (e: any) {
-        console.error('❌ Load favorites error', e);
         setError(e.message || 'Failed to load saved listings');
       } finally {
         setLoading(false);
