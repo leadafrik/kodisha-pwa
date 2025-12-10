@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, AlertTriangle, FileText, Shield, BarChart3, Lock, FileEdit } from 'lucide-react';
+import { Users, AlertTriangle, FileText, Shield, BarChart3, Lock, FileEdit, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const AdminDashboard: React.FC = () => {
@@ -9,14 +9,25 @@ const AdminDashboard: React.FC = () => {
   // Refresh user data on component mount to ensure role is up-to-date
   useEffect(() => {
     refreshUser();
-  }, []);
+  }, [refreshUser]);
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-12">
-          <h1 className="text-5xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
-          <p className="text-lg text-gray-600">Central control center for platform management and fraud prevention</p>
+        <div className="mb-12 flex justify-between items-start">
+          <div>
+            <h1 className="text-5xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
+            <p className="text-lg text-gray-600">Central control center for platform management and fraud prevention</p>
+            {user?.role === 'super_admin' && <p className="text-sm text-green-600 font-semibold mt-1">🔑 Super Admin Access Active</p>}
+          </div>
+          <button
+            onClick={() => refreshUser()}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition text-gray-700 font-medium text-sm"
+            title="Refresh user role and permissions"
+          >
+            <RefreshCw size={16} />
+            Refresh
+          </button>
         </div>
 
         {/* Main Controls Grid */}
