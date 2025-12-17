@@ -253,7 +253,27 @@ const ChatbotWidget: React.FC = () => {
               messages.map((msg) => (
                 <div key={msg.id} className={`chatbot-message chatbot-message-${msg.sender}`}>
                   <div className="chatbot-message-content">
-                    <p>{msg.message}</p>
+                    {msg.sender === 'bot' && msg.message.includes('http') ? (
+                      <p className="chatbot-message-text">
+                        {msg.message.split(/(\bhttps?:\/\/[^\s]+)/g).map((part, idx) =>
+                          part.match(/^https?:\/\//) ? (
+                            <a
+                              key={idx}
+                              href={part}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="chatbot-link"
+                            >
+                              {part}
+                            </a>
+                          ) : (
+                            <span key={idx}>{part}</span>
+                          )
+                        )}
+                      </p>
+                    ) : (
+                      <p>{msg.message}</p>
+                    )}
                     {msg.confidence && msg.confidence < 80 && (
                       <small className="chatbot-confidence">
                         Confidence: {msg.confidence}%
