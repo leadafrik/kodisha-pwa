@@ -11,6 +11,7 @@ import Login from './pages/Login';
 import AboutUs from './pages/AboutUs';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ChatbotWidget from './components/ChatbotWidget';
 import NotFound from './pages/NotFound';
 import ServerError from './pages/ServerError';
 import Offline from './pages/Offline';
@@ -143,6 +144,7 @@ function App() {
                   </Suspense>
                 </div>
                               <Footer />
+                              <ChatbotWidget />
               </div>
             </Router>
           </VerificationProvider>
