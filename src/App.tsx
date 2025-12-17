@@ -12,6 +12,7 @@ import AboutUs from './pages/AboutUs';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ChatbotWidget from './components/ChatbotWidget';
+import WhatsAppFloatingButton from './components/WhatsAppFloatingButton';
 import NotFound from './pages/NotFound';
 import ServerError from './pages/ServerError';
 import Offline from './pages/Offline';
@@ -145,6 +146,7 @@ function App() {
                 </div>
                               <Footer />
                               <ChatbotWidget />
+                              <WhatsAppFloatingButton />
               </div>
             </Router>
           </VerificationProvider>
