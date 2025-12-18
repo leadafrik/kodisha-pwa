@@ -155,7 +155,7 @@ const BrowseListings: React.FC = () => {
           card.subCategory !== serviceSub
         )
           return false;
-        if (county && card.county !== county)
+        if (county && card.county?.toLowerCase() !== county.toLowerCase())
           return false;
         if (searchTerm) {
           const haystack = `${card.title} ${card.description} ${card.locationLabel}`.toLowerCase();
