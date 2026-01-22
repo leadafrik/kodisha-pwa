@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AlertTriangle, CheckCircle, Clock, MessageSquare, Trash2 } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import { API_BASE_URL } from '../../config/api';
 
 interface Report {
@@ -28,6 +28,7 @@ const AdminReportsManagement: React.FC = () => {
 
   useEffect(() => {
     fetchReports();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter, page]);
 
   const fetchReports = async () => {

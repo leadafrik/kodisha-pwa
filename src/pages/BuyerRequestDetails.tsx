@@ -169,8 +169,8 @@ const BuyerRequestDetails: React.FC = () => {
       );
 
       if (refreshResponse.ok) {
-        const data = await refreshResponse.json();
-        setRequest(data.data);
+        const refreshData = await refreshResponse.json();
+        setRequest(refreshData.data);
       }
     } catch (err) {
       console.error('Error submitting reply:', err);
@@ -202,7 +202,7 @@ const BuyerRequestDetails: React.FC = () => {
         throw new Error(errorData.message || 'Failed to mark as fulfilled');
       }
 
-      const data = await response.json();
+      await response.json();
       setSubmitted(true);
       setTimeout(() => {
         setSubmitted(false);
@@ -350,7 +350,7 @@ const BuyerRequestDetails: React.FC = () => {
                         <img
                           key={idx}
                           src={image}
-                          alt={`Request image ${idx + 1}`}
+                          alt={`Request ${idx + 1}`}
                           className="rounded-lg max-h-48 object-cover"
                         />
                       ))}

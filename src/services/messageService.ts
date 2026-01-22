@@ -1,4 +1,4 @@
-import { API_ENDPOINTS, apiRequest } from '../config/api';
+import { API_ENDPOINTS } from '../config/api';
 
 const token = localStorage.getItem('kodisha_token');
 

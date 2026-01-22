@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from "../data/kenyaCounties";
 import { API_BASE_URL } from "../config/api";
-import { AlertCircle, CheckCircle2, MapPin, Package, Tag, Calendar, Camera, FileText } from "lucide-react";
+import { AlertCircle, CheckCircle2, MapPin, Tag, Calendar, Camera, FileText } from "lucide-react";
 
 type ListingCategory = "produce" | "livestock" | "inputs" | "service";
 type ListingType = "sell" | "buy";
@@ -83,7 +83,8 @@ const CreateListing: React.FC = () => {
     if (user?.phone && !form.contact) {
       setForm((prev) => ({ ...prev, contact: user.phone }));
     }
-  }, [user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.phone]);
 
   // Update verification status
   useEffect(() => {

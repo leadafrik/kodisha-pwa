@@ -25,7 +25,6 @@ interface Transaction {
 const PaymentTestPanel: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [simulationResult, setSimulationResult] = useState<any>(null);
 
   useEffect(() => {

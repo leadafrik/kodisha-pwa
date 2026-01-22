@@ -166,7 +166,7 @@ const AdminControlsSection: React.FC<AdminControlsProps> = ({ listing, onUpdate 
     setLoading(true);
     setMessage("");
     try {
-      const data = await adminApiRequest(
+      await adminApiRequest(
         API_ENDPOINTS.admin.listings.verify(listing._id),
         {
           method: "PUT",
@@ -189,7 +189,7 @@ const AdminControlsSection: React.FC<AdminControlsProps> = ({ listing, onUpdate 
     setLoading(true);
     setMessage("");
     try {
-      const data = await adminApiRequest(
+      await adminApiRequest(
         API_ENDPOINTS.admin.listings.delete(listing._id),
         { method: "DELETE" }
       );
@@ -256,7 +256,6 @@ const ListingDetails: React.FC = () => {
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [typing, setTyping] = useState(false);
-  const [ownerOnline, setOwnerOnline] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [ratingScore, setRatingScore] = useState(0);
@@ -409,7 +408,10 @@ const ListingDetails: React.FC = () => {
     });
 
     socket.on("presence:update", (list: string[]) => {
-      setOwnerOnline(Array.isArray(list) && list.includes(ownerId));
+      // Track owner online status for real-time messaging
+      if (Array.isArray(list) && list.includes(ownerId)) {
+        // Owner is online
+      }
     });
 
     socketRef.current = socket;

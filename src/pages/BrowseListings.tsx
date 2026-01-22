@@ -60,7 +60,7 @@ const formatPhoneForUri = (contact: string): string => {
 };
 
 const BrowseListings: React.FC = () => {
-  const { properties, serviceListings, productListings, loading } = useProperties();
+  const { serviceListings, productListings, loading } = useProperties();
   const { user } = useAuth();
 
   const [category, setCategory] = useState<Category>("all");

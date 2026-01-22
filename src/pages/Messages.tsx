@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { messageService, MessageThread, Message } from '../services/messageService';
-import { ChevronLeft, Send, Check, CheckCheck, Circle } from 'lucide-react';
+import { ChevronLeft, Send, Check, CheckCheck } from 'lucide-react';
 
 const Messages: React.FC = () => {
   const [threads, setThreads] = useState<MessageThread[]>([]);

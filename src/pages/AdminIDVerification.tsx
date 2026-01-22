@@ -49,6 +49,7 @@ const AdminIDVerification: React.FC = () => {
   // Load verifications
   useEffect(() => {
     loadVerifications();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterStatus]);
 
   const loadVerifications = async () => {

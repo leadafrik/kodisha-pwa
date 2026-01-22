@@ -362,10 +362,10 @@ const AboutUs: React.FC = () => {
             <div>
               <h4 className="text-white font-bold mb-4">Legal</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-white transition">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition">Data Protection</a></li>
-                <li><a href="#" className="hover:text-white transition">ODPC</a></li>
+                <li><button onClick={() => {}} className="hover:text-white transition">Terms of Service</button></li>
+                <li><button onClick={() => {}} className="hover:text-white transition">Privacy Policy</button></li>
+                <li><button onClick={() => {}} className="hover:text-white transition">Data Protection</button></li>
+                <li><button onClick={() => {}} className="hover:text-white transition">ODPC</button></li>
               </ul>
             </div>
             <div>
@@ -373,7 +373,7 @@ const AboutUs: React.FC = () => {
               <ul className="space-y-2 text-sm">
                 <li><a href="mailto:kodisha.254.ke@gmail.com" className="hover:text-white transition">Email Support</a></li>
                 <li><a href="https://chat.whatsapp.com/HzCaV5YVz86CjwajiOHR5i" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">WhatsApp Community</a></li>
-                <li><a href="#" className="hover:text-white transition">Contact Support</a></li>
+                <li><button onClick={() => {}} className="hover:text-white transition">Contact Support</button></li>
               </ul>
             </div>
           </div>
@@ -385,9 +385,9 @@ const AboutUs: React.FC = () => {
               <p className="text-gray-500">For data protection inquiries: <a href="mailto:kodisha.254.ke@gmail.com" className="text-green-400 hover:text-green-300 transition">kodisha.254.ke@gmail.com</a></p>
             </div>
             <div className="flex justify-center gap-4 mt-6">
-              <a href="#" className="text-green-400 hover:text-green-300 transition font-semibold text-sm">Download App</a>
+              <button onClick={() => {}} className="text-green-400 hover:text-green-300 transition font-semibold text-sm">Download App</button>
               <span className="text-gray-600">|</span>
-              <a href="#" className="text-green-400 hover:text-green-300 transition font-semibold text-sm">Web Version</a>
+              <button onClick={() => {}} className="text-green-400 hover:text-green-300 transition font-semibold text-sm">Web Version</button>
             </div>
           </div>
         </div>
