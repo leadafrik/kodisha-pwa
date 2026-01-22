@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { loginWithGoogle, initializeGoogleSDK } from "../services/googleAuth";
+import { initializeGoogleSDK } from "../services/googleAuth";
 
 declare global {
   interface Window {
