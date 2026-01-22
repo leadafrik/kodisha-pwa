@@ -2,6 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { loginWithGoogle, initializeGoogleSDK } from "../services/googleAuth";
 
+declare global {
+  interface Window {
+    google: any;
+  }
+}
+
 interface GoogleLoginButtonProps {
   onSuccess?: () => void;
   onError?: (error: string) => void;
@@ -37,17 +43,52 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
         throw new Error("Google Client ID not configured");
       }
 
+      // Initialize SDK
       await initializeGoogleSDK(googleClientId);
 
-      // Login with Google
-      const { user, idToken } = await loginWithGoogle();
-
-      if (!user.email) {
-        throw new Error("Google login requires email permission");
+      // Check if Google SDK is available
+      if (!window.google) {
+        throw new Error("Google SDK not initialized");
       }
 
+      // Use the credential callback approach
+      const response = await new Promise<any>((resolve, reject) => {
+        const callback = (response: any) => {
+          if (response.credential) {
+            resolve(response);
+          } else {
+            reject(new Error("No credential received from Google"));
+          }
+        };
+
+        // Initialize with callback
+        window.google.accounts.id.initialize({
+          client_id: googleClientId,
+          callback: callback,
+        });
+
+        // Trigger the One Tap UI
+        window.google.accounts.id.prompt((notification: any) => {
+          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+            reject(new Error("Google Sign-In popup was dismissed or could not be displayed"));
+          }
+        });
+      });
+
+      // Decode the token
+      const base64Url = response.credential.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
+      );
+
+      const decodedToken = JSON.parse(jsonPayload);
+
       // Send to backend for verification and user creation
-      await authLoginWithGoogle(idToken, user.id, user.email, user.name);
+      await authLoginWithGoogle(response.credential, decodedToken.sub, decodedToken.email, decodedToken.name);
 
       if (onSuccess) {
         onSuccess();
