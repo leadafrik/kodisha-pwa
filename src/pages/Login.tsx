@@ -312,7 +312,6 @@ const Login: React.FC = () => {
           type="text"
           value={loginData.emailOrPhone}
           onChange={(e) => setLoginData({ ...loginData, emailOrPhone: e.target.value })}
-          onKeyPress={(e) => e.key === "Enter" && handleLogin()}
           className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-base
             focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100
             placeholder:text-gray-500 transition-colors"
@@ -327,7 +326,6 @@ const Login: React.FC = () => {
           type="password"
           value={loginData.password}
           onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-          onKeyPress={(e) => e.key === "Enter" && handleLogin()}
           className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-base
             focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100
             placeholder:text-gray-500 transition-colors"
