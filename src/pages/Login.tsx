@@ -3,7 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { kenyaCounties } from "../data/kenyaCounties";
 import { formatKenyanPhone } from "../utils/security";
-import GoogleLoginButton from "../components/GoogleLoginButton";
+import GoogleLoginButton from "../components/GoogleLoginButtonV2";
 
 type Mode = "login" | "signup" | "otp-verify" | "forgot" | "otp-reset";
 
