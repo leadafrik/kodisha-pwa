@@ -31,7 +31,8 @@ const ChatbotWidget: React.FC = () => {
     if (isOpen && !chatSession) {
       startChat();
     }
-  }, [isOpen, chatSession, startChat]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, chatSession]);
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {
