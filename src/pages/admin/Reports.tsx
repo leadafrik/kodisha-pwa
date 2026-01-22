@@ -61,6 +61,7 @@ const AdminReports: React.FC = () => {
 
   useEffect(() => {
     fetchReports();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterStatus, filterSeverity, page]);
 
   const handleUpdateStatus = async (reportId: string, newStatus: string) => {

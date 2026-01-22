@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, AlertTriangle, CheckCircle, XCircle, Lock, Unlock, Flag } from 'lucide-react';
+import { Search, AlertTriangle, CheckCircle, Flag } from 'lucide-react';
 import { API_BASE_URL } from '../../config/api';
 
 interface User {

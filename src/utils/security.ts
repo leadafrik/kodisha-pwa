@@ -116,7 +116,7 @@ export const clearAuthTokens = (): void => {
  */
 export const isValidKenyanPhone = (phone: string): boolean => {
   // Remove spaces and special characters
-  const cleaned = phone.replace(/[\s\-\(\)]/g, '');
+  const cleaned = phone.replace(/[\s\-()]/g, '');
   
   // Check if it matches Kenyan format: +254... or 07... or 01...
   const kenyanPattern = /^(\+254|254|0)([17]\d{8})$/;
@@ -127,7 +127,7 @@ export const isValidKenyanPhone = (phone: string): boolean => {
  * Format Kenyan phone to standard format (+254...)
  */
 export const formatKenyanPhone = (phone: string): string => {
-  const cleaned = phone.replace(/[\s\-\(\)]/g, '');
+  const cleaned = phone.replace(/[\s\-()]/g, '');
   
   if (cleaned.startsWith('+254')) {
     return cleaned;

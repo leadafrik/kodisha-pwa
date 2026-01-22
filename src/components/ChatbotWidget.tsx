@@ -31,7 +31,7 @@ const ChatbotWidget: React.FC = () => {
     if (isOpen && !chatSession) {
       startChat();
     }
-  }, [isOpen]);
+  }, [isOpen, chatSession, startChat]);
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {

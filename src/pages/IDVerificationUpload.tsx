@@ -10,7 +10,6 @@ const IDVerificationUpload: React.FC = () => {
   const [selfieFile, setSelfieFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   try {
     if (!user) {

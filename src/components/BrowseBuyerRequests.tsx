@@ -81,7 +81,6 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
       );
 
       if (!response.ok) {
-        const errorText = await response.text();
         throw new Error(`Failed to fetch buyer requests: ${response.status} ${response.statusText}`);
       }
 
@@ -340,7 +339,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                     {/* Buyer Info */}
                     <div className="flex items-center gap-2 pt-2 border-t border-gray-200">
                       <div className="w-8 h-8 bg-green-200 rounded-full flex items-center justify-center text-sm font-bold text-green-800">
-                        {request.userId && request.userId.fullName?.charAt(0) || "U"}
+                        {(request.userId && request.userId.fullName?.charAt(0)) || "U"}
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-medium text-gray-900">

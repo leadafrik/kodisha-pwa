@@ -40,6 +40,7 @@ const AdminListingsApproval: React.FC = () => {
       return;
     }
     fetchPendingListings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, filter]);
 
   const fetchPendingListings = async () => {
