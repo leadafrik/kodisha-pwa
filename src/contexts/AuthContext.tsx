@@ -110,6 +110,70 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const loginWithFacebook = async (
+    accessToken: string,
+    fbUserId: string,
+    email: string,
+    name: string
+  ) => {
+    setLoading(true);
+    try {
+      const res: any = await apiRequest(API_ENDPOINTS.auth.facebookLogin, {
+        method: "POST",
+        body: JSON.stringify({ accessToken, fbUserId, email, name }),
+      });
+
+      if (!res.success || !res.user) {
+        throw new Error(res.message || "Facebook login failed");
+      }
+
+      const mappedUser = mapBackendUserToFrontendUser(res.user);
+      setUser(mappedUser);
+      localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
+
+      if (res.token) {
+        localStorage.setItem("kodisha_token", res.token);
+      }
+    } catch (error) {
+      console.error("Facebook login error:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loginWithGoogle = async (
+    idToken: string,
+    googleUserId: string,
+    email: string,
+    name: string
+  ) => {
+    setLoading(true);
+    try {
+      const res: any = await apiRequest(API_ENDPOINTS.auth.googleLogin, {
+        method: "POST",
+        body: JSON.stringify({ idToken, googleUserId, email, name }),
+      });
+
+      if (!res.success || !res.user) {
+        throw new Error(res.message || "Google login failed");
+      }
+
+      const mappedUser = mapBackendUserToFrontendUser(res.user);
+      setUser(mappedUser);
+      localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
+
+      if (res.token) {
+        localStorage.setItem("kodisha_token", res.token);
+      }
+    } catch (error) {
+      console.error("Google login error:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const register = async (userData: UserFormData): Promise<User | null> => {
     setLoading(true);
     try {
@@ -313,6 +377,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       value={{
         user,
         login,
+        loginWithFacebook,
+        loginWithGoogle,
         requestEmailOtp,
         verifyEmailOtp,
         requestSmsOtp,

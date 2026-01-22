@@ -3,6 +3,8 @@ import { useAuth } from "../contexts/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { kenyaCounties } from "../data/kenyaCounties";
 import { formatKenyanPhone } from "../utils/security";
+import FacebookLoginButton from "../components/FacebookLoginButton";
+import GoogleLoginButton from "../components/GoogleLoginButton";
 
 type Mode = "login" | "signup" | "otp-verify" | "forgot" | "otp-reset";
 
@@ -294,6 +296,26 @@ const Login: React.FC = () => {
 
   const renderLogin = () => (
     <form onSubmit={handleLogin} className="space-y-4">
+      <div className="grid grid-cols-2 gap-3">
+        <FacebookLoginButton
+          onSuccess={() => navigate(redirectTo)}
+          onError={(error) => setError(error)}
+        />
+        <GoogleLoginButton
+          onSuccess={() => navigate(redirectTo)}
+          onError={(error) => setError(error)}
+        />
+      </div>
+
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-300"></div>
+        </div>
+        <div className="relative flex justify-center text-sm">
+          <span className="px-2 bg-white text-gray-500">Or continue with email/phone</span>
+        </div>
+      </div>
+
       <div>
         <label className="block text-sm font-medium text-gray-700">Email or Phone</label>
         <input

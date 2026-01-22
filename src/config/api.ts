@@ -44,6 +44,8 @@ export const API_ENDPOINTS = {
   auth: {
     register: `${API_BASE_URL}/auth/register`,
     login: `${API_BASE_URL}/auth/login`,
+    facebookLogin: `${API_BASE_URL}/auth/facebook/login`,
+    googleLogin: `${API_BASE_URL}/auth/google/login`,
     checkExists: `${API_BASE_URL}/auth/check-exists`,
     loginOtpRequest: `${API_BASE_URL}/auth/login-otp/request`,
     loginOtpVerify: `${API_BASE_URL}/auth/login-otp/verify`,
