@@ -3,7 +3,6 @@ import { useAuth } from "../contexts/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { kenyaCounties } from "../data/kenyaCounties";
 import { formatKenyanPhone } from "../utils/security";
-import FacebookLoginButton from "../components/FacebookLoginButton";
 import GoogleLoginButton from "../components/GoogleLoginButton";
 
 type Mode = "login" | "signup" | "otp-verify" | "forgot" | "otp-reset";
@@ -296,29 +295,14 @@ const Login: React.FC = () => {
 
   const renderLogin = () => (
     <form onSubmit={handleLogin} className="space-y-5">
-      {/* Prominent OAuth Buttons */}
-      <div className="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
-        <p className="text-center text-xs font-semibold text-gray-700 tracking-wide">SIGN IN WITH</p>
-        <FacebookLoginButton
-          onSuccess={() => navigate(redirectTo)}
-          onError={(error) => setError(error)}
-          className="w-full py-3 text-base font-semibold"
-        />
+      {/* Google Sign In Button */}
+      <div className="space-y-2">
+        <p className="text-center text-xs font-semibold text-gray-700 tracking-wide">QUICK SIGN IN</p>
         <GoogleLoginButton
           onSuccess={() => navigate(redirectTo)}
           onError={(error) => setError(error)}
           className="w-full py-3 text-base font-semibold"
         />
-      </div>
-
-      {/* Divider */}
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-300"></div>
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-3 bg-white text-gray-600 font-medium">or</span>
-        </div>
       </div>
 
       {/* Email/Phone */}
