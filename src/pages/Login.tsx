@@ -295,78 +295,99 @@ const Login: React.FC = () => {
   // ==================== RENDER ====================
 
   const renderLogin = () => (
-    <form onSubmit={handleLogin} className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
+    <form onSubmit={handleLogin} className="space-y-5">
+      {/* Prominent OAuth Buttons */}
+      <div className="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <p className="text-center text-xs font-semibold text-gray-700 tracking-wide">SIGN IN WITH</p>
         <FacebookLoginButton
           onSuccess={() => navigate(redirectTo)}
           onError={(error) => setError(error)}
+          className="w-full py-3 text-base font-semibold"
         />
         <GoogleLoginButton
           onSuccess={() => navigate(redirectTo)}
           onError={(error) => setError(error)}
+          className="w-full py-3 text-base font-semibold"
         />
       </div>
 
+      {/* Divider */}
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-gray-300"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-white text-gray-500">Or continue with email/phone</span>
+          <span className="px-3 bg-white text-gray-600 font-medium">or</span>
         </div>
       </div>
 
+      {/* Email/Phone */}
       <div>
-        <label className="block text-sm font-medium text-gray-700">Email or Phone</label>
+        <label className="block text-sm font-bold text-gray-900 mb-2">Email or Phone Number</label>
         <input
           type="text"
           value={loginData.emailOrPhone}
           onChange={(e) => setLoginData({ ...loginData, emailOrPhone: e.target.value })}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500"
+          onKeyPress={(e) => e.key === "Enter" && handleLogin()}
+          className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-base
+            focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100
+            placeholder:text-gray-500 transition-colors"
           placeholder="Email or phone number"
         />
       </div>
 
+      {/* Password */}
       <div>
-        <label className="block text-sm font-medium text-gray-700">Password</label>
+        <label className="block text-sm font-bold text-gray-900 mb-2">Password</label>
         <input
           type="password"
           value={loginData.password}
           onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500"
+          onKeyPress={(e) => e.key === "Enter" && handleLogin()}
+          className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-base
+            focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100
+            placeholder:text-gray-500 transition-colors"
           placeholder="Your password"
         />
       </div>
 
+      {/* Sign In Button */}
       <button
         type="submit"
-        disabled={loading}
-        className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 disabled:opacity-60"
+        disabled={loading || !loginData.emailOrPhone || !loginData.password}
+        className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300
+          text-white font-bold py-3 rounded-lg transition-colors duration-200 text-base"
       >
         {loading ? "Signing in..." : "Sign In"}
       </button>
 
-      <div className="flex justify-between text-sm">
-        <button
-          type="button"
-          onClick={() => {
-            setMode("signup");
-            resetMessages();
-          }}
-          className="text-green-700 font-semibold hover:underline"
-        >
-          New? Sign up
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setMode("forgot");
-            resetMessages();
-          }}
-          className="text-green-700 font-semibold hover:underline"
-        >
-          Forgot password?
-        </button>
+      {/* Forgot Password */}
+      <button
+        type="button"
+        onClick={() => {
+          setMode("forgot");
+          resetMessages();
+        }}
+        className="block w-full text-center text-sm text-orange-600 hover:text-orange-700 hover:underline font-medium"
+      >
+        Forgot your password?
+      </button>
+
+      {/* Sign Up Prompt */}
+      <div className="border-t border-gray-200 pt-4">
+        <p className="text-sm text-gray-700 text-center">
+          New to Agrisoko?{" "}
+          <button
+            type="button"
+            onClick={() => {
+              setMode("signup");
+              resetMessages();
+            }}
+            className="font-bold text-orange-600 hover:text-orange-700 underline"
+          >
+            Create account
+          </button>
+        </p>
       </div>
     </form>
   );
@@ -595,36 +616,70 @@ const Login: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
+      {/* Top spacer for mobile */}
+      <div className="h-8"></div>
+
+      {/* Main Container */}
+      <div className="w-full max-w-md">
+        {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-green-600">Agrisoko</h1>
-          <p className="text-gray-600 text-sm">
-            {mode === "login" && "Sign in to your account"}
-            {mode === "signup" && "Create your account"}
-            {mode === "otp-verify" && "Verify your account"}
-            {mode === "forgot" && "Reset your password"}
-            {mode === "otp-reset" && "Set new password"}
+          <h1 className="text-4xl font-bold text-orange-600 tracking-tight">Agrisoko</h1>
+          <p className="text-gray-600 text-sm mt-2">
+            Connecting Kenya's Agricultural Community
           </p>
         </div>
 
-        {error && (
-          <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200">
-            <p className="text-red-800 text-sm">{error}</p>
+        {/* Card */}
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-8">
+          {/* Subtitle */}
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-1">
+              {mode === "login" && "Sign in"}
+              {mode === "signup" && "Create account"}
+              {mode === "otp-verify" && "Verify your account"}
+              {mode === "forgot" && "Reset password"}
+              {mode === "otp-reset" && "Create new password"}
+            </h2>
+            <p className="text-gray-600 text-sm">
+              {mode === "login" && "Sign in to your account"}
+              {mode === "signup" && "Join Kenya's growing agricultural marketplace"}
+              {mode === "otp-verify" && "Enter the verification code"}
+              {mode === "forgot" && "We'll help you get back in"}
+              {mode === "otp-reset" && "Enter your verification code and new password"}
+            </p>
           </div>
-        )}
 
-        {info && (
-          <div className="mb-4 p-3 rounded-lg bg-green-50 border border-green-200">
-            <p className="text-green-800 text-sm">{info}</p>
+          {/* Alerts */}
+          {error && (
+            <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200">
+              <p className="text-red-800 text-sm">{error}</p>
+            </div>
+          )}
+
+          {info && (
+            <div className="mb-4 p-3 rounded-lg bg-green-50 border border-green-200">
+              <p className="text-green-800 text-sm">{info}</p>
+            </div>
+          )}
+
+          {/* Form Content */}
+          {mode === "login" && renderLogin()}
+          {mode === "signup" && renderSignup()}
+          {mode === "otp-verify" && renderOtpVerify()}
+          {mode === "forgot" && renderForgot()}
+          {mode === "otp-reset" && renderOtpReset()}
+        </div>
+
+        {/* Footer Links */}
+        <div className="text-center text-xs text-gray-600 mt-6 space-y-1">
+          <div>
+            <a href="/" className="hover:text-orange-600">Terms of Service</a>
+            {" • "}
+            <a href="/" className="hover:text-orange-600">Privacy Policy</a>
           </div>
-        )}
-
-        {mode === "login" && renderLogin()}
-        {mode === "signup" && renderSignup()}
-        {mode === "otp-verify" && renderOtpVerify()}
-        {mode === "forgot" && renderForgot()}
-        {mode === "otp-reset" && renderOtpReset()}
+          <p>© 2026 Agrisoko. All rights reserved.</p>
+        </div>
       </div>
     </div>
   );
