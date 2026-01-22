@@ -189,7 +189,7 @@ const AdminControlsSection: React.FC<AdminControlsProps> = ({ listing, onUpdate 
     setLoading(true);
     setMessage("");
     try {
-      const data = await adminApiRequest(
+      await adminApiRequest(
         API_ENDPOINTS.admin.listings.delete(listing._id),
         { method: "DELETE" }
       );

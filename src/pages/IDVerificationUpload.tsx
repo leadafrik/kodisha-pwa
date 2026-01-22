@@ -178,6 +178,13 @@ const IDVerificationUpload: React.FC = () => {
                 </div>
               )}
 
+              {success && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex gap-3">
+                  <CheckCircle className="text-green-600 flex-shrink-0" size={20} />
+                  <p className="text-green-800">{success}</p>
+                </div>
+              )}
+
               {/* ID Document */}
               <div>
                 <label className="block font-bold text-gray-900 mb-3">

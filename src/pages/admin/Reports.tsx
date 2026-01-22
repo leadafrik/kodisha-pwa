@@ -67,7 +67,7 @@ const AdminReports: React.FC = () => {
   const handleUpdateStatus = async (reportId: string, newStatus: string) => {
     setUpdatingStatus(true);
     try {
-      const data = await adminApiRequest(API_ENDPOINTS.admin.reports.updateStatus(reportId), {
+      await adminApiRequest(API_ENDPOINTS.admin.reports.updateStatus(reportId), {
         method: 'PATCH',
         body: JSON.stringify({ status: newStatus })
       });
