@@ -668,8 +668,3 @@ const Login: React.FC = () => {
 };
 
 export default Login;
-    </div>
-  );
-};
-
-export default Login;
