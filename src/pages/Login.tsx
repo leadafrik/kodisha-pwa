@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { kenyaCounties } from "../data/kenyaCounties";
-import { formatKenyanPhone } from "../utils/security";
 import GoogleLoginButton from "../components/GoogleLoginButtonV2";
 import FacebookLoginButton from "../components/FacebookLoginButtonV2";
 
@@ -24,8 +23,6 @@ const Login: React.FC = () => {
     register,
     requestEmailOtp,
     verifyEmailOtp,
-    requestSmsOtp,
-    verifySmsOtp,
     resetPasswordWithEmail,
     loading,
   } = useAuth();
@@ -55,10 +52,9 @@ const Login: React.FC = () => {
     county: "",
   });
 
-  // OTP State
+  // OTP State (email only for now)
   const [otpCode, setOtpCode] = useState("");
   const [otpEmail, setOtpEmail] = useState("");
-  const [otpType, setOtpType] = useState<"email" | "phone">("email");
   const [otpTimer, setOtpTimer] = useState(0);
   const [canResendOtp, setCanResendOtp] = useState(true);
 
@@ -120,7 +116,7 @@ const Login: React.FC = () => {
     }
 
     if (!signupData.emailOrPhone.trim()) {
-      setError("Email or phone number is required.");
+      setError("Email is required.");
       return;
     }
 
@@ -140,23 +136,18 @@ const Login: React.FC = () => {
     }
 
     const input = signupData.emailOrPhone.trim();
-    const isEmail = input.includes("@");
-
-    let email: string | undefined;
-    let phone: string | undefined;
-
-    if (isEmail) {
-      email = input.toLowerCase();
-    } else {
-      phone = formatKenyanPhone(input);
+    if (!input.includes("@")) {
+      setError("Please enter a valid email address.");
+      return;
     }
+    const email = input.toLowerCase();
 
     try {
       // Register user
       await register({
         name: signupData.name,
         email: email,
-        phone: phone,
+        phone: undefined,
         password: signupData.password,
         type: signupData.userType,
         county: signupData.county,
@@ -168,28 +159,11 @@ const Login: React.FC = () => {
         },
       });
 
-      // Registration successful, request OTP
-      try {
-        if (email) {
-          await requestEmailOtp(email);
-          setOtpEmail(email);
-          setOtpType("email");
-          setInfo("✅ Verification code sent to your email. Check inbox and spam folder.");
-        } else {
-          await requestSmsOtp(phone || "");
-          setOtpEmail(phone || "");
-          setOtpType("phone");
-          setInfo("✅ Verification code sent to your phone via SMS.");
-        }
-
-        setMode("otp-verify");
-        startOtpTimer();
-      } catch (otpErr: any) {
-        // Registration succeeded but OTP send failed
-        setError(
-          `Account created! But OTP send failed: ${otpErr?.message || "Please try again."}. You can log in directly.`
-        );
-      }
+      // Registration successful; backend already sent email OTP
+      setOtpEmail(email);
+      setInfo("Verification code sent to your email. Check inbox and spam folder.");
+      setMode("otp-verify");
+      startOtpTimer();
     } catch (err: any) {
       setError(err?.message || "Signup failed. Please try again.");
     }
@@ -206,11 +180,7 @@ const Login: React.FC = () => {
     }
 
     try {
-      if (otpType === "email") {
-        await verifyEmailOtp(otpEmail, otpCode.trim());
-      } else {
-        await verifySmsOtp(otpEmail, otpCode.trim());
-      }
+      await verifyEmailOtp(otpEmail, otpCode.trim());
 
       navigate(redirectTo);
     } catch (err: any) {
@@ -222,13 +192,8 @@ const Login: React.FC = () => {
     resetMessages();
 
     try {
-      if (otpType === "email") {
-        await requestEmailOtp(otpEmail);
-        setInfo("✅ Code resent to your email.");
-      } else {
-        await requestSmsOtp(otpEmail);
-        setInfo("✅ Code resent to your phone.");
-      }
+      await requestEmailOtp(otpEmail);
+      setInfo("Code resent to your email.");
       startOtpTimer();
     } catch (err: any) {
       setError(err?.message || "Failed to resend code.");
@@ -241,19 +206,21 @@ const Login: React.FC = () => {
     resetMessages();
 
     if (!resetData.emailOrPhone.trim()) {
-      setError("Enter your email or phone number.");
+      setError("Enter your email address.");
       return;
     }
 
     try {
       const input = resetData.emailOrPhone.trim();
-      const isEmail = input.includes("@");
-      await requestEmailOtp(isEmail ? input : resetData.emailOrPhone);
-      setOtpEmail(input);
-      setOtpType(isEmail ? "email" : "phone");
+      if (!input.includes("@")) {
+        setError("Password reset is available by email only right now.");
+        return;
+      }
+      await requestEmailOtp(input);
+      setOtpEmail(input.toLowerCase());
       setMode("otp-reset");
       startOtpTimer();
-      setInfo("✅ Reset code sent. Check your email or SMS.");
+      setInfo("Reset code sent. Check your email.");
     } catch (err: any) {
       setError(err?.message || "Failed to send reset code.");
     }
@@ -285,7 +252,7 @@ const Login: React.FC = () => {
         newPassword: resetData.newPassword,
       });
       setMode("login");
-      setInfo("✅ Password reset successfully. Please log in.");
+      setInfo("Password reset successfully. Please log in.");
       setResetData({ emailOrPhone: "", code: "", newPassword: "", confirmPassword: "" });
     } catch (err: any) {
       setError(err?.message || "Failed to reset password.");
@@ -318,18 +285,16 @@ const Login: React.FC = () => {
       {/* Divider */}
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-300"></div>
+          <div className="w-full border-t border-gray-200"></div>
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-white px-2 text-gray-500">Or sign in with email</span>
+          <span className="bg-white px-2 text-gray-500">Or use email and password</span>
         </div>
       </div>
 
       {/* Email/Phone */}
       <div>
-        <label className="block text-sm font-semibold text-gray-900 mb-2">
-          Email or Phone Number
-        </label>
+        <label className="block text-sm font-semibold text-gray-900 mb-2">Email or Phone</label>
         <input
           type="text"
           value={loginData.emailOrPhone}
@@ -337,8 +302,11 @@ const Login: React.FC = () => {
           className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm
             focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100
             placeholder:text-gray-400 transition-colors"
-          placeholder="your.email@example.com or +254712345678"
+          placeholder="name@example.com or +254712345678"
         />
+        <p className="mt-2 text-xs text-gray-500">
+          Phone verification is not enabled yet. Use email for fastest access.
+        </p>
       </div>
 
       {/* Password */}
@@ -397,6 +365,32 @@ const Login: React.FC = () => {
 
   const renderSignup = () => (
     <form onSubmit={handleSignupSubmit} className="space-y-3">
+      <div className="space-y-3 pb-2">
+        <p className="text-center text-xs font-semibold text-gray-500 uppercase tracking-widest">
+          Sign up with
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          <GoogleLoginButton
+            onSuccess={() => navigate(redirectTo)}
+            onError={(error) => setError(error)}
+            className="text-sm"
+          />
+          <FacebookLoginButton
+            onSuccess={() => navigate(redirectTo)}
+            onError={(error) => setError(error)}
+            className="text-sm"
+          />
+        </div>
+      </div>
+
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-200"></div>
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white px-2 text-gray-500">Or create with email</span>
+        </div>
+      </div>
       <div>
         <label className="block text-sm font-medium text-gray-700">Full Name *</label>
         <input
@@ -417,7 +411,7 @@ const Login: React.FC = () => {
           className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="your.email@example.com"
         />
-        <p className="text-xs text-gray-500 mt-1">📱 Phone verification will be coming soon</p>
+        <p className="text-xs text-gray-500 mt-1">Phone verification will be available soon.</p>
       </div>
 
       <div>
@@ -533,14 +527,17 @@ const Login: React.FC = () => {
   const renderForgot = () => (
     <form onSubmit={handleForgotRequest} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700">Email or Phone</label>
+        <label className="block text-sm font-medium text-gray-700">Email</label>
         <input
-          type="text"
+          type="email"
           value={resetData.emailOrPhone}
           onChange={(e) => setResetData({ ...resetData, emailOrPhone: e.target.value })}
           className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500"
-          placeholder="Email or phone number"
+          placeholder="you@example.com"
         />
+        <p className="mt-2 text-xs text-gray-500">
+          For now, password resets are sent by email only.
+        </p>
       </div>
 
       <button
@@ -620,25 +617,48 @@ const Login: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50 flex flex-col">
       {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center px-4 py-8">
-        <div className="w-full max-w-md">
-          {/* Logo & Branding */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-600 rounded-lg mb-4">
-              <span className="text-white font-bold text-xl">A</span>
+      <div className="flex-1 flex items-center justify-center px-4 py-10">
+        <div className="w-full max-w-5xl grid md:grid-cols-2 gap-8 items-stretch">
+          {/* Brand Panel */}
+          <div className="hidden md:flex flex-col justify-between rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-600 via-emerald-700 to-emerald-800 text-white p-10 shadow-xl">
+            <div>
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-white/15 rounded-xl mb-6">
+                <span className="text-white font-bold text-xl">A</span>
+              </div>
+              <h1 className="text-3xl font-bold leading-tight">Agrisoko</h1>
+              <p className="text-sm text-emerald-100 mt-2">
+                Trusted agricultural commerce for East Africa.
+              </p>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Agrisoko</h1>
-            <p className="text-sm text-gray-500 mt-1">
-              {mode === "signup"
-                ? "Join Kenya's Leading Agricultural Marketplace"
-                : "Welcome to Agrisoko"}
-            </p>
+            <div className="space-y-4 text-sm text-emerald-50/90">
+              <p>Faster onboarding, verified sellers, and secure sign-in.</p>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <span className="rounded-full bg-white/15 px-3 py-1">Verified profiles</span>
+                <span className="rounded-full bg-white/15 px-3 py-1">Secure login</span>
+                <span className="rounded-full bg-white/15 px-3 py-1">Buyer protection</span>
+                <span className="rounded-full bg-white/15 px-3 py-1">Instant messaging</span>
+              </div>
+            </div>
           </div>
 
-          {/* Form Card */}
-          <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
+          <div className="w-full max-w-md mx-auto">
+            {/* Logo & Branding */}
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-emerald-600 rounded-xl mb-4">
+                <span className="text-white font-bold text-xl">A</span>
+              </div>
+              <h1 className="text-3xl font-bold text-gray-900">Agrisoko</h1>
+              <p className="text-sm text-gray-500 mt-1">
+                {mode === "signup"
+                  ? "Create your account in minutes"
+                  : "Welcome back"}
+              </p>
+            </div>
+
+            {/* Form Card */}
+            <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
             {/* Messages */}
             {error && (
               <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -647,8 +667,8 @@ const Login: React.FC = () => {
             )}
 
             {info && (
-              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-sm text-green-700 font-medium">{info}</p>
+              <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+                <p className="text-sm text-emerald-700 font-medium">{info}</p>
               </div>
             )}
 
@@ -660,11 +680,12 @@ const Login: React.FC = () => {
             {mode === "otp-reset" && renderOtpReset()}
           </div>
 
-          {/* Trust Badges */}
-          <div className="mt-8 space-y-2 text-center text-xs text-gray-500">
-            <div className="flex items-center justify-center gap-4">
-              <span>Secure & Encrypted</span>
-              <span>Verified Sellers</span>
+            {/* Trust Badges */}
+            <div className="mt-6 space-y-2 text-center text-xs text-gray-500">
+              <div className="flex items-center justify-center gap-4">
+                <span>Secure and encrypted</span>
+                <span>Verified sellers</span>
+              </div>
             </div>
           </div>
         </div>
@@ -761,7 +782,7 @@ const Login: React.FC = () => {
 
           <div className="border-t border-gray-200 pt-6 flex items-center justify-between">
             <p className="text-sm text-gray-500">
-              © 2026 Agrisoko. All rights reserved.
+              (c) 2026 Agrisoko. All rights reserved.
             </p>
             <div className="flex items-center gap-4">
               <a href="https://facebook.com/agrisoko" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-600">

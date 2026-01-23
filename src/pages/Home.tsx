@@ -1,5 +1,4 @@
 import React from 'react';
-import { PAYMENTS_ENABLED } from '../config/featureFlags';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { usePageContent } from '../hooks/usePageContent';
