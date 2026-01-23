@@ -403,20 +403,21 @@ const Login: React.FC = () => {
           type="text"
           value={signupData.name}
           onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Your full name"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Email or Phone *</label>
+        <label className="block text-sm font-medium text-gray-700">Email *</label>
         <input
-          type="text"
+          type="email"
           value={signupData.emailOrPhone}
           onChange={(e) => setSignupData({ ...signupData, emailOrPhone: e.target.value })}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500"
-          placeholder="Email or 0712345678"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="your.email@example.com"
         />
+        <p className="text-xs text-gray-500 mt-1">📱 Phone verification will be coming soon</p>
       </div>
 
       <div>
@@ -425,7 +426,7 @@ const Login: React.FC = () => {
           type="password"
           value={signupData.password}
           onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Min 6 characters"
         />
       </div>
@@ -436,7 +437,7 @@ const Login: React.FC = () => {
           type="password"
           value={signupData.confirmPassword}
           onChange={(e) => setSignupData({ ...signupData, confirmPassword: e.target.value })}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Confirm password"
         />
       </div>
@@ -446,7 +447,7 @@ const Login: React.FC = () => {
         <select
           value={signupData.userType}
           onChange={(e) => setSignupData({ ...signupData, userType: e.target.value as "buyer" | "seller" })}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="buyer">Buyer</option>
           <option value="seller">Seller</option>
@@ -458,7 +459,7 @@ const Login: React.FC = () => {
         <select
           value={signupData.county}
           onChange={(e) => setSignupData({ ...signupData, county: e.target.value })}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">Select county</option>
           {kenyaCounties.map((county, idx) => (
@@ -472,9 +473,9 @@ const Login: React.FC = () => {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 disabled:opacity-60"
+        className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-60"
       >
-        {loading ? "Creating account..." : "Create Account"}
+        {loading ? "Creating account..." : "Sign Up with Email"}
       </button>
 
       <button
@@ -483,7 +484,7 @@ const Login: React.FC = () => {
           setMode("login");
           resetMessages();
         }}
-        className="w-full text-center text-green-700 font-semibold hover:underline"
+        className="w-full text-center text-blue-600 font-semibold hover:underline"
       >
         Already have account? Sign in
       </button>
