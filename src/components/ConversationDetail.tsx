@@ -79,7 +79,7 @@ const ConversationDetail: React.FC<{ conversationId: string; currentUserId: stri
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {conversation.messages.map((msg, idx) => (
+        {conversation.messages.map((msg: Message, idx: number) => (
           <div
             key={idx}
             className={`flex ${msg.sender._id === currentUserId ? 'justify-end' : 'justify-start'}`}
