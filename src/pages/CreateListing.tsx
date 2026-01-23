@@ -874,20 +874,6 @@ const CreateListing: React.FC = () => {
                   </button>
                 </div>
               ) : (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                  <p className="text-yellow-800 font-semibold mb-2">Complete your verification first</p>
-                  <p className="text-yellow-700 text-sm mb-4">
-                    You must complete ID and selfie verification before listing. Visit your profile to upload these documents.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => navigate("/profile")}
-                    className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700"
-                  >
-                    Go to Profile
-                  </button>
-                </div>
-              ) : (
                 <>
                   {/* Listing Summary */}
                   <div className="bg-gray-50 rounded-lg p-6 mb-6 border border-gray-200">
