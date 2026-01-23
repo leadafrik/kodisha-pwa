@@ -88,7 +88,7 @@ const CreateListing: React.FC = () => {
       setForm((prev) => ({ ...prev, contact: user?.phone }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userx.phone]);
+  }, [user?.phone]);
 
   // Check for draft on load
   useEffect(() => {
