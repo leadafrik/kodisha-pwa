@@ -116,7 +116,7 @@ const CreateListing: React.FC = () => {
 
   // Update verification status
   useEffect(() => {
-    if (userx.verification) {
+    if (user?.verification) {
       setIdVerified(!!user.verification.idVerified);
       setSelfieVerified(!!user.verification.selfieVerified);
     }
