@@ -837,10 +837,10 @@ const CreateListing: React.FC = () => {
               </h2>
 
                             {/* Verification Status */}
-              <div className=\"mb-6 space-y-3\">
+              <div className="mb-6 space-y-3">
                 <div className={`p-4 rounded-xl border ${idVerified ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"}`}>
                   <p className={`flex items-center gap-2 font-semibold ${idVerified ? "text-emerald-700" : "text-red-700"}`}>
-                    {idVerified ? <CheckCircle2 className=\"w-5 h-5\" /> : <AlertCircle className=\"w-5 h-5\" />}
+                    {idVerified ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
                     National ID verification
                   </p>
                   <p className={`text-sm mt-1 ${idVerified ? "text-emerald-600" : "text-red-600"}`}>
@@ -850,7 +850,7 @@ const CreateListing: React.FC = () => {
 
                 <div className={`p-4 rounded-xl border ${selfieVerified ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"}`}>
                   <p className={`flex items-center gap-2 font-semibold ${selfieVerified ? "text-emerald-700" : "text-red-700"}`}>
-                    {selfieVerified ? <CheckCircle2 className=\"w-5 h-5\" /> : <AlertCircle className=\"w-5 h-5\" />}
+                    {selfieVerified ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
                     Selfie verification
                   </p>
                   <p className={`text-sm mt-1 ${selfieVerified ? "text-emerald-600" : "text-red-600"}`}>
@@ -860,15 +860,15 @@ const CreateListing: React.FC = () => {
               </div>
 
               {!idVerified || !selfieVerified ? (
-                <div className=\"bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6\">
-                  <p className=\"text-amber-800 font-semibold mb-2\">Complete your verification first</p>
-                  <p className=\"text-amber-700 text-sm mb-4\">
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+                  <p className="text-amber-800 font-semibold mb-2">Complete your verification first</p>
+                  <p className="text-amber-700 text-sm mb-4">
                     You must complete ID and selfie verification before listing. Visit your profile to upload these documents.
                   </p>
                   <button
-                    type=\"button\"
-                    onClick={() => navigate(\"/profile\")}
-                    className=\"bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700\"
+                    type="button"
+                    onClick={() => navigate("/profile")}
+                    className="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700"
                   >
                     Go to Profile
                   </button>
