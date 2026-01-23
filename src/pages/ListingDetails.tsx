@@ -54,10 +54,10 @@ interface Message {
 
 // Type-specific detail section components
 const LandDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
-  <div className="bg-gray-100 p-4 rounded-lg mb-6">
-    <h2 className="font-semibold mb-3">Land Details</h2>
-    <div className="space-y-2">
-      <p><strong>Size:</strong> {listing?.size ?? '—'} {listing?.size ? 'acres' : ''}</p>
+  <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm mb-6">
+    <h2 className="font-semibold text-slate-900 mb-3">Land Details</h2>
+    <div className="space-y-2 text-sm text-slate-700">
+      <p><strong>Size:</strong> {listing?.size Read '—'} {listing?.size ? 'acres' : ''}</p>
       <p><strong>Soil Type:</strong> {listing?.soilType || '—'}</p>
       <p><strong>Water Availability:</strong> {listing?.waterAvailability || '—'}</p>
       <p><strong>Organic Certified:</strong> {listing?.organicCertified ? "Yes" : "No"}</p>
@@ -71,9 +71,9 @@ const LandDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
 );
 
 const EquipmentDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
-  <div className="bg-blue-50 p-4 rounded-lg mb-6">
-    <h2 className="font-semibold mb-3 text-blue-900">Equipment & Services</h2>
-    <div className="space-y-2">
+  <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm mb-6">
+    <h2 className="font-semibold text-slate-900 mb-3">Equipment & Services</h2>
+    <div className="space-y-2 text-sm text-slate-700">
       <p><strong>Services Available:</strong> {Array.isArray(listing.services) ? listing.services.join(', ') : listing.services || '—'}</p>
       {(listing.pricing || listing.price) && <p><strong>Pricing:</strong> {listing.pricing || (typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : listing.price)}</p>}
       {typeof listing.operatorIncluded !== 'undefined' && <p><strong>Operator Included:</strong> {listing.operatorIncluded ? 'Yes' : 'No'}</p>}
@@ -84,9 +84,9 @@ const EquipmentDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
 );
 
 const ProfessionalDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
-  <div className="bg-purple-50 p-4 rounded-lg mb-6">
-    <h2 className="font-semibold mb-3 text-purple-900">Professional Services</h2>
-    <div className="space-y-2">
+  <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm mb-6">
+    <h2 className="font-semibold text-slate-900 mb-3">Professional Services</h2>
+    <div className="space-y-2 text-sm text-slate-700">
       <p><strong>Services Offered:</strong> {Array.isArray(listing.services) ? listing.services.join(', ') : listing.services || '—'}</p>
       {listing.experience && <p><strong>Years of Experience:</strong> {listing.experience}</p>}
       {listing.qualifications && <p><strong>Qualifications:</strong> {listing.qualifications}</p>}
@@ -122,22 +122,22 @@ const AgrovetDetailsSection: React.FC<{ listing: any }> = ({ listing }) => {
   };
 
   return (
-    <div className="bg-green-50 p-4 rounded-lg mb-6">
-      <h2 className="font-semibold mb-3 text-green-900">Agrovet Details</h2>
-      <div className="space-y-2">
-        <p><strong>Products/Services:</strong> {renderServices()}</p>
-        {(listing.pricing || listing.price) && <p><strong>Pricing Info:</strong> {listing.pricing || (typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : listing.price)}</p>}
-        {listing.specialization && <p><strong>Specialization:</strong> {listing.specialization}</p>}
-        {listing.businessHours && <p><strong>Business Hours:</strong> {listing.businessHours}</p>}
-      </div>
+  <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm mb-6">
+    <h2 className="font-semibold text-slate-900 mb-3">Agrovet Details</h2>
+    <div className="space-y-2 text-sm text-slate-700">
+      <p><strong>Products/Services:</strong> {renderServices()}</p>
+      {(listing.pricing || listing.price) && <p><strong>Pricing Info:</strong> {listing.pricing || (typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : listing.price)}</p>}
+      {listing.specialization && <p><strong>Specialization:</strong> {listing.specialization}</p>}
+      {listing.businessHours && <p><strong>Business Hours:</strong> {listing.businessHours}</p>}
     </div>
+  </div>
   );
 };
 
 const ProductDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
-  <div className="bg-orange-50 p-4 rounded-lg mb-6">
-    <h2 className="font-semibold mb-3 text-orange-900">Product Information</h2>
-    <div className="space-y-2">
+  <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm mb-6">
+    <h2 className="font-semibold text-slate-900 mb-3">Product Information</h2>
+    <div className="space-y-2 text-sm text-slate-700">
       <p><strong>Category:</strong> {listing.category || listing.type || '—'}</p>
       {listing.price && <p><strong>Price per Unit:</strong> {typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : listing.price}</p>}
       {listing.unit && <p><strong>Unit:</strong> {listing.unit}</p>}
@@ -228,7 +228,7 @@ const AdminControlsSection: React.FC<AdminControlsProps> = ({ listing, onUpdate 
             disabled={loading || isVerified}
             className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {isVerified ? "✓ Verified" : "Approve"}
+            {isVerified ? "Verified" : "Approve"}
           </button>
           <button
             onClick={() => handleVerify("rejected")}
@@ -604,33 +604,123 @@ const ListingDetails: React.FC = () => {
   };
 
   return (
-    <div className="p-4 max-w-5xl mx-auto">
-      <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          {/* Title + price row - improved layout */}
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                {listing.title || listing.name}
-              </h1>
-              <p className="text-sm text-gray-600">
-                {[listing.location?.county, listing.location?.constituency, listing.location?.ward].filter(Boolean).join(', ') || 'Location not specified'}
-              </p>
+    <div className="min-h-screen bg-slate-50 text-slate-900">
+      <div className="max-w-6xl mx-auto px-4 py-6">
+        <div className="grid lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            {/* Title + price row */}
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+              <div className="flex-1">
+                <h1 className="text-2xl font-bold text-slate-900 mb-2">
+                  {listing.title || listing.name}
+                </h1>
+                <p className="text-sm text-slate-600">
+                  {[listing.location?.county, listing.location?.constituency, listing.location?.ward].filter(Boolean).join(', ') || 'Location not specified'}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-slate-500 mb-1">Price</p>
+                <p className="text-2xl font-extrabold text-emerald-700">
+                  {listing.price || listing.pricing ? (
+                    typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : (listing.price || listing.pricing)
+                  ) : 'Contact for price'}
+                </p>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="text-xs text-gray-500 mb-1">Price</p>
-              <p className="text-2xl font-extrabold text-green-700">
-                {listing.price || listing.pricing ? (
-                  typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : (listing.price || listing.pricing)
-                ) : 'Contact for price'}
-              </p>
+
+            {/* Quick action CTAs */}
+            <div className="flex flex-wrap gap-3 mt-5">
+              <a
+                href={`tel:${owner.phone || listing.contact || ''}`}
+                className="px-5 py-2 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition"
+              >
+                Call Seller
+              </a>
+              <button
+                onClick={() => {
+                  if (!getAuthToken()) {
+                    window.location.href = `/login?next=/listings/${id}`;
+                  } else {
+                    const el = document.querySelector('textarea');
+                    if (el) (el as HTMLElement).focus();
+                  }
+                }}
+                className="px-5 py-2 border border-slate-300 rounded-xl font-semibold text-slate-700 hover:bg-slate-50 transition"
+              >
+                Message
+              </button>
+              <button
+                onClick={() => {
+                  if ((navigator as any).share) {
+                    (navigator as any).share({
+                      title: listing.title,
+                      text: listing.description,
+                      url: window.location.href,
+                    });
+                  } else {
+                    window.alert('Share link: ' + window.location.href);
+                  }
+                }}
+                className="px-5 py-2 border border-slate-300 rounded-xl font-semibold text-slate-700 hover:bg-slate-50 transition"
+              >
+                Share
+              </button>
+              <button
+                onClick={async () => {
+                  const token = getAuthToken();
+                  if (!token) {
+                    window.location.href = `/login?next=/listings/${id}`;
+                    return;
+                  }
+                  try {
+                    if (!listing || !listing._id) {
+                      console.error('Listing not loaded properly');
+                      return;
+                    }
+                    const listingIdToSend = listing._id.toString?.() || String(listing._id);
+                    const listingTypeToSend = (listing.listingType || listingType || 'land') as 'land' | 'product' | 'equipment' | 'service' | 'agrovet';
+                    
+                    const result = await favoritesService.toggleFavorite(listingIdToSend, listingTypeToSend);
+                    setSaved(result.action === 'added');
+                  } catch (err) {
+                    // Handle toggle error
+                  }
+                }}
+                className={`px-5 py-2 rounded-xl font-semibold border transition ${
+                  saved
+                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                    : 'border-slate-300 text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                {saved ? 'Saved' : 'Save'}
+              </button>
+              {canMarkSold && !listing.sold && (
+                <button
+                  onClick={handleMarkSold}
+                  disabled={markingSold}
+                  className="px-5 py-2 bg-rose-600 text-white rounded-xl font-semibold hover:bg-rose-700 disabled:opacity-60 transition"
+                >
+                  {markingSold ? 'Marking...' : 'Mark as Sold'}
+                </button>
+              )}
+              {listing.sold && (
+                <span className="px-4 py-2 bg-rose-100 text-rose-700 rounded-full font-semibold text-sm">
+                  Sold {hoursUntilHide !== null && hoursUntilHide > 0 && `* hides in ${Math.ceil(hoursUntilHide)}h`}
+                </span>
+              )}
             </div>
+            {soldMessage && (
+              <p className={`text-sm mt-3 ${soldMessage.startsWith('Marked') ? 'text-emerald-700' : 'text-rose-600'}`}>
+                {soldMessage}
+              </p>
+            )}
           </div>
 
           {/* Image gallery with main image and selectable thumbnails */}
           {Array.isArray(listing.images) && listing.images.length > 0 && (
-            <div className="mb-6">
-              <div className="rounded-lg overflow-hidden bg-gray-100 mb-3">
+            <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+              <div className="rounded-xl overflow-hidden bg-slate-100 mb-3">
                 <img
                   src={mainImage || listing.images[0]}
                   alt="Listing main"
@@ -645,8 +735,8 @@ const ListingDetails: React.FC = () => {
                   <button
                     key={i}
                     onClick={() => setMainImage(img)}
-                    className={`h-20 rounded overflow-hidden border-2 transition ${
-                      mainImage === img ? 'border-green-600' : 'border-gray-200 hover:border-gray-400'
+                    className={`h-20 rounded-lg overflow-hidden border-2 transition ${
+                      mainImage === img ? 'border-emerald-600' : 'border-slate-200 hover:border-slate-400'
                     }`}
                   >
                     <img 
@@ -663,88 +753,10 @@ const ListingDetails: React.FC = () => {
             </div>
           )}
 
-          {/* Quick action CTAs */}
-          <div className="flex flex-wrap gap-3 mb-6">
-            <a
-              href={`tel:${owner.phone || ''}`}
-              className="px-5 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
-            >
-              Call Seller
-            </a>
-            <button
-              onClick={() => {
-                if (!getAuthToken()) {
-                  window.location.href = `/login?next=/listings/${id}`;
-                } else {
-                  const el = document.querySelector('textarea');
-                  if (el) (el as HTMLElement).focus();
-                }
-              }}
-              className="px-5 py-2 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition"
-            >
-              Message
-            </button>
-            <button
-              onClick={() => {
-                if ((navigator as any).share) {
-                  (navigator as any).share({
-                    title: listing.title,
-                    text: listing.description,
-                    url: window.location.href,
-                  });
-                } else {
-                  window.alert('Share link: ' + window.location.href);
-                }
-              }}
-              className="px-5 py-2 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition"
-            >
-              Share
-            </button>
-            <button
-              onClick={async () => {
-                const token = getAuthToken();
-                if (!token) {
-                  window.location.href = `/login?next=/listings/${id}`;
-                  return;
-                }
-                try {
-                  if (!listing || !listing._id) {
-                    console.error('Listing not loaded properly');
-                    return;
-                  }
-                  const listingIdToSend = listing._id.toString?.() || String(listing._id);
-                  const listingTypeToSend = (listing.listingType || listingType || 'land') as 'land' | 'product' | 'equipment' | 'service' | 'agrovet';
-                  
-                  const result = await favoritesService.toggleFavorite(listingIdToSend, listingTypeToSend);
-                  setSaved(result.action === 'added');
-                } catch (err) {
-                  // Handle toggle error
-                }
-              }}
-              className="px-5 py-2 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition"
-            >
-              {saved ? 'Saved' : 'Save'}
-            </button>
-            {canMarkSold && !listing.sold && (
-              <button
-                onClick={handleMarkSold}
-                disabled={markingSold}
-                className="px-5 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 disabled:opacity-60 transition"
-              >
-                {markingSold ? 'Marking...' : 'Mark as Sold'}
-              </button>
-            )}
-            {listing.sold && (
-              <span className="px-4 py-2 bg-red-100 text-red-700 rounded-lg font-semibold text-sm">
-                Sold {hoursUntilHide !== null && hoursUntilHide > 0 && `• hides in ${Math.ceil(hoursUntilHide)}h`}
-              </span>
-            )}
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <h2 className="font-semibold text-slate-900 mb-3">Description</h2>
+            <p className="text-slate-700 leading-relaxed">{listing.description}</p>
           </div>
-          {soldMessage && (
-            <p className={`text-sm mb-4 ${soldMessage.startsWith('Marked') ? 'text-green-700' : 'text-red-600'}`}>{soldMessage}</p>
-          )}
-
-          <p className="text-gray-700 mb-6">{listing.description}</p>
 
           {/* Type-specific details section */}
           {renderDetailsSection(listingType, listing)}
@@ -752,20 +764,20 @@ const ListingDetails: React.FC = () => {
           {/* Admin controls (only visible to admins) */}
           {isAdmin && <AdminControlsSection listing={listing} onUpdate={fetchListing} />}
 
-          <div className="mt-6">
-            <h2 className="font-semibold mb-2">Map Location</h2>
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <h2 className="font-semibold text-slate-900 mb-2">Map Location</h2>
 
             {!coords || !coords.lat || !coords.lng ? (
-              <p className="text-gray-500 text-sm">No map location was provided for this listing.</p>
+              <p className="text-slate-500 text-sm">No map location was provided for this listing.</p>
             ) : (
               <>
                 <GoogleMapsLoader>
-                  <div className="rounded-lg overflow-hidden shadow-md border">
+                  <div className="rounded-xl overflow-hidden border border-slate-200">
                     <ListingMap lat={coords.lat} lng={coords.lng} />
                   </div>
                 </GoogleMapsLoader>
 
-                <p className="text-gray-500 text-xs mt-2">
+                <p className="text-slate-500 text-xs mt-2">
                   Coordinates: {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
                 </p>
 
@@ -773,7 +785,7 @@ const ListingDetails: React.FC = () => {
                   href={`https://www.google.com/maps?q=${coords.lat},${coords.lng}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block mt-3 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
+                  className="inline-flex mt-3 px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-semibold hover:bg-emerald-700"
                 >
                   Open in Google Maps
                 </a>
@@ -783,11 +795,11 @@ const ListingDetails: React.FC = () => {
         </div>
 
         {/* Sidebar with seller + chat */}
-        <div className="space-y-4">
+          <div className="space-y-4">
           {/* Seller card - improved with avatar and verification */}
-          <div className="bg-white p-4 rounded-lg border shadow-sm">
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-lg font-bold text-gray-700 overflow-hidden">
+              <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center text-lg font-bold text-slate-700 overflow-hidden">
                 {owner.profilePicture ? (
                   <img src={owner.profilePicture} alt={owner.fullName || owner.name} className="w-full h-full object-cover" />
                 ) : (
@@ -795,35 +807,35 @@ const ListingDetails: React.FC = () => {
                 )}
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-gray-900">{owner.fullName || owner.name || 'Seller'}</h3>
+                <h3 className="font-semibold text-slate-900">{owner.fullName || owner.name || 'Seller'}</h3>
                 {owner.isVerified && (
-                  <span className="inline-block text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded">
-                    ✓ Verified
+                  <span className="inline-block text-xs px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
+                     Verified
                   </span>
                 )}
               </div>
             </div>
 
-            <p className="text-sm text-gray-600 mb-1">
+            <p className="text-sm text-slate-600 mb-1">
               {responseTimeLabel}
             </p>
-            <p className="text-xs text-gray-500 mb-3">
+            <p className="text-xs text-slate-500 mb-3">
               {lastActiveLabel}
             </p>
 
             {/* Rating display */}
             {userRatings?.aggregate && userRatings.aggregate.count > 0 && (
-              <div className="mb-3 p-2 bg-yellow-50 rounded border border-yellow-200">
+              <div className="mb-3 p-3 bg-amber-50 rounded-xl border border-amber-200">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-lg font-bold text-yellow-600">
-                    {'⭐'.repeat(Math.round(userRatings.aggregate.average))}
+                  <span className="text-lg font-bold text-amber-600">
+                    {'*'.repeat(Math.round(userRatings.aggregate.average))}
                   </span>
                   <span className="text-sm font-semibold">
                     {userRatings.aggregate.average.toFixed(1)} ({userRatings.aggregate.count} reviews)
                   </span>
                 </div>
                 {userRatings.aggregate.breakdown.overall > 0 && (
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-slate-600">
                     Overall: {userRatings.aggregate.breakdown.overall.toFixed(1)}/5
                   </p>
                 )}
@@ -834,12 +846,12 @@ const ListingDetails: React.FC = () => {
               {listing.owner.phone ? (
                 <a
                   href={`tel:${listing.owner.phone}`}
-                  className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 text-center"
+                  className="flex-1 px-3 py-2 bg-emerald-600 text-white rounded-lg text-sm font-semibold hover:bg-emerald-700 text-center"
                 >
                   Call
                 </a>
               ) : (
-                <div className="flex-1 px-3 py-2 bg-gray-300 text-gray-600 rounded-lg text-sm font-semibold text-center cursor-not-allowed">
+                <div className="flex-1 px-3 py-2 bg-slate-200 text-slate-500 rounded-lg text-sm font-semibold text-center cursor-not-allowed">
                   Call Unavailable
                 </div>
               )}
@@ -848,7 +860,7 @@ const ListingDetails: React.FC = () => {
                   const el = document.querySelector('textarea');
                   if (el) (el as HTMLElement).focus();
                 }}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-50"
+                className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-50"
               >
                 Message
               </button>
@@ -862,9 +874,9 @@ const ListingDetails: React.FC = () => {
                   setShowRatingModal(true);
                 }
               }}
-              className="w-full mt-2 px-3 py-2 border border-yellow-400 bg-yellow-50 text-yellow-700 rounded-lg text-sm font-semibold hover:bg-yellow-100"
+              className="w-full mt-2 px-3 py-2 border border-amber-200 bg-amber-50 text-amber-700 rounded-lg text-sm font-semibold hover:bg-amber-100"
             >
-              ⭐ Rate Seller
+              Rate seller
             </button>
 
             {/* Subtle Report Seller link */}
@@ -888,28 +900,28 @@ const ListingDetails: React.FC = () => {
           </div>
 
           {/* Chat section - improved UI and microcopy */}
-          <div className="bg-white p-4 rounded-lg border">
-            <h3 className="font-semibold mb-3">Message the Seller</h3>
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <h3 className="font-semibold text-slate-900 mb-3">Message the Seller</h3>
 
-            <div className="max-h-64 overflow-y-auto border rounded-lg p-3 mb-3 bg-gray-50">
+            <div className="max-h-64 overflow-y-auto border border-slate-200 rounded-xl p-3 mb-3 bg-slate-50">
               {messages.length === 0 ? (
-                <p className="text-gray-500 text-center text-xs py-4">
+                <p className="text-slate-500 text-center text-xs py-4">
                   No messages yet. Ask about availability, pricing, or arrange a viewing.
                 </p>
               ) : (
                 messages.map((msg, idx) => (
-                  <div key={idx} className={`rounded p-2 mb-2 ${msg.from === owner._id ? 'bg-white border' : 'bg-green-50'}`}>
-                    <p className="text-xs text-gray-600 font-semibold mb-1">
-                      {msg.from === owner._id ? 'Seller' : 'You'} {msg.read && msg.from === owner._id ? '✓✓' : ''}
+                  <div key={idx} className={`rounded-lg p-2 mb-2 ${msg.from === owner._id ? 'bg-white border border-slate-200' : 'bg-emerald-50'}`}>
+                    <p className="text-xs text-slate-600 font-semibold mb-1">
+                      {msg.from === owner._id ? 'Seller' : 'You'} {msg.read && msg.from === owner._id ? 'Read' : ''}
                     </p>
-                    <p className="text-gray-800 text-sm">{msg.body}</p>
-                    <p className="text-[10px] text-gray-500 mt-1">
+                    <p className="text-slate-800 text-sm">{msg.body}</p>
+                    <p className="text-[10px] text-slate-500 mt-1">
                       {msg.createdAt ? new Date(msg.createdAt).toLocaleString() : ''}
                     </p>
                   </div>
                 ))
               )}
-              {typing && <p className="text-xs text-gray-500 italic">Seller is typing…</p>}
+              {typing && <p className="text-xs text-slate-500 italic">Seller is typing…</p>}
             </div>
 
             <textarea
@@ -918,7 +930,7 @@ const ListingDetails: React.FC = () => {
                 setNewMessage(e.target.value);
                 sendTyping();
               }}
-              className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 resize-none"
               placeholder="Type your message..."
               rows={3}
             />
@@ -926,14 +938,15 @@ const ListingDetails: React.FC = () => {
             <button
               onClick={sendMessage}
               disabled={sending || !newMessage.trim()}
-              className="w-full mt-2 bg-blue-600 text-white rounded-lg py-2 text-sm font-semibold hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition"
+              className="w-full mt-2 bg-emerald-600 text-white rounded-lg py-2 text-sm font-semibold hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed transition"
             >
               {sending ? 'Sending...' : 'Send Message'}
             </button>
 
-            <p className="text-xs text-gray-500 mt-2 text-center">
+            <p className="text-xs text-slate-500 mt-2 text-center">
               {getAuthToken() ? 'Messages are private and secure.' : 'Log in to send and receive messages.'}
             </p>
+          </div>
           </div>
         </div>
       </div>
@@ -954,7 +967,7 @@ const ListingDetails: React.FC = () => {
                       star <= ratingScore ? 'text-yellow-500' : 'text-gray-300'
                     } hover:text-yellow-400 transition`}
                   >
-                    ⭐
+                    *
                   </button>
                 ))}
               </div>
