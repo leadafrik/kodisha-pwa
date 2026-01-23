@@ -505,6 +505,10 @@ const CreateListing: React.FC = () => {
                     key={type}
                     type="button"
                     onClick={() => {
+                      if (type === "buy") {
+                        navigate("/request/new");
+                        return;
+                      }
                       setForm((prev) => ({
                         ...prev,
                         listingType: type,
@@ -525,13 +529,16 @@ const CreateListing: React.FC = () => {
                   </button>
                 ))}
               </div>
+              <p className="mt-4 text-xs text-gray-500">
+                Buying? You will be redirected to the buy request form for a cleaner flow.
+              </p>
             </div>
           )}
 
           {/* Step 2: Category Selection */}
           {form.step === 2 && (
             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">What are you listingx</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-6">What are you listing?</h2>
               <div className="space-y-4 mb-8">
                 {(["produce", "livestock", "inputs", "service"] as const).map((cat) => (
                   <button
@@ -771,7 +778,7 @@ const CreateListing: React.FC = () => {
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-2">
                     <Camera className="w-4 h-4 inline mr-2" />
-                    Upload Images ({form.images.length}/5) {form.listingType === "sell" ? "*" : "(Optional for buy requests)"}
+                    Upload Images ({form.images.length}/5) *
                   </label>
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                     <input

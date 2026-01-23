@@ -62,24 +62,24 @@ const Navbar: React.FC = () => {
                   {user ? (
                     <>
                       <Link to="/create-listing" className="block px-4 py-3 hover:bg-green-50 border-b">
-                        <div className="font-semibold text-green-700">Create Listing</div>
+                        <div className="font-semibold text-green-700">List for sale</div>
                         <p className="text-sm text-gray-600">Products, livestock, inputs, services</p>
                       </Link>
                       <hr className="my-2" />
                       <Link to="/request/new" className="block px-4 py-3 hover:bg-blue-50">
-                        <div className="font-semibold text-blue-700">Post Buyer Request</div>
+                        <div className="font-semibold text-blue-700">Post buy request</div>
                         <p className="text-sm text-gray-600">Looking to buy something?</p>
                       </Link>
                     </>
                   ) : (
                     <>
                       <Link to="/login?next=/create-listing" className="block px-4 py-3 hover:bg-green-50 border-b">
-                        <div className="font-semibold text-green-700">Create Listing</div>
+                        <div className="font-semibold text-green-700">List for sale</div>
                         <p className="text-sm text-gray-600">Products, livestock, inputs, services</p>
                       </Link>
                       <hr className="my-2" />
                       <Link to="/login?next=/request/new" className="block px-4 py-3 hover:bg-blue-50">
-                        <div className="font-semibold text-blue-700">Post Buyer Request</div>
+                        <div className="font-semibold text-blue-700">Post buy request</div>
                         <p className="text-sm text-gray-600">Looking to buy something?</p>
                       </Link>
                     </>
@@ -213,7 +213,8 @@ const Navbar: React.FC = () => {
                       <Link to="/admin/profile-verification" onClick={closeMobile}>Profile Verification</Link>
                     </>
                   ) : null}
-                  <Link to="/create-listing" onClick={closeMobile}>Create Listing</Link>
+                  <Link to="/create-listing" onClick={closeMobile}>List for sale</Link>
+                  <Link to="/request/new" onClick={closeMobile}>Post buy request</Link>
                   <button
                     onClick={() => { logout(); closeMobile(); }}
                     className="text-left text-red-600 font-semibold mt-4"
@@ -224,7 +225,8 @@ const Navbar: React.FC = () => {
               ) : (
                 <>
                   <Link to="/login" onClick={closeMobile}>Login</Link>
-                  <Link to="/login?next=/create-listing" onClick={closeMobile}>List</Link>
+                  <Link to="/login?next=/create-listing" onClick={closeMobile}>List for sale</Link>
+                  <Link to="/login?next=/request/new" onClick={closeMobile}>Post buy request</Link>
                 </>
               )}
             </div>
