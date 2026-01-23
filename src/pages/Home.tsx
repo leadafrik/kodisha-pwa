@@ -10,389 +10,368 @@ const Home: React.FC = () => {
   // Fetch dynamic content with fallbacks
   const { content: heroHeadline } = usePageContent('home.hero.headline');
   const { content: heroDescription } = usePageContent('home.hero.description');
-  const { content: ctaPrimary } = usePageContent('home.hero.cta_primary');
   const { content: announcementText } = usePageContent('home.announcement.banner');
   
   // Set defaults if content is empty
-  const displayHeadline = heroHeadline || 'Digitizing Kenya\'s\nAgricultural Marketplace';
-  const displayDescription = heroDescription || 'Buy and sell agricultural produce directly from farmers and producers. Connect with professional agricultural service providers across all 47 counties.';
-  const displayCtaPrimary = ctaPrimary || 'Browse Marketplace';
-  const displayAnnouncement = announcementText || 'Introductory Phase: All listings are free while we onboard early users.';
-
+  const displayHeadline = heroHeadline || "Connecting Kenya's Agricultural Ecosystem";
+  const displayDescription = heroDescription || 'A trusted marketplace for farmers, buyers, and agricultural service providers across all 47 counties.';
+  const displayAnnouncement = announcementText || 'Early access launching with zero fees while we scale.';
 
   return (
     <main className="min-h-screen bg-white">
-      {/* HERO SECTION */}
-      <section className="bg-gradient-to-br from-green-50 via-white to-green-50 pt-20 pb-16 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="space-y-8">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 text-green-700 text-xs sm:text-sm font-semibold tracking-wide">
-              <span className="w-2 h-2 rounded-full bg-green-600" aria-hidden="true"></span>
-              Early Access Launch • Free Listings
-            </div>
-
-            {/* Headline */}
-            <div className="space-y-4">
-              <h1 className="text-5xl sm:text-6xl font-extrabold text-gray-900 leading-tight whitespace-pre-line">
-                {displayHeadline.split('\n').map((line, idx) => (
-                  <React.Fragment key={idx}>
-                    {idx === displayHeadline.split('\n').length - 1 ? (
-                      <span className="bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
-                        {line}
-                      </span>
-                    ) : (
-                      <>
-                        {line}
-                        <br />
-                      </>
-                    )}
-                  </React.Fragment>
-                ))}
-              </h1>
-              <p className="text-lg sm:text-xl text-gray-600 max-w-2xl leading-relaxed">
-                {displayDescription}
-                {!PAYMENTS_ENABLED && (
-                  <span className="block mt-3 font-semibold text-green-700">{displayAnnouncement}</span>
-                )}
-              </p>
-            </div>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Link
-                to="/browse"
-                className="inline-flex justify-center items-center px-8 py-4 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700 active:bg-green-800 shadow-lg hover:shadow-xl transition duration-200"
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                {displayCtaPrimary}
-              </Link>
-              <Link
-                to={user ? "/create-listing" : "/login?next=/create-listing"}
-                className="inline-flex justify-center items-center px-8 py-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 active:bg-blue-800 shadow-lg hover:shadow-xl transition duration-200"
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                {user ? "Create Listing" : "Sign In to List"}
-              </Link>
-              <Link
-                to="/request"
-                className="inline-flex justify-center items-center px-8 py-4 rounded-xl border-2 border-green-600 text-green-600 font-semibold hover:bg-green-50 active:bg-green-100 transition duration-200"
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Browse Buy Requests
-              </Link>
-              <Link
-                to="/about"
-                className="inline-flex justify-center items-center px-8 py-4 rounded-xl border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 active:bg-gray-100 transition duration-200"
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                What We Offer
-              </Link>
-            </div>
-
-            {/* Trust Signals (simple & realistic) */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-10 border-t border-gray-200">
-              {[{label:'Counties Reach',value:'47'},{label:'Launch Users',value:'Early'},{label:'Identity Verification',value:'Enabled'},{label:'In‑App Chat',value:'Live'}].map((item) => (
-                <div key={item.label} className="text-center">
-                  <div className="text-2xl font-bold text-green-600">{item.value}</div>
-                  <div className="text-xs sm:text-sm text-gray-600 mt-1">{item.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* QUICK NAVIGATION FOR BUYERS vs SELLERS */}
-      <section className="py-16 px-4 bg-gradient-to-br from-green-50 to-blue-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">What's Your Goal Today?</h2>
-            <p className="text-gray-600 text-lg">Quickly jump to what you're looking for</p>
+      {/* HERO SECTION - Clean & Minimal */}
+      <section className="pt-20 pb-24 px-4 md:px-8 border-b border-gray-200">
+        <div className="max-w-7xl mx-auto">
+          {/* Beta Badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-medium mb-8">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+            Open Beta • All Listings Free
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* BUYERS - Looking for Listings */}
-            <Link 
-              to="/browse"
-              className="group relative p-8 rounded-2xl bg-white shadow-md hover:shadow-2xl transition-all border-2 border-transparent hover:border-green-500"
-            >
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m0 0l8 4m-8-4v10l8 4m0-10l8 4m-8-4v10" />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">I'm Looking to Buy</h3>
-                  <p className="text-gray-600 mb-4">
-                    Browse thousands of agricultural products, livestock, and services from verified sellers across all 47 Kenya counties.
-                  </p>
-                  <ul className="text-sm text-gray-600 space-y-2">
-                    <li>✓ Fresh produce & livestock</li>
-                    <li>✓ Farm inputs & equipment</li>
-                    <li>✓ Professional services</li>
-                    <li>✓ Direct farmer connections</li>
-                  </ul>
-                  <div className="mt-4 inline-block px-4 py-2 rounded-lg bg-green-100 text-green-700 font-semibold group-hover:bg-green-200 transition">
-                    Browse Listings →
-                  </div>
-                </div>
-              </div>
-            </Link>
-
-            {/* SELLERS - Looking for Buy Requests */}
-            <Link 
-              to="/request"
-              className="group relative p-8 rounded-2xl bg-white shadow-md hover:shadow-2xl transition-all border-2 border-transparent hover:border-blue-500"
-            >
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">I'm Looking to Sell</h3>
-                  <p className="text-gray-600 mb-4">
-                    Find buyers actively looking for what you produce or offer. Respond to buy requests and connect directly with demand.
-                  </p>
-                  <ul className="text-sm text-gray-600 space-y-2">
-                    <li>✓ Real buyer demand</li>
-                    <li>✓ Multiple buyer inquiries</li>
-                    <li>✓ Quick response opportunities</li>
-                    <li>✓ Direct buyer negotiation</li>
-                  </ul>
-                  <div className="mt-4 inline-block px-4 py-2 rounded-lg bg-blue-100 text-blue-700 font-semibold group-hover:bg-blue-200 transition">
-                    View Buy Requests →
-                  </div>
-                </div>
-              </div>
-            </Link>
-          </div>
-
-          {/* Additional Help */}
-          <div className="mt-8 text-center text-sm text-gray-600">
-            <p>Need to post your own products or services? Use the <strong>"+ List"</strong> button in the top navigation.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* FEATURES SECTION */}
-      <section className="py-20 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">A Professional, Simple Marketplace</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">Verified sellers, direct connections, fair prices. Everything you need to buy and sell agricultural products and services with confidence.</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="p-8 rounded-2xl border border-gray-200 hover:border-green-300 hover:shadow-lg transition">
-              <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Verified Sellers</h3>
-              <p className="text-gray-600">
-                Every seller is ID-verified and selfie-authenticated. Buy with confidence.
-              </p>
-            </div>
-
-            {/* Feature 2 */}
-            <div className="p-8 rounded-2xl border border-gray-200 hover:border-green-300 hover:shadow-lg transition">
-              <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Real-Time Chat</h3>
-              <p className="text-gray-600">
-                Message sellers instantly. Negotiate, ask questions, and close deals fast.
-              </p>
-            </div>
-
-            {/* Payments feature tile switches when enabled */}
-            {PAYMENTS_ENABLED ? (
-              <div className="p-8 rounded-2xl border border-gray-200 hover:border-green-300 hover:shadow-lg transition">
-                <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center mb-4">
-                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Secure Payments</h3>
-                <p className="text-gray-600">Instant mobile money integration for seamless transactions.</p>
-              </div>
-            ) : (
-              <div className="p-8 rounded-2xl border border-gray-200 hover:border-green-300 hover:shadow-lg transition">
-                <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center mb-4">
-                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Free Launch</h3>
-                <p className="text-gray-600">All listings are currently free while we onboard Kenya's agricultural community.</p>
-              </div>
-            )}
-
-            {/* Feature 4 */}
-            <div className="p-8 rounded-2xl border border-gray-200 hover:border-green-300 hover:shadow-lg transition">
-              <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Smart Search</h3>
-              <p className="text-gray-600">
-                Filter by county, category, price. Find exactly what you need in seconds.
-              </p>
-            </div>
-
-            {/* Feature 5 */}
-            <div className="p-8 rounded-2xl border border-gray-200 hover:border-green-300 hover:shadow-lg transition">
-              <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Fast Listings</h3>
-              <p className="text-gray-600">
-                List agricultural products and services in under 2 minutes. Go live instantly across Kenya.
-              </p>
-            </div>
-
-            {/* Feature 6 */}
-            <div className="p-8 rounded-2xl border border-gray-200 hover:border-green-300 hover:shadow-lg transition">
-              <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Trusted Support</h3>
-              <p className="text-gray-600">
-                Get help when you need it. Our team is ready to assist you.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CATEGORIES SECTION */}
-      <section className="py-20 px-4 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">What's Available</h2>
-            <p className="text-lg text-gray-600">
-              Two categories of opportunity in Kenya's agricultural marketplace
+          {/* Main Headline */}
+          <div className="space-y-6 max-w-3xl">
+            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
+              {displayHeadline}
+            </h1>
+            <p className="text-xl text-gray-600 leading-relaxed">
+              {displayDescription}
+            </p>
+            <p className="text-lg text-gray-500 font-medium">
+              {displayAnnouncement}
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-8 max-w-3xl mx-auto">
-            {/* Produce */}
-            <div className="p-8 bg-white rounded-2xl border border-gray-200 text-center hover:shadow-lg transition">
-              <div className="text-6xl mb-4">🌾</div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Agricultural Produce</h3>
-              <p className="text-gray-600 mb-6">Fresh vegetables, fruits, grains, and livestock directly from farmers and producers</p>
-              <Link to="/browse" className="inline-block bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700 transition">
-                Browse Produce
-              </Link>
-            </div>
-
-            {/* Services */}
-            <div className="p-8 bg-white rounded-2xl border border-gray-200 text-center hover:shadow-lg transition">
-              <div className="text-6xl mb-4">🔧</div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Agricultural Services</h3>
-              <p className="text-gray-600 mb-6">Professional services: land surveying, transportation, equipment rental, landscaping and more</p>
-              <Link to="/browse" className="inline-block bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700 transition">
-                Browse Services
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* TRUST STRIP */}
-      <section className="py-14 px-4 bg-green-700">
-        <div className="max-w-6xl mx-auto text-center text-white">
-          <h2 className="text-3xl font-bold mb-6">Core Features Live • Payments Later</h2>
-          <p className="max-w-2xl mx-auto text-green-100 text-sm sm:text-base">
-            Identity verification, document uploads, moderation workflow, and in‑app messaging are active. Listing fees and payment processing will be announced before activation.
-          </p>
-        </div>
-      </section>
-
-      {/* CTA SECTION */}
-      <section className="py-20 px-4 bg-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold text-gray-900 mb-6">
-            {user ? "Ready to expand your reach?" : "Ready to get started?"}
-          </h2>
-          <p className="text-lg text-gray-600 mb-8">
-            {user 
-              ? "List your products and reach thousands of buyers across Kenya."
-              : "Join thousands of farmers, buyers, and service providers on Agrisoko."}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          {/* Primary CTA Row */}
+          <div className="flex flex-col sm:flex-row gap-3 mt-10">
             <Link
               to="/browse"
-              className="inline-flex justify-center items-center px-8 py-4 rounded-xl border-2 border-green-600 text-green-600 font-semibold hover:bg-green-50 transition"
+              className="inline-flex justify-center items-center px-6 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
             >
               Browse Listings
             </Link>
             <Link
               to={user ? "/create-listing" : "/login?next=/create-listing"}
-              className="inline-flex justify-center items-center px-8 py-4 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700 shadow-lg transition"
+              className="inline-flex justify-center items-center px-6 py-3 border border-gray-300 text-gray-900 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
             >
-              {user ? "Create a Listing" : "Create Account"}
+              {user ? "Create Listing" : "Start Selling"}
             </Link>
+          </div>
+
+          {/* Key Metrics - Minimal */}
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-8 mt-16 pt-12 border-t border-gray-200">
+            <div>
+              <div className="text-2xl font-bold text-gray-900">47</div>
+              <div className="text-xs text-gray-600 mt-1">Counties Covered</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-gray-900">Verified</div>
+              <div className="text-xs text-gray-600 mt-1">ID Verified</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-gray-900">Instant</div>
+              <div className="text-xs text-gray-600 mt-1">Chat Support</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-gray-900">Free</div>
+              <div className="text-xs text-gray-600 mt-1">Launch Phase</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-gray-900">24/7</div>
+              <div className="text-xs text-gray-600 mt-1">Available</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-gray-900">Direct</div>
+              <div className="text-xs text-gray-600 mt-1">No Middlemen</div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-gray-200 bg-gray-950 text-gray-300">
-        <div className="max-w-6xl mx-auto px-4 py-12">
-          <div className="grid md:grid-cols-5 gap-8 mb-10">
-            <div className="md:col-span-2">
-              <h4 className="text-lg font-bold mb-4 text-white">Agrisoko</h4>
-              <p className="text-sm leading-relaxed">A focused agricultural marketplace for Kenya—streamlining discovery of land, equipment, professional services, and produce. Currently free while we expand coverage; listing fees and payments will be introduced later.</p>
-            </div>
-            <div>
-              <h5 className="font-semibold mb-3 text-white">Platform</h5>
-              <ul className="space-y-2 text-sm">
-                <li><Link to="/browse" className="hover:text-white">Browse Listings</Link></li>
-                <li><Link to={user ? "/create-listing" : "/login"} className="hover:text-white">Create Listing</Link></li>
-                <li><Link to="/profile" className="hover:text-white">Your Profile</Link></li>
+      {/* DUAL CTA SECTION - Two User Paths */}
+      <section className="py-20 px-4 md:px-8 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">What's Your Role?</h2>
+          <p className="text-lg text-gray-600 mb-12 max-w-2xl">
+            Whether you're buying fresh produce or selling your harvest, Agrisoko connects you with the right partners.
+          </p>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* BUYERS PATH */}
+            <div className="border border-gray-200 rounded-lg p-12 bg-white hover:border-gray-300 transition">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">I'm Looking to Buy</h3>
+              <p className="text-gray-600 mb-6">
+                Browse thousands of quality agricultural products, livestock, and professional services from verified sellers across Kenya.
+              </p>
+              <ul className="space-y-3 mb-8 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <span className="text-green-600 font-semibold">+</span> Fresh produce & livestock
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-green-600 font-semibold">+</span> Farm inputs & equipment
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-green-600 font-semibold">+</span> Professional services
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-green-600 font-semibold">+</span> Direct farmer connections
+                </li>
               </ul>
+              <Link
+                to="/browse"
+                className="inline-flex items-center px-6 py-2 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+              >
+                Browse Now →
+              </Link>
             </div>
-            <div>
-              <h5 className="font-semibold mb-3 text-white">Legal</h5>
-              <ul className="space-y-2 text-sm">
-                <li><Link to="/terms" className="hover:text-white">Terms of Service</Link></li>
-                <li><Link to="/privacy" className="hover:text-white">Privacy Policy</Link></li>
+
+            {/* SELLERS PATH */}
+            <div className="border border-gray-200 rounded-lg p-12 bg-white hover:border-gray-300 transition">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">I'm Looking to Sell</h3>
+              <p className="text-gray-600 mb-6">
+                List your products to reach verified buyers actively seeking what you produce. Direct connections, no middlemen.
+              </p>
+              <ul className="space-y-3 mb-8 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <span className="text-blue-600 font-semibold">+</span> Real buyer demand
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-blue-600 font-semibold">+</span> Multiple buyer inquiries
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-blue-600 font-semibold">+</span> Quick response opportunities
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-blue-600 font-semibold">+</span> Direct buyer negotiation
+                </li>
               </ul>
-            </div>
-            <div>
-              <h5 className="font-semibold mb-3 text-white">Contact</h5>
-              <ul className="space-y-2 text-sm">
-                <li><a href="https://wa.me/254796389192" className="hover:text-white" rel="noopener noreferrer">WhatsApp: +254 796 389 192</a></li>
-                <li><a href="mailto:kodisha.254.ke@gmail.com" className="hover:text-white">Email: kodisha.254.ke@gmail.com</a></li>
-              </ul>
-              <p className="text-xs text-gray-500 mt-4">All correspondence: kodisha.254.ke@gmail.com</p>
+              <Link
+                to={user ? "/create-listing" : "/login?next=/create-listing"}
+                className="inline-flex items-center px-6 py-2 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+              >
+                {user ? "Create Listing" : "Get Started"} →
+              </Link>
             </div>
           </div>
-          <div className="border-t border-gray-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
-            <p>&copy; {new Date().getFullYear()} Agrisoko. All rights reserved.</p>
-            <p>Currently free: listing fees and in‑app payments not yet active.</p>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS - Simple 3 Step Flow */}
+      <section className="py-20 px-4 md:px-8">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
+          <p className="text-lg text-gray-600 mb-12 max-w-2xl">
+            Get started in minutes with our straightforward process.
+          </p>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Step 1 */}
+            <div className="relative">
+              <div className="flex items-center justify-center w-12 h-12 bg-gray-900 text-white rounded-full font-bold text-lg mb-4">1</div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Create Account</h3>
+              <p className="text-gray-600">Sign up with email and verify your identity with a photo. Takes just 2 minutes.</p>
+            </div>
+
+            {/* Step 2 */}
+            <div className="relative">
+              <div className="flex items-center justify-center w-12 h-12 bg-gray-900 text-white rounded-full font-bold text-lg mb-4">2</div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Browse or List</h3>
+              <p className="text-gray-600">Search our marketplace or post your products. Filter by location, category, and price.</p>
+            </div>
+
+            {/* Step 3 */}
+            <div className="relative">
+              <div className="flex items-center justify-center w-12 h-12 bg-gray-900 text-white rounded-full font-bold text-lg mb-4">3</div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Connect & Trade</h3>
+              <p className="text-gray-600">Message sellers directly. Negotiate terms and close deals on your terms.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* PLATFORM FEATURES - Clean Grid */}
+      <section className="py-20 px-4 md:px-8 bg-gray-50 border-y border-gray-200">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">Why Choose Agrisoko</h2>
+          <p className="text-lg text-gray-600 mb-12 max-w-2xl">
+            Built for Kenya's agricultural community with security, simplicity, and trust at the core.
+          </p>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Feature 1 */}
+            <div className="p-8 bg-white rounded-lg border border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900 mb-3">Verified Traders</h3>
+              <p className="text-gray-600">Every seller is ID-verified and selfie-authenticated. Trade with confidence.</p>
+            </div>
+
+            {/* Feature 2 */}
+            <div className="p-8 bg-white rounded-lg border border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900 mb-3">Instant Messaging</h3>
+              <p className="text-gray-600">Chat directly with buyers and sellers. Negotiate terms in real-time.</p>
+            </div>
+
+            {/* Feature 3 */}
+            <div className="p-8 bg-white rounded-lg border border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900 mb-3">No Middlemen</h3>
+              <p className="text-gray-600">Direct connections mean better prices for buyers and more profit for sellers.</p>
+            </div>
+
+            {/* Feature 4 */}
+            <div className="p-8 bg-white rounded-lg border border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900 mb-3">47 Counties</h3>
+              <p className="text-gray-600">Full coverage across Kenya. Find sellers and buyers in your area.</p>
+            </div>
+
+            {/* Feature 5 */}
+            <div className="p-8 bg-white rounded-lg border border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900 mb-3">Smart Search</h3>
+              <p className="text-gray-600">Filter by location, category, and price. Find exactly what you need.</p>
+            </div>
+
+            {/* Feature 6 */}
+            <div className="p-8 bg-white rounded-lg border border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900 mb-3">Free Launch Phase</h3>
+              <p className="text-gray-600">Zero listing fees while we onboard Kenya's agricultural community.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* PRODUCT CATEGORIES */}
+      <section className="py-20 px-4 md:px-8">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl font-bold text-gray-900 mb-12">What Can You Buy & Sell?</h2>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Produce Category */}
+            <div className="border border-gray-200 rounded-lg p-8">
+              <div className="text-4xl mb-4">🌾</div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Agricultural Produce</h3>
+              <p className="text-gray-600 mb-6">
+                Fresh vegetables, fruits, grains, and livestock directly from farmers and producers across Kenya.
+              </p>
+              <Link to="/browse" className="text-gray-900 font-semibold hover:underline">
+                Browse Produce →
+              </Link>
+            </div>
+
+            {/* Services Category */}
+            <div className="border border-gray-200 rounded-lg p-8">
+              <div className="text-4xl mb-4">🔧</div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Agricultural Services</h3>
+              <p className="text-gray-600 mb-6">
+                Professional services including land surveying, transportation, equipment rental, and landscaping.
+              </p>
+              <Link to="/browse" className="text-gray-900 font-semibold hover:underline">
+                Browse Services →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FEATURE STATUS BANNER */}
+      <section className="py-12 px-4 md:px-8 bg-gray-900 text-white">
+        <div className="max-w-7xl mx-auto text-center">
+          <h3 className="text-2xl font-bold mb-2">Open Beta • Core Features Live</h3>
+          <p className="text-gray-300">
+            Identity verification, document uploads, and in-app messaging are fully operational. Payments and transaction fees will be announced before activation.
+          </p>
+        </div>
+      </section>
+
+      {/* FINAL CTA SECTION */}
+      <section className="py-20 px-4 md:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-gray-50 rounded-lg border border-gray-200 p-12 text-center">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              {user ? "Ready to Grow Your Business?" : "Ready to Get Started?"}
+            </h2>
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+              {user 
+                ? "List your products now and reach verified buyers across all 47 counties."
+                : "Join thousands of farmers, buyers, and service providers already using Agrisoko."}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                to="/browse"
+                className="inline-flex justify-center items-center px-6 py-3 border border-gray-300 text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                Browse Marketplace
+              </Link>
+              <Link
+                to={user ? "/create-listing" : "/login?next=/create-listing"}
+                className="inline-flex justify-center items-center px-6 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+              >
+                {user ? "Create Listing" : "Create Account"}
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER - Clean & Professional */}
+      <footer className="bg-gray-900 text-gray-300 border-t border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-16">
+          {/* Main Footer Content */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+            {/* Brand Column */}
+            <div className="md:col-span-1">
+              <h3 className="text-lg font-bold text-white mb-3">Agrisoko</h3>
+              <p className="text-sm leading-relaxed">
+                Connecting Kenya's agricultural ecosystem. Direct, trusted, fair.
+              </p>
+            </div>
+
+            {/* Platform Links */}
+            <div>
+              <h4 className="font-semibold text-white mb-4">Platform</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link to="/browse" className="hover:text-white transition">Browse Listings</Link></li>
+                <li><Link to={user ? "/create-listing" : "/login"} className="hover:text-white transition">Create Listing</Link></li>
+                <li><Link to="/request" className="hover:text-white transition">Buy Requests</Link></li>
+                {user && <li><Link to="/profile" className="hover:text-white transition">Your Profile</Link></li>}
+              </ul>
+            </div>
+
+            {/* Legal Links */}
+            <div>
+              <h4 className="font-semibold text-white mb-4">Legal</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link to="/terms" className="hover:text-white transition">Terms of Service</Link></li>
+                <li><Link to="/privacy" className="hover:text-white transition">Privacy Policy</Link></li>
+                <li><Link to="/about" className="hover:text-white transition">About Us</Link></li>
+              </ul>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <h4 className="font-semibold text-white mb-4">Contact</h4>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <a 
+                    href="https://wa.me/254796389192" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition"
+                  >
+                    WhatsApp
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="mailto:kodisha.254.ke@gmail.com"
+                    className="hover:text-white transition"
+                  >
+                    Email Support
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Footer Bottom */}
+          <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
+            <p>&copy; {new Date().getFullYear()} Agrisoko. All rights reserved. Currently in open beta with zero listing fees.</p>
           </div>
         </div>
       </footer>
