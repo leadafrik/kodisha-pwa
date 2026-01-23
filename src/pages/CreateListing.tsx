@@ -84,8 +84,8 @@ const CreateListing: React.FC = () => {
 
   // Pre-fill contact
   useEffect(() => {
-    if (userx.phone && !form.contact) {
-      setForm((prev) => ({ ...prev, contact: user.phone }));
+    if (user?.phone && !form.contact) {
+      setForm((prev) => ({ ...prev, contact: user?.phone }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userx.phone]);
