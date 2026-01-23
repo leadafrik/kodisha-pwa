@@ -1,7 +1,37 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { API_BASE_URL } from '../config/api';
 
 const AboutUs: React.FC = () => {
+  const [userCount, setUserCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadUserCount = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/metrics/community`);
+        const data = await response.json().catch(() => ({}));
+        const total = data?.data?.users?.total;
+
+        if (isMounted && typeof total === 'number') {
+          setUserCount(total);
+        }
+      } catch (error) {
+        // Silent fail to keep the page functional if metrics are unavailable.
+      }
+    };
+
+    loadUserCount();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const userCountLabel =
+    userCount !== null ? `${userCount.toLocaleString()} registered users` : 'Live user count updating';
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <style>{`
@@ -76,7 +106,7 @@ const AboutUs: React.FC = () => {
                 </div>
                 <div className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm sm:col-span-2">
                   <p className="text-xs uppercase tracking-wider text-slate-500">Active community</p>
-                  <p className="text-lg font-semibold text-slate-900">1,000+ users growing weekly</p>
+                  <p className="text-lg font-semibold text-slate-900">{userCountLabel}</p>
                   <p className="text-xs text-slate-500">Farmers, buyers, and service providers</p>
                 </div>
               </div>
@@ -242,7 +272,7 @@ const AboutUs: React.FC = () => {
               <h3 className="text-xl font-semibold text-slate-900 mt-2">Growing every week</h3>
               <div className="mt-4 space-y-3 text-sm text-slate-600">
                 <p><span className="font-semibold text-slate-800">47 counties</span> connected nationwide.</p>
-                <p><span className="font-semibold text-slate-800">1,000+ users</span> actively trading.</p>
+                <p><span className="font-semibold text-slate-800">{userCount ? userCount.toLocaleString() : '—'} users</span> actively trading.</p>
                 <p><span className="font-semibold text-slate-800">24/7 support</span> available to the community.</p>
               </div>
             </div>
