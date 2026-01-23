@@ -237,15 +237,15 @@ const Profile: React.FC = () => {
             to="/create-listing"
             className="bg-emerald-600 text-white p-6 rounded-xl hover:bg-emerald-700 transition duration-300 text-center"
           >
-            <div className="font-semibold text-lg">List Item</div>
-            <div className="text-emerald-100 text-sm">Sell products or offer services</div>
+            <div className="font-semibold text-lg">List for Sale</div>
+            <div className="text-emerald-100 text-sm">Products, livestock, inputs, services</div>
           </Link>
           <Link
-            to="/create-buyer-request"
+            to="/request/new"
             className="bg-sky-600 text-white p-6 rounded-xl hover:bg-sky-700 transition duration-300 text-center"
           >
-            <div className="font-semibold text-lg">Post Need</div>
-            <div className="text-sky-100 text-sm">Post what you're looking for</div>
+            <div className="font-semibold text-lg">Post Buy Request</div>
+            <div className="text-sky-100 text-sm">Share what you're looking for</div>
           </Link>
           <Link
             to="/favorites"
@@ -296,7 +296,7 @@ const Profile: React.FC = () => {
           <h3 className="text-xl font-bold text-slate-900 mb-4">Your Buyer Requests</h3>
           <div className="text-center py-8 text-slate-500">
             <p>View and manage your posted needs</p>
-            <Link to="/buyer-requests" className="text-indigo-600 font-semibold mt-2 inline-block">
+            <Link to="/request" className="text-indigo-600 font-semibold mt-2 inline-block">
               View your requests
             </Link>
           </div>
@@ -332,7 +332,7 @@ const Profile: React.FC = () => {
             <div className="text-center py-8 text-slate-500">
               <p>No agrovet listings yet</p>
               <Link to="/create-listing" className="text-purple-600 font-semibold mt-2 inline-block">
-                List your first agrovet
+                List your agrovet from the main listing flow
               </Link>
             </div>
           ) : (
