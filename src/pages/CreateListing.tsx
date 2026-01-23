@@ -68,7 +68,7 @@ const CreateListing: React.FC = () => {
     unit: "kg",
     availableFrom: "",
     images: [],
-    contact: userx.phone || "",
+    contact: user.phone || "",
     subscribed: false,
     premiumBadge: false,
   });
