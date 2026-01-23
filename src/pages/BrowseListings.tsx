@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useProperties } from "../contexts/PropertyContext";
 import { useAuth } from "../contexts/AuthContext";
@@ -26,6 +26,8 @@ type UnifiedCard = {
   ownerId?: string;
   contact?: string;
   createdAt?: Date;
+  ownerResponseTime?: string;
+  ownerLastActive?: string;
   image?: string;
 };
 
@@ -59,6 +61,22 @@ const formatPhoneForUri = (contact: string): string => {
   return contact.replace(/[\s\-().\s]/g, "");
 };
 
+const highValueCategories: Category[] = ["livestock", "inputs", "service"];
+
+const formatLastActive = (value?: string | Date) => {
+  if (!value) return "Active recently";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Active recently";
+  const diffMs = Date.now() - date.getTime();
+  const diffMins = Math.max(0, Math.floor(diffMs / 60000));
+  if (diffMins < 60) return `Active ${diffMins}m ago`;
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `Active ${diffHours}h ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) return `Active ${diffDays}d ago`;
+  return `Active ${date.toLocaleDateString()}`;
+};
+
 const BrowseListings: React.FC = () => {
   const { serviceListings, productListings, loading } = useProperties();
   const { user } = useAuth();
@@ -67,6 +85,15 @@ const BrowseListings: React.FC = () => {
   const [serviceSub, setServiceSub] = useState<ServiceSubType>("all");
   const [county, setCounty] = useState<string>("");
   const [search, setSearch] = useState<string>("");
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [verifiedOnlyManual, setVerifiedOnlyManual] = useState(false);
+  const isHighValueCategory =
+    category !== "all" && highValueCategories.includes(category);
+
+  useEffect(() => {
+    if (verifiedOnlyManual) return;
+    setVerifiedOnly(isHighValueCategory);
+  }, [isHighValueCategory, verifiedOnlyManual]);
 
   const cards = useMemo<UnifiedCard[]>(() => {
     // Product listings: Produce, Livestock, Inputs
@@ -86,6 +113,11 @@ const BrowseListings: React.FC = () => {
           typeLabel = "Farm Inputs";
         }
         
+        const ownerLastActive =
+          p.owner?.lastActive || p.owner?.updatedAt || p.updatedAt || p.createdAt;
+        const ownerResponseTime =
+          p.owner?.responseTime || p.owner?.responseTimeLabel || "Responds within a day";
+
         return {
           id: p._id || p.id,
           category: categoryLabel,
@@ -104,6 +136,8 @@ const BrowseListings: React.FC = () => {
           image: p.images?.[0],
           ownerId: p.owner?._id || p.ownerId || p.owner,
           contact: p.contact || p.owner?.phone || p.owner?.email,
+          ownerResponseTime,
+          ownerLastActive: ownerLastActive ? formatLastActive(ownerLastActive) : undefined,
         } as UnifiedCard;
       }) || [];
 
@@ -118,6 +152,11 @@ const BrowseListings: React.FC = () => {
         const paidFlag = s.payment?.paymentStatus === "paid";
         const verifiedFlag = !!s.isVerified || !!s.verified;
         const locationLabel = buildLocation(s.location || {});
+        const ownerLastActive =
+          s.owner?.lastActive || s.owner?.updatedAt || s.updatedAt || s.createdAt;
+        const ownerResponseTime =
+          s.owner?.responseTime || s.owner?.responseTimeLabel || "Responds within a day";
+
         return {
           id: s._id || s.id,
           category: "service" as Category,
@@ -136,6 +175,8 @@ const BrowseListings: React.FC = () => {
           image: s.images?.[0],
           ownerId: s.owner?._id || s.ownerId || s.owner,
           contact: s.contact || s.owner?.phone || s.owner?.email,
+          ownerResponseTime,
+          ownerLastActive: ownerLastActive ? formatLastActive(ownerLastActive) : undefined,
         } as UnifiedCard;
       }) || [];
 
@@ -155,6 +196,7 @@ const BrowseListings: React.FC = () => {
           card.subCategory !== serviceSub
         )
           return false;
+        if (verifiedOnly && !card.verified) return false;
         if (county && card.county?.toLowerCase() !== county.toLowerCase())
           return false;
         if (searchTerm) {
@@ -170,7 +212,7 @@ const BrowseListings: React.FC = () => {
         const timeB = b.createdAt ? b.createdAt.getTime() : 0;
         return timeB - timeA;
       });
-  }, [cards, category, serviceSub, county, search]);
+  }, [cards, category, serviceSub, county, search, verifiedOnly]);
 
   const stats = useMemo(() => {
     const total = cards.length;
@@ -372,6 +414,7 @@ const BrowseListings: React.FC = () => {
                     onClick={() => {
                       setCategory(pill.id);
                       setServiceSub("all");
+                      setVerifiedOnlyManual(false);
                     }}
                     className={`rounded-full px-4 py-2 text-sm font-semibold border transition ${
                       active
@@ -385,7 +428,39 @@ const BrowseListings: React.FC = () => {
               })}
             </div>
 
-            {(county || search || category !== "all" || serviceSub !== "all") && (
+            <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+              <label className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 accent-emerald-600"
+                  checked={verifiedOnly}
+                  onChange={() => {
+                    setVerifiedOnly((prev) => !prev);
+                    setVerifiedOnlyManual(true);
+                  }}
+                />
+                Verified only
+              </label>
+              {!verifiedOnlyManual && isHighValueCategory && (
+                <span className="text-xs text-emerald-600 font-semibold">
+                  Recommended for this category
+                </span>
+              )}
+              {verifiedOnlyManual && isHighValueCategory && !verifiedOnly && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setVerifiedOnly(true);
+                    setVerifiedOnlyManual(false);
+                  }}
+                  className="text-xs font-semibold text-emerald-700 hover:text-emerald-800"
+                >
+                  Use recommended
+                </button>
+              )}
+            </div>
+
+            {(county || search || category !== "all" || serviceSub !== "all" || verifiedOnly) && (
               <div className="mt-4 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2 text-xs text-slate-500">
                   <Filter className="h-4 w-4" />
@@ -397,6 +472,8 @@ const BrowseListings: React.FC = () => {
                     setSearch("");
                     setCategory("all");
                     setServiceSub("all");
+                    setVerifiedOnly(false);
+                    setVerifiedOnlyManual(false);
                   }}
                   className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition"
                 >
@@ -526,6 +603,11 @@ const BrowseListings: React.FC = () => {
                     <p className="text-xs text-slate-500 font-medium">
                       Location: {card.locationLabel || "Location pending"}
                     </p>
+                    {(card.ownerResponseTime || card.ownerLastActive) && (
+                      <p className="mt-1 text-xs text-slate-500">
+                        {[card.ownerResponseTime, card.ownerLastActive].filter(Boolean).join(" - ")}
+                      </p>
+                    )}
                   </div>
 
                   <div className="mt-3 flex gap-2">

@@ -45,6 +45,18 @@ const URGENCY_LABELS: Record<string, string> = {
   high: "Urgent",
 };
 
+const CATEGORY_LABELS: Record<string, string> = {
+  produce: "Produce",
+  inputs: "Farm Inputs",
+  service: "Services",
+};
+
+const CATEGORY_PILL_STYLES: Record<string, string> = {
+  produce: "bg-orange-100 text-orange-800",
+  inputs: "bg-sky-100 text-sky-800",
+  service: "bg-emerald-100 text-emerald-800",
+};
+
 export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
   onSelectRequest,
 }) => {
@@ -133,62 +145,135 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
     });
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <div>
-            <h2 className="text-4xl font-bold text-gray-900 mb-2">
-              Browse Buy Requests
-            </h2>
-            <p className="text-gray-600">
-              See what buyers are looking for and connect with new customers
-            </p>
-          </div>
-          <button
-            onClick={() =>
-              navigate(user ? "/request/new" : "/login?next=/request/new")
-            }
-            className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition whitespace-nowrap"
-          >
-            <Plus size={20} />
-            Post a Request
-          </button>
-        </div>
+  const activeFilters: string[] = [];
+  if (filters.category) {
+    activeFilters.push(`Category: ${CATEGORY_LABELS[filters.category] || filters.category}`);
+  }
+  if (filters.county !== "All Counties") {
+    activeFilters.push(`County: ${filters.county}`);
+  }
+  if (filters.urgency) {
+    activeFilters.push(`Urgency: ${URGENCY_LABELS[filters.urgency] || filters.urgency}`);
+  }
 
-        {/* Filters */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Category Filter */}
+  return (
+    <div className=\"min-h-screen bg-slate-50 text-slate-900\">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Manrope:wght@400;600;700&display=swap');
+        :root {
+          --ink: #0f172a;
+          --muted: #64748b;
+          --accent: #0f766e;
+          --accent-soft: #ccfbf1;
+          --sun: #fbbf24;
+          --sand: #fef3c7;
+        }
+        .buy-requests-shell {
+          font-family: \"Manrope\", \"Segoe UI\", \"Tahoma\", sans-serif;
+        }
+        .buy-hero-title {
+          font-family: \"DM Serif Display\", \"Georgia\", serif;
+        }
+        .fade-rise {
+          animation: fadeRise 0.7s ease both;
+        }
+        @keyframes fadeRise {
+          from { opacity: 0; transform: translateY(14px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+
+      <div className=\"relative overflow-hidden buy-requests-shell\">
+        <div className=\"absolute -top-24 left-1/3 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl\" />
+        <div className=\"absolute -bottom-16 right-0 h-72 w-72 rounded-full bg-amber-200/40 blur-3xl\" />
+
+        <div className=\"max-w-6xl mx-auto px-4 pt-12 pb-8\">
+          <div className=\"grid gap-6 lg:grid-cols-[1.2fr_0.8fr] items-center\">
+            <div className=\"space-y-4 fade-rise\">
+              <p className=\"text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold\">
+                Agrisoko Buy Requests
+              </p>
+              <h1 className=\"buy-hero-title text-4xl md:text-5xl text-slate-900\">
+                Connect with buyers who are ready to purchase now
+              </h1>
+              <p className=\"text-base text-slate-600 max-w-xl\">
+                Scan real demand, reply fast, and win repeat business. Filter by county, urgency,
+                or category to find the right match today.
+              </p>
+              <div className=\"flex flex-wrap gap-3\">
+                <button
+                  onClick={() =>
+                    navigate(user ? \"/request/new\" : \"/login?next=/request/new\")
+                  }
+                  className=\"inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition\"
+                >
+                  <Plus size={18} />
+                  Post a Request
+                </button>
+                <Link
+                  to=\"/browse\"
+                  className=\"inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-white px-5 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 transition\"
+                >
+                  Browse Listings
+                </Link>
+              </div>
+            </div>
+
+            <div className=\"grid gap-4 sm:grid-cols-2 fade-rise\">
+              <div className=\"rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm\">
+                <p className=\"text-xs text-slate-500 uppercase tracking-wider\">Active requests</p>
+                <p className=\"text-2xl font-semibold text-slate-900\">{pagination.total}</p>
+                <p className=\"text-xs text-slate-500\">Across Kenya</p>
+              </div>
+              <div className=\"rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm\">
+                <p className=\"text-xs text-slate-500 uppercase tracking-wider\">Urgent this week</p>
+                <p className=\"text-2xl font-semibold text-slate-900\">
+                  {requests.filter((req) => req.urgency === \"high\").length}
+                </p>
+                <p className=\"text-xs text-slate-500\">Ready to close fast</p>
+              </div>
+              <div className=\"rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm sm:col-span-2\">
+                <p className=\"text-xs text-slate-500 uppercase tracking-wider\">Your filter focus</p>
+                <p className=\"text-sm text-slate-700\">
+                  {activeFilters.length ? activeFilters.join(\" - \") : \"All categories, all counties, all urgency\"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className=\"max-w-6xl mx-auto px-4 pb-16\">
+        <div className=\"rounded-3xl border border-slate-200 bg-white p-6 shadow-sm -mt-6 relative z-10\">
+          <div className=\"grid grid-cols-1 md:grid-cols-4 gap-4 items-end\">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className=\"block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2\">
                 Category
               </label>
               <select
                 value={filters.category}
                 onChange={(e) =>
-                  handleFilterChange("category", e.target.value)
+                  handleFilterChange(\"category\", e.target.value)
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className=\"w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200\"
               >
-                <option value="">All Categories</option>
-                <option value="produce">Agricultural Produce</option>
-                <option value="inputs">Farm Inputs</option>
-                <option value="service">Agricultural Services</option>
+                <option value=\"\">All Categories</option>
+                <option value=\"produce\">Agricultural Produce</option>
+                <option value=\"inputs\">Farm Inputs</option>
+                <option value=\"service\">Agricultural Services</option>
               </select>
             </div>
 
-            {/* County Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className=\"block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2\">
                 County
               </label>
               <select
                 value={filters.county}
                 onChange={(e) =>
-                  handleFilterChange("county", e.target.value)
+                  handleFilterChange(\"county\", e.target.value)
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className=\"w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200\"
               >
                 {COUNTIES.map((county) => (
                   <option key={county} value={county}>
@@ -198,119 +283,121 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
               </select>
             </div>
 
-            {/* Urgency Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className=\"block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2\">
                 Urgency
               </label>
               <select
                 value={filters.urgency}
                 onChange={(e) =>
-                  handleFilterChange("urgency", e.target.value)
+                  handleFilterChange(\"urgency\", e.target.value)
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className=\"w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200\"
               >
-                <option value="">All Urgency Levels</option>
-                <option value="low">Low - Can Wait</option>
-                <option value="medium">Medium - Within a Week</option>
-                <option value="high">High - Urgent</option>
+                <option value=\"\">All Urgency Levels</option>
+                <option value=\"low\">Low - Can Wait</option>
+                <option value=\"medium\">Medium - Within a Week</option>
+                <option value=\"high\">High - Urgent</option>
               </select>
             </div>
 
-            {/* Results Count */}
-            <div className="flex items-end">
-              <p className="text-sm text-gray-600">
-                <span className="font-bold text-lg text-gray-900">
-                  {pagination.total}
-                </span>
-                <br />
-                active requests
-              </p>
+            <div className=\"rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3\">
+              <p className=\"text-xs uppercase tracking-widest text-slate-500\">Showing</p>
+              <p className=\"text-lg font-semibold text-slate-900\">{requests.length} on this page</p>
+              <p className=\"text-xs text-slate-500\">{pagination.total} total active</p>
             </div>
           </div>
+
+          {activeFilters.length > 0 && (
+            <div className=\"mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-600\">
+              <span className=\"font-semibold uppercase tracking-widest text-slate-400\">Filters</span>
+              {activeFilters.map((filter) => (
+                <span
+                  key={filter}
+                  className=\"rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-emerald-700 font-semibold\"
+                >
+                  {filter}
+                </span>
+              ))}
+              <button
+                type=\"button\"
+                onClick={() => {
+                  setFilters({ category: \"\", county: \"All Counties\", urgency: \"\" });
+                  setPage(1);
+                }}
+                className=\"text-emerald-700 font-semibold hover:text-emerald-800\"
+              >
+                Clear filters
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Error Message */}
         {error && (
-          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded flex items-center gap-2">
+          <div className=\"mb-6 mt-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded flex items-center gap-2\">
             <AlertCircle size={20} />
             <span>{error}</span>
           </div>
         )}
 
-        {/* Loading State */}
         {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <Loader className="animate-spin text-green-600" size={40} />
+          <div className=\"flex justify-center items-center py-16\">
+            <Loader className=\"animate-spin text-emerald-600\" size={40} />
           </div>
         ) : requests.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600 text-lg">
+          <div className=\"text-center py-16\">
+            <p className=\"text-slate-600 text-lg\">
               No buyer requests found matching your filters.
             </p>
-            <p className="text-gray-500">
-              Try adjusting your filters or check back later!
+            <p className=\"text-slate-500\">
+              Try adjusting your filters or check back later.
             </p>
           </div>
         ) : !Array.isArray(requests) ? (
-          <div className="text-center py-12">
-            <p className="text-red-600 text-lg">
+          <div className=\"text-center py-16\">
+            <p className=\"text-red-600 text-lg\">
               Error: Invalid data format received from server
             </p>
-            <p className="text-gray-500">
+            <p className=\"text-slate-500\">
               Please refresh the page or contact support
             </p>
           </div>
         ) : (
           <>
-            {/* Request Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div className=\"mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10\">
               {requests.map((request) => (
                 <div
                   key={request._id}
                   onClick={() => onSelectRequest?.(request)}
-                  className="bg-white rounded-lg shadow-md hover:shadow-xl transition overflow-hidden cursor-pointer"
+                  className=\"group bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-lg transition overflow-hidden cursor-pointer\"
                 >
-                  {/* Header with Category & Urgency */}
-                  <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 border-b border-gray-200">
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <div className="flex gap-2 flex-wrap">
-                        <span className="inline-block px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full capitalize">
-                          {request.category === "produce"
-                            ? "Produce"
-                            : request.category === "inputs"
-                            ? "Farm Inputs"
-                            : "Services"}
+                  <div className=\"bg-gradient-to-r from-emerald-50 via-white to-amber-50 p-4 border-b border-slate-200\">
+                    <div className=\"flex items-start justify-between gap-2 mb-2\">
+                      <div className=\"flex gap-2 flex-wrap\">
+                        <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full capitalize ${CATEGORY_PILL_STYLES[request.category]}`}>
+                          {CATEGORY_LABELS[request.category]}
                         </span>
                         <span
                           className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${URGENCY_COLORS[request.urgency]}`}
                         >
                           {URGENCY_LABELS[request.urgency]}
                         </span>
-                        {request.status === 'fulfilled' && (
-                          <span className="inline-block px-3 py-1 bg-purple-100 text-purple-800 text-xs font-semibold rounded-full">
-                            ✓ Fulfilled
-                          </span>
-                        )}
                       </div>
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 line-clamp-2">
+                    <h3 className=\"text-lg font-bold text-slate-900 line-clamp-2\">
                       {request.title}
                     </h3>
                   </div>
 
-                  {/* Content */}
-                  <div className="p-4 space-y-3">
-                    {/* Description */}
-                    <p className="text-gray-600 text-sm line-clamp-2">
+                  <div className=\"p-4 space-y-4\">
+                    <p className=\"text-slate-600 text-sm line-clamp-2\">
                       {request.description}
                     </p>
 
-                    {/* Location */}
                     {request.location && (
-                      <div className="flex items-center gap-2 text-gray-700">
-                        <MapPin size={16} className="text-green-600 flex-shrink-0" />
-                        <span className="text-sm font-medium">
+                      <div className=\"flex items-center gap-2 text-slate-700\">
+                        <MapPin size={16} className=\"text-emerald-600 flex-shrink-0\" />
+                        <span className=\"text-sm font-medium\">
                           {request.location.county}
                           {request.location.constituency &&
                             `, ${request.location.constituency}`}
@@ -318,41 +405,39 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                       </div>
                     )}
 
-                    {/* Quantity & Budget */}
-                    <div className="bg-gray-50 rounded p-3 space-y-2">
+                    <div className=\"rounded-2xl bg-slate-50 p-3 space-y-2\">
                       {request.quantity && (
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Quantity:</span>
-                          <span className="font-semibold text-gray-900">
+                        <div className=\"flex justify-between text-sm\">
+                          <span className=\"text-slate-500\">Quantity</span>
+                          <span className=\"font-semibold text-slate-900\">
                             {request.quantity} {request.unit}
                           </span>
                         </div>
                       )}
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Budget:</span>
-                        <span className="font-semibold text-green-600">
+                      <div className=\"flex justify-between text-sm\">
+                        <span className=\"text-slate-500\">Budget</span>
+                        <span className=\"font-semibold text-emerald-700\">
                           {formatBudget(request.budget)}
                         </span>
                       </div>
                     </div>
 
-                    {/* Buyer Info */}
-                    <div className="flex items-center gap-2 pt-2 border-t border-gray-200">
-                      <div className="w-8 h-8 bg-green-200 rounded-full flex items-center justify-center text-sm font-bold text-green-800">
-                        {(request.userId && request.userId.fullName?.charAt(0)) || "U"}
+                    <div className=\"flex items-center gap-2 pt-2 border-t border-slate-200\">
+                      <div className=\"w-9 h-9 bg-emerald-200 rounded-full flex items-center justify-center text-sm font-bold text-emerald-800\">
+                        {(request.userId && request.userId.fullName?.charAt(0)) || \"U\"}
                       </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">
-                          {request.userId?.fullName || "Anonymous"}
+                      <div className=\"flex-1\">
+                        <p className=\"text-sm font-medium text-slate-900\">
+                          {request.userId?.fullName || \"Anonymous\"}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className=\"text-xs text-slate-500\">
                           Posted {formatDate(request.createdAt)}
                         </p>
                       </div>
                       {request.userId?.ratings && typeof request.userId.ratings === 'number' && (
-                        <div className="flex items-center gap-1">
-                          <TrendingUp size={14} className="text-yellow-500" />
-                          <span className="text-sm font-semibold">
+                        <div className=\"flex items-center gap-1\">
+                          <TrendingUp size={14} className=\"text-amber-500\" />
+                          <span className=\"text-sm font-semibold\">
                             {request.userId.ratings.toFixed(1)}
                           </span>
                         </div>
@@ -360,38 +445,36 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                     </div>
                   </div>
 
-                  {/* Footer */}
-                  <div className="bg-green-50 px-4 py-3 border-t border-gray-200">
+                  <div className=\"bg-emerald-50 px-4 py-3 border-t border-slate-200\">
                     <Link
                       to={`/request/${request._id}`}
                       state={{ request }}
-                      className="block text-center bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition text-sm"
+                      className=\"block text-center bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-lg transition text-sm\"
                       aria-label={`View details and reply to ${request.title}`}
                     >
-                      View Details & Reply
+                      View Details and Reply
                     </Link>
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Pagination */}
             {pagination.pages > 1 && (
-              <div className="flex justify-center items-center gap-2">
+              <div className=\"flex justify-center items-center gap-2\">
                 <button
                   onClick={() => setPage(Math.max(1, page - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition"
+                  className=\"px-4 py-2 border border-slate-300 rounded-lg disabled:opacity-50 hover:bg-slate-100 transition\"
                 >
                   Previous
                 </button>
-                <span className="text-gray-700 font-medium">
+                <span className=\"text-slate-700 font-medium\">
                   Page {page} of {pagination.pages}
                 </span>
                 <button
                   onClick={() => setPage(Math.min(pagination.pages, page + 1))}
                   disabled={page === pagination.pages}
-                  className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition"
+                  className=\"px-4 py-2 border border-slate-300 rounded-lg disabled:opacity-50 hover:bg-slate-100 transition\"
                 >
                   Next
                 </button>
@@ -400,23 +483,22 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
           </>
         )}
 
-        {/* Alternative Action - For Buyers */}
-        <div className="mt-16 p-8 rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200">
-          <div className="max-w-4xl mx-auto text-center">
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">Looking to Buy Instead?</h3>
-            <p className="text-gray-600 mb-6">
+        <div className=\"mt-16 p-8 rounded-3xl bg-gradient-to-r from-white via-emerald-50 to-amber-50 border border-emerald-100\">
+          <div className=\"max-w-4xl mx-auto text-center\">
+            <h3 className=\"text-2xl font-bold text-slate-900 mb-3\">Looking to Buy Instead?</h3>
+            <p className=\"text-slate-600 mb-6\">
               Browse thousands of products and services from verified sellers across Kenya. Find exactly what you need with direct connections to farmers and producers.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className=\"flex flex-col sm:flex-row gap-4 justify-center\">
               <Link
-                to="/browse"
-                className="inline-flex justify-center items-center px-6 py-3 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition"
+                to=\"/browse\"
+                className=\"inline-flex justify-center items-center px-6 py-3 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition\"
               >
                 Browse Listings
               </Link>
               <Link
-                to={user ? "/create-listing" : "/login?next=/create-listing"}
-                className="inline-flex justify-center items-center px-6 py-3 rounded-lg border-2 border-green-600 text-green-600 font-semibold hover:bg-green-50 transition"
+                to={user ? \"/create-listing\" : \"/login?next=/create-listing\"}
+                className=\"inline-flex justify-center items-center px-6 py-3 rounded-xl border-2 border-emerald-600 text-emerald-700 font-semibold hover:bg-emerald-50 transition\"
               >
                 Post a Buy Request
               </Link>
@@ -427,5 +509,6 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
     </div>
   );
 };
+
 
 export default BrowseBuyerRequests;

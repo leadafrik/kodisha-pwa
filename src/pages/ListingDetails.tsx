@@ -29,6 +29,20 @@ const isUserAdmin = (): boolean => {
   }
 };
 
+const formatLastActive = (value?: string | Date) => {
+  if (!value) return "Active recently";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Active recently";
+  const diffMs = Date.now() - date.getTime();
+  const diffMins = Math.max(0, Math.floor(diffMs / 60000));
+  if (diffMins < 60) return `Active ${diffMins}m ago`;
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `Active ${diffHours}h ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) return `Active ${diffDays}d ago`;
+  return `Active ${date.toLocaleDateString()}`;
+};
+
 interface Message {
   _id?: string;
   from: string;
@@ -522,6 +536,8 @@ const ListingDetails: React.FC = () => {
 
   const owner = listing.owner || {};
   const coords = listing.coordinates || listing.location?.coordinates;
+  const responseTimeLabel = owner.responseTime || owner.responseTimeLabel || "Usually replies within 24 hours";
+  const lastActiveLabel = formatLastActive(owner.lastActive || owner.updatedAt || listing.updatedAt || listing.createdAt);
 
   // Determine owner/admin privileges for marking sold
   const currentUserRaw = localStorage.getItem('kodisha_user');
@@ -788,8 +804,11 @@ const ListingDetails: React.FC = () => {
               </div>
             </div>
 
-            <p className="text-sm text-gray-600 mb-3">
-              {owner.responseTime || 'Usually replies within 24 hours'}
+            <p className="text-sm text-gray-600 mb-1">
+              {responseTimeLabel}
+            </p>
+            <p className="text-xs text-gray-500 mb-3">
+              {lastActiveLabel}
             </p>
 
             {/* Rating display */}

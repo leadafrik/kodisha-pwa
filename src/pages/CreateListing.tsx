@@ -47,6 +47,8 @@ const CATEGORY_DESCRIPTIONS = {
   service: "Agricultural services including equipment rental, consulting, and labor",
 };
 
+const DRAFT_STORAGE_KEY = "kodisha_listing_draft_v1";
+
 const CreateListing: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -66,7 +68,7 @@ const CreateListing: React.FC = () => {
     unit: "kg",
     availableFrom: "",
     images: [],
-    contact: user?.phone || "",
+    contact: userx.phone || "",
     subscribed: false,
     premiumBadge: false,
   });
@@ -75,20 +77,46 @@ const CreateListing: React.FC = () => {
   const [wards, setWards] = useState<{ value: string; label: string }[]>([]);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [idVerified, setIdVerified] = useState(false);
   const [selfieVerified, setSelfieVerified] = useState(false);
+  const [hasDraft, setHasDraft] = useState(false);
 
   // Pre-fill contact
   useEffect(() => {
-    if (user?.phone && !form.contact) {
+    if (userx.phone && !form.contact) {
       setForm((prev) => ({ ...prev, contact: user.phone }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.phone]);
+  }, [userx.phone]);
+
+  // Check for draft on load
+  useEffect(() => {
+    const draft = localStorage.getItem(DRAFT_STORAGE_KEY);
+    setHasDraft(!!draft);
+  }, []);
+
+  // Auto-save draft (excluding images)
+  useEffect(() => {
+    const shouldSave =
+      form.listingType ||
+      form.category ||
+      form.subcategory ||
+      form.title ||
+      form.description ||
+      form.county ||
+      form.price ||
+      form.quantity ||
+      form.contact;
+    if (!shouldSave) return;
+    const draft = { ...form, images: [] };
+    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+    setHasDraft(true);
+  }, [form]);
 
   // Update verification status
   useEffect(() => {
-    if (user?.verification) {
+    if (userx.verification) {
       setIdVerified(!!user.verification.idVerified);
       setSelfieVerified(!!user.verification.selfieVerified);
     }
@@ -155,6 +183,7 @@ const CreateListing: React.FC = () => {
 
   const validateStep = (): boolean => {
     setError("");
+    setNotice("");
 
     if (form.step === 1) {
       if (!form.listingType) {
@@ -213,7 +242,7 @@ const CreateListing: React.FC = () => {
         setError("Please enter a phone number");
         return false;
       }
-      if (!form.images.length) {
+      if (form.listingType === "sell" && !form.images.length) {
         setError("Please upload at least one image");
         return false;
       }
@@ -239,6 +268,7 @@ const CreateListing: React.FC = () => {
 
   const handlePrevStep = () => {
     setError("");
+    setNotice("");
     setForm((prev) => ({ ...prev, step: Math.max(1, prev.step - 1) }));
   };
 
@@ -287,6 +317,8 @@ const CreateListing: React.FC = () => {
       }
 
       // Success!
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+      setHasDraft(false);
       alert("Listing created successfully! Awaiting admin review...");
       navigate("/listings");
     } catch (err: any) {
@@ -312,54 +344,159 @@ const CreateListing: React.FC = () => {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white py-8 px-4">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create a Listing</h1>
-          <p className="text-gray-600">List your agricultural products, livestock, inputs, or services in a few simple steps</p>
-        </div>
+  const handleRestoreDraft = () => {
+    const draftRaw = localStorage.getItem(DRAFT_STORAGE_KEY);
+    if (!draftRaw) return;
+    try {
+      const parsed = JSON.parse(draftRaw);
+      setForm((prev) => ({
+        ...prev,
+        ...parsed,
+        images: [],
+        step: Math.min(Math.max(Number(parsed.step) || 1, 1), 5),
+      }));
+      setHasDraft(false);
+      setNotice("Draft restored. Continue where you left off.");
+    } catch {
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+      setHasDraft(false);
+    }
+  };
 
-        {/* Progress Indicator */}
-        <div className="mb-8 bg-white rounded-lg p-6 border border-gray-200">
-          <div className="flex justify-between mb-4">
-            {[1, 2, 3, 4, 5].map((step) => (
-              <div key={step} className="flex flex-col items-center flex-1">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-all ${
-                    form.step === step
-                      ? "bg-green-600 text-white shadow-lg"
-                      : form.step > step
-                      ? "bg-green-100 text-green-700"
-                      : "bg-gray-200 text-gray-600"
-                  }`}
-                >
-                  {form.step > step ? "✓" : step}
-                </div>
-                <p className="text-xs mt-2 text-center text-gray-600">
-                  {step === 1 && "Type"}
-                  {step === 2 && "Category"}
-                  {step === 3 && "Location"}
-                  {step === 4 && "Details"}
-                  {step === 5 && "Verify"}
+  const handleDiscardDraft = () => {
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
+    setHasDraft(false);
+    setNotice("Draft discarded.");
+  };
+
+  const handleSaveDraft = () => {
+    const draft = { ...form, images: [] };
+    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+    setHasDraft(true);
+    setNotice("Draft saved.");
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2xfamily=Space+Grotesk:wght@500;700&family=Source+Sans+3:wght@400;600;700&display=swap');
+        .listing-shell {
+          font-family: "Source Sans 3", "Segoe UI", "Tahoma", sans-serif;
+        }
+        .listing-title {
+          font-family: "Space Grotesk", "Segoe UI", "Tahoma", sans-serif;
+        }
+        .fade-rise {
+          animation: fadeRise 0.7s ease both;
+        }
+        @keyframes fadeRise {
+          from { opacity: 0; transform: translateY(14px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+
+      <div className="listing-shell">
+        <section className="relative overflow-hidden">
+          <div className="absolute -top-24 left-1/3 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
+          <div className="absolute -bottom-24 right-0 h-72 w-72 rounded-full bg-amber-200/40 blur-3xl" />
+
+          <div className="max-w-6xl mx-auto px-4 pt-12 pb-8">
+            <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] items-center">
+              <div className="space-y-4 fade-rise">
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">Create a Listing</p>
+                <h1 className="listing-title text-4xl md:text-5xl text-slate-900">
+                  List in minutes, close faster
+                </h1>
+                <p className="text-base text-slate-600 max-w-xl">
+                  Share what you have, set clear prices, and connect directly with verified buyers across Kenya.
                 </p>
+                <div className="flex flex-wrap gap-2 text-xs">
+                  <span className="rounded-full bg-emerald-50 px-3 py-1 font-semibold text-emerald-700">Direct chat</span>
+                  <span className="rounded-full bg-amber-50 px-3 py-1 font-semibold text-amber-700">Verified profiles</span>
+                  <span className="rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-600">Auto-saved drafts</span>
+                </div>
               </div>
-            ))}
+
+              <div className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm fade-rise">
+                <p className="text-xs uppercase tracking-widest text-slate-500">Progress</p>
+                <div className="mt-4 space-y-3">
+                  {(["Type", "Category", "Location", "Details", "Verify"] as const).map((label, idx) => {
+                    const step = idx + 1;
+                    const isActive = form.step === step;
+                    const isDone = form.step > step;
+                    return (
+                      <div key={label} className="flex items-center gap-3">
+                        <div
+                          className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-semibold border ${
+                            isActive
+                              ? "border-emerald-600 bg-emerald-600 text-white"
+                              : isDone
+                              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                              : "border-slate-200 bg-white text-slate-500"
+                          }`}
+                        >
+                          {isDone ? <CheckCircle2 className="h-4 w-4" /> : step}
+                        </div>
+                        <div>
+                          <p className={`text-sm font-semibold ${isActive ? "text-slate-900" : "text-slate-600"}`}>
+                            {label}
+                          </p>
+                          <p className="text-xs text-slate-500">Step {step} of 5</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="mt-5 h-2 rounded-full bg-slate-100 overflow-hidden">
+                  <div
+                    className="h-full bg-emerald-600 transition-all"
+                    style={{ width: `${(form.step / 5) * 100}%` }}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="w-full bg-gray-200 h-1 rounded-full overflow-hidden">
-            <div
-              className="bg-green-600 h-full transition-all"
-              style={{ width: `${(form.step / 5) * 100}%` }}
-            />
+        </section>
+
+        <div className="max-w-5xl mx-auto px-4 pb-16">
+          {/* Header */}
+          <div className="mb-8">
+            <h2 className="listing-title text-2xl text-slate-900 mb-2">Create a listing</h2>
+            <p className="text-slate-600">List your products, livestock, inputs, or services in a few simple steps.</p>
+            <p className="text-xs text-slate-500 mt-2">Drafts save automatically on this device.</p>
           </div>
-        </div>
+
+        {hasDraft && (
+          <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex flex-wrap items-center gap-3">
+            <p className="text-emerald-800 font-semibold flex-1">You have a saved draft. Want to continue?</p>
+            <button
+              type="button"
+              onClick={handleRestoreDraft}
+              className="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700"
+            >
+              Restore draft
+            </button>
+            <button
+              type="button"
+              onClick={handleDiscardDraft}
+              className="px-4 py-2 rounded-lg border border-emerald-200 text-emerald-700 text-sm font-semibold hover:bg-emerald-100"
+            >
+              Discard
+            </button>
+          </div>
+        )}
 
         {/* Error Alert */}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex gap-3">
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-2xl p-4 flex gap-3">
             <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
             <p className="text-red-700">{error}</p>
+          </div>
+        )}
+        {notice && !error && (
+          <div className="mb-6 bg-blue-50 border border-blue-200 rounded-2xl p-4 flex gap-3">
+            <CheckCircle2 className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <p className="text-blue-700">{notice}</p>
           </div>
         )}
 
@@ -367,8 +504,8 @@ const CreateListing: React.FC = () => {
         <form onSubmit={form.step === 5 ? handleSubmit : (e) => e.preventDefault()}>
           {/* Step 1: Listing Type */}
           {form.step === 1 && (
-            <div className="bg-white rounded-lg p-8 border border-gray-200 shadow-sm">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">What do you want to do?</h2>
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">What do you want to dox</h2>
               <div className="grid grid-cols-2 gap-4">
                 {[
                   { type: "sell" as const, label: "Sell", icon: "", desc: "Sell your products" },
@@ -378,8 +515,13 @@ const CreateListing: React.FC = () => {
                     key={type}
                     type="button"
                     onClick={() => {
-                      setForm((prev) => ({ ...prev, listingType: type }));
+                      setForm((prev) => ({
+                        ...prev,
+                        listingType: type,
+                        step: Math.max(prev.step, 2),
+                      }));
                       setError("");
+                      setNotice("");
                     }}
                     className={`p-6 rounded-lg border-2 transition-all text-center ${
                       form.listingType === type
@@ -398,8 +540,8 @@ const CreateListing: React.FC = () => {
 
           {/* Step 2: Category Selection */}
           {form.step === 2 && (
-            <div className="bg-white rounded-lg p-8 border border-gray-200 shadow-sm">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">What are you listing?</h2>
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">What are you listingx</h2>
               <div className="space-y-4 mb-8">
                 {(["produce", "livestock", "inputs", "service"] as const).map((cat) => (
                   <button
@@ -408,6 +550,7 @@ const CreateListing: React.FC = () => {
                     onClick={() => {
                       setForm((prev) => ({ ...prev, category: cat, subcategory: null }));
                       setError("");
+                      setNotice("");
                     }}
                     className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
                       form.category === cat
@@ -432,8 +575,13 @@ const CreateListing: React.FC = () => {
                         key={sub}
                         type="button"
                         onClick={() => {
-                          setForm((prev) => ({ ...prev, subcategory: sub }));
+                          setForm((prev) => ({
+                            ...prev,
+                            subcategory: sub,
+                            step: Math.max(prev.step, 3),
+                          }));
                           setError("");
+                          setNotice("");
                         }}
                         className={`p-3 rounded-lg border-2 text-center transition-all ${
                           form.subcategory === sub
@@ -452,9 +600,9 @@ const CreateListing: React.FC = () => {
 
           {/* Step 3: Location */}
           {form.step === 3 && (
-            <div className="bg-white rounded-lg p-8 border border-gray-200 shadow-sm">
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
               <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <MapPin className="w-5 h-5" /> Where is it located?
+                <MapPin className="w-5 h-5" /> Where is it locatedx
               </h2>
 
               <div className="space-y-5">
@@ -530,7 +678,7 @@ const CreateListing: React.FC = () => {
 
           {/* Step 4: Listing Details */}
           {form.step === 4 && (
-            <div className="bg-white rounded-lg p-8 border border-gray-200 shadow-sm">
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
               <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                 <Tag className="w-5 h-5" /> Listing Details
               </h2>
@@ -636,7 +784,7 @@ const CreateListing: React.FC = () => {
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-2">
                     <Camera className="w-4 h-4 inline mr-2" />
-                    Upload Images ({form.images.length}/5) *
+                    Upload Images ({form.images.length}/5) {form.listingType === "sell" ? "*" : "(Optional for buy requests)"}
                   </label>
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                     <input
@@ -670,7 +818,7 @@ const CreateListing: React.FC = () => {
                             onClick={() => removeImage(idx)}
                             className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                           >
-                            <span className="text-white text-xl">✕</span>
+                            <span className="text-white text-xs font-semibold">Remove</span>
                           </button>
                         </div>
                       ))}
@@ -683,35 +831,49 @@ const CreateListing: React.FC = () => {
 
           {/* Step 5: Verification & Confirmation */}
           {form.step === 5 && (
-            <div className="bg-white rounded-lg p-8 border border-gray-200 shadow-sm">
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
               <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                 <FileText className="w-5 h-5" /> Review & Confirm
               </h2>
 
-              {/* Verification Status */}
-              <div className="mb-6 space-y-3">
-                <div className={`p-4 rounded-lg border ${idVerified ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}>
-                  <p className={`flex items-center gap-2 font-semibold ${idVerified ? "text-green-700" : "text-red-700"}`}>
-                    {idVerified ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-                    National ID Verification
+                            {/* Verification Status */}
+              <div className=\"mb-6 space-y-3\">
+                <div className={`p-4 rounded-xl border ${idVerified ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"}`}>
+                  <p className={`flex items-center gap-2 font-semibold ${idVerified ? "text-emerald-700" : "text-red-700"}`}>
+                    {idVerified ? <CheckCircle2 className=\"w-5 h-5\" /> : <AlertCircle className=\"w-5 h-5\" />}
+                    National ID verification
                   </p>
-                  <p className={`text-sm mt-1 ${idVerified ? "text-green-600" : "text-red-600"}`}>
-                    {idVerified ? "✓ Verified" : "✗ Required - Please upload ID"}
+                  <p className={`text-sm mt-1 ${idVerified ? "text-emerald-600" : "text-red-600"}`}>
+                    {idVerified ? "Verified" : "Required - please upload ID"}
                   </p>
                 </div>
 
-                <div className={`p-4 rounded-lg border ${selfieVerified ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}>
-                  <p className={`flex items-center gap-2 font-semibold ${selfieVerified ? "text-green-700" : "text-red-700"}`}>
-                    {selfieVerified ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-                    Selfie Verification
+                <div className={`p-4 rounded-xl border ${selfieVerified ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"}`}>
+                  <p className={`flex items-center gap-2 font-semibold ${selfieVerified ? "text-emerald-700" : "text-red-700"}`}>
+                    {selfieVerified ? <CheckCircle2 className=\"w-5 h-5\" /> : <AlertCircle className=\"w-5 h-5\" />}
+                    Selfie verification
                   </p>
-                  <p className={`text-sm mt-1 ${selfieVerified ? "text-green-600" : "text-red-600"}`}>
-                    {selfieVerified ? "✓ Verified" : "✗ Required - Please upload selfie"}
+                  <p className={`text-sm mt-1 ${selfieVerified ? "text-emerald-600" : "text-red-600"}`}>
+                    {selfieVerified ? "Verified" : "Required - please upload selfie"}
                   </p>
                 </div>
               </div>
 
               {!idVerified || !selfieVerified ? (
+                <div className=\"bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6\">
+                  <p className=\"text-amber-800 font-semibold mb-2\">Complete your verification first</p>
+                  <p className=\"text-amber-700 text-sm mb-4\">
+                    You must complete ID and selfie verification before listing. Visit your profile to upload these documents.
+                  </p>
+                  <button
+                    type=\"button\"
+                    onClick={() => navigate(\"/profile\")}
+                    className=\"bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700\"
+                  >
+                    Go to Profile
+                  </button>
+                </div>
+              ) : (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
                   <p className="text-yellow-800 font-semibold mb-2">Complete your verification first</p>
                   <p className="text-yellow-700 text-sm mb-4">
@@ -806,7 +968,7 @@ const CreateListing: React.FC = () => {
               <button
                 type="button"
                 onClick={handlePrevStep}
-                className="flex-1 bg-gray-600 text-white font-bold py-3 rounded-lg hover:bg-gray-700"
+                className="flex-1 border border-slate-300 text-slate-700 font-semibold py-3 rounded-xl hover:bg-slate-50"
               >
                 Previous
               </button>
@@ -814,14 +976,24 @@ const CreateListing: React.FC = () => {
             {form.step < 5 && (
               <button
                 type="button"
+                onClick={handleSaveDraft}
+                className="flex-1 border border-slate-300 text-slate-700 font-semibold py-3 rounded-xl hover:bg-slate-50"
+              >
+                Save draft
+              </button>
+            )}
+            {form.step < 5 && (
+              <button
+                type="button"
                 onClick={handleNextStep}
-                className="flex-1 bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700"
+                className="flex-1 bg-emerald-600 text-white font-semibold py-3 rounded-xl hover:bg-emerald-700"
               >
                 Next
               </button>
             )}
           </div>
         </form>
+      </div>
       </div>
     </div>
   );

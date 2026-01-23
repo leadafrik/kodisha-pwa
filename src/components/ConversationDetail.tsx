@@ -24,6 +24,20 @@ interface Conversation {
   lastMessageAt: string;
 }
 
+const formatLastActive = (value?: string | Date) => {
+  if (!value) return "Active recently";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Active recently";
+  const diffMs = Date.now() - date.getTime();
+  const diffMins = Math.max(0, Math.floor(diffMs / 60000));
+  if (diffMins < 60) return `Active ${diffMins}m ago`;
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `Active ${diffHours}h ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) return `Active ${diffDays}d ago`;
+  return `Active ${date.toLocaleDateString()}`;
+};
+
 const ConversationDetail: React.FC<{ conversationId: string; currentUserId: string }> = ({
   conversationId,
   currentUserId,
@@ -66,12 +80,25 @@ const ConversationDetail: React.FC<{ conversationId: string; currentUserId: stri
   if (!conversation) return <div className="p-4">Conversation not found</div>;
 
   const otherParty = conversation.buyer._id === currentUserId ? conversation.seller : conversation.buyer;
+  const responseTimeLabel = otherParty?.responseTime || otherParty?.responseTimeLabel || "Usually replies within 24 hours";
+  const lastActiveLabel = formatLastActive(otherParty?.lastActive || otherParty?.updatedAt || conversation.lastMessageAt);
+  const isVerified = !!otherParty?.isVerified;
 
   return (
     <div className="flex flex-col h-[600px] bg-white border rounded-lg">
       {/* Header */}
       <div className="p-4 border-b bg-gray-50">
-        <h2 className="font-semibold text-lg">{otherParty.name}</h2>
+        <div className="flex flex-wrap items-center gap-2">
+          <h2 className="font-semibold text-lg">{otherParty.name}</h2>
+          {isVerified && (
+            <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+              Verified
+            </span>
+          )}
+        </div>
+        <p className="text-xs text-gray-500 mt-1">
+          {responseTimeLabel} - {lastActiveLabel}
+        </p>
         {conversation.listing && (
           <p className="text-sm text-gray-600">{conversation.listing.title}</p>
         )}
