@@ -164,8 +164,20 @@ export const apiRequest = async (url: string, options: RequestInit = {}) => {
           localStorage.getItem("token")
         : null;
 
+    const normalizeHeaders = (headers?: HeadersInit): Record<string, string> => {
+      if (!headers) return {};
+      if (headers instanceof Headers) {
+        return Object.fromEntries(headers.entries());
+      }
+      if (Array.isArray(headers)) {
+        return Object.fromEntries(headers);
+      }
+      return headers as Record<string, string>;
+    };
+
+    const baseHeaders = normalizeHeaders(options.headers);
     const authHeader =
-      token && !(options.headers as Record<string, string> | undefined)?.Authorization
+      token && !baseHeaders.Authorization
         ? { Authorization: `Bearer ${token}` }
         : {};
 
@@ -173,7 +185,7 @@ export const apiRequest = async (url: string, options: RequestInit = {}) => {
       headers: {
         "Content-Type": "application/json",
         ...authHeader,
-        ...options.headers,
+        ...baseHeaders,
       },
       ...options,
     });
