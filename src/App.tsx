@@ -128,7 +128,14 @@ function App() {
                     <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
                     <Route path="/admin/listings-approval" element={<ProtectedRoute><AdminListingsApproval /></ProtectedRoute>} />
                     <Route path="/admin/id-verification" element={<ProtectedRoute><AdminIDVerification /></ProtectedRoute>} />
-                    <Route path="/admin/moderation" element={<Moderation />} />
+                    <Route
+                      path="/admin/moderation/*"
+                      element={
+                        <ProtectedRoute>
+                          <Moderation />
+                        </ProtectedRoute>
+                      }
+                    />
                     <Route path="/admin/reports" element={<ProtectedRoute><AdminReports /></ProtectedRoute>} />
                     <Route path="/admin/profile-verification" element={<ProtectedRoute><AdminIDVerification /></ProtectedRoute>} />
                     <Route path="/admin/users" element={<ProtectedRoute><AdminUserManagement /></ProtectedRoute>} />

@@ -278,8 +278,8 @@ export const adminApiRequest = async (
         localStorage.removeItem("kodisha_admin_token");
         localStorage.removeItem("kodisha_token");
         localStorage.removeItem("token");
-        if (typeof window !== "undefined" && !window.location.pathname.includes("/admin/login")) {
-          window.location.href = "/admin/login";
+        if (typeof window !== "undefined" && !window.location.pathname.includes("/login")) {
+          window.location.href = "/login";
         }
         const message =
           (data && (data.message || data.error)) ||

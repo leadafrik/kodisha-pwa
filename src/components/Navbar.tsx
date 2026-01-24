@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import NotificationCenter from "./NotificationCenter";
@@ -12,8 +12,23 @@ const Chevron: React.FC = () => (
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [listOpen, setListOpen] = useState(false);
+  const listCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const closeMobile = () => setMobileOpen(false);
+  const scheduleListClose = () => {
+    if (listCloseTimer.current) {
+      clearTimeout(listCloseTimer.current);
+    }
+    listCloseTimer.current = setTimeout(() => setListOpen(false), 180);
+  };
+
+  const cancelListClose = () => {
+    if (listCloseTimer.current) {
+      clearTimeout(listCloseTimer.current);
+      listCloseTimer.current = null;
+    }
+  };
 
   return (
     <>
@@ -54,31 +69,62 @@ const Navbar: React.FC = () => {
                 About
               </Link>
 
-              <div className="group relative">
-                <button className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition font-semibold flex items-center gap-2">
+              <div
+                className="relative"
+                onMouseEnter={() => {
+                  cancelListClose();
+                  setListOpen(true);
+                }}
+                onMouseLeave={scheduleListClose}
+              >
+                <button
+                  type="button"
+                  onClick={() => setListOpen((prev) => !prev)}
+                  className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition font-semibold flex items-center gap-2"
+                >
                   + List <Chevron />
                 </button>
-                <div className="absolute hidden group-hover:block bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 z-50">
+                <div
+                  className={`absolute ${listOpen ? "block" : "hidden"} bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 z-50`}
+                  onMouseEnter={cancelListClose}
+                  onMouseLeave={scheduleListClose}
+                >
                   {user ? (
                     <>
-                      <Link to="/create-listing" className="block px-4 py-3 hover:bg-green-50 border-b">
+                      <Link
+                        to="/create-listing"
+                        className="block px-4 py-3 hover:bg-green-50 border-b"
+                        onClick={() => setListOpen(false)}
+                      >
                         <div className="font-semibold text-green-700">List for sale</div>
                         <p className="text-sm text-gray-600">Products, livestock, inputs, services</p>
                       </Link>
                       <hr className="my-2" />
-                      <Link to="/request/new" className="block px-4 py-3 hover:bg-blue-50">
+                      <Link
+                        to="/request/new"
+                        className="block px-4 py-3 hover:bg-blue-50"
+                        onClick={() => setListOpen(false)}
+                      >
                         <div className="font-semibold text-blue-700">Post buy request</div>
                         <p className="text-sm text-gray-600">Looking to buy something?</p>
                       </Link>
                     </>
                   ) : (
                     <>
-                      <Link to="/login?next=/create-listing" className="block px-4 py-3 hover:bg-green-50 border-b">
+                      <Link
+                        to="/login?next=/create-listing"
+                        className="block px-4 py-3 hover:bg-green-50 border-b"
+                        onClick={() => setListOpen(false)}
+                      >
                         <div className="font-semibold text-green-700">List for sale</div>
                         <p className="text-sm text-gray-600">Products, livestock, inputs, services</p>
                       </Link>
                       <hr className="my-2" />
-                      <Link to="/login?next=/request/new" className="block px-4 py-3 hover:bg-blue-50">
+                      <Link
+                        to="/login?next=/request/new"
+                        className="block px-4 py-3 hover:bg-blue-50"
+                        onClick={() => setListOpen(false)}
+                      >
                         <div className="font-semibold text-blue-700">Post buy request</div>
                         <p className="text-sm text-gray-600">Looking to buy something?</p>
                       </Link>
