@@ -68,7 +68,7 @@ const CreateListing: React.FC = () => {
     unit: "kg",
     availableFrom: "",
     images: [],
-    contact: userx.phone || "",
+    contact: user?.phone || "",
     subscribed: false,
     premiumBadge: false,
   });
@@ -84,11 +84,11 @@ const CreateListing: React.FC = () => {
 
   // Pre-fill contact
   useEffect(() => {
-    if (userx.phone && !form.contact) {
-      setForm((prev) => ({ ...prev, contact: user.phone }));
+    if (user?.phone && !form.contact) {
+      setForm((prev) => ({ ...prev, contact: user?.phone }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userx.phone]);
+  }, [user?.phone]);
 
   // Check for draft on load
   useEffect(() => {
@@ -116,7 +116,7 @@ const CreateListing: React.FC = () => {
 
   // Update verification status
   useEffect(() => {
-    if (userx.verification) {
+    if (user?.verification) {
       setIdVerified(!!user.verification.idVerified);
       setSelfieVerified(!!user.verification.selfieVerified);
     }
@@ -379,7 +379,7 @@ const CreateListing: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2xfamily=Space+Grotesk:wght@500;700&family=Source+Sans+3:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Source+Sans+3:wght@400;600;700&display=swap');
         .listing-shell {
           font-family: "Source Sans 3", "Segoe UI", "Tahoma", sans-serif;
         }
@@ -410,11 +410,6 @@ const CreateListing: React.FC = () => {
                 <p className="text-base text-slate-600 max-w-xl">
                   Share what you have, set clear prices, and connect directly with verified buyers across Kenya.
                 </p>
-                <div className="flex flex-wrap gap-2 text-xs">
-                  <span className="rounded-full bg-emerald-50 px-3 py-1 font-semibold text-emerald-700">Direct chat</span>
-                  <span className="rounded-full bg-amber-50 px-3 py-1 font-semibold text-amber-700">Verified profiles</span>
-                  <span className="rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-600">Auto-saved drafts</span>
-                </div>
               </div>
 
               <div className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm fade-rise">
@@ -459,62 +454,61 @@ const CreateListing: React.FC = () => {
         </section>
 
         <div className="max-w-5xl mx-auto px-4 pb-16">
-          {/* Header */}
-          <div className="mb-8">
-            <h2 className="listing-title text-2xl text-slate-900 mb-2">Create a listing</h2>
-            <p className="text-slate-600">List your products, livestock, inputs, or services in a few simple steps.</p>
-            <p className="text-xs text-slate-500 mt-2">Drafts save automatically on this device.</p>
-          </div>
+          <p className="mb-6 text-sm text-slate-500">Drafts save automatically on this device.</p>
 
-        {hasDraft && (
-          <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex flex-wrap items-center gap-3">
-            <p className="text-emerald-800 font-semibold flex-1">You have a saved draft. Want to continue?</p>
-            <button
-              type="button"
-              onClick={handleRestoreDraft}
-              className="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700"
-            >
-              Restore draft
-            </button>
-            <button
-              type="button"
-              onClick={handleDiscardDraft}
-              className="px-4 py-2 rounded-lg border border-emerald-200 text-emerald-700 text-sm font-semibold hover:bg-emerald-100"
-            >
-              Discard
-            </button>
-          </div>
-        )}
+          {hasDraft && (
+            <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex flex-wrap items-center gap-3">
+              <p className="text-emerald-800 font-semibold flex-1">You have a saved draft. Want to continue?</p>
+              <button
+                type="button"
+                onClick={handleRestoreDraft}
+                className="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700"
+              >
+                Restore draft
+              </button>
+              <button
+                type="button"
+                onClick={handleDiscardDraft}
+                className="px-4 py-2 rounded-lg border border-emerald-200 text-emerald-700 text-sm font-semibold hover:bg-emerald-100"
+              >
+                Discard
+              </button>
+            </div>
+          )}
 
-        {/* Error Alert */}
-        {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-2xl p-4 flex gap-3">
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-            <p className="text-red-700">{error}</p>
-          </div>
-        )}
-        {notice && !error && (
-          <div className="mb-6 bg-blue-50 border border-blue-200 rounded-2xl p-4 flex gap-3">
-            <CheckCircle2 className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <p className="text-blue-700">{notice}</p>
-          </div>
-        )}
+          {/* Error Alert */}
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-2xl p-4 flex gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <p className="text-red-700">{error}</p>
+            </div>
+          )}
+          {notice && !error && (
+            <div className="mb-6 bg-blue-50 border border-blue-200 rounded-2xl p-4 flex gap-3">
+              <CheckCircle2 className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <p className="text-blue-700">{notice}</p>
+            </div>
+          )}
 
         {/* Form Container */}
         <form onSubmit={form.step === 5 ? handleSubmit : (e) => e.preventDefault()}>
           {/* Step 1: Listing Type */}
           {form.step === 1 && (
             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">What do you want to dox</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-6">What do you want to do?</h2>
               <div className="grid grid-cols-2 gap-4">
                 {[
                   { type: "sell" as const, label: "Sell", icon: "", desc: "Sell your products" },
-                  { type: "buy" as const, label: "Buy", icon: "", desc: "Request to buy" },
+                  { type: "buy" as const, label: "Buy", icon: "", desc: "Post a buy request" },
                 ].map(({ type, label, icon, desc }) => (
                   <button
                     key={type}
                     type="button"
                     onClick={() => {
+                      if (type === "buy") {
+                        navigate("/request/new");
+                        return;
+                      }
                       setForm((prev) => ({
                         ...prev,
                         listingType: type,
@@ -535,13 +529,16 @@ const CreateListing: React.FC = () => {
                   </button>
                 ))}
               </div>
+              <p className="mt-4 text-xs text-gray-500">
+                Buying? You will be redirected to the buy request form for a cleaner flow.
+              </p>
             </div>
           )}
 
           {/* Step 2: Category Selection */}
           {form.step === 2 && (
             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">What are you listingx</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-6">What are you listing?</h2>
               <div className="space-y-4 mb-8">
                 {(["produce", "livestock", "inputs", "service"] as const).map((cat) => (
                   <button
@@ -568,31 +565,28 @@ const CreateListing: React.FC = () => {
 
               {form.category && (
                 <div>
-                  <h3 className="font-bold text-gray-900 mb-4">Select a subcategory:</h3>
-                  <div className="grid grid-cols-2 gap-3">
+                  <h3 className="font-bold text-gray-900 mb-4">Select a subcategory</h3>
+                  <select
+                    value={form.subcategory ?? ""}
+                    onChange={(e) => {
+                      const value = (e.target.value || null) as ListingFormData["subcategory"];
+                      setForm((prev) => ({
+                        ...prev,
+                        subcategory: value,
+                        step: value ? Math.max(prev.step, 3) : prev.step,
+                      }));
+                      setError("");
+                      setNotice("");
+                    }}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  >
+                    <option value="">Select a subcategory...</option>
                     {subcategoryOptions.map((sub) => (
-                      <button
-                        key={sub}
-                        type="button"
-                        onClick={() => {
-                          setForm((prev) => ({
-                            ...prev,
-                            subcategory: sub,
-                            step: Math.max(prev.step, 3),
-                          }));
-                          setError("");
-                          setNotice("");
-                        }}
-                        className={`p-3 rounded-lg border-2 text-center transition-all ${
-                          form.subcategory === sub
-                            ? "border-green-600 bg-green-50"
-                            : "border-gray-200 hover:border-green-300"
-                        }`}
-                      >
-                        <p className="font-semibold text-gray-900 text-sm capitalize">{sub}</p>
-                      </button>
+                      <option key={sub} value={sub}>
+                        {sub}
+                      </option>
                     ))}
-                  </div>
+                  </select>
                 </div>
               )}
             </div>
@@ -602,7 +596,7 @@ const CreateListing: React.FC = () => {
           {form.step === 3 && (
             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
               <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <MapPin className="w-5 h-5" /> Where is it locatedx
+                <MapPin className="w-5 h-5" /> Where is it located?
               </h2>
 
               <div className="space-y-5">
@@ -784,7 +778,7 @@ const CreateListing: React.FC = () => {
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-2">
                     <Camera className="w-4 h-4 inline mr-2" />
-                    Upload Images ({form.images.length}/5) {form.listingType === "sell" ? "*" : "(Optional for buy requests)"}
+                    Upload Images ({form.images.length}/5) *
                   </label>
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                     <input
@@ -836,7 +830,7 @@ const CreateListing: React.FC = () => {
                 <FileText className="w-5 h-5" /> Review & Confirm
               </h2>
 
-                            {/* Verification Status */}
+              {/* Verification Status */}
               <div className="mb-6 space-y-3">
                 <div className={`p-4 rounded-xl border ${idVerified ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"}`}>
                   <p className={`flex items-center gap-2 font-semibold ${idVerified ? "text-emerald-700" : "text-red-700"}`}>
@@ -869,20 +863,6 @@ const CreateListing: React.FC = () => {
                     type="button"
                     onClick={() => navigate("/profile")}
                     className="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700"
-                  >
-                    Go to Profile
-                  </button>
-                </div>
-              ) : (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                  <p className="text-yellow-800 font-semibold mb-2">Complete your verification first</p>
-                  <p className="text-yellow-700 text-sm mb-4">
-                    You must complete ID and selfie verification before listing. Visit your profile to upload these documents.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => navigate("/profile")}
-                    className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700"
                   >
                     Go to Profile
                   </button>

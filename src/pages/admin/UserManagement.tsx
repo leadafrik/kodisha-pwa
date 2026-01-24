@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Search, AlertTriangle, CheckCircle, Lock, Flag } from 'lucide-react';
 import { API_BASE_URL } from '../../config/api';
 
@@ -26,7 +26,10 @@ const AdminUserManagement: React.FC = () => {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
 
-  const token = localStorage.getItem('token');
+  const token =
+    localStorage.getItem('kodisha_admin_token') ||
+    localStorage.getItem('kodisha_token') ||
+    localStorage.getItem('token');
 
   const handleSearch = async (newPage = 1) => {
     setLoading(true);
@@ -59,6 +62,11 @@ const AdminUserManagement: React.FC = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    handleSearch(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSuspend = async (userId: string, reason: string) => {
     if (!reason.trim()) {

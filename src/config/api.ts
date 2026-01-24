@@ -157,11 +157,39 @@ export const API_ENDPOINTS = {
 
 export const apiRequest = async (url: string, options: RequestInit = {}) => {
   try {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("kodisha_token") ||
+          localStorage.getItem("kodisha_admin_token") ||
+          localStorage.getItem("token")
+        : null;
+
+    const normalizeHeaders = (headers?: HeadersInit): Record<string, string> => {
+      if (!headers) return {};
+      if (headers instanceof Headers) {
+        return Object.fromEntries(headers.entries());
+      }
+      if (Array.isArray(headers)) {
+        return Object.fromEntries(headers);
+      }
+      return headers as Record<string, string>;
+    };
+
+    const baseHeaders = normalizeHeaders(options.headers);
+    const authHeader: Record<string, string> =
+      token && !baseHeaders.Authorization
+        ? { Authorization: `Bearer ${token}` }
+        : {};
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...authHeader,
+      ...baseHeaders,
+    };
+
     const response = await fetch(url, {
-      headers: {
-        "Content-Type": "application/json",
-        ...options.headers,
-      },
+      headers,
+      credentials: options.credentials ?? "include",
       ...options,
     });
 
@@ -250,8 +278,8 @@ export const adminApiRequest = async (
         localStorage.removeItem("kodisha_admin_token");
         localStorage.removeItem("kodisha_token");
         localStorage.removeItem("token");
-        if (typeof window !== "undefined" && !window.location.pathname.includes("/admin/login")) {
-          window.location.href = "/admin/login";
+        if (typeof window !== "undefined" && !window.location.pathname.includes("/login")) {
+          window.location.href = "/login";
         }
         const message =
           (data && (data.message || data.error)) ||

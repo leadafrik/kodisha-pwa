@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { Heart, MapPin, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from "../data/kenyaCounties";
 import { API_BASE_URL } from "../config/api";
 
@@ -24,10 +24,10 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
     description: "",
     category: "produce",
     productType: "",
-    budget: { min: 0, max: 0, currency: "KES" },
-    quantity: 0,
+    budget: { min: "", max: "", currency: "KES" },
+    quantity: "",
     unit: "kg",
-    location: { county: "Nairobi", constituency: "", ward: "" },
+    location: { county: "", constituency: "", ward: "" },
     urgency: "medium",
     images: [] as string[],
   });
@@ -49,13 +49,11 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
     }
   };
 
-  const handleBudgetChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      budget: { ...prev.budget, [name]: parseInt(value) || 0 },
+      budget: { ...prev.budget, [name]: value },
     }));
   };
 
@@ -76,17 +74,34 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
       }
 
       const token = localStorage.getItem("kodisha_token");
-      const response = await fetch(
-        `${API_BASE_URL}/buyer-requests`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const budgetMin =
+        formData.budget.min.trim() !== ""
+          ? Number(formData.budget.min)
+          : undefined;
+      const budgetMax =
+        formData.budget.max.trim() !== ""
+          ? Number(formData.budget.max)
+          : undefined;
+      const quantityValue =
+        formData.quantity.trim() !== "" ? Number(formData.quantity) : undefined;
+
+      const payload = {
+        ...formData,
+        quantity: quantityValue,
+        budget:
+          budgetMin !== undefined || budgetMax !== undefined
+            ? { min: budgetMin, max: budgetMax, currency: formData.budget.currency }
+            : undefined,
+      };
+
+      const response = await fetch(`${API_BASE_URL}/buyer-requests`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -102,13 +117,17 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6">
-        Post a Buy Request
-      </h2>
+    <div className="max-w-2xl mx-auto rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-sm">
+      <div className="mb-6">
+        <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">Buy request</p>
+        <h2 className="text-3xl font-bold text-slate-900 mt-2">Post a buy request</h2>
+        <p className="text-sm text-slate-600 mt-2">
+          Share exactly what you need. Verified sellers will reach out with offers.
+        </p>
+      </div>
 
       {error && (
-        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded flex items-start gap-2">
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-start gap-2">
           <AlertCircle size={20} className="mt-0.5 flex-shrink-0" />
           <span>{error}</span>
         </div>
@@ -126,13 +145,13 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
             value={formData.title}
             onChange={handleChange}
             placeholder="e.g., Fresh Maize, Irrigation Pipes"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             required
           />
         </div>
 
         {/* Category */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid gap-4 md:grid-cols-2">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Category
@@ -141,7 +160,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
               name="category"
               value={formData.category}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             >
               <option value="produce">Agricultural Produce</option>
               <option value="inputs">Farm Inputs</option>
@@ -157,7 +176,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
               name="urgency"
               value={formData.urgency}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             >
               <option value="low">Low - Can wait</option>
               <option value="medium">Medium - Within a week</option>
@@ -177,13 +196,13 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
             onChange={handleChange}
             placeholder="Describe what you need. Include specifications, quality requirements, preferred timing..."
             rows={4}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             required
           />
         </div>
 
         {/* Product Type & Quantity */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid gap-4 md:grid-cols-3">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Product Type
@@ -194,7 +213,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
               value={formData.productType}
               onChange={handleChange}
               placeholder="e.g., Hybrid maize"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             />
           </div>
 
@@ -203,12 +222,14 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
               Quantity
             </label>
             <input
-              type="number"
+              type="text"
               name="quantity"
               value={formData.quantity}
               onChange={handleChange}
-              placeholder="0"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              placeholder="e.g., 10"
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             />
           </div>
 
@@ -220,7 +241,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
               name="unit"
               value={formData.unit}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             >
               {UNITS.map((unit) => (
                 <option key={unit} value={unit}>
@@ -232,42 +253,44 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
         </div>
 
         {/* Budget */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid gap-4 md:grid-cols-2">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Min Budget (KES)
+              Min Budget (KES) <span className="text-xs text-slate-400">(Optional)</span>
             </label>
             <input
-              type="number"
+              type="text"
               name="min"
               value={formData.budget.min}
               onChange={handleBudgetChange}
-              placeholder="0"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              placeholder="e.g., 3000"
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Max Budget (KES)
+              Max Budget (KES) <span className="text-xs text-slate-400">(Optional)</span>
             </label>
             <input
-              type="number"
+              type="text"
               name="max"
               value={formData.budget.max}
               onChange={handleBudgetChange}
-              placeholder="0"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              placeholder="e.g., 12000"
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             />
           </div>
         </div>
 
         {/* Location */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid gap-4 md:grid-cols-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-              <MapPin size={16} /> County
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">County</label>
             <select
               name="location.county"
               value={formData.location.county}
@@ -279,7 +302,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                   location: { county: e.target.value, constituency: "", ward: "" }
                 }));
               }}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             >
               <option value="">Select County</option>
               {kenyaCounties.map((county) => (
@@ -306,7 +329,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                 }));
               }}
               disabled={!formData.location.county}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-100"
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:bg-gray-100"
             >
               <option value="">Select Constituency</option>
               {formData.location.county && 
@@ -327,7 +350,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
               value={formData.location.ward}
               onChange={handleChange}
               disabled={!formData.location.constituency}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-100"
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:bg-gray-100"
             >
               <option value="">Select Ward</option>
               {formData.location.county && formData.location.constituency &&
@@ -341,20 +364,19 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
         </div>
 
         {/* Buttons */}
-        <div className="flex gap-4 pt-4">
+        <div className="flex flex-col-reverse gap-3 pt-2 md:flex-row">
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-3 rounded-lg transition flex items-center justify-center gap-2"
+            className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2"
           >
-            <Heart size={20} />
             {loading ? "Creating..." : "Post Buy Request"}
           </button>
           {onCancel && (
             <button
               type="button"
               onClick={onCancel}
-              className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 rounded-lg transition"
+              className="flex-1 border border-slate-300 text-slate-700 font-semibold py-3 rounded-lg transition hover:bg-slate-50"
             >
               Cancel
             </button>

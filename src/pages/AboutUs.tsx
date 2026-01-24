@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { API_BASE_URL } from '../config/api';
+import { kenyaCounties } from '../data/kenyaCounties';
 
 const AboutUs: React.FC = () => {
+  const { user } = useAuth();
   const [userCount, setUserCount] = useState<number | null>(null);
 
   useEffect(() => {
@@ -29,8 +32,12 @@ const AboutUs: React.FC = () => {
     };
   }, []);
 
+  const countiesCount = kenyaCounties.length;
   const userCountLabel =
     userCount !== null ? `${userCount.toLocaleString()} registered users` : 'Live user count updating';
+  const isFullyVerified = !!user?.verification?.idVerified && !!user?.verification?.selfieVerified;
+  const verificationLink = user ? (isFullyVerified ? '/profile' : '/verify-id') : '/login';
+  const verificationCta = user ? (isFullyVerified ? 'View verification status' : 'Verify your profile') : 'Sign in to verify';
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -71,19 +78,21 @@ const AboutUs: React.FC = () => {
                   About Agrisoko
                 </p>
                 <h1 className="about-title text-4xl md:text-5xl text-slate-900">
-                  Kenya's agricultural marketplace, redesigned for real trade.
+                  Kenya's agricultural marketplace, built for real trade.
                 </h1>
                 <p className="text-base text-slate-600 max-w-xl">
-                  Agrisoko connects farmers, producers, service providers, and buyers across all 47 counties.
-                  We remove middlemen, build trust, and keep commerce flowing with verified profiles and direct chat.
+                  Agrisoko connects farmers, producers, service providers, and buyers across Kenya.
+                  Verified profiles, direct chat, and fair pricing keep transactions clear and fast.
                 </p>
                 <div className="flex flex-wrap gap-3">
-                  <Link
-                    to="/login"
-                    className="inline-flex items-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition"
-                  >
-                    Sign In
-                  </Link>
+                  {!user && (
+                    <Link
+                      to="/login"
+                      className="inline-flex items-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition"
+                    >
+                      Sign In
+                    </Link>
+                  )}
                   <Link
                     to="/browse"
                     className="inline-flex items-center rounded-xl border border-emerald-200 bg-white px-5 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 transition"
@@ -96,13 +105,13 @@ const AboutUs: React.FC = () => {
               <div className="grid gap-4 sm:grid-cols-2 fade-rise">
                 <div className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm">
                   <p className="text-xs uppercase tracking-wider text-slate-500">Counties covered</p>
-                  <p className="text-2xl font-semibold text-slate-900">47</p>
+                  <p className="text-2xl font-semibold text-slate-900">{countiesCount}</p>
                   <p className="text-xs text-slate-500">Nationwide reach</p>
                 </div>
                 <div className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm">
-                  <p className="text-xs uppercase tracking-wider text-slate-500">Verified profiles</p>
-                  <p className="text-2xl font-semibold text-slate-900">100%</p>
-                  <p className="text-xs text-slate-500">Trust-first access</p>
+                  <p className="text-xs uppercase tracking-wider text-slate-500">Trust checks</p>
+                  <p className="text-2xl font-semibold text-slate-900">Verified</p>
+                  <p className="text-xs text-slate-500">Profiles and listings</p>
                 </div>
                 <div className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm sm:col-span-2">
                   <p className="text-xs uppercase tracking-wider text-slate-500">Active community</p>
@@ -120,16 +129,14 @@ const AboutUs: React.FC = () => {
               <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">Our Mission</p>
               <h2 className="about-title text-3xl text-slate-900 mt-3">Digitize the market</h2>
               <p className="text-slate-600 mt-3 leading-relaxed">
-                We bring Kenya's agricultural trade online, making it accessible, efficient, and aligned with modern
-                standards. Agrisoko connects buyers and sellers directly, so commerce stays fair and transparent.
+                Put agriculture online with simple tools for listing, buying, and messaging. No middlemen. No noise.
               </p>
             </div>
             <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
               <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">Our Vision</p>
               <h2 className="about-title text-3xl text-slate-900 mt-3">A trusted ecosystem</h2>
               <p className="text-slate-600 mt-3 leading-relaxed">
-                We envision a thriving agricultural network where every farmer, buyer, and service provider has equal
-                access to markets, information, and opportunity, powered by verified profiles and direct connections.
+                A platform where every farmer, buyer, and service provider can trade with confidence, backed by verification.
               </p>
             </div>
           </div>
@@ -159,9 +166,8 @@ const AboutUs: React.FC = () => {
                 <p className="text-sm text-slate-600 mt-3">Fresh produce listed directly by farmers and producers.</p>
                 <ul className="mt-4 space-y-2 text-sm text-slate-600">
                   <li>- Vegetables and fruits</li>
-                  <li>- Livestock and animal products</li>
                   <li>- Grains and cereals</li>
-                  <li>- Direct farm-to-buyer deals</li>
+                  <li>- Farm-to-buyer deals</li>
                 </ul>
               </div>
 
@@ -173,9 +179,8 @@ const AboutUs: React.FC = () => {
                 <p className="text-sm text-slate-600 mt-3">Trusted suppliers for reliable agricultural inputs.</p>
                 <ul className="mt-4 space-y-2 text-sm text-slate-600">
                   <li>- Seeds and seedlings</li>
-                  <li>- Fertilizers and soil nutrients</li>
-                  <li>- Pesticides and herbicides</li>
-                  <li>- Equipment and tools</li>
+                  <li>- Fertilizers and crop care</li>
+                  <li>- Tools and equipment</li>
                 </ul>
               </div>
 
@@ -186,10 +191,9 @@ const AboutUs: React.FC = () => {
                 </div>
                 <p className="text-sm text-slate-600 mt-3">Professional services for modern farms and agribusiness.</p>
                 <ul className="mt-4 space-y-2 text-sm text-slate-600">
-                  <li>- Land surveying and mapping</li>
+                  <li>- Equipment rental</li>
                   <li>- Transport and logistics</li>
-                  <li>- Equipment rental and leasing</li>
-                  <li>- Land preparation and landscaping</li>
+                  <li>- Land preparation</li>
                 </ul>
               </div>
             </div>
@@ -200,22 +204,21 @@ const AboutUs: React.FC = () => {
           <div className="grid gap-6 md:grid-cols-2">
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <h3 className="text-xl font-semibold text-slate-900">Why choose Agrisoko</h3>
-              <div className="mt-4 space-y-4 text-sm text-slate-600">
+              <div className="mt-4 space-y-3 text-sm text-slate-600">
                 <p><span className="font-semibold text-slate-800">Direct connections:</span> Fair pricing without middlemen.</p>
                 <p><span className="font-semibold text-slate-800">Verified profiles:</span> Trust signals on every transaction.</p>
-                <p><span className="font-semibold text-slate-800">Nationwide coverage:</span> Reach all 47 counties.</p>
-                <p><span className="font-semibold text-slate-800">Data protection:</span> Industry-standard security.</p>
-                <p><span className="font-semibold text-slate-800">Simple to use:</span> Built for first-time digital traders.</p>
+                <p><span className="font-semibold text-slate-800">Nationwide reach:</span> Listings across {countiesCount} counties.</p>
+                <p><span className="font-semibold text-slate-800">Data protection:</span> Secure handling of your information.</p>
                 <p><span className="font-semibold text-slate-800">Ratings and reviews:</span> Transparent reputation building.</p>
               </div>
             </div>
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <h3 className="text-xl font-semibold text-slate-900">How it works</h3>
-              <ol className="mt-4 space-y-4 text-sm text-slate-600">
+              <ol className="mt-4 space-y-3 text-sm text-slate-600">
                 <li><span className="font-semibold text-slate-800">1. Sign up and verify</span> - Create your profile and verify identity.</li>
-                <li><span className="font-semibold text-slate-800">2. List or browse</span> - Post a listing or explore what is available.</li>
-                <li><span className="font-semibold text-slate-800">3. Connect and negotiate</span> - Chat and agree on terms directly.</li>
-                <li><span className="font-semibold text-slate-800">4. Complete and rate</span> - Close the deal and leave feedback.</li>
+                <li><span className="font-semibold text-slate-800">2. List or browse</span> - Post a listing or search.</li>
+                <li><span className="font-semibold text-slate-800">3. Connect and agree</span> - Chat and settle terms.</li>
+                <li><span className="font-semibold text-slate-800">4. Complete and rate</span> - Close the deal.</li>
               </ol>
             </div>
           </div>
@@ -228,12 +231,14 @@ const AboutUs: React.FC = () => {
               Join thousands of farmers, producers, buyers, and service providers building a stronger agricultural economy.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                to="/login"
-                className="inline-flex justify-center items-center px-6 py-3 rounded-xl bg-white text-emerald-700 font-semibold hover:bg-emerald-50 transition"
-              >
-                Sign In
-              </Link>
+              {!user && (
+                <Link
+                  to="/login"
+                  className="inline-flex justify-center items-center px-6 py-3 rounded-xl bg-white text-emerald-700 font-semibold hover:bg-emerald-50 transition"
+                >
+                  Sign In
+                </Link>
+              )}
               <Link
                 to="/create-listing"
                 className="inline-flex justify-center items-center px-6 py-3 rounded-xl border border-white text-white font-semibold hover:bg-emerald-700 transition"
@@ -271,20 +276,20 @@ const AboutUs: React.FC = () => {
               <p className="text-xs uppercase tracking-widest text-slate-500">Impact</p>
               <h3 className="text-xl font-semibold text-slate-900 mt-2">Growing every week</h3>
               <div className="mt-4 space-y-3 text-sm text-slate-600">
-                <p><span className="font-semibold text-slate-800">47 counties</span> connected nationwide.</p>
-                <p><span className="font-semibold text-slate-800">{userCount ? userCount.toLocaleString() : '—'} users</span> actively trading.</p>
-                <p><span className="font-semibold text-slate-800">24/7 support</span> available to the community.</p>
+                <p><span className="font-semibold text-slate-800">{countiesCount} counties</span> connected nationwide.</p>
+                <p><span className="font-semibold text-slate-800">{userCountLabel}</span> and growing.</p>
+                <p><span className="font-semibold text-slate-800">Support</span> available to the community.</p>
               </div>
             </div>
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <p className="text-xs uppercase tracking-widest text-slate-500">Trust</p>
               <h3 className="text-xl font-semibold text-slate-900 mt-2">Built on verification</h3>
-              <p className="text-sm text-slate-600 mt-3">Every profile is verified. Ratings keep the marketplace honest.</p>
+              <p className="text-sm text-slate-600 mt-3">Profiles are verified and ratings keep the marketplace honest.</p>
               <Link
-                to="/profile"
+                to={verificationLink}
                 className="mt-4 inline-flex items-center text-sm font-semibold text-emerald-700 hover:text-emerald-800"
               >
-                Verify your profile
+                {verificationCta}
               </Link>
             </div>
           </div>
@@ -335,6 +340,5 @@ const AboutUs: React.FC = () => {
     </div>
   );
 };
-
 
 export default AboutUs;

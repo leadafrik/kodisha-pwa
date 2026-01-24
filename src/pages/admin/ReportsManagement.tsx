@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { AlertTriangle, CheckCircle, Clock } from 'lucide-react';
-import { API_BASE_URL } from '../../config/api';
+import { API_ENDPOINTS, adminApiRequest } from '../../config/api';
 
 interface Report {
   _id: string;
-  reportingUser: { fullName: string; email: string };
-  reportedUser: { fullName: string; email: string };
+  reportingUser?: { fullName?: string; email?: string };
+  reportedUser?: { fullName?: string; email?: string };
   reason: string;
   description?: string;
   status: string;
@@ -24,7 +24,12 @@ const AdminReportsManagement: React.FC = () => {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
 
-  const token = localStorage.getItem('token');
+  const statusMap: Record<string, string> = {
+    pending: 'open',
+    investigating: 'reviewing',
+    resolved: 'resolved',
+    dismissed: 'dismissed',
+  };
 
   useEffect(() => {
     fetchReports();
@@ -41,16 +46,9 @@ const AdminReportsManagement: React.FC = () => {
       params.append('page', page.toString());
       params.append('limit', '15');
 
-      const response = await fetch(
-        `${API_BASE_URL}/admin/reports?${params}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (!response.ok) throw new Error('Failed to fetch reports');
-
-      const data = await response.json();
+      const apiStatus = statusMap[statusFilter] || statusFilter;
+      params.set('status', apiStatus);
+      const data = await adminApiRequest(`${API_ENDPOINTS.admin.reports.getAll}?${params}`);
       setReports(data.data);
       setTotal(data.pagination.total);
     } catch (err) {
@@ -62,19 +60,11 @@ const AdminReportsManagement: React.FC = () => {
 
   const handleUpdateStatus = async (reportId: string, newStatus: string, resolution?: string) => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/admin/reports/${reportId}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ status: newStatus, resolution }),
-        }
-      );
-
-      if (!response.ok) throw new Error('Failed to update report');
+      const apiStatus = statusMap[newStatus] || newStatus;
+      await adminApiRequest(API_ENDPOINTS.admin.reports.updateStatus(reportId), {
+        method: 'PATCH',
+        body: JSON.stringify({ status: apiStatus, resolution }),
+      });
 
       setShowModal(false);
       setSelectedReport(null);
@@ -172,14 +162,22 @@ const AdminReportsManagement: React.FC = () => {
                   <tr key={report._id} className="hover:bg-gray-50 transition">
                     <td className="px-6 py-4">
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{report.reportedUser.fullName}</p>
-                        <p className="text-xs text-gray-500">{report.reportedUser.email}</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {report.reportedUser?.fullName || "Unknown user"}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {report.reportedUser?.email || "No email"}
+                        </p>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{report.reportingUser.fullName}</p>
-                        <p className="text-xs text-gray-500">{report.reportingUser.email}</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {report.reportingUser?.fullName || "Unknown reporter"}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {report.reportingUser?.email || "No email"}
+                        </p>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-700 max-w-xs">
@@ -278,7 +276,7 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 font-bold text-2xl"
           >
-            ×
+            x
           </button>
         </div>
 
@@ -287,8 +285,8 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
           <div>
             <h3 className="font-semibold text-gray-900 mb-2">Reported User</h3>
             <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-gray-900 font-medium">{report.reportedUser.fullName}</p>
-              <p className="text-gray-600 text-sm">{report.reportedUser.email}</p>
+              <p className="text-gray-900 font-medium">{report.reportedUser?.fullName || 'Unknown user'}</p>
+              <p className="text-gray-600 text-sm">{report.reportedUser?.email || 'No email'}</p>
             </div>
           </div>
 
@@ -296,8 +294,8 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
           <div>
             <h3 className="font-semibold text-gray-900 mb-2">Reported By</h3>
             <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-gray-900 font-medium">{report.reportingUser.fullName}</p>
-              <p className="text-gray-600 text-sm">{report.reportingUser.email}</p>
+              <p className="text-gray-900 font-medium">{report.reportingUser?.fullName || 'Unknown reporter'}</p>
+              <p className="text-gray-600 text-sm">{report.reportingUser?.email || 'No email'}</p>
             </div>
           </div>
 
@@ -368,3 +366,4 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
 };
 
 export default AdminReportsManagement;
+

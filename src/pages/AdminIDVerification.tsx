@@ -12,23 +12,19 @@ import {
 
 interface IDVerification {
   _id: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  county?: string;
-  constituency?: string;
-  profileVerificationStatus: "pending_verification" | "verified" | "rejected";
-  profileVerifiedAt?: string;
-  idData?: {
-    idFront?: string;
-    idBack?: string;
-    selfie?: string;
-    verifiedAt?: string;
+  userId: {
+    _id: string;
+    fullName?: string;
+    name?: string;
+    email?: string;
+    phone?: string;
   };
-  verification?: {
-    idVerified?: boolean;
-    notes?: string;
-  };
+  idDocumentUrl: string;
+  selfieUrl: string;
+  status: "pending" | "approved" | "rejected";
+  notes?: string;
+  submittedAt?: string;
+  reviewedAt?: string;
 }
 
 const AdminIDVerification: React.FC = () => {
@@ -38,9 +34,6 @@ const AdminIDVerification: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "approved" | "rejected">(
-    "pending"
-  );
   const [selectedVerification, setSelectedVerification] = useState<IDVerification | null>(null);
   const [reviewingId, setReviewingId] = useState<string | null>(null);
   const [reviewingStatus, setReviewingStatus] = useState<"approved" | "rejected" | null>(null);
@@ -50,17 +43,21 @@ const AdminIDVerification: React.FC = () => {
   useEffect(() => {
     loadVerifications();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterStatus]);
+  }, []);
+
+  const getUserName = (verification: IDVerification) =>
+    verification.userId?.fullName ||
+    verification.userId?.name ||
+    "Unknown user";
 
   const loadVerifications = async () => {
     try {
       setLoading(true);
       setError("");
 
-      // Use the correct backend endpoint with status filter
-      const endpoint = `/admin/profiles/pending?status=${filterStatus}`;
+      // Use the ID verification queue
+      const endpoint = `/verification/admin/id/pending`;
       console.log(`[AdminIDVerification] Fetching from endpoint: ${endpoint}`);
-      console.log(`[AdminIDVerification] Filter status: ${filterStatus}`);
       console.log(`[AdminIDVerification] Auth token present:`, !!localStorage.getItem("kodisha_token"));
 
       const response = await adminApiRequest(endpoint, {
@@ -70,11 +67,7 @@ const AdminIDVerification: React.FC = () => {
       console.log(`[AdminIDVerification] Response:`, response);
 
       if (response && response.success) {
-        const data = Array.isArray(response.data)
-          ? response.data
-          : Array.isArray(response.verifications)
-          ? response.verifications
-          : [];
+        const data = Array.isArray(response.verifications) ? response.verifications : [];
 
         console.log(`[AdminIDVerification] Data loaded successfully, count:`, data.length);
         setVerifications(data);
@@ -105,9 +98,9 @@ const AdminIDVerification: React.FC = () => {
   useEffect(() => {
     const filtered = verifications.filter(
       (v) =>
-        v.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        v.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        v.phone.includes(searchTerm)
+        getUserName(v).toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (v.userId?.email || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (v.userId?.phone || "").includes(searchTerm)
     );
     setFilteredVerifications(filtered);
   }, [searchTerm, verifications]);
@@ -141,13 +134,12 @@ const AdminIDVerification: React.FC = () => {
       setReviewingStatus(status);
 
       // Use the correct endpoint based on status
-      const endpoint = status === "approved" 
-        ? `/admin/profiles/${verificationId}/verify`
-        : `/admin/profiles/${verificationId}/reject`;
+      const endpoint = `/verification/admin/id/${verificationId}/review`;
 
       const response = await adminApiRequest(endpoint, {
         method: "PUT",
         body: JSON.stringify({
+          status,
           notes: reviewNotes || undefined,
         }),
       });
@@ -174,14 +166,14 @@ const AdminIDVerification: React.FC = () => {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "pending_verification":
+      case "pending":
         return (
           <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-sm font-semibold">
             <div className="w-2 h-2 bg-amber-600 rounded-full"></div>
             Pending
           </span>
         );
-      case "verified":
+      case "approved":
         return (
           <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-semibold">
             <div className="w-2 h-2 bg-green-600 rounded-full"></div>
@@ -206,23 +198,6 @@ const AdminIDVerification: React.FC = () => {
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-gray-900 mb-2">ID Verification Review</h1>
         <p className="text-gray-600">Review and approve user identity documents</p>
-      </div>
-
-      {/* Filter Tabs */}
-      <div className="flex gap-2 mb-6 border-b border-gray-200">
-        {(["pending", "approved", "rejected", "all"] as const).map((status) => (
-          <button
-            key={status}
-            onClick={() => setFilterStatus(status)}
-            className={`px-4 py-2 font-semibold border-b-2 transition ${
-              filterStatus === status
-                ? "border-green-600 text-green-600"
-                : "border-transparent text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            {status.charAt(0).toUpperCase() + status.slice(1)}
-          </button>
-        ))}
       </div>
 
       {/* Search */}
@@ -257,7 +232,7 @@ const AdminIDVerification: React.FC = () => {
       ) : filteredVerifications.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg">
           <p className="text-gray-600">
-            {filterStatus === "pending" ? "No pending verifications" : "No verifications found"}
+            No pending verifications
           </p>
         </div>
       ) : (
@@ -272,16 +247,15 @@ const AdminIDVerification: React.FC = () => {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="text-lg font-bold text-gray-900">
-                      {verification.fullName}
+                      {getUserName(verification)}
                     </h3>
-                    {getStatusBadge(verification.profileVerificationStatus)}
+                    {getStatusBadge(verification.status)}
                   </div>
                   <div className="text-sm text-gray-600 space-y-1">
-                    <p>Email: {verification.email}</p>
-                    <p>Phone: {verification.phone}</p>
-                    {verification.county && <p>Location: {verification.county}</p>}
+                    <p>Email: {verification.userId?.email || "Not provided"}</p>
+                    <p>Phone: {verification.userId?.phone || "Not provided"}</p>
                     <p className="text-xs text-gray-500 mt-2">
-                      Submitted: {verification.profileVerifiedAt ? new Date(verification.profileVerifiedAt).toLocaleDateString() : 'Recently'}
+                      Submitted: {verification.submittedAt ? new Date(verification.submittedAt).toLocaleDateString() : "Recently"}
                     </p>
                   </div>
                 </div>
@@ -301,7 +275,7 @@ const AdminIDVerification: React.FC = () => {
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">ID Verification</h2>
                 <p className="text-sm text-gray-600 mt-1">
-                  Review application from {selectedVerification.fullName}
+                  Review application from {getUserName(selectedVerification)}
                 </p>
               </div>
               <button
@@ -323,25 +297,25 @@ const AdminIDVerification: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Full Name</p>
-                    <p className="text-gray-900 font-medium">{selectedVerification.fullName}</p>
+                    <p className="text-gray-900 font-medium">{getUserName(selectedVerification)}</p>
                   </div>
                   <div>
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Status</p>
-                    {getStatusBadge(selectedVerification.profileVerificationStatus)}
+                    {getStatusBadge(selectedVerification.status)}
                   </div>
                   <div>
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Email Address</p>
-                    <p className="text-gray-900 font-medium">{selectedVerification.email}</p>
+                    <p className="text-gray-900 font-medium">{selectedVerification.userId?.email || "Not provided"}</p>
                   </div>
                   <div>
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Phone Number</p>
-                    <p className="text-gray-900 font-medium">{selectedVerification.phone}</p>
+                    <p className="text-gray-900 font-medium">{selectedVerification.userId?.phone || "Not provided"}</p>
                   </div>
                   <div>
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Submitted Date</p>
                     <p className="text-gray-900 font-medium">
-                      {selectedVerification.profileVerifiedAt 
-                        ? new Date(selectedVerification.profileVerifiedAt).toLocaleDateString('en-US', {
+                      {selectedVerification.submittedAt 
+                        ? new Date(selectedVerification.submittedAt).toLocaleDateString('en-US', {
                             year: 'numeric',
                             month: 'long',
                             day: 'numeric'
@@ -349,11 +323,11 @@ const AdminIDVerification: React.FC = () => {
                         : 'Recently submitted'}
                     </p>
                   </div>
-                  {selectedVerification.profileVerifiedAt && (
+                  {selectedVerification.reviewedAt && (
                     <div>
                       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Verified Date</p>
                       <p className="text-gray-900 font-medium">
-                        {new Date(selectedVerification.profileVerifiedAt).toLocaleDateString('en-US', {
+                        {new Date(selectedVerification.reviewedAt).toLocaleDateString('en-US', {
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric'
@@ -367,12 +341,12 @@ const AdminIDVerification: React.FC = () => {
               {/* Documents Section */}
               <div className="space-y-6">
                 <div>
-                  <h3 className="font-bold text-gray-900 mb-3">Government ID Document (Front)</h3>
+                  <h3 className="font-bold text-gray-900 mb-3">Government ID Document</h3>
                   <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50 p-4">
-                    {selectedVerification.idData?.idFront ? (
+                    {selectedVerification.idDocumentUrl ? (
                       <img
-                        src={selectedVerification.idData.idFront}
-                        alt="ID Document Front"
+                        src={selectedVerification.idDocumentUrl}
+                        alt="ID Document"
                         className="w-full max-h-80 object-contain"
                       />
                     ) : (
@@ -384,28 +358,11 @@ const AdminIDVerification: React.FC = () => {
                 </div>
 
                 <div>
-                  <h3 className="font-bold text-gray-900 mb-3">Government ID Document (Back)</h3>
-                  <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50 p-4">
-                    {selectedVerification.idData?.idBack ? (
-                      <img
-                        src={selectedVerification.idData.idBack}
-                        alt="ID Document Back"
-                        className="w-full max-h-80 object-contain"
-                      />
-                    ) : (
-                      <div className="h-48 flex items-center justify-center">
-                        <p className="text-gray-500">No ID document back provided</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div>
                   <h3 className="font-bold text-gray-900 mb-3">Selfie with ID</h3>
                   <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50 p-4">
-                    {selectedVerification.idData?.selfie ? (
+                    {selectedVerification.selfieUrl ? (
                       <img
-                        src={selectedVerification.idData.selfie}
+                        src={selectedVerification.selfieUrl}
                         alt="Selfie"
                         className="w-full max-h-80 object-contain"
                       />
@@ -419,7 +376,7 @@ const AdminIDVerification: React.FC = () => {
               </div>
 
               {/* Review Notes and Action Buttons */}
-              {selectedVerification.profileVerificationStatus === "pending_verification" && (
+              {selectedVerification.status === "pending" && (
                 <>
                   <div className="border-t border-gray-200 pt-6">
                     <label className="block font-bold text-gray-900 mb-3">Review Notes (Optional)</label>
@@ -480,17 +437,17 @@ const AdminIDVerification: React.FC = () => {
               )}
 
               {/* Reviewed Status */}
-              {selectedVerification.profileVerificationStatus !== "pending_verification" && (
+              {selectedVerification.status !== "pending" && (
                 <div className="border-t border-gray-200 pt-6">
                   <div className="bg-gray-50 rounded-lg p-4 space-y-4">
                     <div>
                       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Review Status</p>
-                      {getStatusBadge(selectedVerification.profileVerificationStatus)}
+                      {getStatusBadge(selectedVerification.status)}
                     </div>
-                    {selectedVerification.verification?.notes && (
+                    {selectedVerification.notes && (
                       <div>
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Admin Notes</p>
-                        <p className="text-gray-700 text-sm bg-white p-3 rounded border border-gray-200">{selectedVerification.verification.notes}</p>
+                        <p className="text-gray-700 text-sm bg-white p-3 rounded border border-gray-200">{selectedVerification.notes}</p>
                       </div>
                     )}
                   </div>

@@ -1,6 +1,4 @@
-import { API_ENDPOINTS } from '../config/api';
-
-const token = localStorage.getItem('kodisha_token');
+import { API_ENDPOINTS, adminApiRequest, apiRequest } from '../config/api';
 
 export interface Report {
   _id: string;
@@ -15,6 +13,16 @@ export interface Report {
   createdAt: string;
 }
 
+const getUserToken = () =>
+  localStorage.getItem('kodisha_token') ||
+  localStorage.getItem('kodisha_admin_token') ||
+  localStorage.getItem('token');
+
+const getAdminToken = () =>
+  localStorage.getItem('kodisha_admin_token') ||
+  localStorage.getItem('kodisha_token') ||
+  localStorage.getItem('token');
+
 /**
  * Submit a report on a user
  */
@@ -26,16 +34,12 @@ export const submitReport = async (
   listingType?: string,
   severity?: 'low' | 'medium' | 'high'
 ): Promise<Report> => {
-  if (!token) {
+  if (!getUserToken()) {
     throw new Error('Authentication required');
   }
 
-  const response = await fetch(API_ENDPOINTS.reports.submit(sellerId), {
+  const data = await apiRequest(API_ENDPOINTS.reports.submit(sellerId), {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
     body: JSON.stringify({
       reason,
       description,
@@ -45,12 +49,6 @@ export const submitReport = async (
     }),
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to submit report');
-  }
-
-  const data = await response.json();
   return data.data || data;
 };
 
@@ -63,8 +61,7 @@ export const getReports = async (
   page = 1,
   limit = 20
 ): Promise<{ reports: Report[]; total: number; pages: number }> => {
-  const adminToken = localStorage.getItem('kodisha_admin_token') || token;
-  if (!adminToken) {
+  if (!getAdminToken()) {
     throw new Error('Authentication required');
   }
 
@@ -79,20 +76,7 @@ export const getReports = async (
     url += '?' + params.toString();
   }
 
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${adminToken}`,
-    },
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to fetch reports');
-  }
-
-  const data = await response.json();
+  const data = await adminApiRequest(url);
   return {
     reports: data.data || [],
     total: data.pagination?.total || 0,
@@ -109,8 +93,7 @@ export const getUserReports = async (
   page = 1,
   limit = 20
 ): Promise<{ reports: Report[]; total: number; pages: number }> => {
-  const adminToken = localStorage.getItem('kodisha_admin_token') || token;
-  if (!adminToken) {
+  if (!getAdminToken()) {
     throw new Error('Authentication required');
   }
 
@@ -124,20 +107,7 @@ export const getUserReports = async (
     url += '?' + params.toString();
   }
 
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${adminToken}`,
-    },
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to fetch user reports');
-  }
-
-  const data = await response.json();
+  const data = await adminApiRequest(url);
   return {
     reports: data.data || [],
     total: data.pagination?.total || 0,
@@ -153,32 +123,17 @@ export const updateReportStatus = async (
   status: 'reviewing' | 'resolved' | 'dismissed',
   resolution?: string
 ): Promise<Report> => {
-  const adminToken = localStorage.getItem('kodisha_admin_token') || token;
-  if (!adminToken) {
+  if (!getAdminToken()) {
     throw new Error('Authentication required');
   }
 
-  const response = await fetch(
-    API_ENDPOINTS.admin.reports.updateStatus(reportId),
-    {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${adminToken}`,
-      },
-      body: JSON.stringify({
-        status,
-        resolution,
-      }),
-    }
-  );
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to update report');
-  }
-
-  const data = await response.json();
+  const data = await adminApiRequest(API_ENDPOINTS.admin.reports.updateStatus(reportId), {
+    method: 'PATCH',
+    body: JSON.stringify({
+      status,
+      resolution,
+    }),
+  });
   return data.data || data;
 };
 

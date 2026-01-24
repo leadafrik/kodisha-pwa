@@ -1,215 +1,631 @@
-import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Users, AlertTriangle, FileText, Shield, BarChart3, Lock, FileEdit, RefreshCw } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import {
+  Users,
+  AlertTriangle,
+  FileText,
+  Shield,
+  BarChart3,
+  Lock,
+  FileEdit,
+  RefreshCw,
+} from "lucide-react";
+import { useAuth } from "../../contexts/AuthContext";
+import { adminApiRequest } from "../../config/api";
+
+type AdminUserSummary = {
+  _id: string;
+  fullName: string;
+  email?: string;
+  phone?: string;
+  accountStatus?: string;
+  verification?: { idVerified?: boolean };
+  ratings?: { average?: number };
+};
+
+type AdminReportSummary = {
+  _id: string;
+  reason: string;
+  status: string;
+  createdAt: string;
+  reportingUser?: { fullName: string; email?: string };
+  reportedUser?: { fullName: string; email?: string };
+};
+
+type AdminVerificationSummary = {
+  _id: string;
+  user?: { name?: string; email?: string; phone?: string };
+  pendingVerifications?: Array<{
+    step: string;
+    status: string;
+    submittedAt?: string;
+  }>;
+};
 
 const AdminDashboard: React.FC = () => {
   const { user, refreshUser } = useAuth();
+  const adminRoles = ["admin", "super_admin", "moderator"];
+  const isAdmin = adminRoles.includes(user?.role ?? "");
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [snapshotLoading, setSnapshotLoading] = useState(true);
+  const [snapshotError, setSnapshotError] = useState("");
+  const [recentUsers, setRecentUsers] = useState<AdminUserSummary[]>([]);
+  const [recentReports, setRecentReports] = useState<AdminReportSummary[]>([]);
+  const [pendingVerifications, setPendingVerifications] = useState<AdminVerificationSummary[]>([]);
+  const [lastSyncLabel, setLastSyncLabel] = useState("Syncing...");
 
-  // Refresh user data on component mount to ensure role is up-to-date
   useEffect(() => {
     refreshUser();
   }, [refreshUser]);
-  return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-12 flex justify-between items-start">
-          <div>
-            <h1 className="text-5xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
-            <p className="text-lg text-gray-600">Central control center for platform management and fraud prevention</p>
-            {user?.role === 'super_admin' && <p className="text-sm text-green-600 font-semibold mt-1">🔑 Super Admin Access Active</p>}
-          </div>
-          <button
-            onClick={() => refreshUser()}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition text-gray-700 font-medium text-sm"
-            title="Refresh user role and permissions"
-          >
-            <RefreshCw size={16} />
-            Refresh
-          </button>
-        </div>
 
-        {/* Main Controls Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {/* User Management */}
-          <Link
-            to="/admin/users"
-            className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl hover:-translate-y-1 transition group"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition">
-                <Users className="text-blue-600" size={28} />
-              </div>
-              <span className="text-xs font-semibold px-3 py-1 bg-blue-50 text-blue-700 rounded-full">CRITICAL</span>
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">User Management</h2>
-            <p className="text-gray-600 mb-4">Search, monitor, suspend, and manage user accounts with fraud flagging</p>
-            <div className="space-y-2 text-sm text-gray-600">
-              <p>✓ Search by name, email, phone</p>
-              <p>✓ View verification status</p>
-              <p>✓ Suspend/unsuspend accounts</p>
-              <p>✓ Flag for fraud</p>
-            </div>
-          </Link>
+  useEffect(() => {
+    if (!isAdmin) return;
+    let active = true;
 
-          {/* Reports Management */}
-          <Link
-            to="/admin/reports-management"
-            className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl hover:-translate-y-1 transition group"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 rounded-lg bg-red-100 flex items-center justify-center group-hover:bg-red-200 transition">
-                <AlertTriangle className="text-red-600" size={28} />
-              </div>
-              <span className="text-xs font-semibold px-3 py-1 bg-red-50 text-red-700 rounded-full">URGENT</span>
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Reports Management</h2>
-            <p className="text-gray-600 mb-4">Review, investigate, and resolve fraud and policy violation reports</p>
-            <div className="space-y-2 text-sm text-gray-600">
-              <p>✓ Filter by status</p>
-              <p>✓ Investigate cases</p>
-              <p>✓ Document resolutions</p>
-              <p>✓ Track outcomes</p>
-            </div>
-          </Link>
+    const loadSnapshot = async () => {
+      setSnapshotLoading(true);
+      setSnapshotError("");
 
-          {/* Profile Verification */}
-          <Link
-            to="/admin/profile-verification"
-            className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl hover:-translate-y-1 transition group"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center group-hover:bg-green-200 transition">
-                <Shield className="text-green-600" size={28} />
-              </div>
-              <span className="text-xs font-semibold px-3 py-1 bg-green-50 text-green-700 rounded-full">VERIFICATION</span>
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Profile Verification</h2>
-            <p className="text-gray-600 mb-4">Verify user identities and review documents for compliance</p>
-            <div className="space-y-2 text-sm text-gray-600">
-              <p>✓ Verify ID documents</p>
-              <p>✓ Check selfies</p>
-              <p>✓ Review business docs</p>
-              <p>✓ Approve/reject profiles</p>
-            </div>
-          </Link>
+      try {
+        const [usersData, reportsData, verificationData] = await Promise.all([
+          adminApiRequest("/admin/users/search?limit=6&page=1&sortBy=createdAt"),
+          adminApiRequest("/reports?status=pending&limit=6&page=1"),
+          adminApiRequest("/verification/pending?limit=6&status=pending"),
+        ]);
 
-          {/* Moderation */}
-          <Link
-            to="/admin/moderation"
-            className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl hover:-translate-y-1 transition group"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center group-hover:bg-orange-200 transition">
-                <FileText className="text-orange-600" size={28} />
-              </div>
-              <span className="text-xs font-semibold px-3 py-1 bg-orange-50 text-orange-700 rounded-full">CONTENT</span>
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Content Moderation</h2>
-            <p className="text-gray-600 mb-4">Review and moderate listings and user-generated content</p>
-            <div className="space-y-2 text-sm text-gray-600">
-              <p>✓ Flag inappropriate content</p>
-              <p>✓ Delete violations</p>
-              <p>✓ View content reports</p>
-              <p>✓ Track moderation history</p>
-            </div>
-          </Link>
+        if (!active) return;
 
-          {/* Content Editor (Super Admin Only) */}
-          {user?.role === 'super_admin' && (
-            <Link
-              to="/admin/content-editor"
-              className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg shadow-lg p-8 hover:shadow-xl hover:-translate-y-1 transition group border-2 border-green-500"
+        setRecentUsers(Array.isArray(usersData?.data) ? usersData.data : []);
+        setRecentReports(Array.isArray(reportsData?.data) ? reportsData.data : []);
+        setPendingVerifications(
+          Array.isArray(verificationData?.pending) ? verificationData.pending : []
+        );
+        setLastSyncLabel(new Date().toLocaleTimeString());
+      } catch (error: any) {
+        if (!active) return;
+        setSnapshotError(error?.message || "Unable to load admin snapshot.");
+      } finally {
+        if (active) setSnapshotLoading(false);
+      }
+    };
+
+    loadSnapshot();
+
+    return () => {
+      active = false;
+    };
+  }, [isAdmin, refreshKey]);
+
+  const handleQuickSuspend = async (userId: string, currentStatus?: string) => {
+    setSnapshotError("");
+    try {
+      if (currentStatus === "suspended") {
+        await adminApiRequest(`/admin/users/${userId}/unsuspend`, { method: "PUT" });
+      } else {
+        const reason = window.prompt("Suspension reason:");
+        if (!reason || !reason.trim()) return;
+        await adminApiRequest(`/admin/users/${userId}/suspend`, {
+          method: "PUT",
+          body: JSON.stringify({ reason: reason.trim() }),
+        });
+      }
+      setRefreshKey((prev) => prev + 1);
+    } catch (error: any) {
+      setSnapshotError(error?.message || "Unable to update user status.");
+    }
+  };
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center px-6">
+        <div className="max-w-xl w-full rounded-3xl border border-slate-200 bg-white p-8 shadow-sm text-center">
+          <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Access Restricted</p>
+          <h1 className="mt-3 text-3xl font-semibold text-slate-900">Admin access only</h1>
+          <p className="mt-3 text-sm text-slate-600">
+            This dashboard is available to verified admin roles. If you believe this is a mistake,
+            refresh your session or contact support.
+          </p>
+          <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              onClick={() => refreshUser()}
+              className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2 text-sm font-semibold text-white hover:bg-slate-800 transition"
             >
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center group-hover:bg-green-200 transition">
-                  <FileEdit className="text-green-600" size={28} />
-                </div>
-                <span className="text-xs font-semibold px-3 py-1 bg-green-100 text-green-700 rounded-full">SUPER ADMIN</span>
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Website Content Editor</h2>
-              <p className="text-gray-600 mb-4">Edit all website text and content without redeploying</p>
-              <div className="space-y-2 text-sm text-gray-600">
-                <p>✓ Edit hero headlines</p>
-                <p>✓ Update page descriptions</p>
-                <p>✓ Manage CTA buttons</p>
-                <p>✓ Changes apply immediately</p>
-              </div>
+              Refresh Session
+            </button>
+            <Link
+              to="/"
+              className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
+            >
+              Back to Home
             </Link>
-          )}
-
-          {/* Listing Management */}
-          <div className="bg-white rounded-lg shadow-lg p-8 opacity-50 cursor-not-allowed">
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
-                <BarChart3 className="text-purple-600" size={28} />
-              </div>
-              <span className="text-xs font-semibold px-3 py-1 bg-gray-100 text-gray-600 rounded-full">COMING SOON</span>
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Listing Management</h2>
-            <p className="text-gray-600 mb-4">Manage listings, pricing, and promotional features</p>
-            <div className="space-y-2 text-sm text-gray-600">
-              <p>✓ Review new listings</p>
-              <p>✓ Delete violations</p>
-              <p>✓ Manage promotions</p>
-              <p>✓ Price monitoring</p>
-            </div>
           </div>
+        </div>
+      </div>
+    );
+  }
 
-          {/* Analytics */}
-          <div className="bg-white rounded-lg shadow-lg p-8 opacity-50 cursor-not-allowed">
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 rounded-lg bg-pink-100 flex items-center justify-center">
-                <Lock className="text-pink-600" size={28} />
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:wght@400;600&display=swap');
+        :root {
+          --ink: #0f172a;
+          --muted: #475569;
+          --panel: #ffffff;
+          --border: #e2e8f0;
+          --accent: #0f766e;
+          --accent-2: #0ea5a4;
+        }
+        .admin-shell { font-family: "Space Grotesk", "Segoe UI", sans-serif; }
+        .admin-title { font-family: "Newsreader", "Georgia", serif; }
+        .fade-in { animation: fadeIn 0.6s ease both; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      `}</style>
+
+      <div className="admin-shell">
+        <div className="relative overflow-hidden">
+          <div className="absolute -top-24 right-[-6rem] h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
+          <div className="absolute -bottom-28 left-[-4rem] h-72 w-72 rounded-full bg-amber-200/40 blur-3xl" />
+          <div className="max-w-7xl mx-auto px-6 pt-12 pb-10">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="space-y-3 fade-in">
+                <p className="text-xs uppercase tracking-[0.4em] text-emerald-700 font-semibold">Admin Console</p>
+                <h1 className="admin-title text-4xl md:text-5xl text-slate-900">Admin Dashboard</h1>
+                <p className="text-base text-slate-600 max-w-2xl">
+                  Central control for platform trust, user safety, and fraud prevention across the marketplace.
+                </p>
+                <div className="flex flex-wrap gap-3 text-xs">
+                  <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 font-semibold text-emerald-700">
+                    Role: {user?.role ?? "admin"}
+                  </span>
+                  <span className="rounded-full border border-slate-200 bg-white px-3 py-1 font-semibold text-slate-600">
+                    Access active
+                  </span>
+                </div>
               </div>
-              <span className="text-xs font-semibold px-3 py-1 bg-gray-100 text-gray-600 rounded-full">COMING SOON</span>
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Analytics & Reports</h2>
-            <p className="text-gray-600 mb-4">View platform analytics and fraud trend reports</p>
-            <div className="space-y-2 text-sm text-gray-600">
-              <p>✓ User activity stats</p>
-              <p>✓ Fraud patterns</p>
-              <p>✓ Revenue tracking</p>
-              <p>✓ Performance metrics</p>
+              <div className="flex items-center gap-3">
+                {user?.role === "super_admin" && (
+                  <span className="inline-flex items-center rounded-full bg-emerald-600/10 px-3 py-1 text-xs font-semibold text-emerald-700">
+                    Super Admin Access
+                  </span>
+                )}
+                <button
+                  onClick={() => {
+                    refreshUser();
+                    setRefreshKey((prev) => prev + 1);
+                  }}
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
+                  title="Refresh user role and permissions"
+                >
+                  <RefreshCw size={16} />
+                  Refresh
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Quick Stats */}
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Quick Actions & Info</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="border-l-4 border-red-500 pl-6">
-              <p className="text-sm text-gray-600 mb-1">Immediate Action Needed</p>
-              <p className="text-3xl font-bold text-gray-900">Review Reports</p>
-              <p className="text-sm text-gray-600 mt-2">Pending user reports require your attention</p>
+        <div className="max-w-7xl mx-auto px-6 pb-16">
+          <section className="mt-2">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.35em] text-slate-500">Operations</p>
+                <h2 className="admin-title text-3xl text-slate-900 mt-2">Core controls</h2>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-slate-500">
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1 font-semibold">
+                  Last sync: {lastSyncLabel}
+                </span>
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1 font-semibold">Secure</span>
+              </div>
             </div>
-            <div className="border-l-4 border-yellow-500 pl-6">
-              <p className="text-sm text-gray-600 mb-1">Verification Queue</p>
-              <p className="text-3xl font-bold text-gray-900">Check Profiles</p>
-              <p className="text-sm text-gray-600 mt-2">Users awaiting ID verification</p>
-            </div>
-            <div className="border-l-4 border-blue-500 pl-6">
-              <p className="text-sm text-gray-600 mb-1">Security</p>
-              <p className="text-3xl font-bold text-gray-900">Monitor Users</p>
-              <p className="text-sm text-gray-600 mt-2">Keep watch for suspicious activity</p>
-            </div>
-          </div>
-        </div>
 
-        {/* Guidelines */}
-        <div className="mt-12 bg-blue-50 border border-blue-200 rounded-lg p-8">
-          <h3 className="text-xl font-bold text-blue-900 mb-4">Fraud Prevention Guidelines</h3>
-          <ul className="space-y-2 text-blue-800">
-            <li>• <strong>Document Everything:</strong> Keep detailed records of all actions taken on user accounts</li>
-            <li>• <strong>Investigate Thoroughly:</strong> Don't suspend without proper investigation - use the flag system first</li>
-            <li>• <strong>Communicate:</strong> When suspending, provide clear reason to help users understand violations</li>
-            <li>• <strong>Pattern Recognition:</strong> Look for patterns in fraud reports - similar victims or MOs suggest organized fraud</li>
-            <li>• <strong>Protect Privacy:</strong> Never share user data or investigations with other users</li>
-            <li>• <strong>Fair Process:</strong> Give users opportunity to respond before permanent action when possible</li>
-            <li>• <strong>Stay Updated:</strong> Keep track of new fraud techniques and update security measures accordingly</li>
-          </ul>
+            {snapshotError && (
+              <div className="mt-4 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                {snapshotError}
+              </div>
+            )}
+
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Link
+                to="/admin/users"
+                className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="h-12 w-12 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center">
+                    <Users size={24} />
+                  </div>
+                  <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">Priority</span>
+                </div>
+                <h3 className="mt-4 text-xl font-semibold text-slate-900">User Management</h3>
+                <p className="mt-2 text-sm text-slate-600">
+                  Search, monitor, suspend, and manage user accounts with fraud flagging.
+                </p>
+                <ul className="mt-4 space-y-2 text-sm text-slate-600">
+                  <li>- Search by name, email, phone</li>
+                  <li>- View verification status</li>
+                  <li>- Suspend or unsuspend accounts</li>
+                  <li>- Flag for fraud</li>
+                </ul>
+              </Link>
+
+              <Link
+                to="/admin/reports-management"
+                className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="h-12 w-12 rounded-2xl bg-rose-50 text-rose-700 flex items-center justify-center">
+                    <AlertTriangle size={24} />
+                  </div>
+                  <span className="rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700">Urgent</span>
+                </div>
+                <h3 className="mt-4 text-xl font-semibold text-slate-900">Reports Management</h3>
+                <p className="mt-2 text-sm text-slate-600">
+                  Review, investigate, and resolve fraud and policy violation reports.
+                </p>
+                <ul className="mt-4 space-y-2 text-sm text-slate-600">
+                  <li>- Filter by status</li>
+                  <li>- Investigate cases</li>
+                  <li>- Document resolutions</li>
+                  <li>- Track outcomes</li>
+                </ul>
+              </Link>
+
+              <Link
+                to="/admin/profile-verification"
+                className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                    <Shield size={24} />
+                  </div>
+                  <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                    Verification
+                  </span>
+                </div>
+                <h3 className="mt-4 text-xl font-semibold text-slate-900">Profile Verification</h3>
+                <p className="mt-2 text-sm text-slate-600">
+                  Verify identities and review documents for compliance.
+                </p>
+                <ul className="mt-4 space-y-2 text-sm text-slate-600">
+                  <li>- Verify ID documents</li>
+                  <li>- Check selfies</li>
+                  <li>- Review business docs</li>
+                  <li>- Approve or reject profiles</li>
+                </ul>
+              </Link>
+
+              <Link
+                to="/admin/moderation"
+                className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="h-12 w-12 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center">
+                    <FileText size={24} />
+                  </div>
+                  <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">Content</span>
+                </div>
+                <h3 className="mt-4 text-xl font-semibold text-slate-900">Content Moderation</h3>
+                <p className="mt-2 text-sm text-slate-600">
+                  Review listings and user-generated content to keep the platform safe.
+                </p>
+                <ul className="mt-4 space-y-2 text-sm text-slate-600">
+                  <li>- Flag inappropriate content</li>
+                  <li>- Delete violations</li>
+                  <li>- View content reports</li>
+                  <li>- Track moderation history</li>
+                </ul>
+              </Link>
+
+              {user?.role === "super_admin" && (
+                <Link
+                  to="/admin/content-editor"
+                  className="group rounded-3xl border border-emerald-300 bg-emerald-50/60 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="h-12 w-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                      <FileEdit size={24} />
+                    </div>
+                    <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                      Super Admin
+                    </span>
+                  </div>
+                  <h3 className="mt-4 text-xl font-semibold text-slate-900">Website Content Editor</h3>
+                  <p className="mt-2 text-sm text-slate-600">
+                    Edit public-facing copy and CTAs without redeploying.
+                  </p>
+                  <ul className="mt-4 space-y-2 text-sm text-slate-600">
+                    <li>- Update hero headlines</li>
+                    <li>- Manage page descriptions</li>
+                    <li>- Control CTA buttons</li>
+                    <li>- Publish instantly</li>
+                  </ul>
+                </Link>
+              )}
+
+              <Link
+                to="/admin/listing-management"
+                className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="h-12 w-12 rounded-2xl bg-indigo-50 text-indigo-700 flex items-center justify-center">
+                    <BarChart3 size={24} />
+                  </div>
+                  <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">Listings</span>
+                </div>
+                <h3 className="mt-4 text-xl font-semibold text-slate-900">Listing Management</h3>
+                <p className="mt-2 text-sm text-slate-600">Approve, reject, and remove listings at scale.</p>
+                <ul className="mt-4 space-y-2 text-sm text-slate-600">
+                  <li>- Review pending listings</li>
+                  <li>- Maintain active inventory</li>
+                  <li>- Remove violations fast</li>
+                </ul>
+              </Link>
+
+              <Link
+                to="/admin/analytics"
+                className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="h-12 w-12 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center">
+                    <Lock size={24} />
+                  </div>
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">Analytics</span>
+                </div>
+                <h3 className="mt-4 text-xl font-semibold text-slate-900">Analytics and Reports</h3>
+                <p className="mt-2 text-sm text-slate-600">Track trends, performance, and fraud signals.</p>
+                <ul className="mt-4 space-y-2 text-sm text-slate-600">
+                  <li>- Listing mix and growth</li>
+                  <li>- Report and flag volume</li>
+                  <li>- Verification backlog</li>
+                </ul>
+              </Link>
+            </div>
+          </section>
+
+          <section className="mt-12 grid gap-6 lg:grid-cols-2">
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Users</p>
+                  <h3 className="admin-title text-2xl text-slate-900 mt-2">Latest users</h3>
+                </div>
+                <Link
+                  to="/admin/users"
+                  className="text-sm font-semibold text-emerald-700 hover:text-emerald-800"
+                >
+                  View all
+                </Link>
+              </div>
+
+              {snapshotError && (
+                <p className="mt-4 text-sm text-rose-600">{snapshotError}</p>
+              )}
+
+              {snapshotLoading ? (
+                <p className="mt-6 text-sm text-slate-500">Loading user snapshot...</p>
+              ) : (
+                <div className="mt-6 overflow-hidden rounded-2xl border border-slate-100">
+                  <table className="w-full text-sm">
+                    <thead className="bg-slate-50 text-slate-600">
+                      <tr>
+                        <th className="px-4 py-3 text-left font-semibold">User</th>
+                        <th className="px-4 py-3 text-left font-semibold">Status</th>
+                        <th className="px-4 py-3 text-left font-semibold">Rating</th>
+                        <th className="px-4 py-3 text-left font-semibold">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {recentUsers.length === 0 ? (
+                        <tr>
+                          <td className="px-4 py-4 text-slate-500" colSpan={4}>
+                            No users found.
+                          </td>
+                        </tr>
+                      ) : (
+                        recentUsers.map((profile) => {
+                          const isSuspended = profile.accountStatus === "suspended";
+                          const rating =
+                            typeof profile.ratings?.average === "number"
+                              ? profile.ratings.average.toFixed(1)
+                              : "--";
+                          return (
+                            <tr key={profile._id}>
+                              <td className="px-4 py-3">
+                                <p className="font-semibold text-slate-900">{profile.fullName}</p>
+                                <p className="text-xs text-slate-500">{profile.email || "No email"}</p>
+                              </td>
+                              <td className="px-4 py-3">
+                                <span
+                                  className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                                    isSuspended
+                                      ? "bg-rose-100 text-rose-700"
+                                      : "bg-emerald-100 text-emerald-700"
+                                  }`}
+                                >
+                                  {isSuspended ? "Suspended" : "Active"}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-slate-700">{rating}</td>
+                              <td className="px-4 py-3">
+                                <button
+                                  onClick={() => handleQuickSuspend(profile._id, profile.accountStatus)}
+                                  className="text-xs font-semibold text-slate-700 hover:text-slate-900"
+                                >
+                                  {isSuspended ? "Unsuspend" : "Suspend"}
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Reports</p>
+                  <h3 className="admin-title text-2xl text-slate-900 mt-2">Pending reports</h3>
+                </div>
+                <Link
+                  to="/admin/reports-management"
+                  className="text-sm font-semibold text-emerald-700 hover:text-emerald-800"
+                >
+                  Review all
+                </Link>
+              </div>
+
+              {snapshotLoading ? (
+                <p className="mt-6 text-sm text-slate-500">Loading report snapshot...</p>
+              ) : (
+                <div className="mt-6 space-y-3">
+                  {recentReports.length === 0 ? (
+                    <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4 text-sm text-slate-500">
+                      No pending reports.
+                    </div>
+                  ) : (
+                    recentReports.map((report) => (
+                      <div
+                        key={report._id}
+                        className="rounded-2xl border border-slate-100 bg-white px-4 py-3"
+                      >
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-semibold text-slate-900">{report.reason}</p>
+                          <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
+                            {report.status}
+                          </span>
+                        </div>
+                        <p className="mt-2 text-xs text-slate-500">
+                          Reported: {report.reportedUser?.fullName || "Unknown"} | Reporter:{" "}
+                          {report.reportingUser?.fullName || "Unknown"}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="mt-6 grid gap-6 lg:grid-cols-2">
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Verification</p>
+                  <h3 className="admin-title text-2xl text-slate-900 mt-2">Pending verifications</h3>
+                </div>
+                <Link
+                  to="/admin/profile-verification"
+                  className="text-sm font-semibold text-emerald-700 hover:text-emerald-800"
+                >
+                  Review queue
+                </Link>
+              </div>
+
+              {snapshotLoading ? (
+                <p className="mt-6 text-sm text-slate-500">Loading verification queue...</p>
+              ) : (
+                <div className="mt-6 space-y-3">
+                  {pendingVerifications.length === 0 ? (
+                    <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4 text-sm text-slate-500">
+                      No pending verification items.
+                    </div>
+                  ) : (
+                    pendingVerifications.map((item) => {
+                      const displayName = item.user?.name || item.user?.email || "Unknown user";
+                      const pendingSteps =
+                        item.pendingVerifications
+                          ?.filter((step) => step.status === "pending")
+                          .map((step) => step.step.replace("_", " ")) || [];
+                      return (
+                        <div
+                          key={item._id}
+                          className="rounded-2xl border border-slate-100 bg-white px-4 py-3"
+                        >
+                          <p className="text-sm font-semibold text-slate-900">{displayName}</p>
+                          <p className="mt-1 text-xs text-slate-500">
+                            Pending: {pendingSteps.length ? pendingSteps.join(", ") : "Review needed"}
+                          </p>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Connections</p>
+                  <h3 className="admin-title text-2xl text-slate-900 mt-2">Live activity</h3>
+                </div>
+                <span className="text-xs font-semibold text-slate-500">Auto refresh</span>
+              </div>
+              <div className="mt-6 space-y-3 text-sm text-slate-600">
+                <p>Reports, verifications, and user updates sync into this dashboard automatically.</p>
+                <p>Use the quick actions above to review urgent items and keep responses fast.</p>
+              </div>
+            </div>
+          </section>
+
+          <section className="mt-12 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h3 className="admin-title text-2xl text-slate-900">Quick actions</h3>
+              <p className="mt-2 text-sm text-slate-600">Jump to the most time-sensitive queues.</p>
+              <div className="mt-6 grid gap-4 md:grid-cols-3">
+                <div className="rounded-2xl border border-rose-100 bg-rose-50/60 p-4">
+                  <p className="text-xs uppercase tracking-[0.3em] text-rose-700">Reports</p>
+                  <p className="mt-2 text-lg font-semibold text-slate-900">Review reports</p>
+                  <p className="mt-2 text-xs text-slate-600">Pending cases need a decision.</p>
+                  <Link
+                    to="/admin/reports-management"
+                    className="mt-4 inline-flex items-center text-sm font-semibold text-rose-700 hover:text-rose-800"
+                  >
+                    Open queue
+                  </Link>
+                </div>
+                <div className="rounded-2xl border border-amber-100 bg-amber-50/60 p-4">
+                  <p className="text-xs uppercase tracking-[0.3em] text-amber-700">Verification</p>
+                  <p className="mt-2 text-lg font-semibold text-slate-900">Check profiles</p>
+                  <p className="mt-2 text-xs text-slate-600">Users awaiting ID review.</p>
+                  <Link
+                    to="/admin/profile-verification"
+                    className="mt-4 inline-flex items-center text-sm font-semibold text-amber-700 hover:text-amber-800"
+                  >
+                    Review now
+                  </Link>
+                </div>
+                <div className="rounded-2xl border border-sky-100 bg-sky-50/60 p-4">
+                  <p className="text-xs uppercase tracking-[0.3em] text-sky-700">Security</p>
+                  <p className="mt-2 text-lg font-semibold text-slate-900">Monitor users</p>
+                  <p className="mt-2 text-xs text-slate-600">Flag suspicious activity early.</p>
+                  <Link
+                    to="/admin/users"
+                    className="mt-4 inline-flex items-center text-sm font-semibold text-sky-700 hover:text-sky-800"
+                  >
+                    View users
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h3 className="admin-title text-2xl text-slate-900">Fraud prevention playbook</h3>
+              <ul className="mt-4 space-y-3 text-sm text-slate-600">
+                <li><span className="font-semibold text-slate-800">Document everything:</span> Keep detailed records of actions taken.</li>
+                <li><span className="font-semibold text-slate-800">Investigate thoroughly:</span> Flag first, suspend after evidence.</li>
+                <li><span className="font-semibold text-slate-800">Communicate clearly:</span> Provide a reason and next steps.</li>
+                <li><span className="font-semibold text-slate-800">Recognize patterns:</span> Similar reports can indicate organized fraud.</li>
+                <li><span className="font-semibold text-slate-800">Protect privacy:</span> Never share user data with others.</li>
+                <li><span className="font-semibold text-slate-800">Stay updated:</span> Review new fraud techniques regularly.</li>
+              </ul>
+            </div>
+          </section>
         </div>
       </div>
     </div>

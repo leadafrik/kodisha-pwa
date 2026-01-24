@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import NotificationCenter from "./NotificationCenter";
@@ -12,8 +12,23 @@ const Chevron: React.FC = () => (
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [listOpen, setListOpen] = useState(false);
+  const listCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const closeMobile = () => setMobileOpen(false);
+  const scheduleListClose = () => {
+    if (listCloseTimer.current) {
+      clearTimeout(listCloseTimer.current);
+    }
+    listCloseTimer.current = setTimeout(() => setListOpen(false), 180);
+  };
+
+  const cancelListClose = () => {
+    if (listCloseTimer.current) {
+      clearTimeout(listCloseTimer.current);
+      listCloseTimer.current = null;
+    }
+  };
 
   return (
     <>
@@ -54,32 +69,63 @@ const Navbar: React.FC = () => {
                 About
               </Link>
 
-              <div className="group relative">
-                <button className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition font-semibold flex items-center gap-2">
+              <div
+                className="relative"
+                onMouseEnter={() => {
+                  cancelListClose();
+                  setListOpen(true);
+                }}
+                onMouseLeave={scheduleListClose}
+              >
+                <button
+                  type="button"
+                  onClick={() => setListOpen((prev) => !prev)}
+                  className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition font-semibold flex items-center gap-2"
+                >
                   + List <Chevron />
                 </button>
-                <div className="absolute hidden group-hover:block bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 z-50">
+                <div
+                  className={`absolute ${listOpen ? "block" : "hidden"} bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 z-50`}
+                  onMouseEnter={cancelListClose}
+                  onMouseLeave={scheduleListClose}
+                >
                   {user ? (
                     <>
-                      <Link to="/create-listing" className="block px-4 py-3 hover:bg-green-50 border-b">
-                        <div className="font-semibold text-green-700">Create Listing</div>
+                      <Link
+                        to="/create-listing"
+                        className="block px-4 py-3 hover:bg-green-50 border-b"
+                        onClick={() => setListOpen(false)}
+                      >
+                        <div className="font-semibold text-green-700">List for sale</div>
                         <p className="text-sm text-gray-600">Products, livestock, inputs, services</p>
                       </Link>
                       <hr className="my-2" />
-                      <Link to="/request/new" className="block px-4 py-3 hover:bg-blue-50">
-                        <div className="font-semibold text-blue-700">Post Buyer Request</div>
+                      <Link
+                        to="/request/new"
+                        className="block px-4 py-3 hover:bg-blue-50"
+                        onClick={() => setListOpen(false)}
+                      >
+                        <div className="font-semibold text-blue-700">Post buy request</div>
                         <p className="text-sm text-gray-600">Looking to buy something?</p>
                       </Link>
                     </>
                   ) : (
                     <>
-                      <Link to="/login?next=/create-listing" className="block px-4 py-3 hover:bg-green-50 border-b">
-                        <div className="font-semibold text-green-700">Create Listing</div>
+                      <Link
+                        to="/login?next=/create-listing"
+                        className="block px-4 py-3 hover:bg-green-50 border-b"
+                        onClick={() => setListOpen(false)}
+                      >
+                        <div className="font-semibold text-green-700">List for sale</div>
                         <p className="text-sm text-gray-600">Products, livestock, inputs, services</p>
                       </Link>
                       <hr className="my-2" />
-                      <Link to="/login?next=/request/new" className="block px-4 py-3 hover:bg-blue-50">
-                        <div className="font-semibold text-blue-700">Post Buyer Request</div>
+                      <Link
+                        to="/login?next=/request/new"
+                        className="block px-4 py-3 hover:bg-blue-50"
+                        onClick={() => setListOpen(false)}
+                      >
+                        <div className="font-semibold text-blue-700">Post buy request</div>
                         <p className="text-sm text-gray-600">Looking to buy something?</p>
                       </Link>
                     </>
@@ -127,6 +173,9 @@ const Navbar: React.FC = () => {
                           <Link to="/admin/listings-approval" className="block px-4 py-3 hover:bg-gray-50 border-b">
                             <div className="font-semibold">Listing Approvals</div>
                           </Link>
+                          <Link to="/admin/listing-management" className="block px-4 py-3 hover:bg-gray-50 border-b">
+                            <div className="font-semibold">Listing Management</div>
+                          </Link>
                           <Link to="/admin/id-verification" className="block px-4 py-3 hover:bg-gray-50 border-b">
                             <div className="font-semibold">ID Verification</div>
                           </Link>
@@ -135,6 +184,9 @@ const Navbar: React.FC = () => {
                           </Link>
                           <Link to="/admin/profile-verification" className="block px-4 py-3 hover:bg-gray-50 border-b">
                             <div className="font-semibold">Profile Verification</div>
+                          </Link>
+                          <Link to="/admin/analytics" className="block px-4 py-3 hover:bg-gray-50 border-b">
+                            <div className="font-semibold">Analytics</div>
                           </Link>
                         </>
                       ) : null}
@@ -208,12 +260,15 @@ const Navbar: React.FC = () => {
                   {user.role === 'admin' || user.type === 'admin' ? (
                     <>
                       <Link to="/admin/listings-approval" onClick={closeMobile}>Listing Approvals</Link>
+                      <Link to="/admin/listing-management" onClick={closeMobile}>Listing Management</Link>
                       <Link to="/admin/id-verification" onClick={closeMobile}>ID Verification</Link>
                       <Link to="/admin/reports" onClick={closeMobile}>User Reports</Link>
                       <Link to="/admin/profile-verification" onClick={closeMobile}>Profile Verification</Link>
+                      <Link to="/admin/analytics" onClick={closeMobile}>Analytics</Link>
                     </>
                   ) : null}
-                  <Link to="/create-listing" onClick={closeMobile}>Create Listing</Link>
+                  <Link to="/create-listing" onClick={closeMobile}>List for sale</Link>
+                  <Link to="/request/new" onClick={closeMobile}>Post buy request</Link>
                   <button
                     onClick={() => { logout(); closeMobile(); }}
                     className="text-left text-red-600 font-semibold mt-4"
@@ -224,7 +279,8 @@ const Navbar: React.FC = () => {
               ) : (
                 <>
                   <Link to="/login" onClick={closeMobile}>Login</Link>
-                  <Link to="/login?next=/create-listing" onClick={closeMobile}>List</Link>
+                  <Link to="/login?next=/create-listing" onClick={closeMobile}>List for sale</Link>
+                  <Link to="/login?next=/request/new" onClick={closeMobile}>Post buy request</Link>
                 </>
               )}
             </div>
