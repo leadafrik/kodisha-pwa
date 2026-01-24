@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { API_BASE_URL } from '../config/api';
 
 const AboutUs: React.FC = () => {
+  const { user } = useAuth();
   const [userCount, setUserCount] = useState<number | null>(null);
 
   useEffect(() => {
@@ -78,12 +80,14 @@ const AboutUs: React.FC = () => {
                   We remove middlemen, build trust, and keep commerce flowing with verified profiles and direct chat.
                 </p>
                 <div className="flex flex-wrap gap-3">
-                  <Link
-                    to="/login"
-                    className="inline-flex items-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition"
-                  >
-                    Sign In
-                  </Link>
+                  {!user && (
+                    <Link
+                      to="/login"
+                      className="inline-flex items-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition"
+                    >
+                      Sign In
+                    </Link>
+                  )}
                   <Link
                     to="/browse"
                     className="inline-flex items-center rounded-xl border border-emerald-200 bg-white px-5 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 transition"
@@ -228,12 +232,14 @@ const AboutUs: React.FC = () => {
               Join thousands of farmers, producers, buyers, and service providers building a stronger agricultural economy.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                to="/login"
-                className="inline-flex justify-center items-center px-6 py-3 rounded-xl bg-white text-emerald-700 font-semibold hover:bg-emerald-50 transition"
-              >
-                Sign In
-              </Link>
+              {!user && (
+                <Link
+                  to="/login"
+                  className="inline-flex justify-center items-center px-6 py-3 rounded-xl bg-white text-emerald-700 font-semibold hover:bg-emerald-50 transition"
+                >
+                  Sign In
+                </Link>
+              )}
               <Link
                 to="/create-listing"
                 className="inline-flex justify-center items-center px-6 py-3 rounded-xl border border-white text-white font-semibold hover:bg-emerald-700 transition"

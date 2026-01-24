@@ -250,24 +250,26 @@ const BrowseListings: React.FC = () => {
 
         <div className="max-w-7xl mx-auto px-4 py-10 md:py-14 space-y-6">
           {!user && (
-            <div className="rounded-2xl border border-emerald-200 bg-white/90 px-4 py-3 shadow-sm fade-in">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">
-                    Sign in to view details and contact sellers
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    Save listings and message verified sellers directly.
-                  </p>
+            {!user && (
+              <div className="rounded-2xl border border-emerald-200 bg-white/90 px-4 py-3 shadow-sm fade-in">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">
+                      Sign in to view details and contact sellers
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Save listings and message verified sellers directly.
+                    </p>
+                  </div>
+                  <Link
+                    to="/login"
+                    className="inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition"
+                  >
+                    Sign In
+                  </Link>
                 </div>
-                <Link
-                  to="/login"
-                  className="inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition"
-                >
-                  Sign In
-                </Link>
               </div>
-            </div>
+            )}
           )}
 
           <div className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr] items-stretch">
