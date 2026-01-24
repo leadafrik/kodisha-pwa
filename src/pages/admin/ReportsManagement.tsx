@@ -4,8 +4,8 @@ import { API_ENDPOINTS, adminApiRequest } from '../../config/api';
 
 interface Report {
   _id: string;
-  reportingUser: { fullName: string; email: string };
-  reportedUser: { fullName: string; email: string };
+  reportingUser?: { fullName?: string; email?: string };
+  reportedUser?: { fullName?: string; email?: string };
   reason: string;
   description?: string;
   status: string;
@@ -162,14 +162,22 @@ const AdminReportsManagement: React.FC = () => {
                   <tr key={report._id} className="hover:bg-gray-50 transition">
                     <td className="px-6 py-4">
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{report.reportedUser.fullName}</p>
-                        <p className="text-xs text-gray-500">{report.reportedUser.email}</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {report.reportedUser?.fullName || "Unknown user"}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {report.reportedUser?.email || "No email"}
+                        </p>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{report.reportingUser.fullName}</p>
-                        <p className="text-xs text-gray-500">{report.reportingUser.email}</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {report.reportingUser?.fullName || "Unknown reporter"}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {report.reportingUser?.email || "No email"}
+                        </p>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-700 max-w-xs">
