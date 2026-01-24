@@ -24,8 +24,8 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
     description: "",
     category: "produce",
     productType: "",
-    budget: { min: 0, max: 0, currency: "KES" },
-    quantity: 0,
+    budget: { min: "", max: "", currency: "KES" },
+    quantity: "",
     unit: "kg",
     location: { county: "", constituency: "", ward: "" },
     urgency: "medium",
@@ -49,13 +49,11 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
     }
   };
 
-  const handleBudgetChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      budget: { ...prev.budget, [name]: parseInt(value) || 0 },
+      budget: { ...prev.budget, [name]: value },
     }));
   };
 
@@ -76,17 +74,34 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
       }
 
       const token = localStorage.getItem("kodisha_token");
-      const response = await fetch(
-        `${API_BASE_URL}/buyer-requests`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const budgetMin =
+        formData.budget.min.trim() !== ""
+          ? Number(formData.budget.min)
+          : undefined;
+      const budgetMax =
+        formData.budget.max.trim() !== ""
+          ? Number(formData.budget.max)
+          : undefined;
+      const quantityValue =
+        formData.quantity.trim() !== "" ? Number(formData.quantity) : undefined;
+
+      const payload = {
+        ...formData,
+        quantity: quantityValue,
+        budget:
+          budgetMin !== undefined || budgetMax !== undefined
+            ? { min: budgetMin, max: budgetMax, currency: formData.budget.currency }
+            : undefined,
+      };
+
+      const response = await fetch(`${API_BASE_URL}/buyer-requests`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -207,11 +222,13 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
               Quantity
             </label>
             <input
-              type="number"
+              type="text"
               name="quantity"
               value={formData.quantity}
               onChange={handleChange}
-              placeholder="0"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              placeholder="e.g., 10"
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             />
           </div>
@@ -242,11 +259,13 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
               Min Budget (KES) <span className="text-xs text-slate-400">(Optional)</span>
             </label>
             <input
-              type="number"
+              type="text"
               name="min"
               value={formData.budget.min}
               onChange={handleBudgetChange}
-              placeholder="0"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              placeholder="e.g., 3000"
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             />
           </div>
@@ -256,11 +275,13 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
               Max Budget (KES) <span className="text-xs text-slate-400">(Optional)</span>
             </label>
             <input
-              type="number"
+              type="text"
               name="max"
               value={formData.budget.max}
               onChange={handleBudgetChange}
-              placeholder="0"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              placeholder="e.g., 12000"
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             />
           </div>
