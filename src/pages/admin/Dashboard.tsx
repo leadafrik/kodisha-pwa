@@ -32,6 +32,16 @@ type AdminReportSummary = {
   reportedUser?: { fullName: string; email?: string };
 };
 
+type AdminVerificationSummary = {
+  _id: string;
+  user?: { name?: string; email?: string; phone?: string };
+  pendingVerifications?: Array<{
+    step: string;
+    status: string;
+    submittedAt?: string;
+  }>;
+};
+
 const AdminDashboard: React.FC = () => {
   const { user, refreshUser } = useAuth();
   const adminRoles = ["admin", "super_admin", "moderator"];
@@ -41,6 +51,8 @@ const AdminDashboard: React.FC = () => {
   const [snapshotError, setSnapshotError] = useState("");
   const [recentUsers, setRecentUsers] = useState<AdminUserSummary[]>([]);
   const [recentReports, setRecentReports] = useState<AdminReportSummary[]>([]);
+  const [pendingVerifications, setPendingVerifications] = useState<AdminVerificationSummary[]>([]);
+  const [lastSyncLabel, setLastSyncLabel] = useState("Syncing...");
 
   useEffect(() => {
     refreshUser();
@@ -55,15 +67,20 @@ const AdminDashboard: React.FC = () => {
       setSnapshotError("");
 
       try {
-        const [usersData, reportsData] = await Promise.all([
+        const [usersData, reportsData, verificationData] = await Promise.all([
           adminApiRequest("/admin/users/search?limit=6&page=1&sortBy=createdAt"),
           adminApiRequest("/reports?status=pending&limit=6&page=1"),
+          adminApiRequest("/verification/pending?limit=6&status=pending"),
         ]);
 
         if (!active) return;
 
         setRecentUsers(Array.isArray(usersData?.data) ? usersData.data : []);
         setRecentReports(Array.isArray(reportsData?.data) ? reportsData.data : []);
+        setPendingVerifications(
+          Array.isArray(verificationData?.pending) ? verificationData.pending : []
+        );
+        setLastSyncLabel(new Date().toLocaleTimeString());
       } catch (error: any) {
         if (!active) return;
         setSnapshotError(error?.message || "Unable to load admin snapshot.");
@@ -173,7 +190,10 @@ const AdminDashboard: React.FC = () => {
                   </span>
                 )}
                 <button
-                  onClick={() => refreshUser()}
+                  onClick={() => {
+                    refreshUser();
+                    setRefreshKey((prev) => prev + 1);
+                  }}
                   className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
                   title="Refresh user role and permissions"
                 >
@@ -193,10 +213,18 @@ const AdminDashboard: React.FC = () => {
                 <h2 className="admin-title text-3xl text-slate-900 mt-2">Core controls</h2>
               </div>
               <div className="flex items-center gap-2 text-xs text-slate-500">
-                <span className="rounded-full border border-slate-200 bg-white px-3 py-1 font-semibold">Last sync: now</span>
+                <span className="rounded-full border border-slate-200 bg-white px-3 py-1 font-semibold">
+                  Last sync: {lastSyncLabel}
+                </span>
                 <span className="rounded-full border border-slate-200 bg-white px-3 py-1 font-semibold">Secure</span>
               </div>
             </div>
+
+            {snapshotError && (
+              <div className="mt-4 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                {snapshotError}
+              </div>
+            )}
 
             <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <Link
@@ -464,6 +492,68 @@ const AdminDashboard: React.FC = () => {
                   )}
                 </div>
               )}
+            </div>
+          </section>
+
+          <section className="mt-6 grid gap-6 lg:grid-cols-2">
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Verification</p>
+                  <h3 className="admin-title text-2xl text-slate-900 mt-2">Pending verifications</h3>
+                </div>
+                <Link
+                  to="/admin/profile-verification"
+                  className="text-sm font-semibold text-emerald-700 hover:text-emerald-800"
+                >
+                  Review queue
+                </Link>
+              </div>
+
+              {snapshotLoading ? (
+                <p className="mt-6 text-sm text-slate-500">Loading verification queue...</p>
+              ) : (
+                <div className="mt-6 space-y-3">
+                  {pendingVerifications.length === 0 ? (
+                    <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4 text-sm text-slate-500">
+                      No pending verification items.
+                    </div>
+                  ) : (
+                    pendingVerifications.map((item) => {
+                      const displayName = item.user?.name || item.user?.email || "Unknown user";
+                      const pendingSteps =
+                        item.pendingVerifications
+                          ?.filter((step) => step.status === "pending")
+                          .map((step) => step.step.replace("_", " ")) || [];
+                      return (
+                        <div
+                          key={item._id}
+                          className="rounded-2xl border border-slate-100 bg-white px-4 py-3"
+                        >
+                          <p className="text-sm font-semibold text-slate-900">{displayName}</p>
+                          <p className="mt-1 text-xs text-slate-500">
+                            Pending: {pendingSteps.length ? pendingSteps.join(", ") : "Review needed"}
+                          </p>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Connections</p>
+                  <h3 className="admin-title text-2xl text-slate-900 mt-2">Live activity</h3>
+                </div>
+                <span className="text-xs font-semibold text-slate-500">Auto refresh</span>
+              </div>
+              <div className="mt-6 space-y-3 text-sm text-slate-600">
+                <p>Reports, verifications, and user updates sync into this dashboard automatically.</p>
+                <p>Use the quick actions above to review urgent items and keep responses fast.</p>
+              </div>
             </div>
           </section>
 

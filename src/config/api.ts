@@ -189,6 +189,7 @@ export const apiRequest = async (url: string, options: RequestInit = {}) => {
 
     const response = await fetch(url, {
       headers,
+      credentials: options.credentials ?? "include",
       ...options,
     });
 
