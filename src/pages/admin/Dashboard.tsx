@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Users,
@@ -11,15 +11,92 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
+import { adminApiRequest } from "../../config/api";
+
+type AdminUserSummary = {
+  _id: string;
+  fullName: string;
+  email?: string;
+  phone?: string;
+  accountStatus?: string;
+  verification?: { idVerified?: boolean };
+  ratings?: { average?: number };
+};
+
+type AdminReportSummary = {
+  _id: string;
+  reason: string;
+  status: string;
+  createdAt: string;
+  reportingUser?: { fullName: string; email?: string };
+  reportedUser?: { fullName: string; email?: string };
+};
 
 const AdminDashboard: React.FC = () => {
   const { user, refreshUser } = useAuth();
   const adminRoles = ["admin", "super_admin", "moderator"];
   const isAdmin = adminRoles.includes(user?.role ?? "");
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [snapshotLoading, setSnapshotLoading] = useState(true);
+  const [snapshotError, setSnapshotError] = useState("");
+  const [recentUsers, setRecentUsers] = useState<AdminUserSummary[]>([]);
+  const [recentReports, setRecentReports] = useState<AdminReportSummary[]>([]);
 
   useEffect(() => {
     refreshUser();
   }, [refreshUser]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    let active = true;
+
+    const loadSnapshot = async () => {
+      setSnapshotLoading(true);
+      setSnapshotError("");
+
+      try {
+        const [usersData, reportsData] = await Promise.all([
+          adminApiRequest("/admin/users/search?limit=6&page=1&sortBy=createdAt"),
+          adminApiRequest("/reports?status=pending&limit=6&page=1"),
+        ]);
+
+        if (!active) return;
+
+        setRecentUsers(Array.isArray(usersData?.data) ? usersData.data : []);
+        setRecentReports(Array.isArray(reportsData?.data) ? reportsData.data : []);
+      } catch (error: any) {
+        if (!active) return;
+        setSnapshotError(error?.message || "Unable to load admin snapshot.");
+      } finally {
+        if (active) setSnapshotLoading(false);
+      }
+    };
+
+    loadSnapshot();
+
+    return () => {
+      active = false;
+    };
+  }, [isAdmin, refreshKey]);
+
+  const handleQuickSuspend = async (userId: string, currentStatus?: string) => {
+    setSnapshotError("");
+    try {
+      if (currentStatus === "suspended") {
+        await adminApiRequest(`/admin/users/${userId}/unsuspend`, { method: "PUT" });
+      } else {
+        const reason = window.prompt("Suspension reason:");
+        if (!reason || !reason.trim()) return;
+        await adminApiRequest(`/admin/users/${userId}/suspend`, {
+          method: "PUT",
+          body: JSON.stringify({ reason: reason.trim() }),
+        });
+      }
+      setRefreshKey((prev) => prev + 1);
+    } catch (error: any) {
+      setSnapshotError(error?.message || "Unable to update user status.");
+    }
+  };
 
   if (!isAdmin) {
     return (
@@ -259,6 +336,134 @@ const AdminDashboard: React.FC = () => {
                 <h3 className="mt-4 text-xl font-semibold text-slate-700">Analytics and Reports</h3>
                 <p className="mt-2 text-sm text-slate-500">Track trends, performance, and fraud signals.</p>
               </div>
+            </div>
+          </section>
+
+          <section className="mt-12 grid gap-6 lg:grid-cols-2">
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Users</p>
+                  <h3 className="admin-title text-2xl text-slate-900 mt-2">Latest users</h3>
+                </div>
+                <Link
+                  to="/admin/users"
+                  className="text-sm font-semibold text-emerald-700 hover:text-emerald-800"
+                >
+                  View all
+                </Link>
+              </div>
+
+              {snapshotError && (
+                <p className="mt-4 text-sm text-rose-600">{snapshotError}</p>
+              )}
+
+              {snapshotLoading ? (
+                <p className="mt-6 text-sm text-slate-500">Loading user snapshot...</p>
+              ) : (
+                <div className="mt-6 overflow-hidden rounded-2xl border border-slate-100">
+                  <table className="w-full text-sm">
+                    <thead className="bg-slate-50 text-slate-600">
+                      <tr>
+                        <th className="px-4 py-3 text-left font-semibold">User</th>
+                        <th className="px-4 py-3 text-left font-semibold">Status</th>
+                        <th className="px-4 py-3 text-left font-semibold">Rating</th>
+                        <th className="px-4 py-3 text-left font-semibold">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {recentUsers.length === 0 ? (
+                        <tr>
+                          <td className="px-4 py-4 text-slate-500" colSpan={4}>
+                            No users found.
+                          </td>
+                        </tr>
+                      ) : (
+                        recentUsers.map((profile) => {
+                          const isSuspended = profile.accountStatus === "suspended";
+                          const rating =
+                            typeof profile.ratings?.average === "number"
+                              ? profile.ratings.average.toFixed(1)
+                              : "--";
+                          return (
+                            <tr key={profile._id}>
+                              <td className="px-4 py-3">
+                                <p className="font-semibold text-slate-900">{profile.fullName}</p>
+                                <p className="text-xs text-slate-500">{profile.email || "No email"}</p>
+                              </td>
+                              <td className="px-4 py-3">
+                                <span
+                                  className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                                    isSuspended
+                                      ? "bg-rose-100 text-rose-700"
+                                      : "bg-emerald-100 text-emerald-700"
+                                  }`}
+                                >
+                                  {isSuspended ? "Suspended" : "Active"}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-slate-700">{rating}</td>
+                              <td className="px-4 py-3">
+                                <button
+                                  onClick={() => handleQuickSuspend(profile._id, profile.accountStatus)}
+                                  className="text-xs font-semibold text-slate-700 hover:text-slate-900"
+                                >
+                                  {isSuspended ? "Unsuspend" : "Suspend"}
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Reports</p>
+                  <h3 className="admin-title text-2xl text-slate-900 mt-2">Pending reports</h3>
+                </div>
+                <Link
+                  to="/admin/reports-management"
+                  className="text-sm font-semibold text-emerald-700 hover:text-emerald-800"
+                >
+                  Review all
+                </Link>
+              </div>
+
+              {snapshotLoading ? (
+                <p className="mt-6 text-sm text-slate-500">Loading report snapshot...</p>
+              ) : (
+                <div className="mt-6 space-y-3">
+                  {recentReports.length === 0 ? (
+                    <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4 text-sm text-slate-500">
+                      No pending reports.
+                    </div>
+                  ) : (
+                    recentReports.map((report) => (
+                      <div
+                        key={report._id}
+                        className="rounded-2xl border border-slate-100 bg-white px-4 py-3"
+                      >
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-semibold text-slate-900">{report.reason}</p>
+                          <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
+                            {report.status}
+                          </span>
+                        </div>
+                        <p className="mt-2 text-xs text-slate-500">
+                          Reported: {report.reportedUser?.fullName || "Unknown"} | Reporter:{" "}
+                          {report.reportingUser?.fullName || "Unknown"}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
           </section>
 

@@ -157,9 +157,22 @@ export const API_ENDPOINTS = {
 
 export const apiRequest = async (url: string, options: RequestInit = {}) => {
   try {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("kodisha_token") ||
+          localStorage.getItem("kodisha_admin_token") ||
+          localStorage.getItem("token")
+        : null;
+
+    const authHeader =
+      token && !(options.headers as Record<string, string> | undefined)?.Authorization
+        ? { Authorization: `Bearer ${token}` }
+        : {};
+
     const response = await fetch(url, {
       headers: {
         "Content-Type": "application/json",
+        ...authHeader,
         ...options.headers,
       },
       ...options,
