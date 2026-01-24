@@ -27,9 +27,12 @@ const Moderation: React.FC = () => {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
-    const adminToken = localStorage.getItem('kodisha_admin_token');
+    const adminToken =
+      localStorage.getItem('kodisha_admin_token') ||
+      localStorage.getItem('kodisha_token') ||
+      localStorage.getItem('token');
     if (!adminToken) {
-      navigate('/admin/login');
+      navigate('/login');
       return;
     }
     fetchFlaggedUsers();
@@ -128,10 +131,10 @@ const Moderation: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold">Moderation Queue</h1>
           <button
-            onClick={() => navigate('/admin/dashboard')}
+            onClick={() => navigate('/admin')}
             className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-semibold"
           >
-            ← Back to Dashboard
+            <- Back to Dashboard
           </button>
         </div>
 
