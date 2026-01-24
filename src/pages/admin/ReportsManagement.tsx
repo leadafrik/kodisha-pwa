@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AlertTriangle, CheckCircle, Clock } from 'lucide-react';
-import { API_BASE_URL } from '../../config/api';
+import { API_ENDPOINTS, adminApiRequest } from '../../config/api';
 
 interface Report {
   _id: string;
@@ -24,10 +24,12 @@ const AdminReportsManagement: React.FC = () => {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
 
-  const token =
-    localStorage.getItem('kodisha_admin_token') ||
-    localStorage.getItem('kodisha_token') ||
-    localStorage.getItem('token');
+  const statusMap: Record<string, string> = {
+    pending: 'open',
+    investigating: 'reviewing',
+    resolved: 'resolved',
+    dismissed: 'dismissed',
+  };
 
   useEffect(() => {
     fetchReports();
@@ -44,16 +46,9 @@ const AdminReportsManagement: React.FC = () => {
       params.append('page', page.toString());
       params.append('limit', '15');
 
-      const response = await fetch(
-        `${API_BASE_URL}/admin/reports?${params}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (!response.ok) throw new Error('Failed to fetch reports');
-
-      const data = await response.json();
+      const apiStatus = statusMap[statusFilter] || statusFilter;
+      params.set('status', apiStatus);
+      const data = await adminApiRequest(`${API_ENDPOINTS.admin.reports.getAll}?${params}`);
       setReports(data.data);
       setTotal(data.pagination.total);
     } catch (err) {
@@ -65,19 +60,11 @@ const AdminReportsManagement: React.FC = () => {
 
   const handleUpdateStatus = async (reportId: string, newStatus: string, resolution?: string) => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/admin/reports/${reportId}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ status: newStatus, resolution }),
-        }
-      );
-
-      if (!response.ok) throw new Error('Failed to update report');
+      const apiStatus = statusMap[newStatus] || newStatus;
+      await adminApiRequest(API_ENDPOINTS.admin.reports.updateStatus(reportId), {
+        method: 'PATCH',
+        body: JSON.stringify({ status: apiStatus, resolution }),
+      });
 
       setShowModal(false);
       setSelectedReport(null);
