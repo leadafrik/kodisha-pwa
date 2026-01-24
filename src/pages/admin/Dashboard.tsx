@@ -15,7 +15,7 @@ import { useAuth } from "../../contexts/AuthContext";
 const AdminDashboard: React.FC = () => {
   const { user, refreshUser } = useAuth();
   const adminRoles = ["admin", "super_admin", "moderator"];
-  const isAdmin = !!user && adminRoles.includes(user.role);
+  const isAdmin = adminRoles.includes(user?.role ?? "");
 
   useEffect(() => {
     refreshUser();
