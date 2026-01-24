@@ -134,7 +134,7 @@ const Moderation: React.FC = () => {
             onClick={() => navigate('/admin')}
             className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-semibold"
           >
-            <- Back to Dashboard
+            Back to Dashboard
           </button>
         </div>
 
