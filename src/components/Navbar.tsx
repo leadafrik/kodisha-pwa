@@ -173,6 +173,9 @@ const Navbar: React.FC = () => {
                           <Link to="/admin/listings-approval" className="block px-4 py-3 hover:bg-gray-50 border-b">
                             <div className="font-semibold">Listing Approvals</div>
                           </Link>
+                          <Link to="/admin/listing-management" className="block px-4 py-3 hover:bg-gray-50 border-b">
+                            <div className="font-semibold">Listing Management</div>
+                          </Link>
                           <Link to="/admin/id-verification" className="block px-4 py-3 hover:bg-gray-50 border-b">
                             <div className="font-semibold">ID Verification</div>
                           </Link>
@@ -181,6 +184,9 @@ const Navbar: React.FC = () => {
                           </Link>
                           <Link to="/admin/profile-verification" className="block px-4 py-3 hover:bg-gray-50 border-b">
                             <div className="font-semibold">Profile Verification</div>
+                          </Link>
+                          <Link to="/admin/analytics" className="block px-4 py-3 hover:bg-gray-50 border-b">
+                            <div className="font-semibold">Analytics</div>
                           </Link>
                         </>
                       ) : null}
@@ -254,9 +260,11 @@ const Navbar: React.FC = () => {
                   {user.role === 'admin' || user.type === 'admin' ? (
                     <>
                       <Link to="/admin/listings-approval" onClick={closeMobile}>Listing Approvals</Link>
+                      <Link to="/admin/listing-management" onClick={closeMobile}>Listing Management</Link>
                       <Link to="/admin/id-verification" onClick={closeMobile}>ID Verification</Link>
                       <Link to="/admin/reports" onClick={closeMobile}>User Reports</Link>
                       <Link to="/admin/profile-verification" onClick={closeMobile}>Profile Verification</Link>
+                      <Link to="/admin/analytics" onClick={closeMobile}>Analytics</Link>
                     </>
                   ) : null}
                   <Link to="/create-listing" onClick={closeMobile}>List for sale</Link>

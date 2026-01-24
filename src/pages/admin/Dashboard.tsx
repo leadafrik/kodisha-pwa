@@ -343,27 +343,43 @@ const AdminDashboard: React.FC = () => {
                 </Link>
               )}
 
-              <div className="rounded-3xl border border-dashed border-slate-200 bg-white/70 p-6 text-slate-500">
+              <Link
+                to="/admin/listing-management"
+                className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              >
                 <div className="flex items-center justify-between">
-                  <div className="h-12 w-12 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center">
+                  <div className="h-12 w-12 rounded-2xl bg-indigo-50 text-indigo-700 flex items-center justify-center">
                     <BarChart3 size={24} />
                   </div>
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">Coming soon</span>
+                  <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">Listings</span>
                 </div>
-                <h3 className="mt-4 text-xl font-semibold text-slate-700">Listing Management</h3>
-                <p className="mt-2 text-sm text-slate-500">Manage listings, pricing, and promotions.</p>
-              </div>
+                <h3 className="mt-4 text-xl font-semibold text-slate-900">Listing Management</h3>
+                <p className="mt-2 text-sm text-slate-600">Approve, reject, and remove listings at scale.</p>
+                <ul className="mt-4 space-y-2 text-sm text-slate-600">
+                  <li>- Review pending listings</li>
+                  <li>- Maintain active inventory</li>
+                  <li>- Remove violations fast</li>
+                </ul>
+              </Link>
 
-              <div className="rounded-3xl border border-dashed border-slate-200 bg-white/70 p-6 text-slate-500">
+              <Link
+                to="/admin/analytics"
+                className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              >
                 <div className="flex items-center justify-between">
-                  <div className="h-12 w-12 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center">
+                  <div className="h-12 w-12 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center">
                     <Lock size={24} />
                   </div>
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">Coming soon</span>
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">Analytics</span>
                 </div>
-                <h3 className="mt-4 text-xl font-semibold text-slate-700">Analytics and Reports</h3>
-                <p className="mt-2 text-sm text-slate-500">Track trends, performance, and fraud signals.</p>
-              </div>
+                <h3 className="mt-4 text-xl font-semibold text-slate-900">Analytics and Reports</h3>
+                <p className="mt-2 text-sm text-slate-600">Track trends, performance, and fraud signals.</p>
+                <ul className="mt-4 space-y-2 text-sm text-slate-600">
+                  <li>- Listing mix and growth</li>
+                  <li>- Report and flag volume</li>
+                  <li>- Verification backlog</li>
+                </ul>
+              </Link>
             </div>
           </section>
 
