@@ -275,7 +275,7 @@ const AdminIDVerification: React.FC = () => {
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">ID Verification</h2>
                 <p className="text-sm text-gray-600 mt-1">
-                  Review application from {selectedVerification.fullName}
+                  Review application from {getUserName(selectedVerification)}
                 </p>
               </div>
               <button
