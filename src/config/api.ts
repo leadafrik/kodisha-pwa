@@ -176,17 +176,19 @@ export const apiRequest = async (url: string, options: RequestInit = {}) => {
     };
 
     const baseHeaders = normalizeHeaders(options.headers);
-    const authHeader =
+    const authHeader: Record<string, string> =
       token && !baseHeaders.Authorization
         ? { Authorization: `Bearer ${token}` }
         : {};
 
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...authHeader,
+      ...baseHeaders,
+    };
+
     const response = await fetch(url, {
-      headers: {
-        "Content-Type": "application/json",
-        ...authHeader,
-        ...baseHeaders,
-      },
+      headers,
       ...options,
     });
 
