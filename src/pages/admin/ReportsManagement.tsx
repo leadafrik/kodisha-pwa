@@ -24,7 +24,10 @@ const AdminReportsManagement: React.FC = () => {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
 
-  const token = localStorage.getItem('token');
+  const token =
+    localStorage.getItem('kodisha_admin_token') ||
+    localStorage.getItem('kodisha_token') ||
+    localStorage.getItem('token');
 
   useEffect(() => {
     fetchReports();
