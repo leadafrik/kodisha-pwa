@@ -65,21 +65,28 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
         throw new Error("Google account must have email");
       }
 
-      const legalConsents = getLegalConsents
-        ? await getLegalConsents()
-        : undefined;
-      if (getLegalConsents && !legalConsents) {
-        return;
-      }
+      try {
+        // First attempt without explicit consents for existing users
+        await loginWithGoogle(idToken, user.id, user.email, user.name);
+      } catch (initialError: any) {
+        const message = initialError?.message || "";
+        if (!getLegalConsents || !message.toLowerCase().includes("accept")) {
+          throw initialError;
+        }
 
-      // Send to backend for verification and account creation
-      await loginWithGoogle(
-        idToken,
-        user.id,
-        user.email,
-        user.name,
-        legalConsents || undefined
-      );
+        const legalConsents = await getLegalConsents();
+        if (!legalConsents) {
+          return;
+        }
+
+        await loginWithGoogle(
+          idToken,
+          user.id,
+          user.email,
+          user.name,
+          legalConsents
+        );
+      }
 
       // Success - trigger callback
       if (onSuccess) {

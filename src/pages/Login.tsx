@@ -107,18 +107,6 @@ const Login: React.FC = () => {
   });
 
   const requestSocialConsents = async (): Promise<LegalConsents | null> => {
-    const stored = localStorage.getItem("agrisoko_social_consents");
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (parsed?.privacyAccepted) {
-          return buildLegalConsents(true, !!parsed?.marketingConsent);
-        }
-      } catch {
-        // ignore parse errors
-      }
-    }
-
     return new Promise((resolve) => {
       socialConsentResolver.current = resolve;
       setSocialConsents({ privacyAccepted: false, marketingConsent: false });
@@ -145,14 +133,6 @@ const Login: React.FC = () => {
     const consents = buildLegalConsents(
       true,
       socialConsents.marketingConsent
-    );
-
-    localStorage.setItem(
-      "agrisoko_social_consents",
-      JSON.stringify({
-        privacyAccepted: true,
-        marketingConsent: socialConsents.marketingConsent,
-      })
     );
 
     setShowSocialConsent(false);

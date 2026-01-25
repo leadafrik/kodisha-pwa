@@ -65,21 +65,28 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
         throw new Error('Facebook account must have email');
       }
 
-      const legalConsents = getLegalConsents
-        ? await getLegalConsents()
-        : undefined;
-      if (getLegalConsents && !legalConsents) {
-        return;
-      }
+      try {
+        // First attempt without explicit consents for existing users
+        await loginWithFacebook(accessToken, user.id, user.email, user.name);
+      } catch (initialError: any) {
+        const message = initialError?.message || "";
+        if (!getLegalConsents || !message.toLowerCase().includes("accept")) {
+          throw initialError;
+        }
 
-      // Send to backend for verification and account creation
-      await loginWithFacebook(
-        accessToken,
-        user.id,
-        user.email,
-        user.name,
-        legalConsents || undefined
-      );
+        const legalConsents = await getLegalConsents();
+        if (!legalConsents) {
+          return;
+        }
+
+        await loginWithFacebook(
+          accessToken,
+          user.id,
+          user.email,
+          user.name,
+          legalConsents
+        );
+      }
 
       // Success - trigger callback
       if (onSuccess) {
