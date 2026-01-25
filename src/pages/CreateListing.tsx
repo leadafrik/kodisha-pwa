@@ -320,7 +320,7 @@ const CreateListing: React.FC = () => {
       localStorage.removeItem(DRAFT_STORAGE_KEY);
       setHasDraft(false);
       alert("Listing created successfully! Awaiting admin review...");
-      navigate("/listings");
+      navigate("/browse");
     } catch (err: any) {
       setError(err.message || "An error occurred while creating your listing");
       setUploading(false);
