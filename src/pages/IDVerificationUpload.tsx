@@ -17,23 +17,18 @@ const IDVerificationUpload: React.FC = () => {
     submittedAt?: string;
   } | null>(null);
 
-  try {
-    if (!user) {
-      return null;
-    }
-
-    const isAlreadyVerified =
-      user.verification?.idVerified && user.verification?.selfieVerified;
-    const steps = [
-      { key: "info", label: "Overview" },
-      { key: "documents", label: "Upload documents" },
-      { key: "review", label: "Review" },
-      { key: "submitted", label: "Submitted" },
-    ];
-    const currentStepIndex = Math.max(
-      0,
-      steps.findIndex((item) => item.key === step)
-    );
+  const isAlreadyVerified =
+    user?.verification?.idVerified && user?.verification?.selfieVerified;
+  const steps = [
+    { key: "info", label: "Overview" },
+    { key: "documents", label: "Upload documents" },
+    { key: "review", label: "Review" },
+    { key: "submitted", label: "Submitted" },
+  ];
+  const currentStepIndex = Math.max(
+    0,
+    steps.findIndex((item) => item.key === step)
+  );
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "id" | "selfie") => {
     const file = e.target.files?.[0];
@@ -74,14 +69,19 @@ const IDVerificationUpload: React.FC = () => {
   };
 
   React.useEffect(() => {
+    if (!user) return;
     loadLatestStatus();
-  }, []);
+  }, [user]);
 
   React.useEffect(() => {
     if (latestVerification?.status && step !== "submitted") {
       setStep("submitted");
     }
   }, [latestVerification?.status, step]);
+
+  if (!user) {
+    return null;
+  }
 
   const handleSubmit = async () => {
     if (!idFile || !selfieFile) {
@@ -479,24 +479,7 @@ const IDVerificationUpload: React.FC = () => {
         </div>
       </div>
     </div>
-    );
-  } catch (err: any) {
-    console.error('Error rendering IDVerificationUpload:', err);
-    return (
-      <div className="max-w-2xl mx-auto p-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-red-900 mb-2">Error Loading Page</h2>
-          <p className="text-red-800 mb-4">{err?.message || 'An unexpected error occurred'}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
-          >
-            Reload Page
-          </button>
-        </div>
-      </div>
-    );
-  }
+  );
 };
 
 export default IDVerificationUpload;
