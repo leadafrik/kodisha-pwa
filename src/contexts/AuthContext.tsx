@@ -120,13 +120,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     accessToken: string,
     fbUserId: string,
     email: string,
-    name: string
+    name: string,
+    legalConsents?: UserFormData["legalConsents"]
   ) => {
     setLoading(true);
     try {
       const res: any = await apiRequest(API_ENDPOINTS.auth.facebookLogin, {
         method: "POST",
-        body: JSON.stringify({ accessToken, fbUserId, email, name }),
+        body: JSON.stringify({ accessToken, fbUserId, email, name, legalConsents }),
       });
 
       if (!res.success || !res.user) {
@@ -152,13 +153,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     idToken: string,
     googleUserId: string,
     email: string,
-    name: string
+    name: string,
+    legalConsents?: UserFormData["legalConsents"]
   ) => {
     setLoading(true);
     try {
       const res: any = await apiRequest(API_ENDPOINTS.auth.googleLogin, {
         method: "POST",
-        body: JSON.stringify({ idToken, googleUserId, email, name }),
+        body: JSON.stringify({ idToken, googleUserId, email, name, legalConsents }),
       });
 
       if (!res.success || !res.user) {

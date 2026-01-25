@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { LegalConsents } from '../types/property';
 import { facebookAuth } from '../services/facebookAuthV2';
 
 interface FacebookLoginButtonProps {
   onSuccess?: () => void;
   onError?: (error: string) => void;
   className?: string;
+  getLegalConsents?: () => Promise<LegalConsents | null>;
 }
 
 /**
@@ -16,6 +18,7 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
   onSuccess,
   onError,
   className = '',
+  getLegalConsents,
 }) => {
   const { loginWithFacebook } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -62,8 +65,21 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
         throw new Error('Facebook account must have email');
       }
 
+      const legalConsents = getLegalConsents
+        ? await getLegalConsents()
+        : undefined;
+      if (getLegalConsents && !legalConsents) {
+        return;
+      }
+
       // Send to backend for verification and account creation
-      await loginWithFacebook(accessToken, user.id, user.email, user.name);
+      await loginWithFacebook(
+        accessToken,
+        user.id,
+        user.email,
+        user.name,
+        legalConsents || undefined
+      );
 
       // Success - trigger callback
       if (onSuccess) {

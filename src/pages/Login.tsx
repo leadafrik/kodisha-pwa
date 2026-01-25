@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { kenyaCounties } from "../data/kenyaCounties";
 import GoogleLoginButton from "../components/GoogleLoginButtonV2";
 import FacebookLoginButton from "../components/FacebookLoginButtonV2";
+import { LegalConsents } from "../types/property";
 
 type Mode = "login" | "signup" | "otp-verify" | "forgot" | "otp-reset";
 
@@ -51,6 +52,18 @@ const Login: React.FC = () => {
     userType: "buyer" as "buyer" | "seller",
     county: "",
   });
+  const [signupConsents, setSignupConsents] = useState({
+    privacyAccepted: false,
+    marketingConsent: false,
+  });
+
+  const [showSocialConsent, setShowSocialConsent] = useState(false);
+  const [socialConsentError, setSocialConsentError] = useState<string | null>(null);
+  const [socialConsents, setSocialConsents] = useState({
+    privacyAccepted: false,
+    marketingConsent: false,
+  });
+  const socialConsentResolver = useRef<((consents: LegalConsents | null) => void) | null>(null);
 
   // OTP State (email only for now)
   const [otpCode, setOtpCode] = useState("");
@@ -84,6 +97,70 @@ const Login: React.FC = () => {
   const startOtpTimer = () => {
     setOtpTimer(60);
     setCanResendOtp(false);
+  };
+
+  const buildLegalConsents = (privacyAccepted: boolean, marketingConsent: boolean): LegalConsents => ({
+    termsAccepted: privacyAccepted,
+    privacyAccepted,
+    dataProcessingConsent: privacyAccepted,
+    marketingConsent,
+  });
+
+  const requestSocialConsents = async (): Promise<LegalConsents | null> => {
+    const stored = localStorage.getItem("agrisoko_social_consents");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed?.privacyAccepted) {
+          return buildLegalConsents(true, !!parsed?.marketingConsent);
+        }
+      } catch {
+        // ignore parse errors
+      }
+    }
+
+    return new Promise((resolve) => {
+      socialConsentResolver.current = resolve;
+      setSocialConsents({ privacyAccepted: false, marketingConsent: false });
+      setSocialConsentError(null);
+      setShowSocialConsent(true);
+    });
+  };
+
+  const handleSocialConsentCancel = () => {
+    setShowSocialConsent(false);
+    setSocialConsentError(null);
+    if (socialConsentResolver.current) {
+      socialConsentResolver.current(null);
+      socialConsentResolver.current = null;
+    }
+  };
+
+  const handleSocialConsentConfirm = () => {
+    if (!socialConsents.privacyAccepted) {
+      setSocialConsentError("Please accept the Terms and Privacy Policy to continue.");
+      return;
+    }
+
+    const consents = buildLegalConsents(
+      true,
+      socialConsents.marketingConsent
+    );
+
+    localStorage.setItem(
+      "agrisoko_social_consents",
+      JSON.stringify({
+        privacyAccepted: true,
+        marketingConsent: socialConsents.marketingConsent,
+      })
+    );
+
+    setShowSocialConsent(false);
+    setSocialConsentError(null);
+    if (socialConsentResolver.current) {
+      socialConsentResolver.current(consents);
+      socialConsentResolver.current = null;
+    }
   };
 
   // ==================== LOGIN ====================
@@ -134,6 +211,10 @@ const Login: React.FC = () => {
       setError("Please select a county.");
       return;
     }
+    if (!signupConsents.privacyAccepted) {
+      setError("Please accept the Terms and Privacy Policy.");
+      return;
+    }
 
     const input = signupData.emailOrPhone.trim();
     if (!input.includes("@")) {
@@ -152,10 +233,10 @@ const Login: React.FC = () => {
         type: signupData.userType,
         county: signupData.county,
         legalConsents: {
-          termsAccepted: true,
-          privacyAccepted: true,
-          marketingConsent: false,
-          dataProcessingConsent: true,
+          termsAccepted: signupConsents.privacyAccepted,
+          privacyAccepted: signupConsents.privacyAccepted,
+          marketingConsent: signupConsents.marketingConsent,
+          dataProcessingConsent: signupConsents.privacyAccepted,
         },
       });
 
@@ -272,11 +353,13 @@ const Login: React.FC = () => {
           <GoogleLoginButton
             onSuccess={() => navigate(redirectTo)}
             onError={(error) => setError(error)}
+            getLegalConsents={requestSocialConsents}
             className="text-sm"
           />
           <FacebookLoginButton
             onSuccess={() => navigate(redirectTo)}
             onError={(error) => setError(error)}
+            getLegalConsents={requestSocialConsents}
             className="text-sm"
           />
         </div>
@@ -373,11 +456,13 @@ const Login: React.FC = () => {
           <GoogleLoginButton
             onSuccess={() => navigate(redirectTo)}
             onError={(error) => setError(error)}
+            getLegalConsents={requestSocialConsents}
             className="text-sm"
           />
           <FacebookLoginButton
             onSuccess={() => navigate(redirectTo)}
             onError={(error) => setError(error)}
+            getLegalConsents={requestSocialConsents}
             className="text-sm"
           />
         </div>
@@ -462,6 +547,47 @@ const Login: React.FC = () => {
             </option>
           ))}
         </select>
+      </div>
+
+      <div className="space-y-2 text-xs text-gray-600">
+        <label className="flex items-start gap-2">
+          <input
+            type="checkbox"
+            checked={signupConsents.privacyAccepted}
+            onChange={(e) =>
+              setSignupConsents((prev) => ({
+                ...prev,
+                privacyAccepted: e.target.checked,
+              }))
+            }
+            className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          />
+          <span>
+            I agree to the{" "}
+            <a className="text-blue-600 hover:underline" href="/legal/terms">
+              Terms of Service
+            </a>{" "}
+            and{" "}
+            <a className="text-blue-600 hover:underline" href="/legal/privacy">
+              Privacy Policy
+            </a>
+            .
+          </span>
+        </label>
+        <label className="flex items-start gap-2">
+          <input
+            type="checkbox"
+            checked={signupConsents.marketingConsent}
+            onChange={(e) =>
+              setSignupConsents((prev) => ({
+                ...prev,
+                marketingConsent: e.target.checked,
+              }))
+            }
+            className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          />
+          <span>Send me product updates and marketing emails (optional).</span>
+        </label>
       </div>
 
       <button
@@ -691,113 +817,102 @@ const Login: React.FC = () => {
         </div>
       </div>
 
+      {showSocialConsent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">
+              Privacy & Marketing
+            </h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Please confirm before continuing with social sign in.
+            </p>
+            <div className="space-y-3 text-sm text-gray-700">
+              <label className="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  checked={socialConsents.privacyAccepted}
+                  onChange={(e) =>
+                    setSocialConsents((prev) => ({
+                      ...prev,
+                      privacyAccepted: e.target.checked,
+                    }))
+                  }
+                  className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span>
+                  I agree to the{" "}
+                  <a className="text-blue-600 hover:underline" href="/legal/terms">
+                    Terms of Service
+                  </a>{" "}
+                  and{" "}
+                  <a className="text-blue-600 hover:underline" href="/legal/privacy">
+                    Privacy Policy
+                  </a>
+                  .
+                </span>
+              </label>
+              <label className="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  checked={socialConsents.marketingConsent}
+                  onChange={(e) =>
+                    setSocialConsents((prev) => ({
+                      ...prev,
+                      marketingConsent: e.target.checked,
+                    }))
+                  }
+                  className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span>Send me product updates and marketing emails (optional).</span>
+              </label>
+            </div>
+            {socialConsentError && (
+              <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                {socialConsentError}
+              </div>
+            )}
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={handleSocialConsentCancel}
+                className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSocialConsentConfirm}
+                className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 px-4 py-6">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">Product</h3>
-              <ul className="space-y-2">
-                <li>
-                  <a href="/about" className="text-sm text-gray-600 hover:text-blue-600">
-                    About Us
-                  </a>
-                </li>
-                <li>
-                  <a href="/features" className="text-sm text-gray-600 hover:text-blue-600">
-                    Features
-                  </a>
-                </li>
-                <li>
-                  <a href="/pricing" className="text-sm text-gray-600 hover:text-blue-600">
-                    Pricing
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">Company</h3>
-              <ul className="space-y-2">
-                <li>
-                  <a href="/blog" className="text-sm text-gray-600 hover:text-blue-600">
-                    Blog
-                  </a>
-                </li>
-                <li>
-                  <a href="/careers" className="text-sm text-gray-600 hover:text-blue-600">
-                    Careers
-                  </a>
-                </li>
-                <li>
-                  <a href="/contact" className="text-sm text-gray-600 hover:text-blue-600">
-                    Contact
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">Legal</h3>
-              <ul className="space-y-2">
-                <li>
-                  <a href="/terms" className="text-sm text-gray-600 hover:text-blue-600">
-                    Terms of Service
-                  </a>
-                </li>
-                <li>
-                  <a href="/privacy" className="text-sm text-gray-600 hover:text-blue-600">
-                    Privacy Policy
-                  </a>
-                </li>
-                <li>
-                  <a href="/cookies" className="text-sm text-gray-600 hover:text-blue-600">
-                    Cookie Policy
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">Support</h3>
-              <ul className="space-y-2">
-                <li>
-                  <a href="/help" className="text-sm text-gray-600 hover:text-blue-600">
-                    Help Center
-                  </a>
-                </li>
-                <li>
-                  <a href="/status" className="text-sm text-gray-600 hover:text-blue-600">
-                    Status
-                  </a>
-                </li>
-                <li>
-                  <a href="/feedback" className="text-sm text-gray-600 hover:text-blue-600">
-                    Feedback
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-200 pt-6 flex items-center justify-between">
-            <p className="text-sm text-gray-500">
-              (c) 2026 Agrisoko. All rights reserved.
-            </p>
-            <div className="flex items-center gap-4">
-              <a href="https://facebook.com/agrisoko" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-600">
-                <span className="sr-only">Facebook</span>
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                </svg>
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+              <a href="/about" className="hover:text-blue-600">
+                About Us
               </a>
-              <a href="https://twitter.com/agrisoko" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-600">
-                <span className="sr-only">Twitter</span>
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8.29 20c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-7.655 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.073 4.073 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
-                </svg>
+              <a href="/browse" className="hover:text-blue-600">
+                Browse Listings
+              </a>
+              <a href="/legal/terms" className="hover:text-blue-600">
+                Terms of Service
+              </a>
+              <a href="/legal/privacy" className="hover:text-blue-600">
+                Privacy Policy
+              </a>
+              <a href="mailto:kodisha.254.ke@gmail.com" className="hover:text-blue-600">
+                Contact Support
               </a>
             </div>
+            <p className="text-sm text-gray-500">(c) 2026 Agrisoko. All rights reserved.</p>
           </div>
         </div>
       </footer>

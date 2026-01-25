@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { LegalConsents } from "../types/property";
 import { googleAuth } from "../services/googleAuthV2";
 
 interface GoogleLoginButtonProps {
   onSuccess?: () => void;
   onError?: (error: string) => void;
   className?: string;
+  getLegalConsents?: () => Promise<LegalConsents | null>;
 }
 
 /**
@@ -16,6 +18,7 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
   onSuccess,
   onError,
   className = "",
+  getLegalConsents,
 }) => {
   const { loginWithGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -62,8 +65,21 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
         throw new Error("Google account must have email");
       }
 
+      const legalConsents = getLegalConsents
+        ? await getLegalConsents()
+        : undefined;
+      if (getLegalConsents && !legalConsents) {
+        return;
+      }
+
       // Send to backend for verification and account creation
-      await loginWithGoogle(idToken, user.id, user.email, user.name);
+      await loginWithGoogle(
+        idToken,
+        user.id,
+        user.email,
+        user.name,
+        legalConsents || undefined
+      );
 
       // Success - trigger callback
       if (onSuccess) {

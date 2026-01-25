@@ -237,8 +237,20 @@ export interface AuthContextType {
   requestSmsOtp: (phone: string) => Promise<void>;
   verifySmsOtp: (phone: string, code: string) => Promise<void>;
   resetPasswordWithEmail: (params: { email: string; code: string; newPassword: string }) => Promise<void>;
-  loginWithFacebook: (accessToken: string, fbUserId: string, email: string, name: string) => Promise<void>;
-  loginWithGoogle: (idToken: string, googleUserId: string, email: string, name: string) => Promise<void>;
+  loginWithFacebook: (
+    accessToken: string,
+    fbUserId: string,
+    email: string,
+    name: string,
+    legalConsents?: LegalConsents
+  ) => Promise<void>;
+  loginWithGoogle: (
+    idToken: string,
+    googleUserId: string,
+    email: string,
+    name: string,
+    legalConsents?: LegalConsents
+  ) => Promise<void>;
   logout: () => void;
   updateProfile: (userData: Partial<User>) => void;
   register: (userData: UserFormData) => Promise<User | null>;
@@ -255,12 +267,14 @@ export interface UserFormData {
   county: string;
   constituency?: string;
   ward?: string;
-  legalConsents?: {
-    termsAccepted: boolean;
-    privacyAccepted: boolean;
-    marketingConsent: boolean;
-    dataProcessingConsent: boolean;
-  };
+  legalConsents?: LegalConsents;
+}
+
+export interface LegalConsents {
+  termsAccepted: boolean;
+  privacyAccepted: boolean;
+  marketingConsent: boolean;
+  dataProcessingConsent: boolean;
 }
 
 // ===============================
