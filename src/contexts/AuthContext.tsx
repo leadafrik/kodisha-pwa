@@ -49,6 +49,12 @@ const mapBackendUserToFrontendUser = (apiUser: any): User => {
   const verificationStatus: User["verificationStatus"] = apiUser.isVerified
     ? "verified"
     : "pending";
+  const rawVerification = apiUser.verification || {};
+  const normalizedVerification = {
+    ...rawVerification,
+    idVerified: !!rawVerification.idVerified || !!rawVerification.selfieVerified,
+    selfieVerified: !!rawVerification.selfieVerified || !!rawVerification.idVerified,
+  };
 
   return {
     id,
@@ -67,7 +73,7 @@ const mapBackendUserToFrontendUser = (apiUser: any): User => {
     county: apiUser.county,
     isVerified: apiUser.isVerified,
     role: apiUser.role,
-    verification: apiUser.verification,
+    verification: normalizedVerification,
   };
 };
 
