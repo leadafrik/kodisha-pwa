@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { PropertyProvider } from './contexts/PropertyContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { VerificationProvider } from './contexts/VerificationContext';
@@ -77,6 +77,8 @@ function App() {
                       }
                     />
                     <Route path="/browse" element={<BrowseListings />} />
+                    <Route path="/marketplace" element={<Navigate to="/browse" replace />} />
+                    <Route path="/listings" element={<Navigate to="/browse" replace />} />
                     <Route path="/find-services" element={<BrowseListings />} />
                     <Route path="/request" element={<BrowseBuyerRequestsPage />} />
                     <Route 
