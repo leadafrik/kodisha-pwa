@@ -49,6 +49,10 @@ export const submitReport = async (
     }),
   });
 
+  const reportId = data?.data?.reportId || data?.reportId || data?._id;
+  if (reportId) {
+    return { _id: reportId } as Report;
+  }
   return data.data || data;
 };
 
