@@ -27,6 +27,24 @@ interface PendingListing {
   isDemo?: boolean;
 }
 
+const getListingImages = (listing: PendingListing): string[] => {
+  const raw =
+    listing.images ||
+    (listing as any).imageUrls ||
+    (listing as any).photos ||
+    [];
+
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+
+  return raw
+    .map((img: any) =>
+      typeof img === "string" ? img : img?.url || img?.secure_url || ""
+    )
+    .filter(Boolean);
+};
+
 const AdminListingsApproval: React.FC = () => {
   const { user } = useAuth();
   const [pendingListings, setPendingListings] = useState<PendingListing[]>([]);
@@ -161,82 +179,87 @@ const AdminListingsApproval: React.FC = () => {
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {pendingListings.map((listing) => (
-              <div
-                key={listing._id}
-                className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition"
-              >
-                {/* Image */}
-                <div className="h-40 bg-gradient-to-br from-gray-200 to-gray-300 relative flex items-center justify-center">
-                  {listing.images?.[0] ? (
-                    <img
-                      src={listing.images[0]}
-                      alt={listing.title}
-                      onError={handleImageError}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
-                      <span className="text-sm">No image</span>
-                    </div>
-                  )}
-                  {listing.isDemo && (
-                    <div className="absolute top-2 left-2 bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded">
-                      📋 Sample
-                    </div>
-                  )}
-                  {listing.publishStatus === "pending_verification" && (
-                    <div className="absolute top-2 right-2 bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded">
-                      ⏳ Pending
-                    </div>
-                  )}
-                </div>
+            {pendingListings.map((listing) => {
+              const images = getListingImages(listing);
+              const previewImage = images[0];
 
-                {/* Content */}
-                <div className="p-4">
-                  <h3 className="font-bold text-gray-900 mb-1 line-clamp-2">{listing.title}</h3>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">{listing.description}</p>
-
-                  {/* Category & Price */}
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="inline-block bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">
-                      {listing.category}
-                    </span>
-                    {listing.price && (
-                      <span className="font-bold text-green-600">KSh {listing.price.toLocaleString()}</span>
+              return (
+                <div
+                  key={listing._id}
+                  className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition"
+                >
+                  {/* Image */}
+                  <div className="h-40 bg-gradient-to-br from-gray-200 to-gray-300 relative flex items-center justify-center">
+                    {previewImage ? (
+                      <img
+                        src={previewImage}
+                        alt={listing.title}
+                        onError={handleImageError}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
+                        <span className="text-sm">No image</span>
+                      </div>
+                    )}
+                    {listing.isDemo && (
+                      <div className="absolute top-2 left-2 bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded">
+                        Sample
+                      </div>
+                    )}
+                    {listing.publishStatus === "pending_verification" && (
+                      <div className="absolute top-2 right-2 bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded">
+                        Pending
+                      </div>
                     )}
                   </div>
 
-                  {/* Location */}
-                  {listing.location && (
-                    <div className="flex items-start gap-2 text-xs text-gray-600 mb-3">
-                      <MapPin size={14} className="mt-0.5 flex-shrink-0" />
-                      <span>
-                        {listing.location.ward}, {listing.location.constituency}, {listing.location.county}
+                  {/* Content */}
+                  <div className="p-4">
+                    <h3 className="font-bold text-gray-900 mb-1 line-clamp-2">{listing.title}</h3>
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">{listing.description}</p>
+
+                    {/* Category & Price */}
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="inline-block bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">
+                        {listing.category}
                       </span>
+                      {listing.price && (
+                        <span className="font-bold text-green-600">KSh {listing.price.toLocaleString()}</span>
+                      )}
                     </div>
-                  )}
 
-                  {/* Seller Info */}
-                  {listing.owner && (
-                    <div className="bg-gray-50 p-3 rounded-lg mb-3 text-sm">
-                      <p className="font-semibold text-gray-900">{listing.owner.fullName}</p>
-                      <p className="text-gray-600">{listing.owner.email}</p>
-                      <p className="text-gray-600">{listing.owner.phone}</p>
-                    </div>
-                  )}
+                    {/* Location */}
+                    {listing.location && (
+                      <div className="flex items-start gap-2 text-xs text-gray-600 mb-3">
+                        <MapPin size={14} className="mt-0.5 flex-shrink-0" />
+                        <span>
+                          {listing.location.ward}, {listing.location.constituency}, {listing.location.county}
+                        </span>
+                      </div>
+                    )}
 
-                  {/* Actions */}
-                  <button
-                    onClick={() => setSelectedListing(listing)}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
-                  >
-                    <Eye size={16} />
-                    Review & Approve/Reject
-                  </button>
+                    {/* Seller Info */}
+                    {listing.owner && (
+                      <div className="bg-gray-50 p-3 rounded-lg mb-3 text-sm">
+                        <p className="font-semibold text-gray-900">{listing.owner.fullName}</p>
+                        <p className="text-gray-600">{listing.owner.email}</p>
+                        <p className="text-gray-600">{listing.owner.phone}</p>
+                      </div>
+                    )}
+
+                    {/* Actions */}
+                    <button
+                      onClick={() => setSelectedListing(listing)}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+                    >
+                      <Eye size={16} />
+                      Review & Approve/Reject
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
@@ -265,13 +288,14 @@ const AdminListingsApproval: React.FC = () => {
               {/* Content */}
               <div className="p-6 space-y-6">
                 {/* Images */}
-                {selectedListing.images && selectedListing.images.length > 0 && (
+                {getListingImages(selectedListing).length > 0 && (
                   <div className="space-y-2">
                     <h3 className="font-bold text-gray-900">Images</h3>
                     <div className="grid grid-cols-3 gap-3">
-                      {selectedListing.images.map((img, idx) => (
+                      {getListingImages(selectedListing).map((img, idx) => (
                         <img key={idx} src={img} alt="Listing" onError={handleImageError} className="w-full h-32 object-cover rounded-lg" />
-                      ))}
+                      );
+            })}
                     </div>
                   </div>
                 )}

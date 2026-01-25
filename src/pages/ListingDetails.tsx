@@ -209,7 +209,7 @@ const AdminControlsSection: React.FC<AdminControlsProps> = ({ listing, onUpdate 
         { method: "DELETE" }
       );
       setMessage("Listing deleted. Redirecting...");
-      setTimeout(() => navigate("/listings"), 1500);
+      setTimeout(() => navigate("/browse"), 1500);
     } catch (err: any) {
       setMessage(`Error: ${err.message}`);
     } finally {
