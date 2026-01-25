@@ -80,6 +80,8 @@ const IDVerificationUpload: React.FC = () => {
     }
 
     try {
+      setError("");
+      setSuccess("");
       setUploading(true);
       const formData = new FormData();
       formData.append("idDocument", idFile);
@@ -365,6 +367,13 @@ const IDVerificationUpload: React.FC = () => {
           ) : step === "review" ? (
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900">Review Your Documents</h2>
+
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex gap-3">
+                  <AlertCircle className="text-red-600 flex-shrink-0" size={20} />
+                  <p className="text-red-800">{error}</p>
+                </div>
+              )}
 
               {idFile && (
                 <div>
