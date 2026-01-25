@@ -81,6 +81,7 @@ const CreateListing: React.FC = () => {
   const [idVerified, setIdVerified] = useState(false);
   const [selfieVerified, setSelfieVerified] = useState(false);
   const [hasDraft, setHasDraft] = useState(false);
+  const verificationErrorMessage = "Please complete ID and selfie verification before listing";
 
   // Pre-fill contact
   useEffect(() => {
@@ -121,6 +122,12 @@ const CreateListing: React.FC = () => {
       setSelfieVerified(!!user.verification.selfieVerified);
     }
   }, [user]);
+
+  useEffect(() => {
+    if (idVerified && selfieVerified && error === verificationErrorMessage) {
+      setError("");
+    }
+  }, [idVerified, selfieVerified, error, verificationErrorMessage]);
 
   // Update constituencies when county changes
   useEffect(() => {
@@ -251,7 +258,7 @@ const CreateListing: React.FC = () => {
 
     if (form.step === 5) {
       if (!idVerified || !selfieVerified) {
-        setError("Please complete ID and selfie verification before listing");
+        setError(verificationErrorMessage);
         return false;
       }
       return true;
