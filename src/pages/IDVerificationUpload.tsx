@@ -24,6 +24,16 @@ const IDVerificationUpload: React.FC = () => {
 
     const isAlreadyVerified =
       user.verification?.idVerified && user.verification?.selfieVerified;
+    const steps = [
+      { key: "info", label: "Overview" },
+      { key: "documents", label: "Upload documents" },
+      { key: "review", label: "Review" },
+      { key: "submitted", label: "Submitted" },
+    ];
+    const currentStepIndex = Math.max(
+      0,
+      steps.findIndex((item) => item.key === step)
+    );
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "id" | "selfie") => {
     const file = e.target.files?.[0];
@@ -108,89 +118,113 @@ const IDVerificationUpload: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+    <div className="max-w-5xl mx-auto px-4">
+      <div className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-8">
-          <div className="flex items-center gap-3 mb-2">
-            <Shield size={32} />
-            <h1 className="text-3xl font-bold">Identity Verification</h1>
+        <div className="bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 text-white p-8">
+          <div className="flex items-center gap-3 mb-3">
+            <Shield size={30} />
+            <p className="text-sm uppercase tracking-[0.2em] text-emerald-100">
+              Agrisoko Trust
+            </p>
           </div>
-          <p className="text-green-100">
-            Verify your identity to increase trust and unlock premium features
+          <h1 className="text-3xl md:text-4xl font-bold mb-3">Identity Verification</h1>
+          <p className="text-emerald-100 max-w-2xl">
+            Submit your ID and selfie to display a verified badge, earn higher visibility, and build
+            trust with buyers and sellers.
           </p>
         </div>
 
         {/* Content */}
         <div className="p-8">
+          {!isAlreadyVerified && (
+            <div className="mb-8">
+              <div className="flex flex-wrap gap-2">
+                {steps.map((item, index) => {
+                  const isActive = index <= currentStepIndex;
+                  return (
+                    <div
+                      key={item.key}
+                      className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold ${
+                        isActive
+                          ? "bg-emerald-100 text-emerald-800"
+                          : "bg-slate-100 text-slate-500"
+                      }`}
+                    >
+                      <span
+                        className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
+                          isActive ? "bg-emerald-600 text-white" : "bg-slate-300 text-white"
+                        }`}
+                      >
+                        {index + 1}
+                      </span>
+                      {item.label}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {isAlreadyVerified ? (
-            <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
-              <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-green-900 mb-2">Verified!</h2>
-              <p className="text-green-800 mb-4">
-                Your identity has been verified. This badge will display on your profile and listings.
+            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-8 text-center">
+              <CheckCircle className="w-16 h-16 text-emerald-600 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-emerald-900 mb-2">Verified</h2>
+              <p className="text-emerald-800 mb-5">
+                Your identity has been verified. The badge is now visible on your profile and listings.
               </p>
-              <div className="inline-flex px-6 py-2 rounded-lg bg-green-600 text-white font-semibold">
-                ✓ ID Verified
+              <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-emerald-600 text-white font-semibold">
+                <CheckCircle className="w-5 h-5" />
+                ID Verified
               </div>
             </div>
           ) : step === "info" ? (
             <div className="space-y-6">
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-                <h3 className="font-bold text-blue-900 mb-3">Why Get Verified?</h3>
-                <ul className="space-y-2 text-blue-800">
-                  <li className="flex items-center gap-2">
-                    <span className="text-xl">⭐</span>
-                    <span>Display an "ID Verified" badge on your profile and listings</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                    </svg>
-                    <span>Build trust with buyers and sellers</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="text-xl">📈</span>
-                    <span>Higher visibility in search results</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                    <span>Priority support from Agrisoko team</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
-                <h3 className="font-bold text-gray-900 mb-3">What We Need</h3>
-                <div className="space-y-4">
-                  <div>
-                    <p className="font-semibold text-gray-900 mb-1">1. Valid ID Document</p>
-                    <p className="text-sm text-gray-600">
-                      National ID, Passport, or Driver's License (clear photo)
-                    </p>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900 mb-1">2. Selfie with ID</p>
-                    <p className="text-sm text-gray-600">
-                      A photo of you holding your ID document (so we know it's really you)
-                    </p>
+              <div className="grid gap-4 lg:grid-cols-2">
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6">
+                  <h3 className="font-bold text-slate-900 mb-4">Why get verified</h3>
+                  <ul className="space-y-3 text-slate-700">
+                    {[
+                      "Display a verified badge on your profile and listings.",
+                      "Increase buyer confidence and trust.",
+                      "Higher visibility in marketplace search results.",
+                      "Priority support from the Agrisoko team.",
+                    ].map((benefit) => (
+                      <li key={benefit} className="flex items-start gap-3">
+                        <CheckCircle className="w-5 h-5 text-emerald-600 mt-0.5" />
+                        <span>{benefit}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="bg-white border border-slate-200 rounded-2xl p-6">
+                  <h3 className="font-bold text-slate-900 mb-4">What you will submit</h3>
+                  <div className="space-y-4 text-sm text-slate-600">
+                    <div className="rounded-xl border border-slate-200 p-4">
+                      <p className="font-semibold text-slate-900">1. Valid ID document</p>
+                      <p>National ID, passport, or driver's license.</p>
+                    </div>
+                    <div className="rounded-xl border border-slate-200 p-4">
+                      <p className="font-semibold text-slate-900">2. Selfie with ID</p>
+                      <p>A clear photo of you holding the same document.</p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex gap-3">
-                <AlertCircle className="text-yellow-700 flex-shrink-0 mt-0.5" size={20} />
-                <div className="text-sm text-yellow-800">
-                  <p className="font-semibold">Privacy & Security</p>
-                  <p>Your documents are encrypted and only reviewed by our admin team. We never share or sell your data.</p>
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex gap-3">
+                <AlertCircle className="text-amber-700 flex-shrink-0 mt-0.5" size={20} />
+                <div className="text-sm text-amber-800">
+                  <p className="font-semibold">Privacy and security</p>
+                  <p>
+                    Documents are encrypted and reviewed only by our admin team. We never share or sell your data.
+                  </p>
                 </div>
               </div>
 
               <button
                 onClick={() => setStep("documents")}
-                className="w-full px-6 py-3 rounded-lg bg-green-600 text-white font-bold hover:bg-green-700 transition"
+                className="w-full px-6 py-3 rounded-2xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition"
               >
                 Start Verification
               </button>
@@ -205,9 +239,9 @@ const IDVerificationUpload: React.FC = () => {
               )}
 
               {success && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex gap-3">
-                  <CheckCircle className="text-green-600 flex-shrink-0" size={20} />
-                  <p className="text-green-800">{success}</p>
+                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 flex gap-3">
+                  <CheckCircle className="text-emerald-600 flex-shrink-0" size={20} />
+                  <p className="text-emerald-800">{success}</p>
                 </div>
               )}
 
@@ -249,7 +283,7 @@ const IDVerificationUpload: React.FC = () => {
                       />
                       <label
                         htmlFor="id-input"
-                        className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg cursor-pointer hover:bg-green-700 transition"
+                        className="inline-block px-4 py-2 bg-emerald-600 text-white rounded-lg cursor-pointer hover:bg-emerald-700 transition"
                       >
                         Select File
                       </label>
@@ -299,7 +333,7 @@ const IDVerificationUpload: React.FC = () => {
                       />
                       <label
                         htmlFor="selfie-input"
-                        className="inline-block px-4 py-2 bg-green-600 text-white rounded-lg cursor-pointer hover:bg-green-700 transition"
+                        className="inline-block px-4 py-2 bg-emerald-600 text-white rounded-lg cursor-pointer hover:bg-emerald-700 transition"
                       >
                         Select File
                       </label>
@@ -322,7 +356,7 @@ const IDVerificationUpload: React.FC = () => {
                 <button
                   onClick={() => setStep("review")}
                   disabled={!idFile || !selfieFile}
-                  className="flex-1 px-6 py-3 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 disabled:bg-gray-400 transition"
+                  className="flex-1 px-6 py-3 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 disabled:bg-gray-400 transition"
                 >
                   Review & Submit
                 </button>
@@ -375,7 +409,7 @@ const IDVerificationUpload: React.FC = () => {
                 <button
                   onClick={handleSubmit}
                   disabled={uploading}
-                  className="flex-1 px-6 py-3 rounded-lg bg-green-600 text-white font-bold hover:bg-green-700 disabled:bg-gray-400 transition flex items-center justify-center gap-2"
+                  className="flex-1 px-6 py-3 rounded-lg bg-emerald-600 text-white font-bold hover:bg-emerald-700 disabled:bg-gray-400 transition flex items-center justify-center gap-2"
                 >
                   {uploading ? (
                     <>
@@ -390,7 +424,7 @@ const IDVerificationUpload: React.FC = () => {
             </div>
           ) : (
             <div className="text-center space-y-4">
-              <CheckCircle className="w-16 h-16 text-green-600 mx-auto" />
+              <CheckCircle className="w-16 h-16 text-emerald-600 mx-auto" />
               <h2 className="text-2xl font-bold text-gray-900">Documents Submitted!</h2>
               <p className="text-gray-600 max-w-md mx-auto">
                 Your identity documents have been received. Our admin team will review them within
@@ -412,7 +446,7 @@ const IDVerificationUpload: React.FC = () => {
               )}
               <button
                 onClick={() => setStep("info")}
-                className="px-6 py-3 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition"
+                className="px-6 py-3 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition"
               >
                 Done
               </button>
