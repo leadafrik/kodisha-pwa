@@ -73,6 +73,16 @@ const IDVerificationUpload: React.FC = () => {
     }
   };
 
+  React.useEffect(() => {
+    loadLatestStatus();
+  }, []);
+
+  React.useEffect(() => {
+    if (latestVerification?.status && step !== "submitted") {
+      setStep("submitted");
+    }
+  }, [latestVerification?.status, step]);
+
   const handleSubmit = async () => {
     if (!idFile || !selfieFile) {
       setError("Please upload both ID and selfie documents");
@@ -113,7 +123,12 @@ const IDVerificationUpload: React.FC = () => {
       setIdFile(null);
       setSelfieFile(null);
     } catch (err: any) {
-      setError(err.message || "Upload failed");
+      const message = err.message || "Upload failed";
+      setError(message);
+      if (message.toLowerCase().includes("pending") || message.toLowerCase().includes("approved")) {
+        await loadLatestStatus();
+        setStep("submitted");
+      }
     } finally {
       setUploading(false);
     }

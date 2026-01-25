@@ -372,6 +372,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
+  useEffect(() => {
+    const token = localStorage.getItem("kodisha_token");
+    if (!token) return;
+
+    refreshUser();
+
+    const handleFocus = () => {
+      refreshUser();
+    };
+
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
