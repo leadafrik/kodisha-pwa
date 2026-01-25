@@ -1,5 +1,6 @@
-﻿import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { API_ENDPOINTS, adminApiRequest } from '../../config/api';
+import { handleImageError } from '../../utils/imageFallback';
 export {}; // Add this line to make it a module
 
 type ListingType = 'land' | 'equipment' | 'professional_services' | 'agrovet' | 'product';
@@ -565,6 +566,7 @@ const AdminDashboard: React.FC = () => {
                                   key={index}
                                   src={image}
                                   alt={`Listing ${index + 1}`}
+                                  onError={handleImageError}
                                   className="w-16 h-16 object-cover rounded border"
                                 />
                               ))}
@@ -587,7 +589,7 @@ const AdminDashboard: React.FC = () => {
                           }}
                           className="inline-flex items-center justify-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md shadow-sm text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
-                          📄 View Documents
+                          ?? View Documents
                         </button>
                         <button
                           onClick={() => verifyListing(listing._id, 'approved')}
@@ -718,9 +720,9 @@ const AdminDashboard: React.FC = () => {
                   <div className="border border-gray-200 rounded-lg p-4">
                     <h3 className="font-semibold text-lg mb-3 flex items-center">
                       {documents.idVerified ? (
-                        <span className="text-green-600 mr-2">✓</span>
+                        <span className="text-green-600 mr-2">?</span>
                       ) : (
-                        <span className="text-gray-400 mr-2">○</span>
+                        <span className="text-gray-400 mr-2">?</span>
                       )}
                       Identity Documents
                     </h3>
@@ -731,6 +733,7 @@ const AdminDashboard: React.FC = () => {
                           <img
                             src={documents.idData.idFront}
                             alt="ID Front"
+                            onError={handleImageError}
                             className="w-full h-48 object-cover rounded border cursor-pointer hover:opacity-90"
                             onClick={() => window.open(documents.idData.idFront, '_blank')}
                           />
@@ -742,6 +745,7 @@ const AdminDashboard: React.FC = () => {
                           <img
                             src={documents.idData.idBack}
                             alt="ID Back"
+                            onError={handleImageError}
                             className="w-full h-48 object-cover rounded border cursor-pointer hover:opacity-90"
                             onClick={() => window.open(documents.idData.idBack, '_blank')}
                           />
@@ -753,6 +757,7 @@ const AdminDashboard: React.FC = () => {
                           <img
                             src={documents.idData.selfie}
                             alt="Selfie"
+                            onError={handleImageError}
                             className="w-full h-48 object-cover rounded border cursor-pointer hover:opacity-90"
                             onClick={() => window.open(documents.idData.selfie, '_blank')}
                           />
@@ -764,7 +769,7 @@ const AdminDashboard: React.FC = () => {
                         onClick={() => verifyUserID(documentViewer.userId!)}
                         className="mt-4 px-6 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700"
                       >
-                        ✓ Verify ID Documents
+                        ? Verify ID Documents
                       </button>
                     )}
                   </div>
@@ -794,6 +799,7 @@ const AdminDashboard: React.FC = () => {
                             <img
                               src={doc.url}
                               alt={doc.type}
+                              onError={handleImageError}
                               className="w-full h-32 object-cover rounded cursor-pointer hover:opacity-90"
                               onClick={() => window.open(doc.url, '_blank')}
                             />
@@ -813,25 +819,25 @@ const AdminDashboard: React.FC = () => {
                       <div>
                         <span className="text-gray-600">Phone:</span>{' '}
                         <span className={documents.phoneVerified ? 'text-green-600' : 'text-gray-400'}>
-                          {documents.phoneVerified ? '✓ Verified' : '○ Not verified'}
+                          {documents.phoneVerified ? '? Verified' : '? Not verified'}
                         </span>
                       </div>
                       <div>
                         <span className="text-gray-600">Email:</span>{' '}
                         <span className={documents.emailVerified ? 'text-green-600' : 'text-gray-400'}>
-                          {documents.emailVerified ? '✓ Verified' : '○ Not verified'}
+                          {documents.emailVerified ? '? Verified' : '? Not verified'}
                         </span>
                       </div>
                       <div>
                         <span className="text-gray-600">ID:</span>{' '}
                         <span className={documents.idVerified ? 'text-green-600' : 'text-gray-400'}>
-                          {documents.idVerified ? '✓ Verified' : '○ Not verified'}
+                          {documents.idVerified ? '? Verified' : '? Not verified'}
                         </span>
                       </div>
                       <div>
                         <span className="text-gray-600">Selfie:</span>{' '}
                         <span className={documents.selfieVerified ? 'text-green-600' : 'text-gray-400'}>
-                          {documents.selfieVerified ? '✓ Verified' : '○ Not verified'}
+                          {documents.selfieVerified ? '? Verified' : '? Not verified'}
                         </span>
                       </div>
                       <div className="col-span-2 mt-2 pt-2 border-t border-blue-200">
@@ -866,6 +872,7 @@ const AdminDashboard: React.FC = () => {
 };
 
 export default AdminDashboard;
+
 
 
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { adminApiRequest } from "../config/api";
+import { handleImageError } from "../utils/imageFallback";
 import {
   CheckCircle,
   XCircle,
@@ -347,6 +348,7 @@ const AdminIDVerification: React.FC = () => {
                       <img
                         src={selectedVerification.idDocumentUrl}
                         alt="ID Document"
+                        onError={handleImageError}
                         className="w-full max-h-80 object-contain"
                       />
                     ) : (
@@ -364,6 +366,7 @@ const AdminIDVerification: React.FC = () => {
                       <img
                         src={selectedVerification.selfieUrl}
                         alt="Selfie"
+                        onError={handleImageError}
                         className="w-full max-h-80 object-contain"
                       />
                     ) : (

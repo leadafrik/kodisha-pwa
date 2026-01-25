@@ -6,6 +6,7 @@ import ReportModal from "../components/ReportModal";
 import { API_ENDPOINTS, API_BASE_URL, adminApiRequest } from "../config/api";
 import { io, Socket } from "socket.io-client";
 import { favoritesService } from "../services/favoritesService";
+import { handleImageError } from "../utils/imageFallback";
 
 // Helper: Get auth token (user or admin)
 const getAuthToken = (): string | null => {
@@ -635,9 +636,7 @@ const ListingDetails: React.FC = () => {
                   src={mainImage || listing.images[0]}
                   alt="Listing main"
                   className="w-full h-96 object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x600?text=Image+Not+Available';
-                  }}
+                  onError={handleImageError}
                 />
               </div>
               <div className="grid grid-cols-4 gap-2">
@@ -653,9 +652,7 @@ const ListingDetails: React.FC = () => {
                       src={img} 
                       alt={`Thumbnail ${i + 1}`} 
                       className="w-full h-full object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/200x200?text=No+Image';
-                      }}
+                      onError={handleImageError}
                     />
                   </button>
                 ))}
@@ -789,7 +786,12 @@ const ListingDetails: React.FC = () => {
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-lg font-bold text-gray-700 overflow-hidden">
                 {owner.profilePicture ? (
-                  <img src={owner.profilePicture} alt={owner.fullName || owner.name} className="w-full h-full object-cover" />
+                  <img
+                    src={owner.profilePicture}
+                    alt={owner.fullName || owner.name}
+                    onError={handleImageError}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   <span className="text-white">{owner.name ? owner.name[0].toUpperCase() : (owner.fullName ? owner.fullName[0].toUpperCase() : 'S')}</span>
                 )}

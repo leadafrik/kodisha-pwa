@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useProperties } from "../contexts/PropertyContext";
 import { useAuth } from "../contexts/AuthContext";
 import { kenyaCounties } from "../data/kenyaCounties";
+import { handleImageError } from "../utils/imageFallback";
 import { Search, Filter } from "lucide-react";
 
 type Category = "all" | "produce" | "livestock" | "inputs" | "service";
@@ -549,6 +550,7 @@ const BrowseListings: React.FC = () => {
                     <img
                       src={card.image}
                       alt={card.title}
+                      onError={handleImageError}
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (

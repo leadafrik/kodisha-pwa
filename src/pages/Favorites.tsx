@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getAuthToken } from '../utils/auth';
 import { Link } from 'react-router-dom';
 import { favoritesService } from '../services/favoritesService';
+import { handleImageError } from '../utils/imageFallback';
 
 interface FavoriteItem {
   listingId: string;
@@ -64,7 +65,12 @@ const Favorites: React.FC = () => {
           return (
             <Link key={item.listingId} to={`/listings/${item.listingId}`} className="group border rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition">
               <div className="h-40 bg-gray-100 overflow-hidden">
-                <img src={image} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition" />
+                <img
+                  src={image}
+                  alt={title}
+                  onError={handleImageError}
+                  className="w-full h-full object-cover group-hover:scale-105 transition"
+                />
               </div>
               <div className="p-4 space-y-2">
                 <div className="flex justify-between items-center">

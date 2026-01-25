@@ -7,6 +7,7 @@ import {
   PendingProfile,
   SellerDocuments,
 } from '../../services/adminVerificationService';
+import { handleImageError } from "../../utils/imageFallback";
 
 const AdminProfileVerification: React.FC = () => {
   const [profiles, setProfiles] = useState<PendingProfile[]>([]);
@@ -229,6 +230,7 @@ const AdminProfileVerification: React.FC = () => {
                           <img
                             src={documents.idDocuments.idFront}
                             alt="ID Front"
+                            onError={handleImageError}
                             className="w-full h-40 object-cover rounded border border-gray-300"
                           />
                         </a>
@@ -248,6 +250,7 @@ const AdminProfileVerification: React.FC = () => {
                           <img
                             src={documents.idDocuments.idBack}
                             alt="ID Back"
+                            onError={handleImageError}
                             className="w-full h-40 object-cover rounded border border-gray-300"
                           />
                         </a>
@@ -267,6 +270,7 @@ const AdminProfileVerification: React.FC = () => {
                           <img
                             src={documents.idDocuments.selfie}
                             alt="Selfie"
+                            onError={handleImageError}
                             className="w-full h-40 object-cover rounded border border-gray-300"
                           />
                         </a>

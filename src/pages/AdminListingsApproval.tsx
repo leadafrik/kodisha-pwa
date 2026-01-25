@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { API_ENDPOINTS, adminApiRequest } from "../config/api";
 import { CheckCircle, XCircle, AlertCircle, Eye, MapPin } from "lucide-react";
+import { handleImageError } from "../utils/imageFallback";
 
 interface PendingListing {
   _id: string;
@@ -171,6 +172,7 @@ const AdminListingsApproval: React.FC = () => {
                     <img
                       src={listing.images[0]}
                       alt={listing.title}
+                      onError={handleImageError}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -255,7 +257,7 @@ const AdminListingsApproval: React.FC = () => {
                     onClick={() => setSelectedListing(null)}
                     className="text-gray-500 hover:text-gray-700 text-2xl"
                   >
-                    ×
+                    x
                   </button>
                 </div>
               </div>
@@ -268,12 +270,7 @@ const AdminListingsApproval: React.FC = () => {
                     <h3 className="font-bold text-gray-900">Images</h3>
                     <div className="grid grid-cols-3 gap-3">
                       {selectedListing.images.map((img, idx) => (
-                        <img
-                          key={idx}
-                          src={img}
-                          alt="Listing"
-                          className="w-full h-32 object-cover rounded-lg"
-                        />
+                        <img key={idx} src={img} alt="Listing" onError={handleImageError} className="w-full h-32 object-cover rounded-lg" />
                       ))}
                     </div>
                   </div>
@@ -372,3 +369,4 @@ const AdminListingsApproval: React.FC = () => {
 };
 
 export default AdminListingsApproval;
+

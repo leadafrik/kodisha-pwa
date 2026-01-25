@@ -2,6 +2,7 @@ import React from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { Heart, X } from 'lucide-react';
+import { handleImageError } from "../utils/imageFallback";
 
 const WishlistPage: React.FC = () => {
   // Fetch wishlist
@@ -59,6 +60,7 @@ const WishlistPage: React.FC = () => {
                   <img
                     src={item.listing.images[0]}
                     alt={item.listing.title}
+                    onError={handleImageError}
                     className="w-full h-full object-cover hover:scale-110 transition-transform"
                   />
                   <button

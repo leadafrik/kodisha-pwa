@@ -83,11 +83,7 @@ const Profile: React.FC = () => {
   } = user?.verification || {};
 
   const verificationItems = [
-    { label: "Phone verified", value: verificationDetails.phoneVerified ?? false },
     { label: "ID verified", value: verificationDetails.idVerified ?? false },
-    { label: "Selfie verified", value: verificationDetails.selfieVerified ?? false },
-    { label: "Ownership verified", value: verificationDetails.ownershipVerified ?? false },
-    { label: "Business verified", value: verificationDetails.businessVerified ?? false },
   ];
 
   return (
@@ -153,7 +149,7 @@ const Profile: React.FC = () => {
             </p>
           </div>
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm md:col-span-2">
-            <p className="text-xs font-semibold text-emerald-700 uppercase mb-3">Verification checklist</p>
+            <p className="text-xs font-semibold text-emerald-700 uppercase mb-3">Verification status</p>
             <div className="grid sm:grid-cols-2 gap-2">
               {verificationItems.map((item) => (
                 <div key={item.label} className="flex items-center gap-2 text-sm text-slate-900">
@@ -256,7 +252,7 @@ const Profile: React.FC = () => {
           </Link>
           {user.type === "admin" && (
             <Link
-              to="/admin/dashboard"
+              to="/admin"
               className="bg-red-600 text-white p-6 rounded-xl hover:bg-red-700 transition duration-300 text-center"
             >
               <div className="font-semibold text-lg">Admin Panel</div>

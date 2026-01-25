@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE_URL } from '../config/api';
 import * as Sentry from '@sentry/react';
+import { handleImageError } from "../utils/imageFallback";
 
 interface BuyerRequest {
   _id: string;
@@ -351,6 +352,7 @@ const BuyerRequestDetails: React.FC = () => {
                           key={idx}
                           src={image}
                           alt={`Request ${idx + 1}`}
+                          onError={handleImageError}
                           className="rounded-lg max-h-48 object-cover"
                         />
                       ))}

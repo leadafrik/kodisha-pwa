@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { API_BASE_URL } from "../config/api";
 import { Upload, CheckCircle, AlertCircle, Shield } from "lucide-react";
+import { handleImageError } from "../utils/imageFallback";
 
 const IDVerificationUpload: React.FC = () => {
   const { user } = useAuth();
@@ -11,6 +12,10 @@ const IDVerificationUpload: React.FC = () => {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [latestVerification, setLatestVerification] = useState<{
+    status?: string;
+    submittedAt?: string;
+  } | null>(null);
 
   try {
     if (!user) {
@@ -35,6 +40,26 @@ const IDVerificationUpload: React.FC = () => {
       setError("");
       if (type === "id") setIdFile(file);
       else setSelfieFile(file);
+    }
+  };
+
+  const loadLatestStatus = async () => {
+    try {
+      const token = localStorage.getItem("kodisha_token");
+      const response = await fetch(`${API_BASE_URL}/verification/id/status`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (response.ok && data?.verification) {
+        setLatestVerification({
+          status: data.verification.status,
+          submittedAt: data.verification.submittedAt,
+        });
+      }
+    } catch {
+      setLatestVerification(null);
     }
   };
 
@@ -71,6 +96,7 @@ const IDVerificationUpload: React.FC = () => {
       setSuccess(
         "Documents submitted successfully! Admin review typically takes 1-2 business days."
       );
+      await loadLatestStatus();
       setStep("submitted");
       setIdFile(null);
       setSelfieFile(null);
@@ -198,6 +224,7 @@ const IDVerificationUpload: React.FC = () => {
                       <img
                         src={URL.createObjectURL(idFile)}
                         alt="ID Preview"
+                        onError={handleImageError}
                         className="w-full max-h-48 object-contain mx-auto mb-4"
                       />
                       <button
@@ -247,6 +274,7 @@ const IDVerificationUpload: React.FC = () => {
                       <img
                         src={URL.createObjectURL(selfieFile)}
                         alt="Selfie Preview"
+                        onError={handleImageError}
                         className="w-full max-h-48 object-contain mx-auto mb-4"
                       />
                       <button
@@ -310,6 +338,7 @@ const IDVerificationUpload: React.FC = () => {
                   <img
                     src={URL.createObjectURL(idFile)}
                     alt="ID"
+                    onError={handleImageError}
                     className="w-full max-h-64 object-contain rounded-lg border border-gray-200"
                   />
                 </div>
@@ -321,6 +350,7 @@ const IDVerificationUpload: React.FC = () => {
                   <img
                     src={URL.createObjectURL(selfieFile)}
                     alt="Selfie"
+                    onError={handleImageError}
                     className="w-full max-h-64 object-contain rounded-lg border border-gray-200"
                   />
                 </div>
@@ -366,6 +396,20 @@ const IDVerificationUpload: React.FC = () => {
                 Your identity documents have been received. Our admin team will review them within
                 1-2 business days. You'll be notified once verification is complete.
               </p>
+              {latestVerification && (
+                <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 text-sm text-slate-700">
+                  <p>
+                    <span className="font-semibold text-slate-900">Status:</span>{" "}
+                    {latestVerification.status?.replace(/_/g, " ") || "pending"}
+                  </p>
+                  {latestVerification.submittedAt && (
+                    <p className="mt-1">
+                      <span className="font-semibold text-slate-900">Submitted:</span>{" "}
+                      {new Date(latestVerification.submittedAt).toLocaleString()}
+                    </p>
+                  )}
+                </div>
+              )}
               <button
                 onClick={() => setStep("info")}
                 className="px-6 py-3 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition"
