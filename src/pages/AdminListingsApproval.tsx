@@ -294,8 +294,7 @@ const AdminListingsApproval: React.FC = () => {
                     <div className="grid grid-cols-3 gap-3">
                       {getListingImages(selectedListing).map((img, idx) => (
                         <img key={idx} src={img} alt="Listing" onError={handleImageError} className="w-full h-32 object-cover rounded-lg" />
-                      );
-            })}
+                      ))}
                     </div>
                   </div>
                 )}
