@@ -30,6 +30,13 @@ const getSocketUrl = (): string => {
 
   // Use explicit env var if set
   if (process.env.REACT_APP_SOCKET_URL) {
+    if (
+      typeof window !== 'undefined' &&
+      !['localhost', '127.0.0.1'].includes(window.location.hostname) &&
+      process.env.REACT_APP_SOCKET_URL.includes('localhost')
+    ) {
+      return getApiBaseUrl().replace(/\/api$/, '');
+    }
     return process.env.REACT_APP_SOCKET_URL;
   }
 

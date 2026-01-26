@@ -4,6 +4,7 @@ import React, {
   useContext,
   useState,
   useEffect,
+  useRef,
   ReactNode,
 } from "react";
 import { User, AuthContextType, UserFormData } from "../types/property";
@@ -80,6 +81,9 @@ const mapBackendUserToFrontendUser = (apiUser: any): User => {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
+  const refreshInFlightRef = useRef<Promise<User | null> | null>(null);
+  const lastRefreshAtRef = useRef(0);
+  const REFRESH_COOLDOWN_MS = 30 * 1000;
 
   const login = async (identifier: string, password: string) => {
     setLoading(true);
@@ -346,18 +350,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const refreshUser = async () => {
-    try {
-      const res: any = await apiRequest(API_ENDPOINTS.auth.me);
-      if (res.success && res.user) {
-        const mappedUser = mapBackendUserToFrontendUser(res.user);
-        setUser(mappedUser);
-        localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
-        return mappedUser;
-      }
-    } catch (err) {
-      console.error("Failed to refresh user:", err);
+    const now = Date.now();
+    if (refreshInFlightRef.current) {
+      return refreshInFlightRef.current;
     }
-    return null;
+    if (now - lastRefreshAtRef.current < REFRESH_COOLDOWN_MS) {
+      return user;
+    }
+    lastRefreshAtRef.current = now;
+
+    const request = (async () => {
+      try {
+        const res: any = await apiRequest(API_ENDPOINTS.auth.me);
+        if (res.success && res.user) {
+          const mappedUser = mapBackendUserToFrontendUser(res.user);
+          setUser(mappedUser);
+          localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
+          return mappedUser;
+        }
+      } catch (err) {
+        console.error("Failed to refresh user:", err);
+      }
+      return null;
+    })();
+
+    refreshInFlightRef.current = request;
+    try {
+      return await request;
+    } finally {
+      refreshInFlightRef.current = null;
+    }
   };
 
   const updateProfile = (userData: Partial<User>) => {
