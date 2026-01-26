@@ -193,8 +193,8 @@ const AdminDashboard: React.FC = () => {
       setError(null);
       const [statsData, pendingData, approvedData] = await Promise.all([
         adminApiRequest(API_ENDPOINTS.admin.dashboard),
-        adminApiRequest(API_ENDPOINTS.admin.listings.getPending),
-        adminApiRequest(API_ENDPOINTS.admin.listings.getApproved),
+        adminApiRequest(`${API_ENDPOINTS.admin.listings.getPending}?limit=50`),
+        adminApiRequest(`${API_ENDPOINTS.admin.listings.getApproved}?limit=50`),
       ]);
 
       if (statsData?.success !== false) {
