@@ -59,6 +59,8 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
         throw new Error('Facebook Auth not initialized');
       }
 
+      const { user, accessToken } = await facebookAuth.login();
+
       if (!user.email) {
         throw new Error('Facebook account must have email');
       }

@@ -59,6 +59,8 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
         throw new Error("Google Auth not initialized");
       }
 
+      const { user, idToken } = await googleAuth.signIn();
+
       if (!user.email) {
         throw new Error("Google account must have email");
       }
