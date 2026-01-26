@@ -10,6 +10,7 @@ interface PendingListing {
   description: string;
   category: string;
   price?: number;
+  contact?: string;
   location?: {
     county: string;
     constituency: string;
