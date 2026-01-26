@@ -17,8 +17,8 @@ const PostBuyRequest: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-2xl mx-auto px-4">
+    <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-slate-50 py-10">
+      <div className="max-w-3xl mx-auto px-4">
         <CreateBuyerRequest onSuccess={handleSuccess} onCancel={handleCancel} />
       </div>
     </div>
