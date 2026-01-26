@@ -25,11 +25,26 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
   const [isInitialized, setIsInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const getFacebookAppId = () => {
+    const fromEnv = process.env.REACT_APP_FACEBOOK_APP_ID;
+    if (fromEnv) return fromEnv;
+    if (typeof window !== 'undefined') {
+      const win: any = window;
+      return (
+        win.REACT_APP_FACEBOOK_APP_ID ||
+        win.__ENV__?.REACT_APP_FACEBOOK_APP_ID ||
+        win.FACEBOOK_APP_ID ||
+        ''
+      );
+    }
+    return '';
+  };
+
   // Initialize Facebook Auth on component mount
   useEffect(() => {
     const initFacebook = async () => {
       try {
-        const appId = process.env.REACT_APP_FACEBOOK_APP_ID;
+        const appId = getFacebookAppId();
 
         if (!appId) {
           setError('Facebook configuration missing');
@@ -56,7 +71,7 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
 
     try {
       if (!isInitialized || !facebookAuth.isInitialized()) {
-        const appId = process.env.REACT_APP_FACEBOOK_APP_ID;
+        const appId = getFacebookAppId();
         if (!appId) {
           throw new Error('Facebook configuration missing');
         }

@@ -25,11 +25,26 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
   const [isInitialized, setIsInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const getGoogleClientId = () => {
+    const fromEnv = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+    if (fromEnv) return fromEnv;
+    if (typeof window !== "undefined") {
+      const win: any = window;
+      return (
+        win.REACT_APP_GOOGLE_CLIENT_ID ||
+        win.__ENV__?.REACT_APP_GOOGLE_CLIENT_ID ||
+        win.GOOGLE_CLIENT_ID ||
+        ""
+      );
+    }
+    return "";
+  };
+
   // Initialize Google Auth on component mount
   useEffect(() => {
     const initGoogle = async () => {
       try {
-        const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+        const clientId = getGoogleClientId();
 
         if (!clientId) {
           setError("Google configuration missing");
@@ -56,7 +71,7 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
 
     try {
       if (!isInitialized || !googleAuth.isInitialized()) {
-        const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+        const clientId = getGoogleClientId();
         if (!clientId) {
           throw new Error("Google configuration missing");
         }
