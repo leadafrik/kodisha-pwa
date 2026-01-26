@@ -364,6 +364,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem("kodisha_token");
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const refreshUser = useCallback(async () => {
     const now = Date.now();
     if (refreshInFlightRef.current) {
@@ -395,7 +396,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       refreshInFlightRef.current = null;
     }
-  }, [user]);
+  }, []);
 
   const updateProfile = (userData: Partial<User>) => {
     if (user) {
@@ -415,7 +416,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (e) {
       console.error("Failed to load saved user", e);
     }
-  }, [refreshUser]);
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("kodisha_token");
