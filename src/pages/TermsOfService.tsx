@@ -46,7 +46,7 @@ const TermsOfService: React.FC = () => {
               Back
             </button>
             <h1 className="text-3xl font-bold text-white">Terms of Service</h1>
-            <p className="text-green-50 mt-2">Kodisha Limited - Agricultural Marketplace Platform</p>
+            <p className="text-green-50 mt-2">Agrisoko Limited - Agricultural Marketplace Platform</p>
           </div>
 
           {/* Content */}
@@ -64,11 +64,8 @@ const TermsOfService: React.FC = () => {
               </p>
             </div>
             <div className="mt-4 flex flex-wrap gap-4 text-sm">
-              <a href="mailto:legal@kodisha.co.ke" className="text-green-600 hover:text-green-700 font-semibold">
-                📧 legal@kodisha.co.ke
-              </a>
-              <a href="mailto:support@kodisha.co.ke" className="text-green-600 hover:text-green-700 font-semibold">
-                💬 support@kodisha.co.ke
+              <a href="mailto:info@leadafrik.com" className="text-green-600 hover:text-green-700 font-semibold">
+                info@leadafrik.com
               </a>
             </div>
           </div>
@@ -79,3 +76,5 @@ const TermsOfService: React.FC = () => {
 };
 
 export default TermsOfService;
+
+
