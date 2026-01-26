@@ -107,11 +107,6 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
     }
   };
 
-  if (error && !isInitialized) {
-    // Silent fail - show nothing if not initialized
-    return null;
-  }
-
   return (
     <button
       type="button"
