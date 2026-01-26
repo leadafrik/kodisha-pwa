@@ -55,5 +55,15 @@ registerServiceWorker({
   },
   onUpdate: (registration) => {
     console.log('Service Worker updated:', registration);
+    try {
+      const reloaded = sessionStorage.getItem('sw-reloaded');
+      if (!reloaded) {
+        sessionStorage.setItem('sw-reloaded', '1');
+        registration.waiting?.postMessage({ type: 'SKIP_WAITING' });
+        window.location.reload();
+      }
+    } catch {
+      window.location.reload();
+    }
   }
 });

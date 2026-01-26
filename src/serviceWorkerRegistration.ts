@@ -18,6 +18,24 @@ export function register(config?: Config) {
       .register('/service-worker.js')
       .then(reg => {
         if (config?.onSuccess) config.onSuccess(reg);
+
+        if (reg.waiting && config?.onUpdate) {
+          config.onUpdate(reg);
+        }
+
+        reg.onupdatefound = () => {
+          const installing = reg.installing;
+          if (!installing) return;
+          installing.onstatechange = () => {
+            if (installing.state === 'installed') {
+              if (navigator.serviceWorker.controller) {
+                if (config?.onUpdate) config.onUpdate(reg);
+              } else if (config?.onSuccess) {
+                config.onSuccess(reg);
+              }
+            }
+          };
+        };
       })
       .catch(() => {
         /* silent */
