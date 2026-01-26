@@ -435,7 +435,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     window.addEventListener("focus", handleFocus);
     return () => window.removeEventListener("focus", handleFocus);
-  }, [refreshUser]);
+  }, []);
 
   return (
     <AuthContext.Provider
