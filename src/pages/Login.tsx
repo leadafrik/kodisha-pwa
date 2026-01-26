@@ -6,7 +6,7 @@ import GoogleLoginButton from "../components/GoogleLoginButtonV2";
 import FacebookLoginButton from "../components/FacebookLoginButtonV2";
 import { LegalConsents } from "../types/property";
 import { ErrorAlert } from "../components/ui";
-import { validateEmail, validatePassword, validatePasswordMatch, validateName, validateEmailOrPhone } from "../utils/formValidation";
+import { validatePassword, validatePasswordMatch, validateName, validateEmailOrPhone } from "../utils/formValidation";
 
 type Mode = "login" | "signup" | "otp-verify" | "forgot" | "otp-reset";
 
