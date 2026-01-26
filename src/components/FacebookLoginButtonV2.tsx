@@ -147,6 +147,7 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
       ) : (
         <span>Continue with Facebook</span>
       )}
+      {error ? <span className="sr-only">{error}</span> : null}
     </button>
   );
 };

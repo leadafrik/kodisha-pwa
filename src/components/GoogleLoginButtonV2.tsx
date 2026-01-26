@@ -161,6 +161,7 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
       ) : (
         <span>Continue with Google</span>
       )}
+      {error ? <span className="sr-only">{error}</span> : null}
     </button>
   );
 };
