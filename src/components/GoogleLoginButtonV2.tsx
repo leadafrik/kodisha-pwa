@@ -28,7 +28,9 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
     const initGoogle = async () => {
       try {
         const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-        await googleAuth.init(clientId);
+        if (clientId) {
+          await googleAuth.init(clientId);
+        }
       } catch (err) {
         console.error("[GoogleLoginButton] Init error:", err);
       }

@@ -28,7 +28,9 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
     const initFacebook = async () => {
       try {
         const appId = process.env.REACT_APP_FACEBOOK_APP_ID;
-        await facebookAuth.init(appId);
+        if (appId) {
+          await facebookAuth.init(appId);
+        }
       } catch (err) {
         console.error('[FacebookLoginButton] Init error:', err);
       }
