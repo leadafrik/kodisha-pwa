@@ -91,7 +91,6 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
         err instanceof Error ? err.message : 'Facebook sign-in failed';
 
       console.error('[FacebookLoginButton] Sign-in error:', errorMessage);
-      setError(errorMessage);
 
       if (onError) {
         onError(errorMessage);

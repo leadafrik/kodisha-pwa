@@ -91,7 +91,6 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
         err instanceof Error ? err.message : "Google sign-in failed";
 
       console.error("[GoogleLoginButton] Sign-in error:", errorMessage);
-      setError(errorMessage);
 
       if (onError) {
         onError(errorMessage);
