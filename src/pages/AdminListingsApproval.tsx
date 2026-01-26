@@ -17,9 +17,10 @@ interface PendingListing {
   };
   owner?: {
     _id: string;
-    fullName: string;
-    email: string;
-    phone: string;
+    fullName?: string;
+    name?: string;
+    email?: string;
+    phone?: string;
   };
   images?: string[];
   createdAt: string;
@@ -241,12 +242,12 @@ const AdminListingsApproval: React.FC = () => {
 
                     {/* Seller Info */}
                     {listing.owner && (
-                      <div className="bg-gray-50 p-3 rounded-lg mb-3 text-sm">
-                        <p className="font-semibold text-gray-900">{listing.owner.fullName}</p>
-                        <p className="text-gray-600">{listing.owner.email}</p>
-                        <p className="text-gray-600">{listing.owner.phone}</p>
-                      </div>
-                    )}
+                    <div className="bg-gray-50 p-3 rounded-lg mb-3 text-sm">
+                      <p className="font-semibold text-gray-900">{listing.owner.fullName || listing.owner.name || "Unknown"}</p>
+                      <p className="text-gray-600">{listing.owner.email || "Not provided"}</p>
+                      <p className="text-gray-600">{listing.owner.phone || listing.contact || "Not provided"}</p>
+                    </div>
+                  )}
 
                     {/* Actions */}
                     <button
@@ -336,9 +337,9 @@ const AdminListingsApproval: React.FC = () => {
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <h3 className="font-bold text-gray-900 mb-3">Seller Information</h3>
                     <div className="space-y-2">
-                      <p className="text-sm"><span className="text-gray-600">Name:</span> <span className="font-semibold">{selectedListing.owner.fullName}</span></p>
-                      <p className="text-sm"><span className="text-gray-600">Email:</span> <span className="font-semibold">{selectedListing.owner.email}</span></p>
-                      <p className="text-sm"><span className="text-gray-600">Phone:</span> <span className="font-semibold">{selectedListing.owner.phone}</span></p>
+                      <p className="text-sm"><span className="text-gray-600">Name:</span> <span className="font-semibold">{selectedListing.owner.fullName || selectedListing.owner.name || "Unknown"}</span></p>
+                      <p className="text-sm"><span className="text-gray-600">Email:</span> <span className="font-semibold">{selectedListing.owner.email || "Not provided"}</span></p>
+                      <p className="text-sm"><span className="text-gray-600">Phone:</span> <span className="font-semibold">{selectedListing.owner.phone || selectedListing.contact || "Not provided"}</span></p>
                     </div>
                   </div>
                 )}
