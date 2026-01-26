@@ -225,6 +225,8 @@ export interface User {
     ownershipVerified: boolean;
     businessVerified: boolean;
     trustScore: number;
+    idVerificationPending?: boolean;
+    idVerificationSubmitted?: boolean;
     verificationLevel: "basic" | "verified" | "premium";
   };
 }
