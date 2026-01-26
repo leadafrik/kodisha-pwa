@@ -22,6 +22,7 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
 }) => {
   const { loginWithGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialize Google Auth on component mount
   useEffect(() => {
@@ -35,6 +36,7 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
         }
 
         await googleAuth.init(clientId);
+        setIsInitialized(true);
       } catch (err) {
         const message =
           err instanceof Error ? err.message : "Failed to initialize Google Auth";
@@ -49,7 +51,7 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
     setIsLoading(true);
 
     try {
-      if (!googleAuth.isInitialized()) {
+      if (!isInitialized || !googleAuth.isInitialized()) {
         throw new Error("Google Auth not initialized");
       }
 
@@ -99,6 +101,10 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
       setIsLoading(false);
     }
   };
+
+  if (!isInitialized) {
+    return null;
+  }
 
   return (
     <button

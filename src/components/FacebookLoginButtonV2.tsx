@@ -22,6 +22,7 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
 }) => {
   const { loginWithFacebook } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialize Facebook Auth on component mount
   useEffect(() => {
@@ -35,6 +36,7 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
         }
 
         await facebookAuth.init(appId);
+        setIsInitialized(true);
       } catch (err) {
         const message =
           err instanceof Error ? err.message : 'Failed to initialize Facebook Auth';
@@ -49,7 +51,7 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
     setIsLoading(true);
 
     try {
-      if (!facebookAuth.isInitialized()) {
+      if (!isInitialized || !facebookAuth.isInitialized()) {
         throw new Error('Facebook Auth not initialized');
       }
 
@@ -99,6 +101,10 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
       setIsLoading(false);
     }
   };
+
+  if (!isInitialized) {
+    return null;
+  }
 
   return (
     <button
