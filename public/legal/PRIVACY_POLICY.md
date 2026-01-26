@@ -4,7 +4,7 @@
 
 ## INTRODUCTION
 
-Mamamboga Digital Limited ("Mamamboga Digital," "we," "us," or "our"), a company registered under the laws of the Republic of Kenya, respects your privacy and is committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform, including our website and mobile application (collectively, the "Platform").
+Agrisoko Limited ("Agrisoko," "we," "us," or "our"), a company registered under the laws of the Republic of Kenya, respects your privacy and is committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform, including our website and mobile application (collectively, the "Platform").
 
 **This Privacy Policy complies with the Data Protection Act, 2019 (Kenya) and is incorporated into our Terms of Service.**
 
@@ -18,7 +18,7 @@ As per the Data Protection Act, 2019:
 
 - **"Personal Data"** means any information relating to an identified or identifiable natural person.
 - **"Processing"** means any operation performed on personal data, including collection, recording, storage, use, disclosure, or deletion.
-- **"Data Controller"** means Mamamboga Digital Limited, which determines the purposes and means of processing personal data.
+- **"Data Controller"** means Agrisoko Limited, which determines the purposes and means of processing personal data.
 - **"Data Subject"** means you, the individual whose personal data we process.
 - **"Sensitive Personal Data"** includes data revealing tribe, health, biometric data, financial information, and criminal records.
 
@@ -27,7 +27,7 @@ As per the Data Protection Act, 2019:
 ## 2. DATA CONTROLLER INFORMATION
 
 **Data Controller:**  
-Mamamboga Digital Limited  
+Agrisoko Limited  
 Registered Office: Kenya  
 Email: kodisha.254.ke@gmail.com  
 Phone/WhatsApp: +254796389192
@@ -486,7 +486,7 @@ If you access the Platform from outside Kenya:
 
 ## 15. BUSINESS TRANSFERS
 
-If Mamamboga Digital is involved in a merger, acquisition, asset sale, or bankruptcy, your personal data may be transferred to the successor entity. We will notify you before your data is transferred and becomes subject to a different privacy policy.
+If Agrisoko is involved in a merger, acquisition, asset sale, or bankruptcy, your personal data may be transferred to the successor entity. We will notify you before your data is transferred and becomes subject to a different privacy policy.
 
 ---
 
@@ -501,7 +501,7 @@ For high-risk processing activities (e.g., large-scale profiling, sensitive data
 For questions, requests, or complaints regarding this Privacy Policy or our data practices:
 
 **Data Protection Officer:**  
-Mamamboga Digital Limited  
+Agrisoko Limited  
 Email: kodisha.254.ke@gmail.com  
 Phone/WhatsApp: +254796389192  
 Registered Office: Kenya
@@ -555,3 +555,4 @@ By using the Platform, you acknowledge that:
 ---
 
 *Payments and any fee-based data processing features are currently inactive. We will provide advance notice before activation.*
+

@@ -53,10 +53,24 @@ const mapBackendUserToFrontendUser = (apiUser: any): User => {
     ? "verified"
     : "pending";
   const rawVerification = apiUser.verification || {};
+  const verificationStatusValue = String(rawVerification.status || "").toLowerCase();
+  const hasPendingStatus = ["pending", "submitted", "in_review", "under_review"].includes(
+    verificationStatusValue
+  );
+  const isApprovedStatus = ["approved", "verified"].includes(verificationStatusValue);
+  const isFullyVerified = !!apiUser.isVerified || isApprovedStatus;
   const normalizedVerification = {
     ...rawVerification,
-    idVerified: !!rawVerification.idVerified || !!rawVerification.selfieVerified,
-    selfieVerified: !!rawVerification.selfieVerified || !!rawVerification.idVerified,
+    idVerified:
+      !!rawVerification.idVerified ||
+      !!rawVerification.selfieVerified ||
+      isFullyVerified,
+    selfieVerified:
+      !!rawVerification.selfieVerified ||
+      !!rawVerification.idVerified ||
+      isFullyVerified,
+    idVerificationPending: rawVerification.idVerificationPending ?? hasPendingStatus,
+    idVerificationSubmitted: rawVerification.idVerificationSubmitted ?? hasPendingStatus,
   };
 
   return {

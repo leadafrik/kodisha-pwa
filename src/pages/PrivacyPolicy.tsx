@@ -69,14 +69,11 @@ const PrivacyPolicy: React.FC = () => {
               </p>
             </div>
             <div className="flex flex-wrap gap-4 text-sm">
-              <a href="mailto:dpo@kodisha.co.ke" className="text-blue-600 hover:text-blue-700 font-semibold">
-                📧 Data Protection Officer
-              </a>
-              <a href="mailto:support@kodisha.co.ke" className="text-blue-600 hover:text-blue-700 font-semibold">
-                💬 Support
+              <a href="mailto:info@leadafrik.com" className="text-blue-600 hover:text-blue-700 font-semibold">
+                info@leadafrik.com
               </a>
               <a href="https://www.odpc.go.ke" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 font-semibold">
-                🏛️ Data Protection Commissioner
+                Office of the Data Protection Commissioner
               </a>
             </div>
           </div>
@@ -87,3 +84,4 @@ const PrivacyPolicy: React.FC = () => {
 };
 
 export default PrivacyPolicy;
+
