@@ -4,17 +4,25 @@
  * Includes support for monthly reminder notifications
  */
 
-import { apiRequest } from '../config/api';
+import { API_BASE_URL, apiRequest } from '../config/api';
 
 export interface Notification {
-  id: string;
-  userId: string;
-  type: 'listing_alert' | 'buy_request_alert' | 'message' | 'rating' | 'monthly_reminder' | 'system';
+  _id: string;
+  user: string;
+  type:
+    | 'new_inquiry'
+    | 'new_message'
+    | 'listing_inquiry_response'
+    | 'review_received'
+    | 'listing_sold'
+    | 'listing_expiring'
+    | 'seller_verified'
+    | 'admin_notice';
   title: string;
   message: string;
-  channel: 'in-app' | 'email' | 'push' | 'all';
   read: boolean;
-  createdAt: Date;
+  priority?: 'normal' | 'high' | 'urgent';
+  createdAt: string;
   actionUrl?: string;
 }
 
@@ -108,32 +116,18 @@ export const updateNotificationPreferences = async (
  * Get user's notifications
  */
 export const getNotifications = async (
-  userId: string,
   limit: number = 50,
-  offset: number = 0
+  skip: number = 0,
+  unreadOnly: boolean = false
 ): Promise<Notification[]> => {
   try {
-    const token = localStorage.getItem('kodisha_token') || localStorage.getItem('token');
     const response = await apiRequest(
-      `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/users/${userId}/notifications?limit=${limit}&offset=${offset}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      }
+      `${API_BASE_URL}/notifications?limit=${limit}&skip=${skip}&unread=${unreadOnly}`
     );
-    // API returns { success: true, data: { notifications: [], total: 0, ... } }
-    if (response && response.data && Array.isArray(response.data.notifications)) {
+    if (response?.data?.notifications && Array.isArray(response.data.notifications)) {
       return response.data.notifications;
     }
-    // Fallback for different response structures
-    if (Array.isArray(response)) {
-      return response;
-    }
-    if (response && Array.isArray(response.notifications)) {
-      return response.notifications;
-    }
-    return [];
+    return response?.notifications || [];
   } catch (error) {
     console.error('Failed to fetch notifications:', error);
     return [];
@@ -143,24 +137,27 @@ export const getNotifications = async (
 /**
  * Mark a notification as read
  */
-export const markNotificationAsRead = async (
-  userId: string,
-  notificationId: string
-): Promise<void> => {
+export const markNotificationAsRead = async (notificationId: string): Promise<void> => {
   try {
-    const token = localStorage.getItem('kodisha_token') || localStorage.getItem('token');
-    await apiRequest(
-      `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/users/${userId}/notifications/${notificationId}/read`,
-      {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      }
-    );
+    await apiRequest(`${API_BASE_URL}/notifications/${notificationId}/read`, {
+      method: 'PATCH',
+    });
   } catch (error) {
     console.error('Failed to mark notification as read:', error);
     // Don't throw - this is non-critical
+  }
+};
+
+/**
+ * Get unread count
+ */
+export const getUnreadCount = async (): Promise<number> => {
+  try {
+    const response = await apiRequest(`${API_BASE_URL}/notifications/unread/count`);
+    return response?.data?.unreadCount ?? response?.unreadCount ?? 0;
+  } catch (error) {
+    console.error('Failed to fetch unread count:', error);
+    return 0;
   }
 };
 

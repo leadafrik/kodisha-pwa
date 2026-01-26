@@ -11,6 +11,8 @@ import {
   requestNotificationPermission,
   subscribeToPushNotifications,
 } from '../services/notificationService';
+import { io, Socket } from 'socket.io-client';
+import { SOCKET_URL } from '../config/api';
 
 interface NotificationsContextType {
   notifications: Notification[];
@@ -32,6 +34,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [preferences, setPreferences] = useState<NotificationPreferences | null>(null);
   const [loading, setLoading] = useState(false);
+  const socketRef = React.useRef<Socket | null>(null);
 
   // Fetch notifications on user login
   const fetchNotifications = useCallback(async () => {
@@ -39,7 +42,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 
     try {
       setLoading(true);
-      const data = await getNotifications(user.id);
+      const data = await getNotifications(50, 0, false);
       setNotifications(data);
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
@@ -77,10 +80,10 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       if (!user?.id) return;
 
       try {
-        await markNotificationAsRead(user.id, notificationId);
+        await markNotificationAsRead(notificationId);
         setNotifications((prev) =>
           prev.map((notif) =>
-            notif.id === notificationId ? { ...notif, read: true } : notif
+            notif._id === notificationId ? { ...notif, read: true } : notif
           )
         );
       } catch (error) {
@@ -129,6 +132,35 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [user?.id]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
+
+  useEffect(() => {
+    const token = localStorage.getItem('kodisha_token');
+    if (!token || !user?.id) return;
+
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+    }
+
+    const socket = io(SOCKET_URL, {
+      auth: { token },
+      transports: ['websocket'],
+    });
+
+    socket.on('notification:new', (notification: Notification) => {
+      if (!notification?._id) return;
+      setNotifications((prev) => {
+        if (prev.find((n) => n._id === notification._id)) return prev;
+        return [notification, ...prev];
+      });
+    });
+
+    socketRef.current = socket;
+
+    return () => {
+      socket.disconnect();
+      socketRef.current = null;
+    };
+  }, [user?.id]);
 
   return (
     <NotificationsContext.Provider

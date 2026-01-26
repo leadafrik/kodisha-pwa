@@ -8,7 +8,10 @@ const NotificationCenter: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
 
-  const handleMarkAsRead = async (notificationId: string) => {
+  const handleMarkAsRead = async (notificationId: string, actionUrl?: string) => {
+    if (actionUrl) {
+      window.location.href = actionUrl;
+    }
     await markAsRead(notificationId);
   };
 
@@ -54,13 +57,13 @@ const NotificationCenter: React.FC = () => {
                 className="text-sm text-gray-600 hover:text-gray-900 transition"
                 aria-label="Notification settings"
               >
-                ⚙️
+                Settings
               </button>
               <button
                 onClick={() => setIsOpen(false)}
                 className="text-gray-600 hover:text-gray-900"
               >
-                ✕
+                Close
               </button>
             </div>
           </div>
@@ -109,11 +112,13 @@ const NotificationCenter: React.FC = () => {
             <div className="divide-y divide-gray-200">
               {notifications.slice(0, 10).map((notification) => (
                 <div
-                  key={notification.id}
+                  key={notification._id}
                   className={`p-4 hover:bg-gray-50 transition cursor-pointer ${
                     !notification.read ? 'bg-blue-50' : ''
                   }`}
-                  onClick={() => !notification.read && handleMarkAsRead(notification.id)}
+                  onClick={() =>
+                    !notification.read && handleMarkAsRead(notification._id, notification.actionUrl)
+                  }
                 >
                   <div className="flex justify-between items-start gap-2">
                     <div className="flex-1">
@@ -147,7 +152,7 @@ const NotificationCenter: React.FC = () => {
                 href="/profile/notifications"
                 className="text-sm font-semibold text-green-600 hover:text-green-700 transition"
               >
-                View All Notifications →
+                View All Notifications 
               </a>
             </div>
           )}
@@ -177,3 +182,8 @@ const formatTime = (date: Date | string): string => {
 };
 
 export default NotificationCenter;
+
+
+
+
+
