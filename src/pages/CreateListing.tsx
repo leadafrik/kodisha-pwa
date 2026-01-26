@@ -89,6 +89,27 @@ const CreateListing: React.FC = () => {
     hasPendingIdVerification && (!idVerified || !selfieVerified);
   const requiresVerification = (!idVerified || !selfieVerified) && !isVerificationPending;
 
+  /**
+   * Check if user is actually verified in backend
+   */
+  const isUserVerified = () => {
+    const hasIdVerified = user?.verification?.idVerified === true;
+    const hasSelfieVerified = user?.verification?.selfieVerified === true;
+    
+    // Debug log
+    if (user?._id) {
+      console.debug('Verification Check:', {
+        userId: user._id,
+        idVerified: hasIdVerified,
+        selfieVerified: hasSelfieVerified,
+        canList: hasIdVerified && hasSelfieVerified
+      });
+    }
+    
+    // User can list if they have both verification flags
+    return hasIdVerified && hasSelfieVerified;
+  };
+
   // Pre-fill contact
   useEffect(() => {
     if (user?.phone && !form.contact) {
@@ -298,6 +319,13 @@ const CreateListing: React.FC = () => {
     e.preventDefault();
     if (!validateStep() || !user) return;
 
+    // Check if user is actually verified before attempting to create listing
+    if (!isUserVerified()) {
+      setError("Your identity verification is not complete. Please verify your ID and take a selfie in your Profile before creating listings.");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     setUploading(true);
     setError("");
 
@@ -333,7 +361,20 @@ const CreateListing: React.FC = () => {
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        setError(result.message || "Failed to create listing");
+        let errorMsg = result.message || "Failed to create listing";
+        
+        // Provide better error messaging for 403 (verification required)
+        if (response.status === 403) {
+          errorMsg = "Verification required: Please verify your identity (ID + Selfie) in your Profile before creating listings";
+          
+          // Log verification status for debugging
+          console.warn("Verification Status:", {
+            idVerified: user?.verification?.idVerified,
+            selfieVerified: user?.verification?.selfieVerified
+          });
+        }
+        
+        setError(errorMsg);
         setUploading(false);
         return;
       }
