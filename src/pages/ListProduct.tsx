@@ -15,7 +15,7 @@ const formatPrice = (v: number) => `KSh ${v.toLocaleString()}`;
 
 const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }) => {
   const { addProduct } = useProperties();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [category, setCategory] = useState<ProductCategory>(initialCategory);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -51,6 +51,12 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
       setContact(user.phone);
     }
   }, [user, contact]);
+
+  useEffect(() => {
+    if (user?._id) {
+      refreshUser();
+    }
+  }, [user?._id, refreshUser]);
 
   useEffect(() => {
     if (county) {

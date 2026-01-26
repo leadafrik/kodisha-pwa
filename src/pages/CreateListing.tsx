@@ -51,7 +51,7 @@ const DRAFT_STORAGE_KEY = "kodisha_listing_draft_v1";
 
 const CreateListing: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [form, setForm] = useState<ListingFormData>({
     step: 1,
     listingType: null,
@@ -95,6 +95,12 @@ const CreateListing: React.FC = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.phone]);
+
+  useEffect(() => {
+    if (user?._id) {
+      refreshUser();
+    }
+  }, [user?._id, refreshUser]);
 
   // Check for draft on load
   useEffect(() => {

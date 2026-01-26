@@ -143,7 +143,7 @@ const formatKenyanPrice = (value: number) =>
 
 const ListAgrovet: React.FC = () => {
   const { addService } = useProperties();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [formData, setFormData] = useState<AgrovetFormData>({
     name: '',
     description: '',
@@ -204,6 +204,12 @@ const ListAgrovet: React.FC = () => {
     hasPendingIdVerification && (!idVerified || !selfieVerified);
   const idDocsNeeded = !idVerified && !hasPendingIdVerification;
   const selfieNeeded = !selfieVerified && !hasPendingIdVerification;
+
+  useEffect(() => {
+    if (user?._id) {
+      refreshUser();
+    }
+  }, [user?._id, refreshUser]);
   // Update constituencies when county changes
   useEffect(() => {
     if (formData.county) {

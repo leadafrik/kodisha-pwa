@@ -114,7 +114,7 @@ const formatKenyanPrice = (value: number) =>
 
 const ListService: React.FC<ListServiceProps> = ({ initialServiceType }) => {
   const { addService } = useProperties();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [formData, setFormData] = useState<ServiceFormData>({
     type: initialServiceType || "equipment",
     name: "",
@@ -165,6 +165,12 @@ const ListService: React.FC<ListServiceProps> = ({ initialServiceType }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialServiceType]);
+
+  useEffect(() => {
+    if (user?._id) {
+      refreshUser();
+    }
+  }, [user?._id, refreshUser]);
 
   const serviceOptions: Record<ServiceType, string[]> = {
     equipment: [

@@ -116,7 +116,7 @@ const formatKenyanPrice = (value: number) =>
 
 const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
   const { addProperty } = useProperties();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState<PropertyFormData>({
     title: '',
@@ -188,6 +188,12 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
       console.error('Failed to restore draft listing', err);
     }
   }, []);
+
+  useEffect(() => {
+    if (user?._id) {
+      refreshUser();
+    }
+  }, [user?._id, refreshUser]);
 
   // Force rental-only listings (disable sale for now)
   useEffect(() => {
