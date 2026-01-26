@@ -61,6 +61,11 @@ const mapBackendUserToFrontendUser = (apiUser: any): User => {
   const isFullyVerified = !!apiUser.isVerified || isApprovedStatus;
   const normalizedVerification = {
     ...rawVerification,
+    phoneVerified: rawVerification.phoneVerified ?? apiUser.phoneVerified ?? false,
+    ownershipVerified: rawVerification.ownershipVerified ?? false,
+    businessVerified: rawVerification.businessVerified ?? false,
+    trustScore: rawVerification.trustScore ?? 0,
+    verificationLevel: rawVerification.verificationLevel ?? (isFullyVerified ? "verified" : "basic"),
     idVerified:
       !!rawVerification.idVerified ||
       !!rawVerification.selfieVerified ||
