@@ -39,6 +39,8 @@ const mapBackendUserToFrontendUser = (apiUser: any): User => {
     type = "seller";
   } else if (apiUser.userType === "buyer") {
     type = "buyer";
+  } else if (apiUser.userType === "service" || apiUser.userType === "service provider") {
+    type = "service_provider";
   } else if (apiUser.userType === "landowner") {
     // Legacy support for old types
     type = "seller";
@@ -62,6 +64,7 @@ const mapBackendUserToFrontendUser = (apiUser: any): User => {
   const normalizedVerification = {
     ...rawVerification,
     phoneVerified: rawVerification.phoneVerified ?? apiUser.phoneVerified ?? false,
+    emailVerified: rawVerification.emailVerified ?? apiUser.emailVerified ?? false,
     ownershipVerified: rawVerification.ownershipVerified ?? false,
     businessVerified: rawVerification.businessVerified ?? false,
     trustScore: rawVerification.trustScore ?? 0,

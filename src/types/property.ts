@@ -213,13 +213,14 @@ export interface User {
 
   _id?: string;
   fullName?: string;
-  userType?: "farmer" | "landowner" | "buyer" | "service provider";
+  userType?: "farmer" | "landowner" | "buyer" | "service provider" | "service";
   county?: string;
   isVerified?: boolean;
   role?: "user" | "admin" | "moderator" | "super_admin";
 
   verification?: {
     phoneVerified: boolean;
+    emailVerified: boolean;
     idVerified: boolean;
     selfieVerified: boolean;
     ownershipVerified: boolean;

@@ -22,13 +22,15 @@ export const VerificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     // Later we'll fetch from API
     setVerificationStatus({
       phoneVerified: user?.verification?.phoneVerified || false,
+      emailVerified: user?.verification?.emailVerified || false,
       idVerified: user?.verification?.idVerified || false,
+      businessVerified: user?.verification?.businessVerified || false,
       trustScore: user?.verification?.trustScore || 0,
       verificationLevel: user?.verification?.verificationLevel || 'basic'
     });
 
-    // Show verification modal if user is logged in but not phone verified
-    if (user && !user.verification?.phoneVerified) {
+    // Show verification modal if user is logged in but not phone/email verified
+    if (user && !user.verification?.phoneVerified && !user.verification?.emailVerified) {
       setShowVerificationModal(true);
     }
   }, [user]);
@@ -38,11 +40,11 @@ export const VerificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     switch (type) {
       case 'land-listing':
-        return !verificationStatus.phoneVerified;
+        return !verificationStatus.phoneVerified && !verificationStatus.emailVerified;
       case 'equipment-listing':
-        return !verificationStatus.phoneVerified;
+        return !verificationStatus.phoneVerified && !verificationStatus.emailVerified;
       case 'agrovet-listing':
-        return !verificationStatus.phoneVerified || !verificationStatus.businessVerified;
+        return (!verificationStatus.phoneVerified && !verificationStatus.emailVerified) || !verificationStatus.businessVerified;
       default:
         return false;
     }
