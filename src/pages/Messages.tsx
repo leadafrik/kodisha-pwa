@@ -4,6 +4,7 @@ import { messageService, MessageThread, Message } from '../services/messageServi
 import { useAuth } from '../contexts/AuthContext';
 import { SOCKET_URL, API_ENDPOINTS, apiRequest } from '../config/api';
 import { ChevronLeft, Send, Check, CheckCheck } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 
 const Messages: React.FC = () => {
   const [threads, setThreads] = useState<MessageThread[]>([]);
@@ -18,6 +19,8 @@ const Messages: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
   const userNamesRef = useRef<Record<string, string>>({});
+  const initialSelectionDoneRef = useRef(false);
+  const location = useLocation();
 
   useEffect(() => {
     userNamesRef.current = userNames;
@@ -189,6 +192,18 @@ const Messages: React.FC = () => {
 
     loadConversation();
   }, [selectedUserId]);
+
+  useEffect(() => {
+    if (initialSelectionDoneRef.current) return;
+    const params = new URLSearchParams(location.search);
+    const userId = params.get('userId');
+    if (!userId) return;
+    initialSelectionDoneRef.current = true;
+    setSelectedUserId(userId);
+    const existingName = userNames[userId];
+    setSelectedUserName(existingName || userId);
+    loadUserNames([userId]);
+  }, [location.search, userNames, loadUserNames]);
 
   const handleSelectUser = (userId: string, userName: string) => {
     setSelectedUserId(userId);
