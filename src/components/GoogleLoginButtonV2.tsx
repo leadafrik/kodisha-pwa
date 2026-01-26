@@ -56,7 +56,12 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
 
     try {
       if (!isInitialized || !googleAuth.isInitialized()) {
-        throw new Error("Google Auth not initialized");
+        const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+        if (!clientId) {
+          throw new Error("Google configuration missing");
+        }
+        await googleAuth.init(clientId);
+        setIsInitialized(true);
       }
 
       const { user, idToken } = await googleAuth.signIn();
@@ -106,16 +111,11 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
     }
   };
 
-  if (error && !isInitialized) {
-    // Silent fail - show nothing if not initialized
-    return null;
-  }
-
   return (
     <button
       type="button"
       onClick={handleClick}
-      disabled={isLoading || !isInitialized}
+      disabled={isLoading}
       aria-label="Sign in with Google"
       className={`
         inline-flex items-center justify-center gap-2

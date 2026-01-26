@@ -56,7 +56,12 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
 
     try {
       if (!isInitialized || !facebookAuth.isInitialized()) {
-        throw new Error('Facebook Auth not initialized');
+        const appId = process.env.REACT_APP_FACEBOOK_APP_ID;
+        if (!appId) {
+          throw new Error('Facebook configuration missing');
+        }
+        await facebookAuth.init(appId);
+        setIsInitialized(true);
       }
 
       const { user, accessToken } = await facebookAuth.login();
@@ -106,16 +111,11 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
     }
   };
 
-  if (error && !isInitialized) {
-    // Silent fail - show nothing if not initialized
-    return null;
-  }
-
   return (
     <button
       type="button"
       onClick={handleClick}
-      disabled={isLoading || !isInitialized}
+      disabled={isLoading}
       aria-label="Sign in with Facebook"
       className={`
         inline-flex items-center justify-center gap-2
