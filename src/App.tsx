@@ -147,6 +147,8 @@ function App() {
                     <Route path="/admin/content-editor" element={<ProtectedRoute><AdminContentEditor /></ProtectedRoute>} />
                     <Route path="/admin/listing-management" element={<ProtectedRoute><ListingManagement /></ProtectedRoute>} />
                     <Route path="/admin/analytics" element={<ProtectedRoute><AnalyticsReports /></ProtectedRoute>} />
+                    <Route path="/privacy" element={<Navigate to="/legal/privacy" replace />} />
+                    <Route path="/terms" element={<Navigate to="/legal/terms" replace />} />
                     <Route path="/legal/terms" element={<TermsOfService />} />
                     <Route path="/legal/privacy" element={<PrivacyPolicy />} />
                     <Route path="/error" element={<ServerError />} />
