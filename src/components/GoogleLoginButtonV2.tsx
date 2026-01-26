@@ -111,7 +111,7 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
     <button
       type="button"
       onClick={handleClick}
-      disabled={isLoading || !isInitialized}
+      disabled={isLoading}
       aria-label="Sign in with Google"
       className={`
         inline-flex items-center justify-center gap-2

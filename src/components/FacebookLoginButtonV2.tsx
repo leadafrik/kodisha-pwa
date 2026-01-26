@@ -111,7 +111,7 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
     <button
       type="button"
       onClick={handleClick}
-      disabled={isLoading || !isInitialized}
+      disabled={isLoading}
       aria-label="Sign in with Facebook"
       className={`
         inline-flex items-center justify-center gap-2
