@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { messageService, MessageThread, Message } from '../services/messageService';
 import { useAuth } from '../contexts/AuthContext';
-import { SOCKET_URL } from '../config/api';
+import { SOCKET_URL, API_ENDPOINTS, apiRequest } from '../config/api';
 import { ChevronLeft, Send, Check, CheckCheck } from 'lucide-react';
 
 const Messages: React.FC = () => {
@@ -13,9 +13,15 @@ const Messages: React.FC = () => {
   const [messageInput, setMessageInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userNames, setUserNames] = useState<Record<string, string>>({});
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
+  const userNamesRef = useRef<Record<string, string>>({});
+
+  useEffect(() => {
+    userNamesRef.current = userNames;
+  }, [userNames]);
 
   // Auto-scroll to bottom
   const scrollToBottom = () => {
@@ -26,6 +32,34 @@ const Messages: React.FC = () => {
     scrollToBottom();
   }, [messages]);
 
+  const loadUserNames = useCallback(async (ids: string[]) => {
+    const missing = ids.filter((id) => id && !userNamesRef.current[id]);
+    if (missing.length === 0) return;
+
+    try {
+      const results = await Promise.all(
+        missing.map(async (id) => {
+          try {
+            const res: any = await apiRequest(API_ENDPOINTS.users.getProfile(id));
+            const name = res?.data?.fullName || res?.data?.name || res?.user?.fullName || res?.user?.name;
+            return { id, name: name || 'Unknown user' };
+          } catch {
+            return { id, name: 'Unknown user' };
+          }
+        })
+      );
+      setUserNames((prev) => {
+        const next = { ...prev };
+        results.forEach((entry) => {
+          next[entry.id] = entry.name;
+        });
+        return next;
+      });
+    } catch (err) {
+      console.error('Failed to load user names', err);
+    }
+  }, []);
+
   // Fetch message threads on mount
   useEffect(() => {
     const loadThreads = async () => {
@@ -34,6 +68,10 @@ const Messages: React.FC = () => {
         setError(null);
         const data = await messageService.getMessageThreads();
         setThreads(data);
+        const ids = data
+          .map((thread) => thread.counterpart || thread.to)
+          .filter((id): id is string => !!id);
+        await loadUserNames(ids);
       } catch (err) {
         setError((err as Error).message);
       } finally {
@@ -42,7 +80,7 @@ const Messages: React.FC = () => {
     };
 
     loadThreads();
-  }, []);
+  }, [loadUserNames]);
 
   useEffect(() => {
     const token = localStorage.getItem('kodisha_token');
@@ -83,6 +121,11 @@ const Messages: React.FC = () => {
         return [updatedThread, ...prev.filter((t) => t !== existing)];
       });
 
+      const counterpartId = msg.from === user._id ? msg.to : msg.from;
+      if (counterpartId) {
+        loadUserNames([counterpartId]);
+      }
+
       if (selectedUserId && msg.from === selectedUserId) {
         socket.emit('message:read', { from: selectedUserId });
       }
@@ -106,7 +149,15 @@ const Messages: React.FC = () => {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [user?._id, selectedUserId]);
+  }, [user?._id, selectedUserId, loadUserNames]);
+
+  useEffect(() => {
+    if (!selectedUserId) return;
+    const nextName = userNames[selectedUserId];
+    if (nextName && nextName !== selectedUserName) {
+      setSelectedUserName(nextName);
+    }
+  }, [selectedUserId, selectedUserName, userNames]);
 
   // Fetch conversation and mark as read when selected user changes
   useEffect(() => {
@@ -218,12 +269,13 @@ const Messages: React.FC = () => {
             <div className="space-y-0">
               {threads.map((thread) => {
                 const otherUserId = thread.counterpart || thread.to;
+                const displayName = userNames[otherUserId] || otherUserId;
                 const isSelected = selectedUserId === otherUserId;
 
                 return (
                   <button
                     key={thread._id}
-                    onClick={() => handleSelectUser(otherUserId, thread.counterpart || thread.to)}
+                    onClick={() => handleSelectUser(otherUserId, displayName)}
                     className={`w-full text-left px-4 py-3 border-b border-gray-100 transition ${
                       isSelected
                         ? 'bg-green-50 border-l-4 border-l-green-600'
@@ -233,7 +285,7 @@ const Messages: React.FC = () => {
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-sm text-gray-900 truncate">
-                          {thread.counterpart || thread.to}
+                          {displayName}
                         </p>
                         <p className="text-xs text-gray-600 truncate line-clamp-1">
                           {thread.body}
