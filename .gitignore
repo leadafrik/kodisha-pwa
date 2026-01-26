@@ -10,10 +10,15 @@
 .env.production
 .env.production.local
 .env.*.local
+.env.rotation
+.env.rotation.*
 secrets.json
 .secrets
 credentials.txt
 .credentials
+.secrets-backup
+.secrets-backup/
+rotation-*.log
 *.key
 *.pem
 
