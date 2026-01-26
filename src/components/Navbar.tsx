@@ -64,7 +64,7 @@ const Navbar: React.FC = () => {
 
               <Link 
                 to="/about" 
-                className="px-4 py-2 rounded-lg hover:bg-gray-100 transition text-gray-700 font-semibold text-sm"
+                className="px-4 py-2 rounded-lg hover:bg-gray-100 transition text-gray-700 font-semibold text-sm min-h-[44px] flex items-center"
               >
                 About
               </Link>
@@ -80,7 +80,7 @@ const Navbar: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setListOpen((prev) => !prev)}
-                  className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition font-semibold flex items-center gap-2"
+                  className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition font-semibold flex items-center gap-2 min-h-[44px]"
                 >
                   + List <Chevron />
                 </button>
@@ -206,7 +206,7 @@ const Navbar: React.FC = () => {
                 </div>
               ) : (
                 <div className="flex items-center gap-4">
-                  <Link to="/login" className="px-5 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 font-semibold transition">
+                  <Link to="/login" className="px-5 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 font-semibold transition min-h-[44px] flex items-center">
                     Login
                   </Link>
                 </div>
@@ -214,7 +214,13 @@ const Navbar: React.FC = () => {
             </div>
 
             {/* MOBILE MENU ICON */}
-            <button className="lg:hidden flex flex-col gap-1" onClick={() => setMobileOpen(true)}>
+            <button 
+              className="lg:hidden flex flex-col gap-1 p-3 -mr-3 min-h-[48px] min-w-[48px] items-center justify-center"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open menu"
+              aria-expanded={mobileOpen}
+              aria-haspopup="menu"
+            >
               <span className="w-6 h-0.5 bg-gray-900"></span>
               <span className="w-6 h-0.5 bg-gray-900"></span>
               <span className="w-6 h-0.5 bg-gray-900"></span>
@@ -237,50 +243,147 @@ const Navbar: React.FC = () => {
               </button>
             </div>
 
-            <div className="flex flex-col gap-4 text-lg font-medium">
+            <div className="flex flex-col gap-1 text-lg font-medium">
               {/* Browse Toggle for Mobile */}
-              <div className="flex flex-col gap-2 bg-gray-100 rounded-lg p-2">
-                <Link to="/browse" onClick={closeMobile} className="px-3 py-2 rounded hover:bg-white transition font-semibold">
+              <div className="flex flex-col gap-1 bg-gray-100 rounded-lg p-2">
+                <Link 
+                  to="/browse" 
+                  onClick={closeMobile} 
+                  className="px-3 py-3 rounded hover:bg-white transition font-semibold min-h-[48px] flex items-center"
+                >
                   Browse Listings
                 </Link>
-                <Link to="/request" onClick={closeMobile} className="px-3 py-2 rounded hover:bg-white transition font-semibold">
+                <Link 
+                  to="/request" 
+                  onClick={closeMobile} 
+                  className="px-3 py-3 rounded hover:bg-white transition font-semibold min-h-[48px] flex items-center"
+                >
                   Browse Buy Requests
                 </Link>
               </div>
-              <Link to="/about" onClick={closeMobile} className="px-3 py-2 font-semibold">
+              <Link 
+                to="/about" 
+                onClick={closeMobile} 
+                className="px-3 py-3 font-semibold min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
+              >
                 About Agrisoko
               </Link>
               <hr />
 
               {user ? (
                 <>
-                  <Link to="/profile" onClick={closeMobile}>Dashboard</Link>
-                  <Link to="/messages" onClick={closeMobile}>Messages</Link>
-                  <Link to="/favorites" onClick={closeMobile}>Saved Listings</Link>
+                  <Link 
+                    to="/profile" 
+                    onClick={closeMobile}
+                    className="px-3 py-3 min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
+                  >
+                    Dashboard
+                  </Link>
+                  <Link 
+                    to="/messages" 
+                    onClick={closeMobile}
+                    className="px-3 py-3 min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
+                  >
+                    Messages
+                  </Link>
+                  <Link 
+                    to="/favorites" 
+                    onClick={closeMobile}
+                    className="px-3 py-3 min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
+                  >
+                    Saved Listings
+                  </Link>
                   {user.role === 'admin' || user.type === 'admin' ? (
                     <>
-                      <Link to="/admin/listings-approval" onClick={closeMobile}>Listing Approvals</Link>
-                      <Link to="/admin/listing-management" onClick={closeMobile}>Listing Management</Link>
-                      <Link to="/admin/id-verification" onClick={closeMobile}>ID Verification</Link>
-                      <Link to="/admin/reports" onClick={closeMobile}>User Reports</Link>
-                      <Link to="/admin/profile-verification" onClick={closeMobile}>Profile Verification</Link>
-                      <Link to="/admin/analytics" onClick={closeMobile}>Analytics</Link>
+                      <div className="text-sm text-gray-600 font-semibold mt-2 mb-1">Admin</div>
+                      <Link 
+                        to="/admin/listings-approval" 
+                        onClick={closeMobile}
+                        className="px-3 py-3 text-base min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
+                      >
+                        Listing Approvals
+                      </Link>
+                      <Link 
+                        to="/admin/listing-management" 
+                        onClick={closeMobile}
+                        className="px-3 py-3 text-base min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
+                      >
+                        Listing Management
+                      </Link>
+                      <Link 
+                        to="/admin/id-verification" 
+                        onClick={closeMobile}
+                        className="px-3 py-3 text-base min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
+                      >
+                        ID Verification
+                      </Link>
+                      <Link 
+                        to="/admin/reports" 
+                        onClick={closeMobile}
+                        className="px-3 py-3 text-base min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
+                      >
+                        User Reports
+                      </Link>
+                      <Link 
+                        to="/admin/profile-verification" 
+                        onClick={closeMobile}
+                        className="px-3 py-3 text-base min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
+                      >
+                        Profile Verification
+                      </Link>
+                      <Link 
+                        to="/admin/analytics" 
+                        onClick={closeMobile}
+                        className="px-3 py-3 text-base min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
+                      >
+                        Analytics
+                      </Link>
                     </>
                   ) : null}
-                  <Link to="/create-listing" onClick={closeMobile}>List for sale</Link>
-                  <Link to="/request/new" onClick={closeMobile}>Post buy request</Link>
+                  <Link 
+                    to="/create-listing" 
+                    onClick={closeMobile}
+                    className="px-3 py-3 min-h-[48px] flex items-center rounded hover:bg-green-50 transition font-semibold text-green-600 mt-2"
+                  >
+                    List for sale
+                  </Link>
+                  <Link 
+                    to="/request/new" 
+                    onClick={closeMobile}
+                    className="px-3 py-3 min-h-[48px] flex items-center rounded hover:bg-green-50 transition font-semibold text-green-600"
+                  >
+                    Post buy request
+                  </Link>
                   <button
                     onClick={() => { logout(); closeMobile(); }}
-                    className="text-left text-red-600 font-semibold mt-4"
+                    className="text-left px-3 py-3 text-red-600 font-semibold mt-4 min-h-[48px] flex items-center rounded hover:bg-red-50 transition"
                   >
                     Logout
                   </button>
                 </>
               ) : (
                 <>
-                  <Link to="/login" onClick={closeMobile}>Login</Link>
-                  <Link to="/login?next=/create-listing" onClick={closeMobile}>List for sale</Link>
-                  <Link to="/login?next=/request/new" onClick={closeMobile}>Post buy request</Link>
+                  <Link 
+                    to="/login" 
+                    onClick={closeMobile}
+                    className="px-3 py-3 min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
+                  >
+                    Login
+                  </Link>
+                  <Link 
+                    to="/login?next=/create-listing" 
+                    onClick={closeMobile}
+                    className="px-3 py-3 min-h-[48px] flex items-center rounded hover:bg-green-50 transition font-semibold text-green-600 mt-2"
+                  >
+                    List for sale
+                  </Link>
+                  <Link 
+                    to="/login?next=/request/new" 
+                    onClick={closeMobile}
+                    className="px-3 py-3 min-h-[48px] flex items-center rounded hover:bg-green-50 transition font-semibold text-green-600"
+                  >
+                    Post buy request
+                  </Link>
                 </>
               )}
             </div>

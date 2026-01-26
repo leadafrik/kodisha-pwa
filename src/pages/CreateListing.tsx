@@ -4,6 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from "../data/kenyaCounties";
 import { API_BASE_URL } from "../config/api";
 import { AlertCircle, CheckCircle2, MapPin, Tag, Calendar, Camera, FileText } from "lucide-react";
+import { ErrorAlert } from "../components/ui";
 
 type ListingCategory = "produce" | "livestock" | "inputs" | "service";
 type ListingType = "sell" | "buy";
@@ -499,10 +500,11 @@ const CreateListing: React.FC = () => {
 
           {/* Error Alert */}
           {error && (
-            <div className="mb-6 bg-red-50 border border-red-200 rounded-2xl p-4 flex gap-3">
-              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-              <p className="text-red-700">{error}</p>
-            </div>
+            <ErrorAlert
+              message={error}
+              onRetry={() => setError("")}
+              className="mb-6"
+            />
           )}
           {notice && !error && (
             <div className="mb-6 bg-blue-50 border border-blue-200 rounded-2xl p-4 flex gap-3">

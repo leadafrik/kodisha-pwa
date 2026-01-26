@@ -5,6 +5,7 @@ import { useProperties } from "../contexts/PropertyContext";
 import ProfilePictureUpload from "../components/ProfilePictureUpload";
 import { scheduleAccountDeletion } from "../services/userService";
 import { Shield } from "lucide-react";
+import { ErrorAlert } from "../components/ui";
 
 const Profile: React.FC = () => {
   const { user, logout, updateProfile } = useAuth();
@@ -373,9 +374,11 @@ const Profile: React.FC = () => {
         <div className="mt-8 border-t pt-6">
           <h3 className="text-lg font-bold text-slate-900 mb-4">Account Settings</h3>
           {deleteError && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-2xl text-sm font-medium">
-              {deleteError}
-            </div>
+            <ErrorAlert
+              message={deleteError}
+              onRetry={() => setDeleteError(null)}
+              className="mb-4"
+            />
           )}
           <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
             <p className="text-sm text-slate-600 mb-4">

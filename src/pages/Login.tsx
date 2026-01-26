@@ -5,6 +5,8 @@ import { kenyaCounties } from "../data/kenyaCounties";
 import GoogleLoginButton from "../components/GoogleLoginButtonV2";
 import FacebookLoginButton from "../components/FacebookLoginButtonV2";
 import { LegalConsents } from "../types/property";
+import { ErrorAlert } from "../components/ui";
+import { validateEmail, validatePassword, validatePasswordMatch, validateName, validateEmailOrPhone } from "../utils/formValidation";
 
 type Mode = "login" | "signup" | "otp-verify" | "forgot" | "otp-reset";
 
@@ -79,6 +81,19 @@ const Login: React.FC = () => {
     confirmPassword: "",
   });
 
+  // Field Validation State
+  const [loginFieldErrors, setLoginFieldErrors] = useState({
+    emailOrPhone: "",
+    password: "",
+  });
+  const [signupFieldErrors, setSignupFieldErrors] = useState({
+    name: "",
+    emailOrPhone: "",
+    password: "",
+    confirmPassword: "",
+    county: "",
+  });
+
   // OTP Timer
   useEffect(() => {
     if (otpTimer > 0) {
@@ -88,6 +103,69 @@ const Login: React.FC = () => {
       setCanResendOtp(true);
     }
   }, [otpTimer, mode]);
+
+  // Login field validation handlers
+  const handleLoginEmailChange = (value: string) => {
+    setLoginData({ ...loginData, emailOrPhone: value });
+    const validation = validateEmailOrPhone(value);
+    setLoginFieldErrors({
+      ...loginFieldErrors,
+      emailOrPhone: validation.error || "",
+    });
+  };
+
+  const handleLoginPasswordChange = (value: string) => {
+    setLoginData({ ...loginData, password: value });
+    const validation = validatePassword(value);
+    setLoginFieldErrors({
+      ...loginFieldErrors,
+      password: validation.error || "",
+    });
+  };
+
+  // Signup field validation handlers
+  const handleSignupNameChange = (value: string) => {
+    setSignupData({ ...signupData, name: value });
+    const validation = validateName(value);
+    setSignupFieldErrors({
+      ...signupFieldErrors,
+      name: validation.error || "",
+    });
+  };
+
+  const handleSignupEmailChange = (value: string) => {
+    setSignupData({ ...signupData, emailOrPhone: value });
+    const validation = validateEmailOrPhone(value);
+    setSignupFieldErrors({
+      ...signupFieldErrors,
+      emailOrPhone: validation.error || "",
+    });
+  };
+
+  const handleSignupPasswordChange = (value: string) => {
+    setSignupData({ ...signupData, password: value });
+    const validation = validatePassword(value);
+    setSignupFieldErrors({
+      ...signupFieldErrors,
+      password: validation.error || "",
+    });
+    // Clear confirm password error if it was a match error
+    if (signupData.confirmPassword) {
+      const matchValidation = validatePasswordMatch(value, signupData.confirmPassword);
+      if (!matchValidation.error) {
+        setSignupFieldErrors((prev) => ({ ...prev, confirmPassword: "" }));
+      }
+    }
+  };
+
+  const handleSignupConfirmPasswordChange = (value: string) => {
+    setSignupData({ ...signupData, confirmPassword: value });
+    const validation = validatePasswordMatch(signupData.password, value);
+    setSignupFieldErrors({
+      ...signupFieldErrors,
+      confirmPassword: validation.error || "",
+    });
+  };
 
   const resetMessages = () => {
     setError(null);
@@ -361,12 +439,32 @@ const Login: React.FC = () => {
         <input
           type="text"
           value={loginData.emailOrPhone}
-          onChange={(e) => setLoginData({ ...loginData, emailOrPhone: e.target.value })}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm
-            focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100
-            placeholder:text-gray-400 transition-colors"
+          onChange={(e) => handleLoginEmailChange(e.target.value)}
+          onBlur={() => {
+            if (!loginData.emailOrPhone) {
+              setLoginFieldErrors({
+                ...loginFieldErrors,
+                emailOrPhone: "Email or phone is required",
+              });
+            }
+          }}
+          aria-invalid={!!loginFieldErrors.emailOrPhone}
+          aria-describedby={loginFieldErrors.emailOrPhone ? "email-error" : undefined}
+          className={`w-full border rounded-lg px-4 py-2.5 text-sm transition-colors
+            placeholder:text-gray-400
+            focus:outline-none focus:ring-2
+            ${
+              loginFieldErrors.emailOrPhone
+                ? "border-red-300 focus:border-red-500 focus:ring-red-100 bg-red-50"
+                : "border-gray-300 focus:border-green-500 focus:ring-green-100"
+            }`}
           placeholder="name@example.com or +254712345678"
         />
+        {loginFieldErrors.emailOrPhone && (
+          <p id="email-error" className="mt-2 text-sm text-red-600 font-medium flex items-center gap-1">
+            <span>⚠</span> {loginFieldErrors.emailOrPhone}
+          </p>
+        )}
         <p className="mt-2 text-xs text-gray-500">
           Phone verification is not enabled yet. Use email for fastest access.
         </p>
@@ -378,12 +476,32 @@ const Login: React.FC = () => {
         <input
           type="password"
           value={loginData.password}
-          onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm
-            focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100
-            placeholder:text-gray-400 transition-colors"
+          onChange={(e) => handleLoginPasswordChange(e.target.value)}
+          onBlur={() => {
+            if (!loginData.password) {
+              setLoginFieldErrors({
+                ...loginFieldErrors,
+                password: "Password is required",
+              });
+            }
+          }}
+          aria-invalid={!!loginFieldErrors.password}
+          aria-describedby={loginFieldErrors.password ? "password-error" : undefined}
+          className={`w-full border rounded-lg px-4 py-2.5 text-sm transition-colors
+            placeholder:text-gray-400
+            focus:outline-none focus:ring-2
+            ${
+              loginFieldErrors.password
+                ? "border-red-300 focus:border-red-500 focus:ring-red-100 bg-red-50"
+                : "border-gray-300 focus:border-green-500 focus:ring-green-100"
+            }`}
           placeholder="Enter your password"
         />
+        {loginFieldErrors.password && (
+          <p id="password-error" className="mt-2 text-sm text-red-600 font-medium flex items-center gap-1">
+            <span>⚠</span> {loginFieldErrors.password}
+          </p>
+        )}
       </div>
 
       <button
@@ -461,10 +579,31 @@ const Login: React.FC = () => {
         <input
           type="text"
           value={signupData.name}
-          onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          onChange={(e) => handleSignupNameChange(e.target.value)}
+          onBlur={() => {
+            if (!signupData.name) {
+              setSignupFieldErrors({
+                ...signupFieldErrors,
+                name: "Name is required",
+              });
+            }
+          }}
+          aria-invalid={!!signupFieldErrors.name}
+          aria-describedby={signupFieldErrors.name ? "name-error" : undefined}
+          className={`w-full border rounded-lg px-4 py-2.5 transition-colors
+            focus:outline-none focus:ring-2
+            ${
+              signupFieldErrors.name
+                ? "border-red-300 focus:border-red-500 focus:ring-red-100 bg-red-50"
+                : "border-gray-300 focus:border-green-500 focus:ring-green-100"
+            }`}
           placeholder="Your full name"
         />
+        {signupFieldErrors.name && (
+          <p id="name-error" className="mt-2 text-sm text-red-600 font-medium flex items-center gap-1">
+            <span>⚠</span> {signupFieldErrors.name}
+          </p>
+        )}
       </div>
 
       <div>
@@ -472,10 +611,31 @@ const Login: React.FC = () => {
         <input
           type="email"
           value={signupData.emailOrPhone}
-          onChange={(e) => setSignupData({ ...signupData, emailOrPhone: e.target.value })}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          onChange={(e) => handleSignupEmailChange(e.target.value)}
+          onBlur={() => {
+            if (!signupData.emailOrPhone) {
+              setSignupFieldErrors({
+                ...signupFieldErrors,
+                emailOrPhone: "Email is required",
+              });
+            }
+          }}
+          aria-invalid={!!signupFieldErrors.emailOrPhone}
+          aria-describedby={signupFieldErrors.emailOrPhone ? "signup-email-error" : undefined}
+          className={`w-full border rounded-lg px-4 py-2.5 transition-colors
+            focus:outline-none focus:ring-2
+            ${
+              signupFieldErrors.emailOrPhone
+                ? "border-red-300 focus:border-red-500 focus:ring-red-100 bg-red-50"
+                : "border-gray-300 focus:border-green-500 focus:ring-green-100"
+            }`}
           placeholder="your.email@example.com"
         />
+        {signupFieldErrors.emailOrPhone && (
+          <p id="signup-email-error" className="mt-2 text-sm text-red-600 font-medium flex items-center gap-1">
+            <span>⚠</span> {signupFieldErrors.emailOrPhone}
+          </p>
+        )}
         <p className="text-xs text-gray-500 mt-1">Phone verification will be available soon.</p>
       </div>
 
@@ -484,10 +644,31 @@ const Login: React.FC = () => {
         <input
           type="password"
           value={signupData.password}
-          onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          onChange={(e) => handleSignupPasswordChange(e.target.value)}
+          onBlur={() => {
+            if (!signupData.password) {
+              setSignupFieldErrors({
+                ...signupFieldErrors,
+                password: "Password is required",
+              });
+            }
+          }}
+          aria-invalid={!!signupFieldErrors.password}
+          aria-describedby={signupFieldErrors.password ? "password-error" : undefined}
+          className={`w-full border rounded-lg px-4 py-2.5 transition-colors
+            focus:outline-none focus:ring-2
+            ${
+              signupFieldErrors.password
+                ? "border-red-300 focus:border-red-500 focus:ring-red-100 bg-red-50"
+                : "border-gray-300 focus:border-green-500 focus:ring-green-100"
+            }`}
           placeholder="Min 6 characters"
         />
+        {signupFieldErrors.password && (
+          <p id="password-error" className="mt-2 text-sm text-red-600 font-medium flex items-center gap-1">
+            <span>⚠</span> {signupFieldErrors.password}
+          </p>
+        )}
       </div>
 
       <div>
@@ -495,10 +676,31 @@ const Login: React.FC = () => {
         <input
           type="password"
           value={signupData.confirmPassword}
-          onChange={(e) => setSignupData({ ...signupData, confirmPassword: e.target.value })}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          onChange={(e) => handleSignupConfirmPasswordChange(e.target.value)}
+          onBlur={() => {
+            if (!signupData.confirmPassword) {
+              setSignupFieldErrors({
+                ...signupFieldErrors,
+                confirmPassword: "Please confirm your password",
+              });
+            }
+          }}
+          aria-invalid={!!signupFieldErrors.confirmPassword}
+          aria-describedby={signupFieldErrors.confirmPassword ? "confirm-password-error" : undefined}
+          className={`w-full border rounded-lg px-4 py-2.5 transition-colors
+            focus:outline-none focus:ring-2
+            ${
+              signupFieldErrors.confirmPassword
+                ? "border-red-300 focus:border-red-500 focus:ring-red-100 bg-red-50"
+                : "border-gray-300 focus:border-green-500 focus:ring-green-100"
+            }`}
           placeholder="Confirm password"
         />
+        {signupFieldErrors.confirmPassword && (
+          <p id="confirm-password-error" className="mt-2 text-sm text-red-600 font-medium flex items-center gap-1">
+            <span>⚠</span> {signupFieldErrors.confirmPassword}
+          </p>
+        )}
       </div>
 
       <div>
@@ -767,13 +969,18 @@ const Login: React.FC = () => {
             <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
             {/* Messages */}
             {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-700 font-medium">{error}</p>
-              </div>
+              <ErrorAlert
+                message={error}
+                onRetry={() => {
+                  setError(null);
+                }}
+                className="mb-6"
+              />
             )}
 
             {info && (
-              <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+              <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg flex items-start gap-3">
+                <span className="text-emerald-600 text-xl flex-shrink-0">✓</span>
                 <p className="text-sm text-emerald-700 font-medium">{info}</p>
               </div>
             )}

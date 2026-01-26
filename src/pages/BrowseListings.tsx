@@ -88,6 +88,7 @@ const BrowseListings: React.FC = () => {
   const [search, setSearch] = useState<string>("");
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [verifiedOnlyManual, setVerifiedOnlyManual] = useState(false);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const isHighValueCategory =
     category !== "all" && highValueCategories.includes(category);
 
@@ -358,15 +359,15 @@ const BrowseListings: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-2">
+              <div className="flex gap-2 items-end">
+                <div className="flex-1 space-y-2">
                   <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
                     County
                   </label>
                   <select
                     value={county}
                     onChange={(e) => setCounty(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                    className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 min-h-[44px]"
                   >
                     <option value="">All counties</option>
                     {[...kenyaCounties]
@@ -379,8 +380,19 @@ const BrowseListings: React.FC = () => {
                   </select>
                 </div>
 
-                {category === "service" ? (
-                  <div className="space-y-2">
+                {/* Mobile filter toggle */}
+                <button
+                  onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+                  className="md:hidden flex items-center gap-2 px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-700 font-semibold text-sm hover:bg-slate-50 transition min-h-[44px]"
+                  aria-label="Toggle filters"
+                  aria-expanded={mobileFiltersOpen}
+                >
+                  <Filter className="h-4 w-4" />
+                  <span className="hidden sm:inline">More</span>
+                </button>
+
+                {category === "service" && (
+                  <div className="hidden sm:flex flex-1 space-y-2">
                     <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
                       Service type
                     </label>
@@ -389,21 +401,63 @@ const BrowseListings: React.FC = () => {
                       onChange={(e) =>
                         setServiceSub(e.target.value as ServiceSubType)
                       }
-                      className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                      className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 min-h-[44px]"
                     >
                       <option value="all">All services</option>
                       <option value="equipment">Equipment Hire</option>
                       <option value="professional_services">Professional Services</option>
                     </select>
                   </div>
-                ) : (
-                  <div className="hidden sm:block" />
                 )}
               </div>
             </div>
 
-            <div className="mt-5 flex flex-wrap items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+            {/* Mobile filter drawer */}
+            {mobileFiltersOpen && (
+              <div className="md:hidden mt-4 p-4 border-t border-slate-200 space-y-4 bg-slate-50 rounded-xl">
+                {category === "service" && (
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                      Service type
+                    </label>
+                    <select
+                      value={serviceSub}
+                      onChange={(e) => {
+                        setServiceSub(e.target.value as ServiceSubType);
+                        setMobileFiltersOpen(false);
+                      }}
+                      className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 min-h-[44px]"
+                    >
+                      <option value="all">All services</option>
+                      <option value="equipment">Equipment Hire</option>
+                      <option value="professional_services">Professional Services</option>
+                    </select>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2 pt-2 border-t border-slate-200">
+                  <input
+                    type="checkbox"
+                    id="verified-only-mobile"
+                    checked={verifiedOnly}
+                    onChange={(e) => {
+                      setVerifiedOnly(e.target.checked);
+                      setVerifiedOnlyManual(e.target.checked);
+                    }}
+                    className="h-4 w-4 rounded border-slate-300 cursor-pointer"
+                  />
+                  <label
+                    htmlFor="verified-only-mobile"
+                    className="text-sm font-semibold text-slate-700 cursor-pointer"
+                  >
+                    Verified sellers only
+                  </label>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-5 flex flex-wrap items-center gap-2 overflow-x-auto pb-2">
+              <span className="text-xs font-semibold uppercase tracking-widest text-slate-500 whitespace-nowrap">
                 Category
               </span>
               {categoryPills.map((pill) => {
@@ -417,7 +471,7 @@ const BrowseListings: React.FC = () => {
                       setServiceSub("all");
                       setVerifiedOnlyManual(false);
                     }}
-                    className={`rounded-full px-4 py-2 text-sm font-semibold border transition ${
+                    className={`rounded-full px-4 py-2 text-sm font-semibold border transition min-h-[44px] flex items-center whitespace-nowrap ${
                       active
                         ? "border-emerald-600 bg-emerald-600 text-white shadow-sm"
                         : "border-slate-200 bg-white text-slate-700 hover:border-emerald-300 hover:bg-emerald-50"
