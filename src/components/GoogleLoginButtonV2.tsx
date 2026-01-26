@@ -22,39 +22,25 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
 }) => {
   const { loginWithGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialize Google Auth on component mount
   useEffect(() => {
     const initGoogle = async () => {
       try {
         const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-
-        if (!clientId) {
-          console.error("Google configuration missing");
-          return;
+        if (clientId) {
+          await googleAuth.init(clientId);
         }
-
-        await googleAuth.init(clientId);
-        setIsInitialized(true);
       } catch (err) {
-        const message =
-          err instanceof Error ? err.message : "Failed to initialize Google Auth";
-        console.error("[GoogleLoginButton] Init error:", message);
+        console.error("[GoogleLoginButton] Init error:", err);
       }
     };
-
     initGoogle();
   }, []);
 
   const handleClick = async () => {
     setIsLoading(true);
-
     try {
-      if (!isInitialized || !googleAuth.isInitialized()) {
-        throw new Error("Google Auth not initialized");
-      }
-
       const { user, idToken } = await googleAuth.signIn();
 
       if (!user.email) {
@@ -62,7 +48,6 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
       }
 
       try {
-        // First attempt without explicit consents for existing users
         await loginWithGoogle(idToken, user.id, user.email, user.name);
       } catch (initialError: any) {
         const message = initialError?.message || "";
@@ -84,14 +69,12 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
         );
       }
 
-      // Success - trigger callback
       if (onSuccess) {
         onSuccess();
       }
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Google sign-in failed";
-
       console.error("[GoogleLoginButton] Sign-in error:", errorMessage);
 
       if (onError) {
@@ -101,10 +84,6 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
       setIsLoading(false);
     }
   };
-
-  if (!isInitialized) {
-    return null;
-  }
 
   return (
     <button

@@ -22,39 +22,25 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
 }) => {
   const { loginWithFacebook } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialize Facebook Auth on component mount
   useEffect(() => {
     const initFacebook = async () => {
       try {
         const appId = process.env.REACT_APP_FACEBOOK_APP_ID;
-
-        if (!appId) {
-          console.error('Facebook configuration missing');
-          return;
+        if (appId) {
+          await facebookAuth.init(appId);
         }
-
-        await facebookAuth.init(appId);
-        setIsInitialized(true);
       } catch (err) {
-        const message =
-          err instanceof Error ? err.message : 'Failed to initialize Facebook Auth';
-        console.error('[FacebookLoginButton] Init error:', message);
+        console.error('[FacebookLoginButton] Init error:', err);
       }
     };
-
     initFacebook();
   }, []);
 
   const handleClick = async () => {
     setIsLoading(true);
-
     try {
-      if (!isInitialized || !facebookAuth.isInitialized()) {
-        throw new Error('Facebook Auth not initialized');
-      }
-
       const { user, accessToken } = await facebookAuth.login();
 
       if (!user.email) {
@@ -62,7 +48,6 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
       }
 
       try {
-        // First attempt without explicit consents for existing users
         await loginWithFacebook(accessToken, user.id, user.email, user.name);
       } catch (initialError: any) {
         const message = initialError?.message || "";
@@ -84,14 +69,12 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
         );
       }
 
-      // Success - trigger callback
       if (onSuccess) {
         onSuccess();
       }
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Facebook sign-in failed';
-
       console.error('[FacebookLoginButton] Sign-in error:', errorMessage);
 
       if (onError) {
@@ -101,10 +84,6 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
       setIsLoading(false);
     }
   };
-
-  if (!isInitialized) {
-    return null;
-  }
 
   return (
     <button
