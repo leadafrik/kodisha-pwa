@@ -208,7 +208,7 @@ You agree that disputes will be resolved on an individual basis and not as part 
 ---
 
 ## 13. Privacy and data protection
-
+ 
 Our collection, use, and protection of personal data is governed by our Privacy Policy and complies with the Data Protection Act (2019).
 
 By using the platform, you consent to our data practices as described in the Privacy Policy.
