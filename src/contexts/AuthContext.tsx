@@ -395,7 +395,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       refreshInFlightRef.current = null;
     }
-  }, []);
+  }, [user]);
 
   const updateProfile = (userData: Partial<User>) => {
     if (user) {
