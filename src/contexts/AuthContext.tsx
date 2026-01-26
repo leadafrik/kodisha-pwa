@@ -12,6 +12,7 @@ import { User, AuthContextType, UserFormData } from "../types/property";
 import { API_ENDPOINTS, apiRequest } from "../config/api";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const REFRESH_COOLDOWN_MS = 30 * 1000;
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -84,7 +85,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const refreshInFlightRef = useRef<Promise<User | null> | null>(null);
   const lastRefreshAtRef = useRef(0);
-  const REFRESH_COOLDOWN_MS = 30 * 1000;
 
   const login = async (identifier: string, password: string) => {
     setLoading(true);
@@ -415,7 +415,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     window.addEventListener("focus", handleFocus);
     return () => window.removeEventListener("focus", handleFocus);
-  }, []);
+  }, [refreshUser]);
 
   return (
     <AuthContext.Provider
