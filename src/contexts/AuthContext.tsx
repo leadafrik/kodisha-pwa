@@ -364,14 +364,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem("kodisha_token");
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const refreshUser = useCallback(async () => {
     const now = Date.now();
     if (refreshInFlightRef.current) {
       return refreshInFlightRef.current;
     }
     if (now - lastRefreshAtRef.current < REFRESH_COOLDOWN_MS) {
-      return user;
+      // Return the current cached user without making a request
+      const savedUser = localStorage.getItem("kodisha_user");
+      try {
+        return savedUser ? JSON.parse(savedUser) : null;
+      } catch {
+        return null;
+      }
     }
     lastRefreshAtRef.current = now;
 
