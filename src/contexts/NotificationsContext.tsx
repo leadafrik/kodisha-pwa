@@ -64,8 +64,20 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     };
 
+    const fetchNotificationsData = async () => {
+      try {
+        setLoading(true);
+        const data = await getNotifications(50, 0, false);
+        setNotifications(data);
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchPreferences();
-    fetchNotifications();
+    fetchNotificationsData();
 
     // Initialize monthly reminder scheduler
     const cleanup = initializeMonthlyReminderScheduler(user.id);
@@ -73,7 +85,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     return () => {
       cleanup();
     };
-  }, [user?.id, fetchNotifications]);
+  }, [user?.id]);
 
   const markAsRead = useCallback(
     async (notificationId: string) => {
