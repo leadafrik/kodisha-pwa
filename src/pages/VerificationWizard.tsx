@@ -11,8 +11,8 @@ import { API_BASE_URL } from "../config/api";
  * 4. Review status
  *
  * This talks directly to the backend verification endpoints:
- *  - GET  /api/verification/status/:userId
- *  - POST /api/verification/upload/:type  (FormData: userId + file)
+ *  - GET  /api/verification/status/:userId (auth required)
+ *  - POST /api/verification/upload/:type  (auth required, FormData: file)
  */
 
 type WizardStepKey = "identity" | "land" | "business" | "review";
@@ -122,7 +122,10 @@ const VerificationWizard: React.FC = () => {
     try {
       setStatusLoading(true);
       setError(null);
-      const res = await fetch(`${API_BASE_URL}/verification/status/${user._id}`);
+      const token = localStorage.getItem("kodisha_token");
+      const res = await fetch(`${API_BASE_URL}/verification/status/${user._id}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
       const data = await res.json();
       if (!data.success) {
         throw new Error(data.message || "Failed to load verification status.");
@@ -161,11 +164,13 @@ const VerificationWizard: React.FC = () => {
       setSuccessMessage(null);
 
       const formData = new FormData();
-      formData.append("userId", user._id as string);
       formData.append("file", file);
 
       const res = await fetch(`${API_BASE_URL}/verification/upload/${type}`, {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("kodisha_token")}`,
+        },
         body: formData,
       });
 

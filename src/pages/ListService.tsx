@@ -149,6 +149,15 @@ const ListService: React.FC<ListServiceProps> = ({ initialServiceType }) => {
   const [selectedBoost, setSelectedBoost] = useState<BoostOptionId>("none");
   const [selectedVerification, setSelectedVerification] =
     useState<VerificationTierId>("none");
+  const idVerified = !!user?.verification?.idVerified;
+  const selfieVerified = !!user?.verification?.selfieVerified;
+  const hasPendingIdVerification =
+    !!user?.verification?.idVerificationPending ||
+    !!user?.verification?.idVerificationSubmitted;
+  const isVerificationPending =
+    hasPendingIdVerification && (!idVerified || !selfieVerified);
+  const idDocsNeeded = !idVerified && !hasPendingIdVerification;
+  const selfieNeeded = !selfieVerified && !hasPendingIdVerification;
 
   useEffect(() => {
     if (initialServiceType && initialServiceType !== formData.type) {
@@ -275,9 +284,7 @@ const ListService: React.FC<ListServiceProps> = ({ initialServiceType }) => {
     setSubmitting(true);
 
     try {
-      // Only require ID upload if not already verified
-      const isIdVerified = user?.verification?.idVerified && user?.verification?.selfieVerified;
-      if (!isIdVerified && (!idFrontFile || !idBackFile || !selfieFile)) {
+      if (!idVerified && !hasPendingIdVerification && (!idFrontFile || !idBackFile || !selfieFile)) {
         alert("Please upload ID front, ID back, and a selfie with your ID to list a service.");
         setSubmitting(false);
         return;
@@ -960,15 +967,32 @@ const ListService: React.FC<ListServiceProps> = ({ initialServiceType }) => {
             Identity & Business Verification
           </h3>
           
-          {user?.verification?.idVerified && user?.verification?.selfieVerified ? (
+          {idVerified && selfieVerified ? (
             <div className="space-y-3">
               <div className="flex items-center space-x-2 p-3 bg-green-50 border border-green-200 rounded-lg">
                 <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
                 <div>
-                  <p className="text-green-800 font-semibold">✓ ID Already Verified</p>
+                  <p className="text-green-800 font-semibold">ID already verified</p>
                   <p className="text-sm text-green-700">Your identity documents have been verified by our team. You won't need to upload ID again for future service or agrovet listings.</p>
+                </div>
+              </div>
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  <strong>One-time verification:</strong> We verify IDs once to reduce fraud and impersonation. Your future listings will be published faster.
+                </p>
+              </div>
+            </div>
+          ) : isVerificationPending ? (
+            <div className="space-y-3">
+              <div className="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                <span className="mt-0.5 text-amber-600">!</span>
+                <div>
+                  <p className="text-amber-800 font-semibold">Documents submitted</p>
+                  <p className="text-sm text-amber-700">
+                    Your ID and selfie are pending review. You can submit this listing now; it will stay pending until approved.
+                  </p>
                 </div>
               </div>
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
@@ -993,7 +1017,7 @@ const ListService: React.FC<ListServiceProps> = ({ initialServiceType }) => {
                   <input
                     type="file"
                     accept="image/*"
-                    required
+                    required={idDocsNeeded}
                     onChange={(e) => setIdFrontFile(e.target.files?.[0] || null)}
                     className="w-full border rounded-lg px-3 py-2"
                   />
@@ -1003,7 +1027,7 @@ const ListService: React.FC<ListServiceProps> = ({ initialServiceType }) => {
                   <input
                     type="file"
                     accept="image/*"
-                    required
+                    required={idDocsNeeded}
                     onChange={(e) => setIdBackFile(e.target.files?.[0] || null)}
                     className="w-full border rounded-lg px-3 py-2"
                   />
@@ -1013,7 +1037,7 @@ const ListService: React.FC<ListServiceProps> = ({ initialServiceType }) => {
                   <input
                     type="file"
                     accept="image/*"
-                    required
+                    required={selfieNeeded}
                     onChange={(e) => setSelfieFile(e.target.files?.[0] || null)}
                     className="w-full border rounded-lg px-3 py-2"
                   />
@@ -1034,7 +1058,7 @@ const ListService: React.FC<ListServiceProps> = ({ initialServiceType }) => {
             />
             <p className="text-xs text-gray-500 mt-1">
               {user?.verification?.businessVerified 
-                ? "✓ Business permit verified. Upload a new one only if it has changed."
+                ? "Business permit verified. Upload a new one only if it has changed."
                 : "Upload once to boost your trust score. You won't need to resubmit for future listings."}
             </p>
           </div>

@@ -1,6 +1,6 @@
 import { API_ENDPOINTS } from '../config/api';
 
-const token = localStorage.getItem('kodisha_token');
+const getToken = () => localStorage.getItem('kodisha_token');
 
 export interface Message {
   _id: string;
@@ -31,6 +31,7 @@ export const sendMessage = async (
   body: string,
   listingId?: string
 ): Promise<Message> => {
+  const token = getToken();
   if (!token) {
     throw new Error('Authentication required');
   }
@@ -60,6 +61,7 @@ export const sendMessage = async (
  * Get all message threads (latest message per contact)
  */
 export const getMessageThreads = async (): Promise<MessageThread[]> => {
+  const token = getToken();
   if (!token) {
     throw new Error('Authentication required');
   }
@@ -85,6 +87,7 @@ export const getMessageThreads = async (): Promise<MessageThread[]> => {
  * Get full conversation with a specific user
  */
 export const getConversation = async (userId: string): Promise<Message[]> => {
+  const token = getToken();
   if (!token) {
     throw new Error('Authentication required');
   }
@@ -110,6 +113,7 @@ export const getConversation = async (userId: string): Promise<Message[]> => {
  * Mark all messages from a user as read
  */
 export const markMessagesAsRead = async (userId: string): Promise<void> => {
+  const token = getToken();
   if (!token) {
     throw new Error('Authentication required');
   }

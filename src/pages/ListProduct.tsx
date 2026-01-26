@@ -3,6 +3,7 @@ import { useProperties } from "../contexts/PropertyContext";
 import { useAuth } from "../contexts/AuthContext";
 import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from "../data/kenyaCounties";
 import { API_BASE_URL } from "../config/api";
+import { AlertCircle } from "lucide-react";
 
 type ProductCategory = "produce" | "livestock" | "inputs";
 
@@ -90,21 +91,21 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
 
   const idVerified = !!user?.verification?.idVerified;
   const selfieVerified = !!user?.verification?.selfieVerified;
-  const idDocsNeeded = !idVerified;
-  const selfieNeeded = !selfieVerified;
+  const hasPendingIdVerification =
+    !!user?.verification?.idVerificationPending ||
+    !!user?.verification?.idVerificationSubmitted;
+  const isVerificationPending =
+    hasPendingIdVerification && (!idVerified || !selfieVerified);
+  const idDocsNeeded = !idVerified && !hasPendingIdVerification;
+  const selfieNeeded = !selfieVerified && !hasPendingIdVerification;
 
   const uploadVerificationDoc = async (type: string, file: File) => {
     const token = localStorage.getItem('kodisha_token');
-    const userId = (user as any)?._id || (user as any)?.id;
     if (!token) {
       throw new Error('You must be logged in to upload verification documents.');
     }
-    if (!userId) {
-      throw new Error('Missing user id for verification uploads.');
-    }
 
     const formData = new FormData();
-    formData.append('userId', userId);
     formData.append('file', file);
 
     const response = await fetch(`${API_BASE_URL}/verification/upload/${type}`, {
@@ -122,11 +123,11 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
   const ensureDocsUploaded = async () => {
     const uploads: Array<{ type: string; file: File }> = [];
 
-    if (!idVerified) {
+    if (!idVerified && !hasPendingIdVerification) {
       if (idFrontFile) uploads.push({ type: 'id-front', file: idFrontFile });
       if (idBackFile) uploads.push({ type: 'id-back', file: idBackFile });
     }
-    if (!selfieVerified && selfieFile) {
+    if (!selfieVerified && !hasPendingIdVerification && selfieFile) {
       uploads.push({ type: 'selfie', file: selfieFile });
     }
 
@@ -150,11 +151,11 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
     }
     
     // Check if verification documents are provided
-    if (!idVerified && (!idFrontFile || !idBackFile)) {
+    if (!idVerified && !hasPendingIdVerification && (!idFrontFile || !idBackFile)) {
       alert("Please upload both sides of your National ID (front and back).");
       return;
     }
-    if (!selfieVerified && !selfieFile) {
+    if (!selfieVerified && !hasPendingIdVerification && !selfieFile) {
       alert("Please upload a selfie holding your ID.");
       return;
     }
@@ -420,12 +421,12 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
           <div>
             <h2 className="text-xl font-semibold text-gray-800">Verification Documents</h2>
             <p className="text-sm text-gray-600">
-              Upload your ID and selfie for verification. This is required for all product listings to ensure buyer trust.
+              Upload your ID and selfie once. Listings submitted before approval stay in pending verification until reviewed.
             </p>
           </div>
           {docUploading && (
             <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
-              Uploading docs…
+              Uploading docs...
             </span>
           )}
         </div>
@@ -436,8 +437,18 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
             <div>
-              <p className="text-green-800 font-semibold">✓ ID Already Verified</p>
+              <p className="text-green-800 font-semibold">ID already verified</p>
               <p className="text-sm text-green-700">Your identity documents have been verified by our team.</p>
+            </div>
+          </div>
+        ) : isVerificationPending ? (
+          <div className="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5" />
+            <div>
+              <p className="text-amber-800 font-semibold">Documents submitted</p>
+              <p className="text-sm text-amber-700">
+                Your ID and selfie are pending review. You can submit this listing now; it will stay pending until approved.
+              </p>
             </div>
           </div>
         ) : (
@@ -451,7 +462,7 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
                 accept="image/*,application/pdf"
                 onChange={(e) => setIdFrontFile(e.target.files?.[0] || null)}
                 className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
-                required={!idVerified}
+                required={idDocsNeeded}
               />
               <p className="mt-1 text-xs text-gray-500">
                 Required for product listings unless already verified.
@@ -467,7 +478,7 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
                 accept="image/*,application/pdf"
                 onChange={(e) => setIdBackFile(e.target.files?.[0] || null)}
                 className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
-                required={!idVerified}
+                required={idDocsNeeded}
               />
               <p className="mt-1 text-xs text-gray-500">
                 Required for product listings unless already verified.
@@ -483,7 +494,7 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
                 accept="image/*,application/pdf"
                 onChange={(e) => setSelfieFile(e.target.files?.[0] || null)}
                 className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
-                required={!selfieVerified}
+                required={selfieNeeded}
               />
               <p className="mt-1 text-xs text-gray-500">
                 Take a clear photo holding your ID next to your face. Required unless already verified.
@@ -527,7 +538,7 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
                   onClick={() => removeImage(idx)}
                   className="text-red-600 font-bold"
                 >
-                  ×
+                  X
                 </button>
               </div>
             ))}
@@ -545,9 +556,11 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
         {docUploading ? "Uploading Documents..." : uploading ? "Listing Product..." : "List Product"}
       </button>
       <p className="text-xs text-gray-500 text-center">
-        {idVerified && selfieVerified 
-          ? "Your identity is verified. Free listings for 3 months, then 2.5% commission applies." 
-          : "ID + selfie verification required. One-time upload reviewed by admin."}
+        {idVerified && selfieVerified
+          ? "Your identity is verified. Free listings for 3 months, then 2.5% commission applies."
+          : isVerificationPending
+          ? "Documents submitted. This listing will stay pending until verification is approved."
+          : "Upload ID + selfie once to submit; review is handled by admin."}
       </p>
     </form>
   );

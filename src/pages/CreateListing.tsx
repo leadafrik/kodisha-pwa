@@ -81,7 +81,12 @@ const CreateListing: React.FC = () => {
   const [idVerified, setIdVerified] = useState(false);
   const [selfieVerified, setSelfieVerified] = useState(false);
   const [hasDraft, setHasDraft] = useState(false);
-  const verificationErrorMessage = "Please complete ID and selfie verification before listing";
+  const verificationErrorMessage = "Please upload your ID and selfie before listing";
+  const hasPendingIdVerification =
+    !!user?.verification?.idVerificationPending || !!user?.verification?.idVerificationSubmitted;
+  const isVerificationPending =
+    hasPendingIdVerification && (!idVerified || !selfieVerified);
+  const requiresVerification = (!idVerified || !selfieVerified) && !isVerificationPending;
 
   // Pre-fill contact
   useEffect(() => {
@@ -124,10 +129,13 @@ const CreateListing: React.FC = () => {
   }, [user]);
 
   useEffect(() => {
-    if (idVerified && selfieVerified && error === verificationErrorMessage) {
+    if (
+      (idVerified && selfieVerified) ||
+      (hasPendingIdVerification && error === verificationErrorMessage)
+    ) {
       setError("");
     }
-  }, [idVerified, selfieVerified, error, verificationErrorMessage]);
+  }, [idVerified, selfieVerified, hasPendingIdVerification, error, verificationErrorMessage]);
 
   // Update constituencies when county changes
   useEffect(() => {
@@ -257,7 +265,7 @@ const CreateListing: React.FC = () => {
     }
 
     if (form.step === 5) {
-      if (!idVerified || !selfieVerified) {
+      if ((!idVerified || !selfieVerified) && !hasPendingIdVerification) {
         setError(verificationErrorMessage);
         return false;
       }
@@ -839,32 +847,76 @@ const CreateListing: React.FC = () => {
 
               {/* Verification Status */}
               <div className="mb-6 space-y-3">
-                <div className={`p-4 rounded-xl border ${idVerified ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"}`}>
-                  <p className={`flex items-center gap-2 font-semibold ${idVerified ? "text-emerald-700" : "text-red-700"}`}>
+                <div className={`p-4 rounded-xl border ${
+                  idVerified
+                    ? "bg-emerald-50 border-emerald-200"
+                    : isVerificationPending
+                    ? "bg-amber-50 border-amber-200"
+                    : "bg-red-50 border-red-200"
+                }`}>
+                  <p className={`flex items-center gap-2 font-semibold ${
+                    idVerified
+                      ? "text-emerald-700"
+                      : isVerificationPending
+                      ? "text-amber-700"
+                      : "text-red-700"
+                  }`}>
                     {idVerified ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
                     National ID verification
                   </p>
-                  <p className={`text-sm mt-1 ${idVerified ? "text-emerald-600" : "text-red-600"}`}>
-                    {idVerified ? "Verified" : "Required - please upload ID"}
+                  <p className={`text-sm mt-1 ${
+                    idVerified
+                      ? "text-emerald-600"
+                      : isVerificationPending
+                      ? "text-amber-600"
+                      : "text-red-600"
+                  }`}>
+                    {idVerified
+                      ? "Verified"
+                      : isVerificationPending
+                      ? "Submitted - pending approval"
+                      : "Required - please upload ID"}
                   </p>
                 </div>
 
-                <div className={`p-4 rounded-xl border ${selfieVerified ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"}`}>
-                  <p className={`flex items-center gap-2 font-semibold ${selfieVerified ? "text-emerald-700" : "text-red-700"}`}>
+                <div className={`p-4 rounded-xl border ${
+                  selfieVerified
+                    ? "bg-emerald-50 border-emerald-200"
+                    : isVerificationPending
+                    ? "bg-amber-50 border-amber-200"
+                    : "bg-red-50 border-red-200"
+                }`}>
+                  <p className={`flex items-center gap-2 font-semibold ${
+                    selfieVerified
+                      ? "text-emerald-700"
+                      : isVerificationPending
+                      ? "text-amber-700"
+                      : "text-red-700"
+                  }`}>
                     {selfieVerified ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
                     Selfie verification
                   </p>
-                  <p className={`text-sm mt-1 ${selfieVerified ? "text-emerald-600" : "text-red-600"}`}>
-                    {selfieVerified ? "Verified" : "Required - please upload selfie"}
+                  <p className={`text-sm mt-1 ${
+                    selfieVerified
+                      ? "text-emerald-600"
+                      : isVerificationPending
+                      ? "text-amber-600"
+                      : "text-red-600"
+                  }`}>
+                    {selfieVerified
+                      ? "Verified"
+                      : isVerificationPending
+                      ? "Submitted - pending approval"
+                      : "Required - please upload selfie"}
                   </p>
                 </div>
               </div>
 
-              {!idVerified || !selfieVerified ? (
+              {requiresVerification ? (
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
                   <p className="text-amber-800 font-semibold mb-2">Complete your verification first</p>
                   <p className="text-amber-700 text-sm mb-4">
-                    You must complete ID and selfie verification before listing. Visit your profile to upload these documents.
+                    You must upload your ID and selfie before listing. Visit your profile to submit these documents.
                   </p>
                   <button
                     type="button"

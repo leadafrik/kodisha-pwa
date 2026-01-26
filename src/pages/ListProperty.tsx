@@ -293,25 +293,29 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
   const monetizationSummaryLabel = `${selectedPlanDetails.name}${boostLabel}${verificationLabel}`;
   const idVerified = !!user?.verification?.idVerified;
   const selfieVerified = !!user?.verification?.selfieVerified;
-  const hasIdDocs = idVerified || (idFrontFile !== null && idBackFile !== null);
-  const hasSelfieDoc = selfieVerified || selfieFile !== null;
+  const hasPendingIdVerification =
+    !!user?.verification?.idVerificationPending ||
+    !!user?.verification?.idVerificationSubmitted;
+  const isVerificationPending =
+    hasPendingIdVerification && (!idVerified || !selfieVerified);
+  const hasIdDocs =
+    idVerified ||
+    hasPendingIdVerification ||
+    (idFrontFile !== null && idBackFile !== null);
+  const hasSelfieDoc =
+    selfieVerified || hasPendingIdVerification || selfieFile !== null;
   const identityDocsSatisfied = hasIdDocs && hasSelfieDoc;
 
-  const idDocsNeeded = !idVerified;
-  const selfieNeeded = !selfieVerified;
+  const idDocsNeeded = !idVerified && !hasPendingIdVerification;
+  const selfieNeeded = !selfieVerified && !hasPendingIdVerification;
 
   const uploadVerificationDoc = async (type: string, file: File) => {
     const token = localStorage.getItem('kodisha_token');
-    const userId = (user as any)?._id || (user as any)?.id;
     if (!token) {
       throw new Error('You must be logged in to upload verification documents.');
     }
-    if (!userId) {
-      throw new Error('Missing user id for verification uploads.');
-    }
 
     const formData = new FormData();
-    formData.append('userId', userId);
     formData.append('file', file);
 
     const response = await fetch(`${API_BASE_URL}/verification/upload/${type}`, {
@@ -329,11 +333,11 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
   const ensureDocsUploaded = async () => {
     const uploads: Array<{ type: string; file: File }> = [];
 
-    if (!idVerified) {
+    if (!idVerified && !hasPendingIdVerification) {
       if (idFrontFile) uploads.push({ type: 'id-front', file: idFrontFile });
       if (idBackFile) uploads.push({ type: 'id-back', file: idBackFile });
     }
-    if (!selfieVerified && selfieFile) {
+    if (!selfieVerified && !hasPendingIdVerification && selfieFile) {
       uploads.push({ type: 'selfie', file: selfieFile });
     }
 
@@ -561,7 +565,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-gray-800 mb-2">List Your Farmland</h1>
-      <p className="text-gray-600 mb-8">Connect with farmers across Kenya â€” list your land for rent/lease with clear pricing and trust signals.</p>
+      <p className="text-gray-600 mb-8">Connect with farmers across Kenya - list your land for rent/lease with clear pricing and trust signals.</p>
 
       {saleListingsPaused && (
         <div className="mb-6 rounded-lg border-l-4 border-yellow-400 bg-yellow-50 text-yellow-800 px-4 py-3">
@@ -666,24 +670,34 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
             <div>
               <h2 className="text-xl font-semibold text-gray-800">Verification Documents</h2>
               <p className="text-sm text-gray-600">
-                Upload the documents needed for rent/lease. Ownership proofs are optional but improve trust and speed approvals.
+                Upload the documents needed for rent/lease. Listings submitted before approval stay pending verification.
               </p>
             </div>
             {docUploading && (
               <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
-                Uploading docs…
+                Uploading docs...
               </span>
             )}
           </div>
 
-          {user?.verification?.idVerified && user?.verification?.selfieVerified ? (
+          {idVerified && selfieVerified ? (
             <div className="flex items-center space-x-2 p-3 bg-green-50 border border-green-200 rounded-lg">
               <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
               <div>
-                <p className="text-green-800 font-semibold">✓ ID Already Verified</p>
+                <p className="text-green-800 font-semibold">ID already verified</p>
                 <p className="text-sm text-green-700">Your identity documents have been verified by our team.</p>
+              </div>
+            </div>
+          ) : isVerificationPending ? (
+            <div className="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <span className="mt-0.5 text-amber-600">!</span>
+              <div>
+                <p className="text-amber-800 font-semibold">Documents submitted</p>
+                <p className="text-sm text-amber-700">
+                  Your ID and selfie are pending review. You can submit this listing now; it will stay pending until approved.
+                </p>
               </div>
             </div>
           ) : (
@@ -697,7 +711,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
                   accept="image/*,application/pdf"
                   onChange={(e) => setIdFrontFile(e.target.files?.[0] || null)}
                   className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  required={!idVerified}
+                  required={idDocsNeeded}
                 />
                 <p className="mt-1 text-xs text-gray-500">
                   Required for rent/lease unless already verified.
@@ -713,7 +727,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
                   accept="image/*,application/pdf"
                   onChange={(e) => setIdBackFile(e.target.files?.[0] || null)}
                   className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  required={!idVerified}
+                  required={idDocsNeeded}
                 />
                 <p className="mt-1 text-xs text-gray-500">
                   Required for rent/lease unless already verified.
@@ -729,7 +743,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
                   accept="image/*,application/pdf"
                   onChange={(e) => setSelfieFile(e.target.files?.[0] || null)}
                   className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  required={!selfieVerified}
+                  required={selfieNeeded}
                 />
                 <p className="mt-1 text-xs text-gray-500">
                   Needed for trust & fraud checks; already verified users can skip.

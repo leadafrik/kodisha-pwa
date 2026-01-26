@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { io, Socket } from 'socket.io-client';
 import { messageService, MessageThread, Message } from '../services/messageService';
+import { useAuth } from '../contexts/AuthContext';
+import { SOCKET_URL } from '../config/api';
 import { ChevronLeft, Send, Check, CheckCheck } from 'lucide-react';
 
 const Messages: React.FC = () => {
@@ -10,7 +13,9 @@ const Messages: React.FC = () => {
   const [messageInput, setMessageInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const socketRef = useRef<Socket | null>(null);
 
   // Auto-scroll to bottom
   const scrollToBottom = () => {
@@ -39,6 +44,70 @@ const Messages: React.FC = () => {
     loadThreads();
   }, []);
 
+  useEffect(() => {
+    const token = localStorage.getItem('kodisha_token');
+    if (!token || !user?._id) return;
+
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+    }
+
+    const socket = io(SOCKET_URL, {
+      auth: { token },
+      transports: ['websocket'],
+    });
+
+    socket.on('message:new', (msg: Message) => {
+      setMessages((prev) => {
+        if (!selectedUserId) return prev;
+        const isFromSelected =
+          msg.from === selectedUserId || msg.to === selectedUserId;
+        if (!isFromSelected) return prev;
+        if (prev.find((m) => m._id === msg._id)) return prev;
+        return [...prev, msg];
+      });
+
+      setThreads((prev) => {
+        const counterpartId = msg.from === user._id ? msg.to : msg.from;
+        const existing = prev.find((t) => t.counterpart === counterpartId || t.to === counterpartId);
+        const updatedThread: MessageThread = existing
+          ? { ...existing, body: msg.body, createdAt: msg.createdAt }
+          : {
+              _id: msg._id,
+              from: msg.from,
+              to: msg.to,
+              body: msg.body,
+              createdAt: msg.createdAt,
+              counterpart: counterpartId,
+            };
+        return [updatedThread, ...prev.filter((t) => t !== existing)];
+      });
+
+      if (selectedUserId && msg.from === selectedUserId) {
+        socket.emit('message:read', { from: selectedUserId });
+      }
+    });
+
+    socket.on('message:read', (payload: any) => {
+      const from = payload?.from;
+      if (!from) return;
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.from === user._id && msg.to === from
+            ? { ...msg, read: true, status: 'read' }
+            : msg
+        )
+      );
+    });
+
+    socketRef.current = socket;
+
+    return () => {
+      socket.disconnect();
+      socketRef.current = null;
+    };
+  }, [user?._id, selectedUserId]);
+
   // Fetch conversation and mark as read when selected user changes
   useEffect(() => {
     if (!selectedUserId) return;
@@ -53,6 +122,10 @@ const Messages: React.FC = () => {
         // Mark messages from this user as read
         try {
           await messageService.markMessagesAsRead(selectedUserId);
+          const socket = socketRef.current;
+          if (socket && socket.connected) {
+            socket.emit('message:read', { from: selectedUserId });
+          }
         } catch (markErr) {
           console.error('Failed to mark messages as read:', markErr);
         }
@@ -79,11 +152,17 @@ const Messages: React.FC = () => {
 
     try {
       setError(null);
-      await messageService.sendMessage(selectedUserId, messageText);
-
-      // Refresh conversation
-      const data = await messageService.getConversation(selectedUserId);
-      setMessages(data);
+      const socket = socketRef.current;
+      if (socket && socket.connected) {
+        socket.emit('message:send', {
+          to: selectedUserId,
+          body: messageText,
+        });
+      } else {
+        await messageService.sendMessage(selectedUserId, messageText);
+        const data = await messageService.getConversation(selectedUserId);
+        setMessages(data);
+      }
     } catch (err) {
       setError((err as Error).message);
       setMessageInput(messageText); // Restore input on error
@@ -216,7 +295,7 @@ const Messages: React.FC = () => {
                   </div>
                 ) : (
                   messages.map((msg) => {
-                    const isOwn = msg.from === localStorage.getItem('userId') || msg.from !== selectedUserId;
+                    const isOwn = msg.from === user?._id;
 
                     return (
                       <div
