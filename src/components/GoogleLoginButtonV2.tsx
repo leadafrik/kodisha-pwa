@@ -22,26 +22,42 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
 }) => {
   const { loginWithGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Initialize Google Auth on component mount
   useEffect(() => {
     const initGoogle = async () => {
       try {
         const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-        if (clientId) {
-          await googleAuth.init(clientId);
+
+        if (!clientId) {
+          setError("Google configuration missing");
+          return;
         }
+
+        await googleAuth.init(clientId);
+        setIsInitialized(true);
+        setError(null);
       } catch (err) {
-        console.error("[GoogleLoginButton] Init error:", err);
+        const message =
+          err instanceof Error ? err.message : "Failed to initialize Google Auth";
+        console.error("[GoogleLoginButton] Init error:", message);
+        setError(message);
       }
     };
+
     initGoogle();
   }, []);
 
   const handleClick = async () => {
     setIsLoading(true);
+    setError(null);
+
     try {
-      const { user, idToken } = await googleAuth.signIn();
+      if (!isInitialized || !googleAuth.isInitialized()) {
+        throw new Error("Google Auth not initialized");
+      }
 
       if (!user.email) {
         throw new Error("Google account must have email");
@@ -69,13 +85,16 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
         );
       }
 
+      // Success - trigger callback
       if (onSuccess) {
         onSuccess();
       }
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Google sign-in failed";
+
       console.error("[GoogleLoginButton] Sign-in error:", errorMessage);
+      setError(errorMessage);
 
       if (onError) {
         onError(errorMessage);
@@ -85,11 +104,16 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
     }
   };
 
+  if (error && !isInitialized) {
+    // Silent fail - show nothing if not initialized
+    return null;
+  }
+
   return (
     <button
       type="button"
       onClick={handleClick}
-      disabled={isLoading}
+      disabled={isLoading || !isInitialized}
       aria-label="Sign in with Google"
       className={`
         inline-flex items-center justify-center gap-2
