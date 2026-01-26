@@ -144,7 +144,6 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
         <span>Continue with Facebook</span>
       )}
     </button>
-    </>
   );
 };
 
