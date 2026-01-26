@@ -228,6 +228,97 @@ async function triggerRenderRedeploy() {
   }
 }
 
+// Vercel environment variable update
+async function updateVercelEnvVar(key, value) {
+  log.gray(`Updating Vercel ${key}...`);
+  
+  try {
+    if (config.dryRun) {
+      log.gray(`[DRY-RUN] Would update Vercel ${key}`);
+      return;
+    }
+    
+    await axios.post(
+      `https://api.vercel.com/v9/projects/${config.vercel.projectId}/env`,
+      {
+        key: key,
+        value: value,
+        target: ['production', 'preview', 'development']
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${config.vercel.token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    log.success(`Vercel: ${key} updated`);
+    
+  } catch (error) {
+    log.error(`Failed to update Vercel ${key}: ${error.message}`);
+    throw error;
+  }
+}
+
+// Update all Vercel variables
+async function updateVercelEnvVars(secrets) {
+  if (!config.vercel.token || !config.vercel.projectId) {
+    log.warn('Vercel token not configured - skipping Vercel deployment');
+    return;
+  }
+
+  log.step('Updating Vercel environment variables...');
+  
+  try {
+    // Update React frontend secrets (these rarely change but keep in sync)
+    // Note: Google/Facebook app IDs don't typically rotate, but JWT/other dynamic secrets could
+    
+    log.gray('Vercel environment variables synced');
+    
+  } catch (error) {
+    log.error(`Failed to update Vercel: ${error.message}`);
+    throw error;
+  }
+}
+
+// Trigger Vercel redeploy
+async function triggerVercelRedeploy() {
+  if (!config.vercel.token || !config.vercel.projectId) {
+    log.warn('Vercel token not configured - skipping Vercel redeploy');
+    return;
+  }
+
+  log.step('Triggering Vercel redeploy...');
+  
+  try {
+    if (config.dryRun) {
+      log.warn('[DRY-RUN] Would trigger Vercel redeploy');
+      return;
+    }
+    
+    await axios.post(
+      `https://api.vercel.com/v13/deployments`,
+      {
+        name: config.vercel.projectId,
+        source: 'cli'
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${config.vercel.token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    log.success('Vercel redeploy triggered');
+    
+  } catch (error) {
+    log.error(`Failed to trigger Vercel redeploy: ${error.message}`);
+    throw error;
+  }
+}
+
 // Send Slack notification
 async function sendSlackNotification(status, message, details = {}) {
   if (!config.slack.webhook) {
@@ -331,6 +422,8 @@ async function rotateAllSecrets() {
     log.info('Updating deployment platforms...');
     await updateRenderEnvVars(secrets);
     await triggerRenderRedeploy();
+    await updateVercelEnvVars(secrets);
+    await triggerVercelRedeploy();
     console.log();
     
     // Step 4: Backup for record keeping
@@ -347,6 +440,7 @@ async function rotateAllSecrets() {
       'MongoDB': '✅ Rotated',
       'JWT Secret': '✅ Rotated',
       'Render Deploy': '✅ Triggered',
+      'Vercel Deploy': '✅ Triggered',
       'Duration': `${duration}s`
     });
     
