@@ -107,28 +107,33 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
     }
   };
 
-  if (error && !isInitialized) {
-    // Silent fail - show nothing if not initialized
-    return null;
-  }
+  const isDisabled = isLoading || !isInitialized;
+  const isConfigError = error && !isInitialized;
 
   return (
-    <button
-      type="button"
-      onClick={handleClick}
-      disabled={isLoading || !isInitialized}
-      aria-label="Sign in with Facebook"
-      className={`
-        inline-flex items-center justify-center gap-2
-        w-full px-4 py-3
-        bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400
-        text-white font-semibold text-sm
-        border-2 border-blue-600 hover:border-blue-700 disabled:border-gray-400
-        rounded-lg transition-all duration-200
-        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
-        ${className}
-      `}
-    >
+    <>
+      {isConfigError && (
+        <div className="mb-2 p-2 text-xs text-red-600 bg-red-50 rounded border border-red-200">
+          Facebook login unavailable. Please contact support.
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={isDisabled}
+        aria-label="Sign in with Facebook"
+        title={isConfigError ? "Facebook login not configured" : undefined}
+        className={`
+          inline-flex items-center justify-center gap-2
+          w-full px-4 py-3
+          bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400
+          text-white font-semibold text-sm
+          border-2 border-blue-600 hover:border-blue-700 disabled:border-gray-400
+          rounded-lg transition-all duration-200
+          focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+          ${className}
+        `}
+      >
       {/* Facebook Logo */}
       <svg
         className="w-5 h-5"
@@ -149,6 +154,7 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
         <span>Continue with Facebook</span>
       )}
     </button>
+    </>
   );
 };
 

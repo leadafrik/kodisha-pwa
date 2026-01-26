@@ -107,28 +107,33 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
     }
   };
 
-  if (error && !isInitialized) {
-    // Silent fail - show nothing if not initialized
-    return null;
-  }
+  const isDisabled = isLoading || !isInitialized;
+  const isConfigError = error && !isInitialized;
 
   return (
-    <button
-      type="button"
-      onClick={handleClick}
-      disabled={isLoading || !isInitialized}
-      aria-label="Sign in with Google"
-      className={`
-        inline-flex items-center justify-center gap-2
-        w-full px-4 py-3
-        bg-white hover:bg-gray-50 disabled:bg-gray-100
-        text-gray-700 font-semibold text-sm
-        border-2 border-gray-300 hover:border-gray-400 disabled:border-gray-300
-        rounded-lg transition-all duration-200
-        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500
-        ${className}
-      `}
-    >
+    <>
+      {isConfigError && (
+        <div className="mb-2 p-2 text-xs text-red-600 bg-red-50 rounded border border-red-200">
+          Google login unavailable. Please contact support.
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={isDisabled}
+        aria-label="Sign in with Google"
+        title={isConfigError ? "Google login not configured" : undefined}
+        className={`
+          inline-flex items-center justify-center gap-2
+          w-full px-4 py-3
+          bg-white hover:bg-gray-50 disabled:bg-gray-100
+          text-gray-700 font-semibold text-sm
+          border-2 border-gray-300 hover:border-gray-400 disabled:border-gray-300
+          rounded-lg transition-all duration-200
+          focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500
+          ${className}
+        `}
+      >
       {/* Google Logo */}
       <svg
         className="w-5 h-5"
@@ -163,6 +168,7 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
         <span>Continue with Google</span>
       )}
     </button>
+    </>
   );
 };
 
