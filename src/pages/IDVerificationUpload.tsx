@@ -85,7 +85,7 @@ const IDVerificationUpload: React.FC = () => {
     } catch {
       setLatestVerification(null);
     }
-  }, [updateProfile, user, user?.verification]);
+  }, [updateProfile, user]);
 
   useEffect(() => {
     if (!user) {
