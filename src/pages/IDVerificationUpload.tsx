@@ -54,8 +54,18 @@ const IDVerificationUpload: React.FC = () => {
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
 
+  const getAuthToken = () => {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem("kodisha_token");
+  };
+
   const loadLatestStatus = useCallback(async () => {
     if (!user) {
+      return;
+    }
+    const token = getAuthToken();
+    if (!token) {
+      setError("Session expired. Please sign in again.");
       return;
     }
     try {
@@ -131,6 +141,12 @@ const IDVerificationUpload: React.FC = () => {
   const handleSubmit = async () => {
     if (!idFile || !selfieFile) {
       setError("Please upload both ID and selfie documents");
+      return;
+    }
+
+    const token = getAuthToken();
+    if (!token) {
+      setError("Session expired. Please sign in again.");
       return;
     }
 
