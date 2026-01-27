@@ -66,6 +66,9 @@ export const API_ENDPOINTS = {
     resendVerification: `${API_BASE_URL}/auth/resend-verification`,
     registerAdmin: `${API_BASE_URL}/auth/register-admin`,
   },
+  config: {
+    public: `${API_BASE_URL}/config/public`,
+  },
   verification: {
     send: `${API_BASE_URL}/verification/send`,
     verify: `${API_BASE_URL}/verification/verify`,

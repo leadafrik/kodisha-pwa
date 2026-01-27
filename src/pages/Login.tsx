@@ -26,6 +26,8 @@ const Login: React.FC = () => {
     register,
     requestEmailOtp,
     verifyEmailOtp,
+    requestSmsOtp,
+    verifySmsOtp,
     resetPasswordWithEmail,
     loading,
   } = useAuth();
@@ -67,9 +69,10 @@ const Login: React.FC = () => {
   });
   const socialConsentResolver = useRef<((consents: LegalConsents | null) => void) | null>(null);
 
-  // OTP State (email only for now)
+  // OTP State
   const [otpCode, setOtpCode] = useState("");
-  const [otpEmail, setOtpEmail] = useState("");
+  const [otpTarget, setOtpTarget] = useState("");
+  const [otpMethod, setOtpMethod] = useState<"email" | "sms">("email");
   const [otpTimer, setOtpTimer] = useState(0);
   const [canResendOtp, setCanResendOtp] = useState(true);
 
@@ -235,6 +238,15 @@ const Login: React.FC = () => {
       await login(loginData.emailOrPhone, loginData.password);
       navigate(redirectTo);
     } catch (err: any) {
+      if (err?.requiresVerification) {
+        const method = err?.verificationMethod === "sms" ? "sms" : "email";
+        setOtpMethod(method);
+        setOtpTarget(err?.verificationTarget || loginData.emailOrPhone.trim());
+        setInfo(err?.message || "Verification required. Please enter the code.");
+        setMode("otp-verify");
+        startOtpTimer();
+        return;
+      }
       setError(err?.message || "Login failed. Please try again.");
     }
   };
@@ -299,7 +311,8 @@ const Login: React.FC = () => {
       });
 
       // Registration successful; backend already sent email OTP
-      setOtpEmail(email);
+      setOtpTarget(email);
+      setOtpMethod("email");
       setInfo("Verification code sent to your email. Check inbox and spam folder.");
       setMode("otp-verify");
       startOtpTimer();
@@ -319,7 +332,11 @@ const Login: React.FC = () => {
     }
 
     try {
-      await verifyEmailOtp(otpEmail, otpCode.trim());
+      if (otpMethod === "sms") {
+        await verifySmsOtp(otpTarget, otpCode.trim());
+      } else {
+        await verifyEmailOtp(otpTarget, otpCode.trim());
+      }
 
       navigate(redirectTo);
     } catch (err: any) {
@@ -331,8 +348,13 @@ const Login: React.FC = () => {
     resetMessages();
 
     try {
-      await requestEmailOtp(otpEmail);
-      setInfo("Code resent to your email.");
+      if (otpMethod === "sms") {
+        await requestSmsOtp(otpTarget);
+        setInfo("Code resent to your phone.");
+      } else {
+        await requestEmailOtp(otpTarget);
+        setInfo("Code resent to your email.");
+      }
       startOtpTimer();
     } catch (err: any) {
       setError(err?.message || "Failed to resend code.");
@@ -356,7 +378,8 @@ const Login: React.FC = () => {
         return;
       }
       await requestEmailOtp(input);
-      setOtpEmail(input.toLowerCase());
+      setOtpTarget(input.toLowerCase());
+      setOtpMethod("email");
       setMode("otp-reset");
       startOtpTimer();
       setInfo("Reset code sent. Check your email.");
@@ -386,7 +409,7 @@ const Login: React.FC = () => {
 
     try {
       await resetPasswordWithEmail({
-        email: otpEmail,
+        email: otpTarget,
         code: resetData.code.trim(),
         newPassword: resetData.newPassword,
       });
@@ -797,7 +820,7 @@ const Login: React.FC = () => {
     <form onSubmit={handleOtpVerify} className="space-y-4">
       <div className="text-center mb-4">
         <p className="text-gray-700">
-          Verification code sent to <strong>{otpEmail}</strong>
+          Verification code sent to <strong>{otpTarget}</strong>
         </p>
       </div>
 

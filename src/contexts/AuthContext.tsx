@@ -124,6 +124,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         body: JSON.stringify(payload),
       });
 
+      if (res?.requiresVerification) {
+        const err: any = new Error(res.message || "Verification required");
+        err.requiresVerification = true;
+        err.verificationMethod = res.verificationMethod || (trimmed.includes("@") ? "email" : "sms");
+        err.verificationTarget = res.verificationTarget || trimmed;
+        throw err;
+      }
+
       if (!res.success || !res.user) {
         throw new Error(res.message || "Login failed");
       }

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { LegalConsents } from '../types/property';
 import { facebookAuth } from '../services/facebookAuthV2';
+import { API_ENDPOINTS } from '../config/api';
 
 interface FacebookLoginButtonProps {
   onSuccess?: () => void;
@@ -40,11 +41,48 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
     return '';
   };
 
+  const fetchPublicConfig = async () => {
+    try {
+      const response = await fetch(API_ENDPOINTS.config.public, {
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        return null;
+      }
+
+      const data = await response.json();
+      if (typeof window !== 'undefined') {
+        const win: any = window;
+        win.__ENV__ = {
+          ...(win.__ENV__ || {}),
+          REACT_APP_GOOGLE_CLIENT_ID:
+            data?.googleClientId || win.__ENV__?.REACT_APP_GOOGLE_CLIENT_ID,
+          REACT_APP_FACEBOOK_APP_ID:
+            data?.facebookAppId || win.__ENV__?.REACT_APP_FACEBOOK_APP_ID,
+        };
+      }
+
+      return data;
+    } catch (err) {
+      console.warn('[FacebookLoginButton] Failed to load public config', err);
+      return null;
+    }
+  };
+
+  const resolveFacebookAppId = async () => {
+    const existing = getFacebookAppId();
+    if (existing) return existing;
+
+    const config = await fetchPublicConfig();
+    return config?.facebookAppId || '';
+  };
+
   // Initialize Facebook Auth on component mount
   useEffect(() => {
     const initFacebook = async () => {
       try {
-        const appId = getFacebookAppId();
+        const appId = await resolveFacebookAppId();
 
         if (!appId) {
           setError('Facebook configuration missing');
@@ -71,7 +109,7 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
 
     try {
       if (!isInitialized || !facebookAuth.isInitialized()) {
-        const appId = getFacebookAppId();
+        const appId = await resolveFacebookAppId();
         if (!appId) {
           throw new Error('Facebook configuration missing');
         }
