@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { API_BASE_URL } from "../config/api";
 import { Upload, CheckCircle, AlertCircle, Shield } from "lucide-react";
 import { handleImageError } from "../utils/imageFallback";
 
 const IDVerificationUpload: React.FC = () => {
-  const { user, refreshUser, updateProfile } = useAuth();
+  const { user, refreshUser, updateProfile, logout } = useAuth();
+  const navigate = useNavigate();
   const [step, setStep] = useState<"info" | "documents" | "review" | "submitted">("info");
   const [idFile, setIdFile] = useState<File | null>(null);
   const [selfieFile, setSelfieFile] = useState<File | null>(null);
@@ -50,13 +52,20 @@ const IDVerificationUpload: React.FC = () => {
 
   const getAuthHeaders = (): Record<string, string> => {
     if (typeof window === "undefined") return {};
-    const token = localStorage.getItem("kodisha_token");
+    const token =
+      localStorage.getItem("kodisha_token") || localStorage.getItem("token");
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
 
   const getAuthToken = () => {
     if (typeof window === "undefined") return null;
-    return localStorage.getItem("kodisha_token");
+    return localStorage.getItem("kodisha_token") || localStorage.getItem("token");
+  };
+
+  const handleAuthExpired = () => {
+    setError("Session expired. Please sign in again.");
+    logout();
+    navigate("/login?next=/verify-id", { replace: true });
   };
 
   const loadLatestStatus = useCallback(async () => {
@@ -65,7 +74,7 @@ const IDVerificationUpload: React.FC = () => {
     }
     const token = getAuthToken();
     if (!token) {
-      setError("Session expired. Please sign in again.");
+      handleAuthExpired();
       return;
     }
     try {
@@ -74,7 +83,7 @@ const IDVerificationUpload: React.FC = () => {
         credentials: "include",
       });
       if (response.status === 401) {
-        setError("Session expired. Please sign in again.");
+        handleAuthExpired();
         return;
       }
       const data = await response.json();
@@ -146,7 +155,7 @@ const IDVerificationUpload: React.FC = () => {
 
     const token = getAuthToken();
     if (!token) {
-      setError("Session expired. Please sign in again.");
+      handleAuthExpired();
       return;
     }
 
@@ -170,7 +179,8 @@ const IDVerificationUpload: React.FC = () => {
       );
 
       if (response.status === 401) {
-        throw new Error("Session expired. Please sign in again.");
+        handleAuthExpired();
+        return;
       }
 
       const data = await response.json();
