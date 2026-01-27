@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { PropertyProvider } from './contexts/PropertyContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { VerificationProvider } from './contexts/VerificationContext';
@@ -43,6 +43,7 @@ const BuyerRequestDetails = lazy(() => import('./pages/BuyerRequestDetails'));
 const IDVerificationUpload = lazy(() => import('./pages/IDVerificationUpload'));
 const AdminIDVerification = lazy(() => import('./pages/AdminIDVerification'));
 const AdminContentEditor = lazy(() => import('./pages/admin/AdminContentEditor'));
+const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -97,7 +98,18 @@ function App() {
                       } 
                     />
                     <Route path="/about" element={<AboutUs />} />
+                    <Route path="/contact" element={<AboutUs />} />
+                    <Route path="/help" element={<AboutUs />} />
+                    <Route path="/features" element={<Home />} />
+                    <Route path="/pricing" element={<Home />} />
+                    <Route path="/blog" element={<Home />} />
+                    <Route path="/careers" element={<Home />} />
+                    <Route path="/cookies" element={<PrivacyPolicy />} />
+                    <Route path="/status" element={<Home />} />
+                    <Route path="/feedback" element={<Home />} />
                     <Route path="/login" element={<Login />} />
+                    <Route path="/admin-login" element={<AdminLogin />} />
+                    <Route path="/admin/login" element={<AdminLogin />} />
                     <Route
                       path="/profile"
                       element={
@@ -148,6 +160,10 @@ function App() {
                     <Route path="/admin/analytics" element={<ProtectedRoute><AnalyticsReports /></ProtectedRoute>} />
                     <Route path="/legal/terms" element={<TermsOfService />} />
                     <Route path="/legal/privacy" element={<PrivacyPolicy />} />
+                    <Route path="/terms" element={<TermsOfService />} />
+                    <Route path="/privacy" element={<PrivacyPolicy />} />
+                    <Route path="/notifications" element={<Navigate to="/profile" replace />} />
+                    <Route path="/profile/notifications" element={<Navigate to="/profile" replace />} />
                     <Route path="/error" element={<ServerError />} />
                     <Route path="/offline" element={<Offline />} />
                     <Route path="*" element={<NotFound />} />
