@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { googleAuth } from "../services/googleAuthV2";
+import { API_ENDPOINTS } from "../config/api";
 
 interface GoogleLoginButtonProps {
   onSuccess?: () => void;
@@ -22,11 +23,63 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
   const [isInitialized, setIsInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const getGoogleClientId = useCallback(() => {
+    const fromEnv = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+    if (fromEnv) return fromEnv;
+    if (typeof window !== "undefined") {
+      const win: any = window;
+      return (
+        win.REACT_APP_GOOGLE_CLIENT_ID ||
+        win.__ENV__?.REACT_APP_GOOGLE_CLIENT_ID ||
+        win.GOOGLE_CLIENT_ID ||
+        ""
+      );
+    }
+    return "";
+  }, []);
+
+  const fetchPublicConfig = useCallback(async () => {
+    try {
+      const response = await fetch(API_ENDPOINTS.config.public, {
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        return null;
+      }
+
+      const data = await response.json();
+      if (typeof window !== "undefined") {
+        const win: any = window;
+        win.__ENV__ = {
+          ...(win.__ENV__ || {}),
+          REACT_APP_GOOGLE_CLIENT_ID:
+            data?.googleClientId || win.__ENV__?.REACT_APP_GOOGLE_CLIENT_ID,
+          REACT_APP_FACEBOOK_APP_ID:
+            data?.facebookAppId || win.__ENV__?.REACT_APP_FACEBOOK_APP_ID,
+        };
+      }
+
+      return data;
+    } catch (err) {
+      console.warn("[GoogleLoginButton] Failed to load public config", err);
+      return null;
+    }
+  }, []);
+
+  const resolveGoogleClientId = useCallback(async () => {
+    const existing = getGoogleClientId();
+    if (existing) return existing;
+
+    const config = await fetchPublicConfig();
+    return config?.googleClientId || "";
+  }, [fetchPublicConfig, getGoogleClientId]);
+
   // Initialize Google Auth on component mount
   useEffect(() => {
     const initGoogle = async () => {
       try {
-        const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+        const clientId = await resolveGoogleClientId();
 
         if (!clientId) {
           setError("Google configuration missing");
@@ -45,7 +98,7 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
     };
 
     initGoogle();
-  }, []);
+  }, [resolveGoogleClientId]);
 
   const handleClick = async () => {
     setIsLoading(true);
@@ -53,7 +106,12 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
 
     try {
       if (!isInitialized || !googleAuth.isInitialized()) {
-        throw new Error("Google Auth not initialized");
+        const clientId = await resolveGoogleClientId();
+        if (!clientId) {
+          throw new Error("Google configuration missing");
+        }
+        await googleAuth.init(clientId);
+        setIsInitialized(true);
       }
 
       const { user, idToken } = await googleAuth.signIn();

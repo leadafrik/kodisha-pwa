@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { facebookAuth } from '../services/facebookAuthV2';
+import { API_ENDPOINTS } from '../config/api';
 
 interface FacebookLoginButtonProps {
   onSuccess?: () => void;
@@ -22,11 +23,63 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
   const [isInitialized, setIsInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const getFacebookAppId = useCallback(() => {
+    const fromEnv = process.env.REACT_APP_FACEBOOK_APP_ID;
+    if (fromEnv) return fromEnv;
+    if (typeof window !== 'undefined') {
+      const win: any = window;
+      return (
+        win.REACT_APP_FACEBOOK_APP_ID ||
+        win.__ENV__?.REACT_APP_FACEBOOK_APP_ID ||
+        win.FACEBOOK_APP_ID ||
+        ''
+      );
+    }
+    return '';
+  }, []);
+
+  const fetchPublicConfig = useCallback(async () => {
+    try {
+      const response = await fetch(API_ENDPOINTS.config.public, {
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        return null;
+      }
+
+      const data = await response.json();
+      if (typeof window !== 'undefined') {
+        const win: any = window;
+        win.__ENV__ = {
+          ...(win.__ENV__ || {}),
+          REACT_APP_GOOGLE_CLIENT_ID:
+            data?.googleClientId || win.__ENV__?.REACT_APP_GOOGLE_CLIENT_ID,
+          REACT_APP_FACEBOOK_APP_ID:
+            data?.facebookAppId || win.__ENV__?.REACT_APP_FACEBOOK_APP_ID,
+        };
+      }
+
+      return data;
+    } catch (err) {
+      console.warn('[FacebookLoginButton] Failed to load public config', err);
+      return null;
+    }
+  }, []);
+
+  const resolveFacebookAppId = useCallback(async () => {
+    const existing = getFacebookAppId();
+    if (existing) return existing;
+
+    const config = await fetchPublicConfig();
+    return config?.facebookAppId || '';
+  }, [fetchPublicConfig, getFacebookAppId]);
+
   // Initialize Facebook Auth on component mount
   useEffect(() => {
     const initFacebook = async () => {
       try {
-        const appId = process.env.REACT_APP_FACEBOOK_APP_ID;
+        const appId = await resolveFacebookAppId();
 
         if (!appId) {
           setError('Facebook configuration missing');
@@ -45,7 +98,7 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
     };
 
     initFacebook();
-  }, []);
+  }, [resolveFacebookAppId]);
 
   const handleClick = async () => {
     setIsLoading(true);
@@ -53,7 +106,12 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
 
     try {
       if (!isInitialized || !facebookAuth.isInitialized()) {
-        throw new Error('Facebook Auth not initialized');
+        const appId = await resolveFacebookAppId();
+        if (!appId) {
+          throw new Error('Facebook configuration missing');
+        }
+        await facebookAuth.init(appId);
+        setIsInitialized(true);
       }
 
       const { user, accessToken } = await facebookAuth.login();
