@@ -17,12 +17,8 @@ const IDVerificationUpload: React.FC = () => {
     submittedAt?: string;
   } | null>(null);
 
-  if (!user) {
-    return null;
-  }
-
   const isAlreadyVerified =
-    user.verification?.status === "approved" || !!user.verification?.idVerified;
+    user?.verification?.status === "approved" || !!user?.verification?.idVerified;
   const steps = [
     { key: "info", label: "Overview" },
     { key: "documents", label: "Upload documents" },
@@ -53,6 +49,9 @@ const IDVerificationUpload: React.FC = () => {
   };
 
   const loadLatestStatus = useCallback(async () => {
+    if (!user) {
+      return;
+    }
     try {
       const token = localStorage.getItem("kodisha_token");
       const response = await fetch(`${API_BASE_URL}/verification/id/status`, {
@@ -89,8 +88,11 @@ const IDVerificationUpload: React.FC = () => {
   }, [updateProfile, user?.verification]);
 
   useEffect(() => {
+    if (!user) {
+      return;
+    }
     loadLatestStatus();
-  }, [loadLatestStatus]);
+  }, [loadLatestStatus, user]);
 
   useEffect(() => {
     if (latestVerification?.status && step !== "submitted") {
@@ -99,6 +101,9 @@ const IDVerificationUpload: React.FC = () => {
   }, [latestVerification?.status, step]);
 
   useEffect(() => {
+    if (!user) {
+      return;
+    }
     if (!latestVerification?.status || latestVerification.status !== "pending") {
       return;
     }
@@ -110,6 +115,10 @@ const IDVerificationUpload: React.FC = () => {
 
     return () => clearInterval(interval);
   }, [latestVerification?.status, loadLatestStatus, refreshUser]);
+
+  if (!user) {
+    return null;
+  }
 
   const handleSubmit = async () => {
     if (!idFile || !selfieFile) {
