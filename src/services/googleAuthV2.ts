@@ -86,6 +86,14 @@ class GoogleAuthService {
     }
 
     return new Promise((resolve, reject) => {
+      let settled = false;
+      const timeout = window.setTimeout(() => {
+        if (!settled) {
+          settled = true;
+          reject(new Error("Google Sign-In timed out. Please try again."));
+        }
+      }, 15000);
+
       const callback = (response: any) => {
         try {
           if (!response.credential) {
@@ -120,6 +128,11 @@ class GoogleAuthService {
               picture: jsonPayload.picture,
             };
 
+            if (!settled) {
+              settled = true;
+              window.clearTimeout(timeout);
+            }
+
             resolve({
               user,
               idToken: response.credential,
@@ -128,7 +141,11 @@ class GoogleAuthService {
             throw new Error("Failed to parse Google token");
           }
         } catch (error) {
-          reject(error);
+          if (!settled) {
+            settled = true;
+            window.clearTimeout(timeout);
+            reject(error);
+          }
         }
       };
 
@@ -142,9 +159,13 @@ class GoogleAuthService {
       window.google.accounts.id.prompt((notification: any) => {
         if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
           // One Tap not available, could fallback to redirect flow
-          reject(
-            new Error("Google Sign-In unavailable. Please try again or use email/password.")
-          );
+          if (!settled) {
+            settled = true;
+            window.clearTimeout(timeout);
+            reject(
+              new Error("Google Sign-In unavailable. Please try again or use email/password.")
+            );
+          }
         }
       });
     });
