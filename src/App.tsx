@@ -77,6 +77,7 @@ function App() {
                       }
                     />
                     <Route path="/browse" element={<BrowseListings />} />
+                    <Route path="/listings" element={<BrowseListings />} />
                     <Route path="/find-services" element={<BrowseListings />} />
                     <Route path="/request" element={<BrowseBuyerRequestsPage />} />
                     <Route 
