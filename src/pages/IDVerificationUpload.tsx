@@ -48,17 +48,25 @@ const IDVerificationUpload: React.FC = () => {
     }
   };
 
+  const getAuthHeaders = () => {
+    if (typeof window === "undefined") return {};
+    const token = localStorage.getItem("kodisha_token");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
   const loadLatestStatus = useCallback(async () => {
     if (!user) {
       return;
     }
     try {
-      const token = localStorage.getItem("kodisha_token");
       const response = await fetch(`${API_BASE_URL}/verification/id/status`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: getAuthHeaders(),
+        credentials: "include",
       });
+      if (response.status === 401) {
+        setError("Session expired. Please sign in again.");
+        return;
+      }
       const data = await response.json();
       if (response.ok && data?.verification) {
         setLatestVerification({
@@ -139,12 +147,15 @@ const IDVerificationUpload: React.FC = () => {
         `${API_BASE_URL}/verification/id/submit-documents`,
         {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("kodisha_token")}`,
-          },
+          headers: getAuthHeaders(),
+          credentials: "include",
           body: formData,
         }
       );
+
+      if (response.status === 401) {
+        throw new Error("Session expired. Please sign in again.");
+      }
 
       const data = await response.json();
 
