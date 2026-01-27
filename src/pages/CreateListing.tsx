@@ -117,8 +117,10 @@ const CreateListing: React.FC = () => {
   // Update verification status
   useEffect(() => {
     if (user?.verification) {
-      setIdVerified(!!user.verification.idVerified);
-      setSelfieVerified(!!user.verification.selfieVerified);
+      const verified =
+        user.verification.status === "approved" || !!user.verification.idVerified;
+      setIdVerified(!!verified);
+      setSelfieVerified(!!verified);
     }
   }, [user]);
 
@@ -250,7 +252,7 @@ const CreateListing: React.FC = () => {
     }
 
     if (form.step === 5) {
-      if (!idVerified || !selfieVerified) {
+      if (!idVerified) {
         setError("Please complete ID and selfie verification before listing");
         return false;
       }

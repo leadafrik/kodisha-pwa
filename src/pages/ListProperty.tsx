@@ -291,8 +291,9 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
       ? ` and ${selectedVerificationDetails.name}`
       : '';
   const monetizationSummaryLabel = `${selectedPlanDetails.name}${boostLabel}${verificationLabel}`;
-  const idVerified = !!user?.verification?.idVerified;
-  const selfieVerified = !!user?.verification?.selfieVerified;
+  const idVerified =
+    user?.verification?.status === "approved" || !!user?.verification?.idVerified;
+  const selfieVerified = idVerified;
   const hasIdDocs = idVerified || (idFrontFile !== null && idBackFile !== null);
   const hasSelfieDoc = selfieVerified || selfieFile !== null;
   const identityDocsSatisfied = hasIdDocs && hasSelfieDoc;

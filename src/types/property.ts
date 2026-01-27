@@ -220,12 +220,14 @@ export interface User {
 
   verification?: {
     phoneVerified: boolean;
+    emailVerified: boolean;
     idVerified: boolean;
     selfieVerified: boolean;
     ownershipVerified: boolean;
     businessVerified: boolean;
     trustScore: number;
     verificationLevel: "basic" | "verified" | "premium";
+    status?: "pending" | "approved" | "rejected" | string;
   };
 }
 

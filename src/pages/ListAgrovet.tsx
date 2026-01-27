@@ -310,7 +310,8 @@ const ListAgrovet: React.FC = () => {
     
     try {
       // Only require ID upload if not already verified
-      const isIdVerified = user?.verification?.idVerified && user?.verification?.selfieVerified;
+      const isIdVerified =
+        user?.verification?.status === "approved" || !!user?.verification?.idVerified;
       if (!isIdVerified && (!idFrontFile || !idBackFile || !selfieFile)) {
         alert('Please upload ID front, ID back, and a selfie with your ID to list an agrovet.');
         setSubmitting(false);

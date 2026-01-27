@@ -276,7 +276,8 @@ const ListService: React.FC<ListServiceProps> = ({ initialServiceType }) => {
 
     try {
       // Only require ID upload if not already verified
-      const isIdVerified = user?.verification?.idVerified && user?.verification?.selfieVerified;
+      const isIdVerified =
+        user?.verification?.status === "approved" || !!user?.verification?.idVerified;
       if (!isIdVerified && (!idFrontFile || !idBackFile || !selfieFile)) {
         alert("Please upload ID front, ID back, and a selfie with your ID to list a service.");
         setSubmitting(false);
@@ -384,7 +385,8 @@ const ListService: React.FC<ListServiceProps> = ({ initialServiceType }) => {
         }
       }
 
-      const wasAutoVerified = !!(user?.verification?.idVerified && user?.verification?.selfieVerified);
+      const wasAutoVerified =
+        user?.verification?.status === "approved" || !!user?.verification?.idVerified;
       const publishMessage = wasAutoVerified
         ? 'Service listed and is now live.'
         : 'Service listed successfully! It will appear after verification.';

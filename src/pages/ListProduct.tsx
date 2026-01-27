@@ -88,8 +88,9 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
     setSelectedImages((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  const idVerified = !!user?.verification?.idVerified;
-  const selfieVerified = !!user?.verification?.selfieVerified;
+  const idVerified =
+    user?.verification?.status === "approved" || !!user?.verification?.idVerified;
+  const selfieVerified = idVerified;
   const idDocsNeeded = !idVerified;
   const selfieNeeded = !selfieVerified;
 

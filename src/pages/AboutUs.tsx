@@ -35,7 +35,8 @@ const AboutUs: React.FC = () => {
   const countiesCount = kenyaCounties.length;
   const userCountLabel =
     userCount !== null ? `${userCount.toLocaleString()} registered users` : 'Live user count updating';
-  const isFullyVerified = !!user?.verification?.idVerified && !!user?.verification?.selfieVerified;
+  const isFullyVerified =
+    user?.verification?.status === "approved" || !!user?.verification?.idVerified;
   const verificationLink = user ? (isFullyVerified ? '/profile' : '/verify-id') : '/login';
   const verificationCta = user ? (isFullyVerified ? 'View verification status' : 'Verify your profile') : 'Sign in to verify';
 

@@ -20,9 +20,11 @@ export const VerificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const refreshVerification = useCallback(async () => {
     // For now, set basic status
     // Later we'll fetch from API
+    const idVerified =
+      user?.verification?.status === "approved" || !!user?.verification?.idVerified;
     setVerificationStatus({
       phoneVerified: user?.verification?.phoneVerified || false,
-      idVerified: user?.verification?.idVerified || false,
+      idVerified,
       trustScore: user?.verification?.trustScore || 0,
       verificationLevel: user?.verification?.verificationLevel || 'basic'
     });

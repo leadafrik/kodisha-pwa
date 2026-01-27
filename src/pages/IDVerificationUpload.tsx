@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { API_BASE_URL } from "../config/api";
 import { Upload, CheckCircle, AlertCircle, Shield } from "lucide-react";
 import { handleImageError } from "../utils/imageFallback";
 
 const IDVerificationUpload: React.FC = () => {
-  const { user } = useAuth();
+  const { user, refreshUser, updateProfile } = useAuth();
   const [step, setStep] = useState<"info" | "documents" | "review" | "submitted">("info");
   const [idFile, setIdFile] = useState<File | null>(null);
   const [selfieFile, setSelfieFile] = useState<File | null>(null);
@@ -17,23 +17,22 @@ const IDVerificationUpload: React.FC = () => {
     submittedAt?: string;
   } | null>(null);
 
-  try {
-    if (!user) {
-      return null;
-    }
+  if (!user) {
+    return null;
+  }
 
-    const isAlreadyVerified =
-      user.verification?.idVerified && user.verification?.selfieVerified;
-    const steps = [
-      { key: "info", label: "Overview" },
-      { key: "documents", label: "Upload documents" },
-      { key: "review", label: "Review" },
-      { key: "submitted", label: "Submitted" },
-    ];
-    const currentStepIndex = Math.max(
-      0,
-      steps.findIndex((item) => item.key === step)
-    );
+  const isAlreadyVerified =
+    user.verification?.status === "approved" || !!user.verification?.idVerified;
+  const steps = [
+    { key: "info", label: "Overview" },
+    { key: "documents", label: "Upload documents" },
+    { key: "review", label: "Review" },
+    { key: "submitted", label: "Submitted" },
+  ];
+  const currentStepIndex = Math.max(
+    0,
+    steps.findIndex((item) => item.key === step)
+  );
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "id" | "selfie") => {
     const file = e.target.files?.[0];
@@ -53,7 +52,7 @@ const IDVerificationUpload: React.FC = () => {
     }
   };
 
-  const loadLatestStatus = async () => {
+  const loadLatestStatus = useCallback(async () => {
     try {
       const token = localStorage.getItem("kodisha_token");
       const response = await fetch(`${API_BASE_URL}/verification/id/status`, {
@@ -67,11 +66,50 @@ const IDVerificationUpload: React.FC = () => {
           status: data.verification.status,
           submittedAt: data.verification.submittedAt,
         });
+
+        if (data.verification.status === "approved") {
+            updateProfile({
+              verification: {
+                phoneVerified: user.verification?.phoneVerified ?? false,
+                emailVerified: user.verification?.emailVerified ?? false,
+                idVerified: true,
+                selfieVerified: true,
+                ownershipVerified: user.verification?.ownershipVerified ?? false,
+                businessVerified: user.verification?.businessVerified ?? false,
+                trustScore: user.verification?.trustScore ?? 0,
+                verificationLevel: user.verification?.verificationLevel ?? "basic",
+                status: "approved",
+              },
+            });
+        }
       }
     } catch {
       setLatestVerification(null);
     }
-  };
+  }, [updateProfile, user?.verification]);
+
+  useEffect(() => {
+    loadLatestStatus();
+  }, [loadLatestStatus]);
+
+  useEffect(() => {
+    if (latestVerification?.status && step !== "submitted") {
+      setStep("submitted");
+    }
+  }, [latestVerification?.status, step]);
+
+  useEffect(() => {
+    if (!latestVerification?.status || latestVerification.status !== "pending") {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      loadLatestStatus();
+      refreshUser();
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, [latestVerification?.status, loadLatestStatus, refreshUser]);
 
   const handleSubmit = async () => {
     if (!idFile || !selfieFile) {
@@ -80,6 +118,8 @@ const IDVerificationUpload: React.FC = () => {
     }
 
     try {
+      setError("");
+      setSuccess("");
       setUploading(true);
       const formData = new FormData();
       formData.append("idDocument", idFile);
@@ -103,9 +143,7 @@ const IDVerificationUpload: React.FC = () => {
         throw new Error(data.message || "Upload failed");
       }
 
-      setSuccess(
-        "Documents submitted successfully! Admin review typically takes 1-2 business days."
-      );
+      setSuccess("Documents submitted successfully! Admin review typically takes 1-2 business days.");
       await loadLatestStatus();
       setStep("submitted");
       setIdFile(null);
@@ -456,23 +494,6 @@ const IDVerificationUpload: React.FC = () => {
       </div>
     </div>
     );
-  } catch (err: any) {
-    console.error('Error rendering IDVerificationUpload:', err);
-    return (
-      <div className="max-w-2xl mx-auto p-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-red-900 mb-2">Error Loading Page</h2>
-          <p className="text-red-800 mb-4">{err?.message || 'An unexpected error occurred'}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
-          >
-            Reload Page
-          </button>
-        </div>
-      </div>
-    );
-  }
 };
 
 export default IDVerificationUpload;
