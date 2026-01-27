@@ -62,11 +62,11 @@ const IDVerificationUpload: React.FC = () => {
     return localStorage.getItem("kodisha_token") || localStorage.getItem("token");
   };
 
-  const handleAuthExpired = () => {
+  const handleAuthExpired = useCallback(() => {
     setError("Session expired. Please sign in again.");
     logout();
     navigate("/login?next=/verify-id", { replace: true });
-  };
+  }, [logout, navigate]);
 
   const loadLatestStatus = useCallback(async () => {
     if (!user) {
@@ -112,7 +112,7 @@ const IDVerificationUpload: React.FC = () => {
     } catch {
       setLatestVerification(null);
     }
-  }, [updateProfile, user]);
+  }, [handleAuthExpired, updateProfile, user]);
 
   useEffect(() => {
     if (!user) {
