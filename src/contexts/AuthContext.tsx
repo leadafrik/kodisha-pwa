@@ -4,6 +4,7 @@ import React, {
   useContext,
   useState,
   useEffect,
+  useCallback,
   ReactNode,
 } from "react";
 import { User, AuthContextType, UserFormData } from "../types/property";
@@ -337,7 +338,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem("kodisha_token");
   };
 
-  const refreshUser = async () => {
+  const refreshUser = useCallback(async () => {
     try {
       const res: any = await apiRequest(API_ENDPOINTS.auth.me);
       if (res.success && res.user) {
@@ -350,7 +351,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error("Failed to refresh user:", err);
     }
     return null;
-  };
+  }, []);
 
   const updateProfile = (userData: Partial<User>) => {
     if (user) {
@@ -371,6 +372,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error("Failed to load saved user", e);
     }
   }, []);
+
+  useEffect(() => {
+    const token =
+      localStorage.getItem("kodisha_token") ||
+      localStorage.getItem("kodisha_admin_token") ||
+      localStorage.getItem("token");
+    if (token) {
+      refreshUser();
+    }
+  }, [refreshUser]);
 
   return (
     <AuthContext.Provider
