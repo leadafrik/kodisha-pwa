@@ -303,17 +303,27 @@ const CreateListing: React.FC = () => {
 
       form.images.forEach((img) => formData.append("images", img));
 
-      const token = localStorage.getItem("kodisha_token");
+      const token =
+        localStorage.getItem("kodisha_token") || localStorage.getItem("token");
+      if (!token) {
+        setError("Session expired. Please sign in again.");
+        setUploading(false);
+        navigate("/login?next=/create-listing", { replace: true });
+        return;
+      }
       const response = await fetch(`${API_BASE_URL}/products`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
         body: formData,
       });
 
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        setError(result.message || "Failed to create listing");
+        const errorMessage =
+          result?.message || result?.error || "Failed to create listing";
+        setError(errorMessage);
         setUploading(false);
         return;
       }
