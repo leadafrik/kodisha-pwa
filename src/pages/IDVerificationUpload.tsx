@@ -48,7 +48,7 @@ const IDVerificationUpload: React.FC = () => {
     }
   };
 
-  const getAuthHeaders = () => {
+  const getAuthHeaders = (): Record<string, string> => {
     if (typeof window === "undefined") return {};
     const token = localStorage.getItem("kodisha_token");
     return token ? { Authorization: `Bearer ${token}` } : {};
