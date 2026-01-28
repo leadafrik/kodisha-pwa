@@ -199,6 +199,17 @@ export const apiRequest = async (url: string, options: RequestInit = {}) => {
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("kodisha_token");
+          localStorage.removeItem("kodisha_admin_token");
+          localStorage.removeItem("token");
+          localStorage.removeItem("kodisha_user");
+          if (!window.location.pathname.includes("/login")) {
+            window.location.href = "/login";
+          }
+        }
+      }
       const message =
         (data && (data.message || data.error)) || `API error: ${response.status}`;
       const error: any = new Error(message);
