@@ -120,6 +120,13 @@ export interface ServiceListing {
   type: "equipment" | "agrovet" | "professional_services";
   name: string;
   description: string;
+  status?: string;
+  publishStatus?: string;
+  isDeleted?: boolean;
+  deletedAt?: string;
+  active?: boolean;
+  isActive?: boolean;
+  isPublished?: boolean;
   ownerId?: string;
   ownerName?: string;
   owner?: any;

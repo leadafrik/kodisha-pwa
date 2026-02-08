@@ -78,6 +78,26 @@ const formatLastActive = (value?: string | Date) => {
   return `Active ${date.toLocaleDateString()}`;
 };
 
+const HIDDEN_LISTING_STATUSES = new Set([
+  "draft",
+  "rejected",
+  "deleted",
+  "removed",
+  "archived",
+  "inactive",
+  "delisted",
+]);
+
+const isServiceVisible = (service: any) => {
+  const status = String(service.publishStatus || service.status || "").toLowerCase();
+  if (status && HIDDEN_LISTING_STATUSES.has(status)) return false;
+  if (service.isDeleted === true) return false;
+  if (service.deletedAt) return false;
+  if (service.active === false || service.isActive === false) return false;
+  if (typeof service.isPublished === "boolean" && !service.isPublished) return false;
+  return true;
+};
+
 const BrowseListings: React.FC = () => {
   const { serviceListings, productListings, loading } = useProperties();
   const { user } = useAuth();
@@ -145,8 +165,7 @@ const BrowseListings: React.FC = () => {
     // Service listings
     const serviceCards =
       (serviceListings as any[])?.map((s: any) => {
-        const status = s.publishStatus || s.status;
-        if (status === "rejected" || status === "draft") return null;
+        if (!isServiceVisible(s)) return null;
         const boostFlag =
           s.monetization?.boostOption &&
           s.monetization?.boostOption !== "none";
