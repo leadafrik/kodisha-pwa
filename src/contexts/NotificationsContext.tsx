@@ -29,6 +29,19 @@ interface NotificationsContextType {
 
 const NotificationsContext = createContext<NotificationsContextType | undefined>(undefined);
 
+const urlBase64ToUint8Array = (base64String: string): Uint8Array => {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; i += 1) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+
+  return outputArray;
+};
+
 export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -126,10 +139,16 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       if (granted && user?.id && 'serviceWorker' in navigator && 'PushManager' in window) {
         // Try to subscribe to push notifications
         try {
+          const vapidPublicKey = process.env.REACT_APP_VAPID_PUBLIC_KEY;
+          if (!vapidPublicKey) {
+            console.warn('VAPID public key missing; skipping push subscription');
+            return granted;
+          }
+
           const registration = await navigator.serviceWorker.ready;
           const subscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
-            applicationServerKey: process.env.REACT_APP_VAPID_PUBLIC_KEY,
+            applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
           });
           await subscribeToPushNotifications(user.id, subscription);
         } catch (error) {

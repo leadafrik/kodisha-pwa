@@ -48,7 +48,7 @@ export const getNotificationPreferences = async (
 ): Promise<NotificationPreferences> => {
   try {
     const response = await apiRequest(
-      `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/users/${userId}/notification-preferences`
+      `${API_BASE_URL}/users/${userId}/notification-preferences`
     );
     // API returns { success: true, data: { ... preferences ... } }
     if (response && response.data) {
@@ -89,7 +89,7 @@ export const updateNotificationPreferences = async (
   try {
     const token = localStorage.getItem('kodisha_token') || localStorage.getItem('token');
     const response = await apiRequest(
-      `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/users/${userId}/notification-preferences`,
+      `${API_BASE_URL}/users/${userId}/notification-preferences`,
       {
         method: 'PUT',
         headers: {
@@ -169,7 +169,7 @@ export const triggerMonthlyReminder = async (userId: string): Promise<void> => {
   try {
     const token = localStorage.getItem('kodisha_token') || localStorage.getItem('token');
     await apiRequest(
-      `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/users/${userId}/notifications/monthly-reminder`,
+      `${API_BASE_URL}/users/${userId}/notifications/monthly-reminder`,
       {
         method: 'POST',
         headers: {
@@ -194,7 +194,7 @@ export const subscribeToPushNotifications = async (
   try {
     const token = localStorage.getItem('kodisha_token') || localStorage.getItem('token');
     await apiRequest(
-      `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/users/${userId}/push-subscription`,
+      `${API_BASE_URL}/users/${userId}/push-subscription`,
       {
         method: 'POST',
         headers: {

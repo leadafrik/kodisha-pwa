@@ -37,16 +37,22 @@ const Messages: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userNames, setUserNames] = useState<Record<string, string>>({});
+  const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
   const userNamesRef = useRef<Record<string, string>>({});
+  const selectedUserIdRef = useRef<string | null>(null);
   const initialSelectionDoneRef = useRef(false);
   const location = useLocation();
 
   useEffect(() => {
     userNamesRef.current = userNames;
   }, [userNames]);
+
+  useEffect(() => {
+    selectedUserIdRef.current = selectedUserId;
+  }, [selectedUserId]);
 
   // Auto-scroll to bottom
   const scrollToBottom = () => {
@@ -122,9 +128,10 @@ const Messages: React.FC = () => {
 
     socket.on('message:new', (msg: Message) => {
       setMessages((prev) => {
-        if (!selectedUserId) return prev;
+        const currentSelectedUserId = selectedUserIdRef.current;
+        if (!currentSelectedUserId) return prev;
         const isFromSelected =
-          msg.from === selectedUserId || msg.to === selectedUserId;
+          msg.from === currentSelectedUserId || msg.to === currentSelectedUserId;
         if (!isFromSelected) return prev;
         if (prev.find((m) => m._id === msg._id)) return prev;
         return [...prev, msg];
@@ -151,8 +158,9 @@ const Messages: React.FC = () => {
         loadUserNames([counterpartId]);
       }
 
-      if (selectedUserId && msg.from === selectedUserId) {
-        socket.emit('message:read', { from: selectedUserId });
+      const currentSelectedUserId = selectedUserIdRef.current;
+      if (currentSelectedUserId && msg.from === currentSelectedUserId) {
+        socket.emit('message:read', { from: currentSelectedUserId });
       }
     });
 
@@ -168,13 +176,18 @@ const Messages: React.FC = () => {
       );
     });
 
+    socket.on('presence:update', (list: string[]) => {
+      if (!Array.isArray(list)) return;
+      setOnlineUserIds(list);
+    });
+
     socketRef.current = socket;
 
     return () => {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [user?._id, selectedUserId, loadUserNames]);
+  }, [user?._id, loadUserNames]);
 
   useEffect(() => {
     if (!selectedUserId) return;
@@ -282,6 +295,8 @@ const Messages: React.FC = () => {
     }
   };
 
+  const isSelectedUserOnline = !!selectedUserId && onlineUserIds.includes(selectedUserId);
+
   return (
     <div className="max-w-6xl mx-auto h-screen flex flex-col bg-white">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-0 flex-1 overflow-hidden">
@@ -364,7 +379,9 @@ const Messages: React.FC = () => {
                 </button>
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900">{selectedUserName}</h2>
-                  <p className="text-xs text-gray-500">Online</p>
+                  <p className="text-xs text-gray-500">
+                    {isSelectedUserOnline ? 'Online' : 'Offline'}
+                  </p>
                 </div>
               </div>
 
