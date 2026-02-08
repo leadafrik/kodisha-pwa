@@ -1,38 +1,97 @@
-import React, { useEffect, useState } from 'react';
-import { API_ENDPOINTS, adminApiRequest } from '../../config/api';
+import React, { useEffect, useState } from "react";
+import { API_ENDPOINTS, adminApiRequest } from "../../config/api";
+
+type UiStatus = "open" | "reviewing" | "resolved" | "dismissed";
+type UiSeverity = "low" | "medium" | "high" | "critical";
+
+interface ReportUser {
+  _id?: string;
+  fullName?: string;
+  phone?: string;
+  email?: string;
+  verification?: {
+    status?: string;
+  };
+}
 
 interface Report {
   _id: string;
-  reportedBy: {
-    _id: string;
-    fullName: string;
-    phone: string;
-    email: string;
-  };
-  reportedUser: {
-    _id: string;
-    fullName: string;
-    phone: string;
-    email: string;
-    verification?: {
-      status: string;
-    };
-  };
-  reason: string;
-  description: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  status: 'open' | 'reviewing' | 'resolved' | 'dismissed';
-  resolution: string;
-  createdAt: string;
-  updatedAt: string;
+  reportedBy?: ReportUser;
+  reportedUser?: ReportUser;
+  reason?: string;
+  description?: string;
+  severity?: string;
+  status?: string;
+  resolution?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
+
+const normalizeStatus = (status?: string): UiStatus => {
+  const value = (status || "").toLowerCase();
+  if (value === "pending") return "open";
+  if (value === "investigating") return "reviewing";
+  if (value === "resolved") return "resolved";
+  if (value === "dismissed") return "dismissed";
+  return "open";
+};
+
+const normalizeSeverity = (severity?: string): UiSeverity => {
+  const value = (severity || "").toLowerCase();
+  if (value === "low" || value === "medium" || value === "high" || value === "critical") {
+    return value;
+  }
+  return "low";
+};
+
+const formatDateTime = (dateValue?: string) => {
+  if (!dateValue) return "Unknown";
+  const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) return "Unknown";
+  return date.toLocaleString();
+};
+
+const getUserName = (user?: ReportUser) =>
+  user?.fullName || user?.email || user?.phone || "Unknown user";
+const getUserEmail = (user?: ReportUser) => user?.email || "No email";
+const getUserPhone = (user?: ReportUser) => user?.phone || "No phone";
+
+const getSeverityColor = (severity: UiSeverity) => {
+  switch (severity) {
+    case "critical":
+      return "bg-red-100 text-red-800";
+    case "high":
+      return "bg-orange-100 text-orange-800";
+    case "medium":
+      return "bg-yellow-100 text-yellow-800";
+    case "low":
+      return "bg-blue-100 text-blue-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+};
+
+const getStatusColor = (status: UiStatus) => {
+  switch (status) {
+    case "open":
+      return "bg-red-100 text-red-800";
+    case "reviewing":
+      return "bg-purple-100 text-purple-800";
+    case "resolved":
+      return "bg-green-100 text-green-800";
+    case "dismissed":
+      return "bg-gray-100 text-gray-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+};
 
 const AdminReports: React.FC = () => {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filterStatus, setFilterStatus] = useState('open');
-  const [filterSeverity, setFilterSeverity] = useState('all');
+  const [filterStatus, setFilterStatus] = useState<string>("open");
+  const [filterSeverity, setFilterSeverity] = useState<string>("all");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
@@ -43,17 +102,21 @@ const AdminReports: React.FC = () => {
     setError(null);
     try {
       const query = new URLSearchParams({
-        status: filterStatus,
-        severity: filterSeverity,
         page: page.toString(),
-        limit: '20'
-      }).toString();
+        limit: "20",
+      });
+      if (filterStatus !== "all") query.append("status", filterStatus);
+      if (filterSeverity !== "all") query.append("severity", filterSeverity);
 
-      const data = await adminApiRequest(`${API_ENDPOINTS.admin.reports.getAll}?${query}`);
-      setReports(data.data || []);
-      setTotalPages(data.pagination?.pages || 1);
+      const data = await adminApiRequest(
+        `${API_ENDPOINTS.admin.reports.getAll}?${query.toString()}`
+      );
+      setReports(Array.isArray(data?.data) ? data.data : []);
+      setTotalPages(Number(data?.pagination?.pages) || 1);
     } catch (err: any) {
-      setError(err.message || 'Failed to load reports');
+      setError(err.message || "Failed to load reports");
+      setReports([]);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
@@ -64,45 +127,31 @@ const AdminReports: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterStatus, filterSeverity, page]);
 
-  const handleUpdateStatus = async (reportId: string, newStatus: string) => {
+  const handleUpdateStatus = async (reportId: string, newStatus: UiStatus) => {
     setUpdatingStatus(true);
     try {
       await adminApiRequest(API_ENDPOINTS.admin.reports.updateStatus(reportId), {
-        method: 'PATCH',
-        body: JSON.stringify({ status: newStatus })
+        method: "PATCH",
+        body: JSON.stringify({ status: newStatus }),
       });
-      
-      // Update local state
-      setReports(reports.map(r => r._id === reportId ? { ...r, status: newStatus as any } : r));
-      if (selectedReport?._id === reportId) {
-        setSelectedReport({ ...selectedReport, status: newStatus as any });
-      }
+
+      setReports((prev) =>
+        prev.map((report) =>
+          report._id === reportId ? { ...report, status: newStatus } : report
+        )
+      );
+      setSelectedReport((prev) =>
+        prev && prev._id === reportId ? { ...prev, status: newStatus } : prev
+      );
     } catch (err: any) {
-      setError(err.message || 'Failed to update report');
+      setError(err.message || "Failed to update report");
     } finally {
       setUpdatingStatus(false);
     }
   };
 
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'critical': return 'bg-red-100 text-red-800';
-      case 'high': return 'bg-orange-100 text-orange-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'low': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'open': return 'bg-red-100 text-red-800';
-      case 'reviewing': return 'bg-purple-100 text-purple-800';
-      case 'resolved': return 'bg-green-100 text-green-800';
-      case 'dismissed': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
+  const selectedStatus = normalizeStatus(selectedReport?.status);
+  const selectedSeverity = normalizeSeverity(selectedReport?.severity);
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -114,7 +163,6 @@ const AdminReports: React.FC = () => {
         </div>
       )}
 
-      {/* Filters */}
       <div className="mb-6 p-4 bg-gray-50 rounded-lg space-y-4">
         <div className="grid md:grid-cols-2 gap-4">
           <div>
@@ -154,90 +202,113 @@ const AdminReports: React.FC = () => {
         </div>
       </div>
 
-      {/* Reports List */}
       {loading ? (
         <p className="text-center py-8">Loading reports...</p>
       ) : reports.length === 0 ? (
         <p className="text-center py-8 text-gray-600">No reports found</p>
       ) : (
         <div className="space-y-4">
-          {reports.map(report => (
-            <div key={report._id} className="border rounded-lg p-4 bg-white hover:shadow-md transition">
-              <div className="flex justify-between items-start gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="font-semibold text-lg">
-                      Report on {report.reportedUser.fullName}
-                    </h3>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getSeverityColor(report.severity)}`}>
-                      {report.severity.toUpperCase()}
-                    </span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(report.status)}`}>
-                      {report.status.toUpperCase()}
-                    </span>
-                  </div>
-                  
-                  <div className="space-y-1 text-sm mb-3">
-                    <p><strong>Reported by:</strong> {report.reportedBy.fullName} ({report.reportedBy.phone})</p>
-                    <p><strong>Reported user:</strong> {report.reportedUser.email}</p>
-                    <p><strong>Reason:</strong> {report.reason}</p>
-                    {report.description && <p><strong>Description:</strong> {report.description}</p>}
-                    <p className="text-gray-500"><strong>Created:</strong> {new Date(report.createdAt).toLocaleString()}</p>
+          {reports.map((report, index) => {
+            const status = normalizeStatus(report.status);
+            const severity = normalizeSeverity(report.severity);
+
+            return (
+              <div
+                key={report._id || `report-${index}`}
+                className="border rounded-lg p-4 bg-white hover:shadow-md transition"
+              >
+                <div className="flex justify-between items-start gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="font-semibold text-lg">
+                        Report on {getUserName(report.reportedUser)}
+                      </h3>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${getSeverityColor(severity)}`}
+                      >
+                        {severity.toUpperCase()}
+                      </span>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(status)}`}
+                      >
+                        {status.toUpperCase()}
+                      </span>
+                    </div>
+
+                    <div className="space-y-1 text-sm mb-3">
+                      <p>
+                        <strong>Reported by:</strong> {getUserName(report.reportedBy)} (
+                        {getUserPhone(report.reportedBy)})
+                      </p>
+                      <p>
+                        <strong>Reported user:</strong> {getUserEmail(report.reportedUser)}
+                      </p>
+                      <p>
+                        <strong>Reason:</strong> {report.reason || "Not provided"}
+                      </p>
+                      {report.description && (
+                        <p>
+                          <strong>Description:</strong> {report.description}
+                        </p>
+                      )}
+                      <p className="text-gray-500">
+                        <strong>Created:</strong> {formatDateTime(report.createdAt)}
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => setSelectedReport(report)}
+                      className="text-blue-600 hover:underline text-sm"
+                    >
+                      View Details
+                    </button>
                   </div>
 
-                  <button
-                    onClick={() => setSelectedReport(report)}
-                    className="text-blue-600 hover:underline text-sm"
-                  >
-                    View Details
-                  </button>
-                </div>
-
-                <div className="flex gap-2">
-                  {report.status === 'open' && (
-                    <>
-                      <button
-                        onClick={() => handleUpdateStatus(report._id, 'reviewing')}
-                        disabled={updatingStatus}
-                        className="px-3 py-1 bg-purple-600 text-white rounded text-sm hover:bg-purple-700 disabled:opacity-60"
-                      >
-                        Reviewing
-                      </button>
-                      <button
-                        onClick={() => handleUpdateStatus(report._id, 'dismissed')}
-                        disabled={updatingStatus}
-                        className="px-3 py-1 bg-gray-600 text-white rounded text-sm hover:bg-gray-700 disabled:opacity-60"
-                      >
-                        Dismiss
-                      </button>
-                    </>
-                  )}
-                  {report.status === 'reviewing' && (
-                    <>
-                      <button
-                        onClick={() => handleUpdateStatus(report._id, 'resolved')}
-                        disabled={updatingStatus}
-                        className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:opacity-60"
-                      >
-                        Resolve
-                      </button>
-                      <button
-                        onClick={() => handleUpdateStatus(report._id, 'dismissed')}
-                        disabled={updatingStatus}
-                        className="px-3 py-1 bg-gray-600 text-white rounded text-sm hover:bg-gray-700 disabled:opacity-60"
-                      >
-                        Dismiss
-                      </button>
-                    </>
-                  )}
+                  <div className="flex gap-2">
+                    {status === "open" && (
+                      <>
+                        <button
+                          onClick={() => handleUpdateStatus(report._id, "reviewing")}
+                          disabled={updatingStatus}
+                          className="px-3 py-1 bg-purple-600 text-white rounded text-sm hover:bg-purple-700 disabled:opacity-60"
+                        >
+                          Reviewing
+                        </button>
+                        <button
+                          onClick={() => handleUpdateStatus(report._id, "dismissed")}
+                          disabled={updatingStatus}
+                          className="px-3 py-1 bg-gray-600 text-white rounded text-sm hover:bg-gray-700 disabled:opacity-60"
+                        >
+                          Dismiss
+                        </button>
+                      </>
+                    )}
+                    {status === "reviewing" && (
+                      <>
+                        <button
+                          onClick={() => handleUpdateStatus(report._id, "resolved")}
+                          disabled={updatingStatus}
+                          className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 disabled:opacity-60"
+                        >
+                          Resolve
+                        </button>
+                        <button
+                          onClick={() => handleUpdateStatus(report._id, "dismissed")}
+                          disabled={updatingStatus}
+                          className="px-3 py-1 bg-gray-600 text-white rounded text-sm hover:bg-gray-700 disabled:opacity-60"
+                        >
+                          Dismiss
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="mt-6 flex justify-center gap-2">
           <button
@@ -260,7 +331,6 @@ const AdminReports: React.FC = () => {
         </div>
       )}
 
-      {/* Detail Modal */}
       {selectedReport && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -271,7 +341,7 @@ const AdminReports: React.FC = () => {
                   onClick={() => setSelectedReport(null)}
                   className="text-gray-500 hover:text-gray-700"
                 >
-                  ✕
+                  x
                 </button>
               </div>
 
@@ -279,46 +349,81 @@ const AdminReports: React.FC = () => {
                 <div>
                   <h3 className="font-semibold mb-2">User Reported</h3>
                   <div className="bg-gray-50 p-3 rounded">
-                    <p><strong>Name:</strong> {selectedReport.reportedUser.fullName}</p>
-                    <p><strong>Email:</strong> {selectedReport.reportedUser.email}</p>
-                    <p><strong>Phone:</strong> {selectedReport.reportedUser.phone}</p>
-                    <p><strong>Verification Status:</strong> {selectedReport.reportedUser.verification?.status || 'Unknown'}</p>
+                    <p>
+                      <strong>Name:</strong> {getUserName(selectedReport.reportedUser)}
+                    </p>
+                    <p>
+                      <strong>Email:</strong> {getUserEmail(selectedReport.reportedUser)}
+                    </p>
+                    <p>
+                      <strong>Phone:</strong> {getUserPhone(selectedReport.reportedUser)}
+                    </p>
+                    <p>
+                      <strong>Verification Status:</strong>{" "}
+                      {selectedReport.reportedUser?.verification?.status || "Unknown"}
+                    </p>
                   </div>
                 </div>
 
                 <div>
                   <h3 className="font-semibold mb-2">Report Details</h3>
                   <div className="bg-gray-50 p-3 rounded space-y-2">
-                    <p><strong>Reason:</strong> {selectedReport.reason}</p>
-                    <p><strong>Description:</strong> {selectedReport.description || '—'}</p>
-                    <p><strong>Severity:</strong> <span className={`px-2 py-1 rounded ${getSeverityColor(selectedReport.severity)}`}>{selectedReport.severity}</span></p>
-                    <p><strong>Status:</strong> <span className={`px-2 py-1 rounded ${getStatusColor(selectedReport.status)}`}>{selectedReport.status}</span></p>
+                    <p>
+                      <strong>Reason:</strong> {selectedReport.reason || "Not provided"}
+                    </p>
+                    <p>
+                      <strong>Description:</strong> {selectedReport.description || "-"}
+                    </p>
+                    <p>
+                      <strong>Severity:</strong>{" "}
+                      <span
+                        className={`px-2 py-1 rounded ${getSeverityColor(selectedSeverity)}`}
+                      >
+                        {selectedSeverity}
+                      </span>
+                    </p>
+                    <p>
+                      <strong>Status:</strong>{" "}
+                      <span className={`px-2 py-1 rounded ${getStatusColor(selectedStatus)}`}>
+                        {selectedStatus}
+                      </span>
+                    </p>
                   </div>
                 </div>
 
                 <div>
                   <h3 className="font-semibold mb-2">Reported By</h3>
                   <div className="bg-gray-50 p-3 rounded">
-                    <p><strong>Name:</strong> {selectedReport.reportedBy.fullName}</p>
-                    <p><strong>Email:</strong> {selectedReport.reportedBy.email}</p>
-                    <p><strong>Phone:</strong> {selectedReport.reportedBy.phone}</p>
+                    <p>
+                      <strong>Name:</strong> {getUserName(selectedReport.reportedBy)}
+                    </p>
+                    <p>
+                      <strong>Email:</strong> {getUserEmail(selectedReport.reportedBy)}
+                    </p>
+                    <p>
+                      <strong>Phone:</strong> {getUserPhone(selectedReport.reportedBy)}
+                    </p>
                   </div>
                 </div>
 
                 <div>
                   <h3 className="font-semibold mb-2">Timestamps</h3>
                   <div className="bg-gray-50 p-3 rounded">
-                    <p><strong>Created:</strong> {new Date(selectedReport.createdAt).toLocaleString()}</p>
-                    <p><strong>Updated:</strong> {new Date(selectedReport.updatedAt).toLocaleString()}</p>
+                    <p>
+                      <strong>Created:</strong> {formatDateTime(selectedReport.createdAt)}
+                    </p>
+                    <p>
+                      <strong>Updated:</strong> {formatDateTime(selectedReport.updatedAt)}
+                    </p>
                   </div>
                 </div>
 
                 <div className="flex gap-2 pt-4 border-t">
-                  {selectedReport.status === 'open' && (
+                  {selectedStatus === "open" && (
                     <>
                       <button
                         onClick={() => {
-                          handleUpdateStatus(selectedReport._id, 'reviewing');
+                          handleUpdateStatus(selectedReport._id, "reviewing");
                           setSelectedReport(null);
                         }}
                         disabled={updatingStatus}
@@ -328,7 +433,7 @@ const AdminReports: React.FC = () => {
                       </button>
                       <button
                         onClick={() => {
-                          handleUpdateStatus(selectedReport._id, 'dismissed');
+                          handleUpdateStatus(selectedReport._id, "dismissed");
                           setSelectedReport(null);
                         }}
                         disabled={updatingStatus}
@@ -338,11 +443,11 @@ const AdminReports: React.FC = () => {
                       </button>
                     </>
                   )}
-                  {selectedReport.status === 'reviewing' && (
+                  {selectedStatus === "reviewing" && (
                     <>
                       <button
                         onClick={() => {
-                          handleUpdateStatus(selectedReport._id, 'resolved');
+                          handleUpdateStatus(selectedReport._id, "resolved");
                           setSelectedReport(null);
                         }}
                         disabled={updatingStatus}
@@ -352,7 +457,7 @@ const AdminReports: React.FC = () => {
                       </button>
                       <button
                         onClick={() => {
-                          handleUpdateStatus(selectedReport._id, 'dismissed');
+                          handleUpdateStatus(selectedReport._id, "dismissed");
                           setSelectedReport(null);
                         }}
                         disabled={updatingStatus}
