@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from "../data/kenyaCounties";
-import { API_BASE_URL } from "../config/api";
+import { API_ENDPOINTS } from "../config/api";
 import { AlertCircle, CheckCircle2, MapPin, Tag, Calendar, Camera, FileText } from "lucide-react";
 
 type ListingCategory = "produce" | "livestock" | "inputs" | "service";
@@ -37,6 +37,15 @@ const PRODUCE_SUBCATEGORIES: ProduceSubcategory[] = ["crops", "fruits", "vegetab
 const LIVESTOCK_SUBCATEGORIES: LivestockSubcategory[] = ["cattle", "poultry", "goats", "pigs", "sheep", "other"];
 const INPUTS_SUBCATEGORIES: InputsSubcategory[] = ["fertilizer", "pesticides", "seeds", "tools", "equipment", "feeds", "other"];
 const SERVICE_SUBCATEGORIES: ServiceSubcategory[] = ["equipment_rental", "consulting", "labor", "transportation", "processing", "other"];
+
+const SERVICE_SUBCATEGORY_LABELS: Record<ServiceSubcategory, string> = {
+  equipment_rental: "Equipment Rental",
+  consulting: "Consulting",
+  labor: "Labor",
+  transportation: "Transportation",
+  processing: "Processing",
+  other: "Other",
+};
 
 const UNITS = ["kg", "bag", "ton", "bunch", "dozen", "piece", "liter", "gallon", "box", "crate"];
 
@@ -236,7 +245,7 @@ const CreateListing: React.FC = () => {
         setError("Please enter a price");
         return false;
       }
-      if (form.category !== "inputs" && !form.quantity) {
+      if (form.category !== "inputs" && form.category !== "service" && !form.quantity) {
         setError("Please enter a quantity");
         return false;
       }
@@ -244,7 +253,7 @@ const CreateListing: React.FC = () => {
         setError("Please enter a phone number");
         return false;
       }
-      if (form.listingType === "sell" && !form.images.length) {
+      if (form.listingType === "sell" && form.category !== "service" && !form.images.length) {
         setError("Please upload at least one image");
         return false;
       }
@@ -282,24 +291,55 @@ const CreateListing: React.FC = () => {
     setError("");
 
     try {
+      if (!form.category || !form.subcategory || !form.listingType) {
+        setError("Please complete all required steps before submitting.");
+        setUploading(false);
+        return;
+      }
+
       const formData = new FormData();
-      formData.append("title", form.title.trim());
-      formData.append("description", form.description.trim());
-      formData.append("category", form.category!);
-      formData.append("subcategory", form.subcategory!);
-      formData.append("listingType", form.listingType!);
-      formData.append("price", form.price);
-      formData.append("quantity", form.quantity);
-      formData.append("unit", form.unit);
-      formData.append("county", form.county);
-      formData.append("constituency", form.constituency);
-      formData.append("ward", form.ward);
-      formData.append("approximateLocation", form.approximateLocation.trim());
-      formData.append("availableFrom", form.availableFrom);
-      formData.append("contact", form.contact.trim());
-      formData.append("subscriptionActive", form.subscribed ? "true" : "false");
-      formData.append("premiumBadge", form.premiumBadge ? "true" : "false");
-      formData.append("premiumBadgePrice", form.premiumBadge ? "199" : "0");
+      const isServiceListing = form.category === "service";
+      const serviceType =
+        form.subcategory === "equipment_rental"
+          ? "equipment"
+          : "professional_services";
+      let endpoint = API_ENDPOINTS.services.products.create;
+
+      if (isServiceListing) {
+        formData.append("type", serviceType);
+        formData.append("name", form.title.trim());
+        formData.append("description", form.description.trim());
+        formData.append("county", form.county);
+        formData.append("constituency", form.constituency);
+        formData.append("ward", form.ward);
+        formData.append("approximateLocation", form.approximateLocation.trim());
+        formData.append("contact", form.contact.trim());
+        formData.append("services", SERVICE_SUBCATEGORY_LABELS[form.subcategory as ServiceSubcategory]);
+        if (form.price) formData.append("pricing", form.price);
+        if (form.availableFrom) formData.append("availableFrom", form.availableFrom);
+        endpoint =
+          serviceType === "equipment"
+            ? API_ENDPOINTS.services.equipment.create
+            : API_ENDPOINTS.services.professional.create;
+      } else {
+        formData.append("title", form.title.trim());
+        formData.append("description", form.description.trim());
+        formData.append("category", form.category);
+        formData.append("subcategory", form.subcategory);
+        formData.append("listingType", form.listingType);
+        formData.append("price", form.price);
+        formData.append("quantity", form.quantity);
+        formData.append("unit", form.unit);
+        formData.append("county", form.county);
+        formData.append("constituency", form.constituency);
+        formData.append("ward", form.ward);
+        formData.append("approximateLocation", form.approximateLocation.trim());
+        formData.append("availableFrom", form.availableFrom);
+        formData.append("contact", form.contact.trim());
+        formData.append("subscriptionActive", form.subscribed ? "true" : "false");
+        formData.append("premiumBadge", form.premiumBadge ? "true" : "false");
+        formData.append("premiumBadgePrice", form.premiumBadge ? "199" : "0");
+      }
 
       form.images.forEach((img) => formData.append("images", img));
 
@@ -311,7 +351,7 @@ const CreateListing: React.FC = () => {
         navigate("/login?next=/create-listing", { replace: true });
         return;
       }
-      const response = await fetch(`${API_BASE_URL}/products`, {
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         credentials: "include",
@@ -320,7 +360,7 @@ const CreateListing: React.FC = () => {
 
       const result = await response.json();
 
-      if (!response.ok || !result.success) {
+      if (!response.ok || result?.success === false) {
         const errorMessage =
           result?.message || result?.error || "Failed to create listing";
         setError(errorMessage);
@@ -331,7 +371,11 @@ const CreateListing: React.FC = () => {
       // Success!
       localStorage.removeItem(DRAFT_STORAGE_KEY);
       setHasDraft(false);
-      alert("Listing created successfully! Awaiting admin review...");
+      alert(
+        isServiceListing
+          ? "Service listing created successfully! Awaiting admin review..."
+          : "Listing created successfully! Awaiting admin review..."
+      );
       navigate("/listings");
     } catch (err: any) {
       setError(err.message || "An error occurred while creating your listing");
@@ -732,7 +776,7 @@ const CreateListing: React.FC = () => {
                     )}
                   </div>
 
-                  {form.category !== "inputs" && (
+                  {form.category !== "inputs" && form.category !== "service" && (
                     <div>
                       <label className="block text-sm font-semibold text-gray-900 mb-2">Quantity *</label>
                       <div className="flex gap-2">
@@ -790,7 +834,7 @@ const CreateListing: React.FC = () => {
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-2">
                     <Camera className="w-4 h-4 inline mr-2" />
-                    Upload Images ({form.images.length}/5) *
+                    Upload Images ({form.images.length}/5){form.category === "service" ? "" : " *"}
                   </label>
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                     <input
