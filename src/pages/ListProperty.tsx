@@ -118,6 +118,9 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
   const { addProperty } = useProperties();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const wizardSteps = ['Visibility', 'Property', 'Land Details', 'Pricing & Media', 'Trust & Publish'];
+  const defaultPlanId: ListingPlanId = LISTING_PLAN_OPTIONS[0]?.id ?? 'free';
+  const hasBasicPlan = LISTING_PLAN_OPTIONS.some((plan) => plan.id === 'basic');
   const [formData, setFormData] = useState<PropertyFormData>({
     title: '',
     description: '',
@@ -146,7 +149,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
   const [uploading, setUploading] = useState(false);
   const [constituencies, setConstituencies] = useState<{value: string; label: string}[]>([]);
   const [wards, setWards] = useState<{value: string; label: string}[]>([]);
-  const [selectedPlan, setSelectedPlan] = useState<ListingPlanId>('free');
+  const [selectedPlan, setSelectedPlan] = useState<ListingPlanId>(defaultPlanId);
   const [selectedBoost, setSelectedBoost] = useState<BoostOptionId>('none');
   const [selectedVerification, setSelectedVerification] = useState<VerificationTierId>('none');
   const [firstListingFreeUsed, setFirstListingFreeUsed] = useState(false);
@@ -157,11 +160,31 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
   const [landSearchFile, setLandSearchFile] = useState<File | null>(null);
   const [chiefLetterFile, setChiefLetterFile] = useState<File | null>(null);
   const [docUploading, setDocUploading] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [wizardError, setWizardError] = useState('');
+  const [wizardInfo, setWizardInfo] = useState('');
+  const [hasDraft, setHasDraft] = useState(false);
 
-  const saveDraft = (data: PropertyFormData) => {
+  const clampStep = (value?: number) => {
+    const parsed = Number(value) || 1;
+    return Math.min(Math.max(parsed, 1), wizardSteps.length);
+  };
+
+  const saveDraft = () => {
     if (typeof window === 'undefined') return;
     try {
-      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(data));
+      localStorage.setItem(
+        DRAFT_STORAGE_KEY,
+        JSON.stringify({
+          formData,
+          selectedPlan,
+          selectedBoost,
+          selectedVerification,
+          currentStep,
+          updatedAt: new Date().toISOString(),
+        })
+      );
+      setHasDraft(true);
     } catch (err) {
       console.error('Failed to save draft listing', err);
     }
@@ -171,6 +194,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
     if (typeof window === 'undefined') return;
     try {
       localStorage.removeItem(DRAFT_STORAGE_KEY);
+      setHasDraft(false);
     } catch (err) {
       console.error('Failed to clear draft listing', err);
     }
@@ -182,11 +206,25 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
       const saved = localStorage.getItem(DRAFT_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        setFormData((prev) => ({ ...prev, ...parsed }));
+        if (parsed?.formData) {
+          setFormData((prev) => ({ ...prev, ...parsed.formData }));
+          if (parsed.selectedPlan) setSelectedPlan(parsed.selectedPlan as ListingPlanId);
+          if (parsed.selectedBoost) setSelectedBoost(parsed.selectedBoost as BoostOptionId);
+          if (parsed.selectedVerification) {
+            setSelectedVerification(parsed.selectedVerification as VerificationTierId);
+          }
+          setCurrentStep(clampStep(parsed.currentStep));
+          setWizardInfo('Draft restored from your last session.');
+        } else {
+          // Backward compatibility with older draft shape.
+          setFormData((prev) => ({ ...prev, ...parsed }));
+        }
+        setHasDraft(true);
       }
     } catch (err) {
       console.error('Failed to restore draft listing', err);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Force rental-only listings (disable sale for now)
@@ -197,9 +235,9 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
   }, [formData.type]);
 
   useEffect(() => {
-    saveDraft(formData);
+    saveDraft();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData]);
+  }, [formData, selectedPlan, selectedBoost, selectedVerification, currentStep]);
 
   useEffect(() => {
     if (initialType && initialType !== formData.type) {
@@ -215,10 +253,10 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
   }, []);
 
   useEffect(() => {
-    if (firstListingFreeUsed && selectedPlan === 'free') {
+    if (firstListingFreeUsed && selectedPlan === 'free' && hasBasicPlan) {
       setSelectedPlan('basic');
     }
-  }, [firstListingFreeUsed, selectedPlan]);
+  }, [firstListingFreeUsed, hasBasicPlan, selectedPlan]);
 
   useEffect(() => {
     if (formData.county) {
@@ -338,7 +376,10 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
       uploads.push({ type: 'selfie', file: selfieFile });
     }
 
-    // Rental-only: ownership docs optional, not enforced
+    // Optional ownership docs improve trust score when provided.
+    if (titleDeedFile) uploads.push({ type: 'title-deed', file: titleDeedFile });
+    if (landSearchFile) uploads.push({ type: 'land-search', file: landSearchFile });
+    if (chiefLetterFile) uploads.push({ type: 'chief-letter', file: chiefLetterFile });
 
     if (uploads.length === 0) return;
 
@@ -352,26 +393,108 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
     }
   };
 
+  const getStepError = (step: number): string => {
+    if (step === 1) return '';
+
+    if (step === 2) {
+      if (!formData.title.trim()) return 'Enter a clear farmland title before continuing.';
+      if (!formData.description.trim()) return 'Add a short description before continuing.';
+      if (!formData.county) return 'Select a county before continuing.';
+      if (!formData.constituency) return 'Select a constituency before continuing.';
+      if (!formData.ward) return 'Select a ward before continuing.';
+      if (!formData.approximateLocation.trim()) return 'Add an approximate location before continuing.';
+      return '';
+    }
+
+    if (step === 3) {
+      if (!formData.soilType) return 'Select a soil type before continuing.';
+      if (!formData.waterAvailability) return 'Select water availability before continuing.';
+      if (!formData.availableFrom) return 'Add an available from date before continuing.';
+      if (!formData.availableTo) return 'Add an available to date before continuing.';
+      if (new Date(formData.availableFrom) > new Date(formData.availableTo)) {
+        return 'Available to date must be after available from date.';
+      }
+      if (!formData.minLeasePeriod) return 'Add minimum lease period before continuing.';
+      if (!formData.maxLeasePeriod) return 'Add maximum lease period before continuing.';
+      if (Number(formData.minLeasePeriod) > Number(formData.maxLeasePeriod)) {
+        return 'Maximum lease period must be greater than or equal to minimum lease period.';
+      }
+      return '';
+    }
+
+    if (step === 4) {
+      if (!formData.price) return 'Enter the rental price before continuing.';
+      if (!formData.size) return 'Enter land size before continuing.';
+      if (!formData.contact.trim()) return 'Enter a contact phone before continuing.';
+      const normalizedContact = formData.contact.replace(/\D/g, '');
+      if (normalizedContact.length < 10) return 'Enter a valid 10-digit phone number.';
+      if (selectedImages.length === 0) return 'Upload at least one farmland image before continuing.';
+      return '';
+    }
+
+    return '';
+  };
+
+  const validateStep = (step = currentStep) => {
+    const error = getStepError(step);
+    setWizardError(error);
+    return !error;
+  };
+
+  const validateAllSteps = () => {
+    for (let step = 1; step <= 4; step += 1) {
+      const error = getStepError(step);
+      if (error) {
+        setCurrentStep(step);
+        setWizardError(error);
+        return false;
+      }
+    }
+    setWizardError('');
+    return true;
+  };
+
+  const handleNextStep = () => {
+    if (!validateStep(currentStep)) return;
+    setWizardInfo('');
+    setCurrentStep((prev) => clampStep(prev + 1));
+  };
+
+  const handlePrevStep = () => {
+    setWizardError('');
+    setCurrentStep((prev) => clampStep(prev - 1));
+  };
+
+  const handleDiscardDraft = () => {
+    clearDraft();
+    setWizardInfo('Saved draft removed from this device.');
+  };
+
+  const handleSaveDraftNow = () => {
+    saveDraft();
+    setWizardInfo('Draft saved on this device.');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setWizardInfo('');
 
     if (!user) {
       alert("You must be logged in to list your farmland.");
       return;
     }
 
-    if (!identityDocsSatisfied) {
-      alert(
-        "Please upload your ID front, ID back, and a selfie with your ID (or ensure your identity is already verified)."
-      );
+    if (!validateAllSteps()) {
       return;
     }
 
+    let verificationUploadWarning = '';
     try {
       await ensureDocsUploaded();
     } catch (err: any) {
-      alert(err.message || "Failed to upload verification documents.");
-      return;
+      verificationUploadWarning =
+        err?.message || 'Verification documents were not uploaded. You can retry from your profile.';
+      console.error('Verification upload warning:', err);
     }
 
     if (totalMonetizationFee > 0 && typeof window !== "undefined") {
@@ -469,8 +592,15 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
         : totalMonetizationFee > 0
           ? `${monetizationSummaryLabel} for a total of ${formatKenyanPrice(totalMonetizationFee)}.${paymentNote}`
           : 'You used your free listing credit.';
+      const trustStatus = idVerified
+        ? 'Verified profile'
+        : identityDocsSatisfied
+          ? 'Verification documents submitted'
+          : 'Unverified profile (listing remains visible with a pending trust badge)';
       alert(
-        `Property submitted! An admin will review and verify it shortly. ${feeNote}`
+        `Property submitted! An admin will review it shortly. Trust status: ${trustStatus}. ${feeNote}${
+          verificationUploadWarning ? ` ${verificationUploadWarning}` : ''
+        }`
       );
       clearDraft();
       
@@ -500,9 +630,12 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
       setSelectedImages([]);
       setConstituencies([]);
       setWards([]);
-      setSelectedPlan('basic');
+      setSelectedPlan(defaultPlanId);
       setSelectedBoost('none');
       setSelectedVerification('none');
+      setCurrentStep(1);
+      setWizardError('');
+      setWizardInfo('');
       setIdFrontFile(null);
       setIdBackFile(null);
       setSelfieFile(null);
@@ -559,10 +692,104 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
     { value: 'irrigation', label: 'Irrigation' }
   ];
 
+  const progressPercent = (currentStep / wizardSteps.length) * 100;
+
+  const handleStepChipClick = (nextStep: number) => {
+    const target = clampStep(nextStep);
+    if (target === currentStep) return;
+    if (target < currentStep) {
+      setWizardError('');
+      setCurrentStep(target);
+      return;
+    }
+
+    for (let step = currentStep; step < target; step += 1) {
+      const error = getStepError(step);
+      if (error) {
+        setWizardError(error);
+        setCurrentStep(step);
+        return;
+      }
+    }
+
+    setWizardError('');
+    setCurrentStep(target);
+  };
+
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto px-4 py-6 md:py-8">
       <h1 className="text-3xl font-bold text-gray-800 mb-2">List Your Farmland</h1>
-      <p className="text-gray-600 mb-8">Connect with farmers across Kenya â€” list your land for rent/lease with clear pricing and trust signals.</p>
+      <p className="text-gray-600 mb-5">
+        Connect with farmers across Kenya - list land for rent/lease with clear pricing and trust signals.
+      </p>
+
+      <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm font-semibold text-gray-900">Step {currentStep} of {wizardSteps.length}</p>
+          <p className="text-sm text-gray-600">{wizardSteps[currentStep - 1]}</p>
+        </div>
+        <div className="mt-3 h-2 overflow-hidden rounded-full bg-gray-100">
+          <div
+            className="h-full rounded-full bg-green-600 transition-all"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {wizardSteps.map((label, index) => {
+            const step = index + 1;
+            const isActive = currentStep === step;
+            const isDone = currentStep > step;
+            return (
+              <button
+                key={label}
+                type="button"
+                onClick={() => handleStepChipClick(step)}
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                  isActive
+                    ? 'bg-green-600 text-white'
+                    : isDone
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {step}. {label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {hasDraft && (
+        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm">
+          <span className="text-blue-800">Draft is saved on this device.</span>
+          <button
+            type="button"
+            onClick={handleSaveDraftNow}
+            className="rounded-md border border-blue-200 bg-white px-2 py-1 text-blue-700 hover:bg-blue-100"
+          >
+            Save now
+          </button>
+          <button
+            type="button"
+            onClick={handleDiscardDraft}
+            className="rounded-md border border-blue-200 bg-white px-2 py-1 text-blue-700 hover:bg-blue-100"
+          >
+            Discard draft
+          </button>
+        </div>
+      )}
+
+      {wizardError && (
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          {wizardError}
+        </div>
+      )}
+
+      {wizardInfo && (
+        <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+          {wizardInfo}
+        </div>
+      )}
 
       {saleListingsPaused && (
         <div className="mb-6 rounded-lg border-l-4 border-yellow-400 bg-yellow-50 text-yellow-800 px-4 py-3">
@@ -570,7 +797,8 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
+      <form onSubmit={handleSubmit} noValidate className="bg-white rounded-lg shadow-md p-4 pb-24 md:p-6 md:pb-28">
+        {currentStep === 1 && (
         <div className="mb-6 space-y-4 rounded-2xl border border-green-200 bg-green-50/40 p-4">
           <div>
             <h2 className="text-xl font-semibold text-gray-800">Listing Visibility Options</h2>
@@ -582,7 +810,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
           </div>
           <div className="grid gap-3 md:grid-cols-4">
             {LISTING_PLAN_OPTIONS.map((plan) => {
-              const disabled = plan.id === 'free' && firstListingFreeUsed;
+              const disabled = plan.id === 'free' && firstListingFreeUsed && hasBasicPlan;
               const selected = selectedPlan === plan.id;
               return (
                 <button
@@ -661,7 +889,9 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
             )}
           </div>
         </div>
+        )}
 
+        {currentStep === 5 && (
         <div className="mb-6 space-y-4 rounded-2xl border border-blue-200 bg-blue-50/40 p-4">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -698,10 +928,9 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
                   accept="image/*,application/pdf"
                   onChange={(e) => setIdFrontFile(e.target.files?.[0] || null)}
                   className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  required={!idVerified}
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Required for rent/lease unless already verified.
+                  Recommended for stronger trust badges and faster approval.
                 </p>
               </label>
 
@@ -714,10 +943,9 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
                   accept="image/*,application/pdf"
                   onChange={(e) => setIdBackFile(e.target.files?.[0] || null)}
                   className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  required={!idVerified}
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Required for rent/lease unless already verified.
+                  Recommended for stronger trust badges and faster approval.
                 </p>
               </label>
 
@@ -730,10 +958,9 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
                   accept="image/*,application/pdf"
                   onChange={(e) => setSelfieFile(e.target.files?.[0] || null)}
                   className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  required={!selfieVerified}
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Needed for trust & fraud checks; already verified users can skip.
+                  Optional for publish; helps trust and fraud checks.
                 </p>
               </label>
             </div>
@@ -806,8 +1033,12 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
             We store these securely and auto-verify your profile so the listing can be approved without sending you away from this page.
           </p>
         </div>
+        )}
+
+        {currentStep >= 2 && currentStep <= 4 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
+          {currentStep === 2 && (
+          <>
           <div className="md:col-span-2">
             <label className="block text-gray-700 mb-2">Lease Type</label>
             <p className="text-sm text-gray-600">We currently accept Rent/Lease listings only.</p>
@@ -901,7 +1132,11 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
               required
             />
           </div>
-          
+          </>
+          )}
+
+          {currentStep === 3 && (
+          <>
           <div>
             <label className="block text-gray-700 mb-2">Soil Type *</label>
             <select
@@ -1008,6 +1243,23 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
             />
           </div>
 
+          <div className="md:col-span-2">
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                name="organicCertified"
+                checked={formData.organicCertified}
+                onChange={handleChange}
+                className="mr-2"
+              />
+              <span className="text-gray-700">Organically Certified Farmland</span>
+            </label>
+          </div>
+          </>
+          )}
+
+          {currentStep === 4 && (
+          <>
           <div>
             <label className="block text-gray-700 mb-2">Price (KSh) *</label>
             <input
@@ -1049,19 +1301,6 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
                 <option value="hectares">Hectares</option>
               </select>
             </div>
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                name="organicCertified"
-                checked={formData.organicCertified}
-                onChange={handleChange}
-                className="mr-2"
-              />
-              <span className="text-gray-700">Organically Certified Farmland</span>
-            </label>
           </div>
 
           <div className="md:col-span-2">
@@ -1126,20 +1365,59 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
               </div>
             )}
           </div>
+          </>
+          )}
 
         </div>
+        )}
 
-        <button
-          type="submit"
-          disabled={uploading}
-          className={`w-full py-3 rounded-lg font-semibold text-lg transition duration-300 mt-6 ${
-            uploading 
-              ? 'bg-gray-400 cursor-not-allowed' 
-              : 'bg-green-600 hover:bg-green-700 text-white'
-          }`}
-        >
-          {uploading ? 'Uploading...' : 'List Farmland'}
-        </button>
+        <div className="sticky bottom-0 z-10 -mx-4 border-t border-gray-200 bg-white/95 px-4 py-3 backdrop-blur md:-mx-6 md:px-6">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={handlePrevStep}
+                disabled={currentStep === 1}
+                className={`min-h-[44px] rounded-lg px-4 py-2 text-sm font-semibold ${
+                  currentStep === 1
+                    ? 'cursor-not-allowed bg-gray-100 text-gray-400'
+                    : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveDraftNow}
+                className="min-h-[44px] rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+              >
+                Save draft
+              </button>
+            </div>
+
+            {currentStep < wizardSteps.length ? (
+              <button
+                type="button"
+                onClick={handleNextStep}
+                className="min-h-[44px] rounded-lg bg-green-600 px-5 py-2 text-sm font-semibold text-white hover:bg-green-700"
+              >
+                Next step
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={uploading || docUploading}
+                className={`min-h-[44px] rounded-lg px-5 py-2 text-sm font-semibold ${
+                  uploading || docUploading
+                    ? 'cursor-not-allowed bg-gray-300 text-gray-600'
+                    : 'bg-green-600 text-white hover:bg-green-700'
+                }`}
+              >
+                {uploading || docUploading ? 'Publishing...' : 'Publish listing'}
+              </button>
+            )}
+          </div>
+        </div>
       </form>
     </div>
   );

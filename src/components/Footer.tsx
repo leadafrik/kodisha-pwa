@@ -9,17 +9,40 @@ const Footer: React.FC = () => {
 
   useEffect(() => {
     setIsInstalled(isInstalledAsApp());
-    
-    // Listen for app installation
-    window.addEventListener('appinstalled', () => {
+
+    const handleAppInstalled = () => {
       setIsInstalled(true);
-    });
-    
-    // Check on display mode change
-    const mediaQuery = window.matchMedia('(display-mode: standalone)');
-    mediaQuery.addEventListener('change', (e) => {
-      setIsInstalled(e.matches);
-    });
+    };
+
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    let mediaQuery: MediaQueryList | null = null;
+    const handleDisplayModeChange = (event: MediaQueryListEvent) => {
+      setIsInstalled(event.matches);
+    };
+
+    if (typeof window.matchMedia === 'function') {
+      mediaQuery = window.matchMedia('(display-mode: standalone)');
+      setIsInstalled((prev) => prev || mediaQuery!.matches);
+
+      if (typeof mediaQuery.addEventListener === 'function') {
+        mediaQuery.addEventListener('change', handleDisplayModeChange);
+      } else if (typeof mediaQuery.addListener === 'function') {
+        mediaQuery.addListener(handleDisplayModeChange);
+      }
+    }
+
+    return () => {
+      window.removeEventListener('appinstalled', handleAppInstalled);
+
+      if (!mediaQuery) return;
+
+      if (typeof mediaQuery.removeEventListener === 'function') {
+        mediaQuery.removeEventListener('change', handleDisplayModeChange);
+      } else if (typeof mediaQuery.removeListener === 'function') {
+        mediaQuery.removeListener(handleDisplayModeChange);
+      }
+    };
   }, []);
   return (
     <footer className="bg-gray-50 border-t border-gray-200 mt-auto">
@@ -46,7 +69,7 @@ const Footer: React.FC = () => {
               Privacy Policy
             </Link>
             <a
-              href="mailto:kodisha.254.ke@gmail.com"
+              href="mailto:info@leadafrik.com"
               className="text-gray-600 hover:text-green-700 hover:underline transition"
             >
               Contact Support
@@ -92,8 +115,8 @@ const Footer: React.FC = () => {
           </p>
           <p className="mt-2">
             For data protection inquiries:{' '}
-            <a href="mailto:kodisha.254.ke@gmail.com" className="text-green-700 hover:underline">
-              kodisha.254.ke@gmail.com
+            <a href="mailto:info@leadafrik.com" className="text-green-700 hover:underline">
+              info@leadafrik.com
             </a>
           </p>
         </div>

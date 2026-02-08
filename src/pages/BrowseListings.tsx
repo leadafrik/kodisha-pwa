@@ -221,6 +221,9 @@ const BrowseListings: React.FC = () => {
     const boostedCount = cards.filter((card) => card.boosted).length;
     return { total, verifiedCount, boostedCount };
   }, [cards]);
+  const hasActiveFilters = Boolean(
+    county || search || category !== "all" || serviceSub !== "all" || verifiedOnly
+  );
 
   const categoryPills: Array<{ id: Category; label: string; icon?: string }> = [
     { id: "all", label: "All" },
@@ -461,7 +464,7 @@ const BrowseListings: React.FC = () => {
               )}
             </div>
 
-            {(county || search || category !== "all" || serviceSub !== "all" || verifiedOnly) && (
+            {hasActiveFilters && (
               <div className="mt-4 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2 text-xs text-slate-500">
                   <Filter className="h-4 w-4" />
@@ -497,10 +500,34 @@ const BrowseListings: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 pb-16 space-y-6">
         {loading && (
-          <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200">
-            <div className="inline-flex h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-600 mb-3"></div>
-            <p className="text-slate-600">Loading listings...</p>
-          </div>
+          <>
+            <div className="text-center py-6 bg-white rounded-2xl border border-dashed border-slate-200">
+              <div className="inline-flex items-center gap-2 text-slate-600 text-sm font-medium">
+                <span className="inline-flex h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-emerald-600" />
+                Loading listings...
+              </div>
+            </div>
+            <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm"
+                >
+                  <div className="aspect-[4/3] animate-pulse bg-slate-100" />
+                  <div className="p-4 space-y-3">
+                    <div className="h-4 w-2/5 rounded bg-slate-100 animate-pulse" />
+                    <div className="h-5 w-4/5 rounded bg-slate-100 animate-pulse" />
+                    <div className="h-4 w-full rounded bg-slate-100 animate-pulse" />
+                    <div className="h-4 w-3/4 rounded bg-slate-100 animate-pulse" />
+                    <div className="grid grid-cols-2 gap-2 pt-2">
+                      <div className="h-10 rounded-xl bg-slate-100 animate-pulse" />
+                      <div className="h-10 rounded-xl bg-slate-100 animate-pulse" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
 
         {!loading && filtered.length === 0 && (
@@ -509,26 +536,39 @@ const BrowseListings: React.FC = () => {
               <Search className="h-5 w-5 text-slate-400" />
             </div>
             <h3 className="text-2xl font-semibold text-slate-800 mb-2">
-              No listings found
+              {hasActiveFilters ? "No listings found" : "No listings yet"}
             </h3>
             <p className="text-slate-600 mb-6 max-w-md mx-auto">
-              {search ? "Try a different search term or remove filters." : "Try adjusting your filters or browsing other categories."}
+              {hasActiveFilters
+                ? "Try a different search term, county, or category."
+                : "No listings are available right now. Check back soon or post your own listing."}
             </p>
-            <button
-              onClick={() => {
-                setCategory("all");
-                setServiceSub("all");
-                setCounty("");
-                setSearch("");
-              }}
-              className="inline-flex px-6 py-3 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition shadow-sm"
-            >
-              Browse all listings
-            </button>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                onClick={() => {
+                  setCategory("all");
+                  setServiceSub("all");
+                  setCounty("");
+                  setSearch("");
+                  setVerifiedOnly(false);
+                  setVerifiedOnlyManual(false);
+                }}
+                className="inline-flex min-h-[44px] items-center justify-center px-6 py-3 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition shadow-sm"
+              >
+                Browse all listings
+              </button>
+              <Link
+                to={user ? "/create-listing" : "/login?next=/create-listing"}
+                className="inline-flex min-h-[44px] items-center justify-center px-6 py-3 rounded-lg border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition"
+              >
+                {user ? "Post a listing" : "Sign in to post"}
+              </Link>
+            </div>
           </div>
         )}
 
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {!loading && (
+          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filtered.map((card, index) => {
             const categoryColors: Record<Category, string> = {
               all: "bg-slate-100 text-slate-700",
@@ -615,7 +655,7 @@ const BrowseListings: React.FC = () => {
                   <div className="mt-3 flex gap-2">
                     <Link
                       to={user ? `/listings/${card.id}` : "/login"}
-                      className="flex-1 text-center rounded-xl bg-emerald-600 px-3 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition shadow-sm"
+                      className="flex-1 min-h-[44px] inline-flex items-center justify-center text-center rounded-xl bg-emerald-600 px-3 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition shadow-sm"
                     >
                       View details
                     </Link>
@@ -623,14 +663,14 @@ const BrowseListings: React.FC = () => {
                       user ? (
                         <a
                           href={`tel:${formatPhoneForUri(card.contact)}`}
-                          className="flex-1 text-center rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
+                          className="flex-1 min-h-[44px] inline-flex items-center justify-center text-center rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
                         >
                           Call
                         </a>
                       ) : (
                         <Link
                           to="/login"
-                          className="flex-1 text-center rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
+                          className="flex-1 min-h-[44px] inline-flex items-center justify-center text-center rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
                         >
                           Call
                         </Link>
@@ -641,7 +681,8 @@ const BrowseListings: React.FC = () => {
               </div>
             );
           })}
-        </div>
+          </div>
+        )}
 
         {!loading && filtered.length > 0 && (
           <div className="text-center py-8 text-slate-500 text-sm">

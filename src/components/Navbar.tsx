@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import NotificationCenter from "./NotificationCenter";
@@ -13,7 +13,9 @@ const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [listOpen, setListOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const listCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const userMenuRef = useRef<HTMLDivElement | null>(null);
 
   const closeMobile = () => setMobileOpen(false);
   const scheduleListClose = () => {
@@ -29,6 +31,39 @@ const Navbar: React.FC = () => {
       listCloseTimer.current = null;
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (listCloseTimer.current) {
+        clearTimeout(listCloseTimer.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleMouseDown = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (userMenuRef.current && !userMenuRef.current.contains(target)) {
+        setUserMenuOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setListOpen(false);
+        setUserMenuOpen(false);
+        setMobileOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleMouseDown);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleMouseDown);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
 
   return (
     <>
@@ -80,11 +115,15 @@ const Navbar: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setListOpen((prev) => !prev)}
+                  aria-haspopup="menu"
+                  aria-expanded={listOpen}
+                  aria-controls="list-menu"
                   className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition font-semibold flex items-center gap-2"
                 >
                   + List <Chevron />
                 </button>
                 <div
+                  id="list-menu"
                   className={`absolute ${listOpen ? "block" : "hidden"} bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 z-50`}
                   onMouseEnter={cancelListClose}
                   onMouseLeave={scheduleListClose}
@@ -139,8 +178,20 @@ const Navbar: React.FC = () => {
                   <NotificationCenter />
 
                   {/* USER DROPDOWN */}
-                  <div className="group relative">
-                    <button className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition flex items-center gap-2 font-semibold text-gray-800">
+                  <div
+                    ref={userMenuRef}
+                    className="relative"
+                    onMouseEnter={() => setUserMenuOpen(true)}
+                    onMouseLeave={() => setUserMenuOpen(false)}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setUserMenuOpen((prev) => !prev)}
+                      aria-haspopup="menu"
+                      aria-expanded={userMenuOpen}
+                      aria-controls="user-menu"
+                      className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition flex items-center gap-2 font-semibold text-gray-800"
+                    >
                       <span className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden">
                         {user.profilePicture ? (
                           <img src={user.profilePicture} alt={user.name} className="w-full h-full object-cover" />
@@ -152,51 +203,58 @@ const Navbar: React.FC = () => {
                       <Chevron />
                     </button>
 
-                    <div className="absolute hidden group-hover:block bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 right-0 z-50">
+                    <div
+                      id="user-menu"
+                      className={`absolute ${userMenuOpen ? "block" : "hidden"} bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 right-0 z-50`}
+                    >
                       <div className="px-4 py-3 border-b bg-gray-50">
                         <div className="font-semibold truncate">{user.name || "User"}</div>
                         <div className="text-sm text-gray-600 truncate">{user.email}</div>
                       </div>
 
-                      <Link to="/profile" className="block px-4 py-3 hover:bg-gray-50 border-b">
+                      <Link to="/profile" onClick={() => setUserMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50 border-b">
                         <div className="font-semibold">Dashboard</div>
                       </Link>
-                      <Link to="/messages" className="block px-4 py-3 hover:bg-gray-50 border-b">
+                      <Link to="/messages" onClick={() => setUserMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50 border-b">
                         <div className="font-semibold">Messages</div>
                       </Link>
-                      <Link to="/favorites" className="block px-4 py-3 hover:bg-gray-50 border-b">
+                      <Link to="/favorites" onClick={() => setUserMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50 border-b">
                         <div className="font-semibold">Saved Listings</div>
                       </Link>
 
                       {user.role === 'admin' || user.type === 'admin' ? (
                         <>
-                          <Link to="/admin/listings-approval" className="block px-4 py-3 hover:bg-gray-50 border-b">
+                          <Link to="/admin/listings-approval" onClick={() => setUserMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50 border-b">
                             <div className="font-semibold">Listing Approvals</div>
                           </Link>
-                          <Link to="/admin/listing-management" className="block px-4 py-3 hover:bg-gray-50 border-b">
+                          <Link to="/admin/listing-management" onClick={() => setUserMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50 border-b">
                             <div className="font-semibold">Listing Management</div>
                           </Link>
-                          <Link to="/admin/id-verification" className="block px-4 py-3 hover:bg-gray-50 border-b">
+                          <Link to="/admin/id-verification" onClick={() => setUserMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50 border-b">
                             <div className="font-semibold">ID Verification</div>
                           </Link>
-                          <Link to="/admin/reports" className="block px-4 py-3 hover:bg-gray-50 border-b">
+                          <Link to="/admin/reports" onClick={() => setUserMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50 border-b">
                             <div className="font-semibold">User Reports</div>
                           </Link>
-                          <Link to="/admin/profile-verification" className="block px-4 py-3 hover:bg-gray-50 border-b">
+                          <Link to="/admin/profile-verification" onClick={() => setUserMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50 border-b">
                             <div className="font-semibold">Profile Verification</div>
                           </Link>
-                          <Link to="/admin/analytics" className="block px-4 py-3 hover:bg-gray-50 border-b">
+                          <Link to="/admin/analytics" onClick={() => setUserMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50 border-b">
                             <div className="font-semibold">Analytics</div>
                           </Link>
                         </>
                       ) : null}
 
                       <div className="border-b">
-                        <Link to="/create-listing" className="block px-4 py-2 hover:bg-gray-50 text-sm">Create Listing</Link>
+                        <Link to="/create-listing" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 hover:bg-gray-50 text-sm">Create Listing</Link>
                       </div>
 
                       <button
-                        onClick={logout}
+                        type="button"
+                        onClick={() => {
+                          setUserMenuOpen(false);
+                          logout();
+                        }}
                         className="w-full text-left px-4 py-3 hover:bg-red-50 text-red-600 font-semibold"
                       >
                         Logout
@@ -214,7 +272,14 @@ const Navbar: React.FC = () => {
             </div>
 
             {/* MOBILE MENU ICON */}
-            <button className="lg:hidden flex flex-col gap-1" onClick={() => setMobileOpen(true)}>
+            <button
+              type="button"
+              className="lg:hidden flex flex-col gap-1"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open menu"
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-menu"
+            >
               <span className="w-6 h-0.5 bg-gray-900"></span>
               <span className="w-6 h-0.5 bg-gray-900"></span>
               <span className="w-6 h-0.5 bg-gray-900"></span>
@@ -227,13 +292,14 @@ const Navbar: React.FC = () => {
       {mobileOpen && (
         <div className="fixed inset-0 bg-black/50 z-50" onClick={closeMobile}>
           <div
+            id="mobile-menu"
             className="absolute top-0 left-0 h-full w-72 bg-white shadow-xl p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-8">
               <span className="text-xl font-bold">Menu</span>
-              <button onClick={closeMobile} aria-label="Close menu" className="text-2xl leading-none">
-                ×
+              <button type="button" onClick={closeMobile} aria-label="Close menu" className="text-2xl leading-none">
+                <span aria-hidden="true">&times;</span>
               </button>
             </div>
 
@@ -292,3 +358,4 @@ const Navbar: React.FC = () => {
 };
 
 export default Navbar;
+

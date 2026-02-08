@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../config/api';
+import { getAuthToken } from '../utils/auth';
 
 interface SubmitRatingProps {
   ratedUserId: string;
@@ -22,6 +23,13 @@ const SubmitRating: React.FC<SubmitRatingProps> = ({
   const [category, setCategory] = useState('overall');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const scoreLabels: Record<number, string> = {
+    1: 'Poor',
+    2: 'Fair',
+    3: 'Good',
+    4: 'Very Good',
+    5: 'Excellent',
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +37,11 @@ const SubmitRating: React.FC<SubmitRatingProps> = ({
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken() || localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
       await axios.post(
         `${API_BASE_URL}/ratings`,
         {
@@ -58,17 +70,19 @@ const SubmitRating: React.FC<SubmitRatingProps> = ({
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Star Rating */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-3">
+        <fieldset>
+          <legend className="block text-sm font-semibold text-gray-700 mb-3">
             How was your experience?
-          </label>
-          <div className="flex gap-2">
+          </legend>
+          <div className="flex gap-2" role="group" aria-label="Select a rating from one to five stars">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
                 type="button"
                 onClick={() => setScore(star)}
-                className="focus:outline-none transition"
+                aria-label={`${star} star${star > 1 ? 's' : ''} - ${scoreLabels[star]}`}
+                aria-pressed={score === star}
+                className="transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 rounded"
               >
                 <svg
                   className={`w-8 h-8 ${
@@ -77,20 +91,17 @@ const SubmitRating: React.FC<SubmitRatingProps> = ({
                       : 'text-gray-300'
                   }`}
                   viewBox="0 0 20 20"
+                  aria-hidden="true"
                 >
                   <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
                 </svg>
               </button>
             ))}
           </div>
-          <div className="mt-2 text-sm text-gray-600">
-            {score === 1 && 'Poor'}
-            {score === 2 && 'Fair'}
-            {score === 3 && 'Good'}
-            {score === 4 && 'Very Good'}
-            {score === 5 && 'Excellent'}
+          <div className="mt-2 text-sm text-gray-600" aria-live="polite">
+            {scoreLabels[score]}
           </div>
-        </div>
+        </fieldset>
 
         {/* Category */}
         <div>
@@ -101,7 +112,7 @@ const SubmitRating: React.FC<SubmitRatingProps> = ({
             id="category"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
           >
             <option value="overall">Overall Experience</option>
             <option value="communication">Communication</option>
@@ -121,7 +132,7 @@ const SubmitRating: React.FC<SubmitRatingProps> = ({
             onChange={(e) => setReview(e.target.value)}
             placeholder="Tell others about your experience..."
             maxLength={1000}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 resize-none"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 resize-none"
             rows={4}
           />
           <div className="mt-1 text-xs text-gray-500">
@@ -131,7 +142,7 @@ const SubmitRating: React.FC<SubmitRatingProps> = ({
 
         {/* Error Message */}
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+          <div role="alert" className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
             {error}
           </div>
         )}

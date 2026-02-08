@@ -122,6 +122,12 @@ export async function installApp(): Promise<boolean> {
 
 // Check if already installed as app
 export function isInstalledAsApp(): boolean {
-  return window.matchMedia('(display-mode: standalone)').matches ||
-         (window.navigator as any).standalone === true;
+  if (typeof window === 'undefined') return false;
+
+  const hasMatchMedia = typeof window.matchMedia === 'function';
+  const isStandaloneDisplayMode = hasMatchMedia
+    ? window.matchMedia('(display-mode: standalone)').matches
+    : false;
+
+  return isStandaloneDisplayMode || (window.navigator as any).standalone === true;
 }

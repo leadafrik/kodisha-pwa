@@ -10,6 +10,7 @@ const AboutUs: React.FC = () => {
 
   useEffect(() => {
     let isMounted = true;
+    const REFRESH_INTERVAL_MS = 60000;
 
     const loadUserCount = async () => {
       try {
@@ -26,15 +27,18 @@ const AboutUs: React.FC = () => {
     };
 
     loadUserCount();
+    const intervalId = window.setInterval(loadUserCount, REFRESH_INTERVAL_MS);
 
     return () => {
       isMounted = false;
+      window.clearInterval(intervalId);
     };
   }, []);
 
   const countiesCount = kenyaCounties.length;
+  const currentYear = new Date().getFullYear();
   const userCountLabel =
-    userCount !== null ? `${userCount.toLocaleString()} registered users` : 'Live user count updating';
+    userCount !== null ? `${userCount.toLocaleString()} registered users` : 'Fetching registered users...';
   const isFullyVerified =
     user?.verification?.status === "approved" || !!user?.verification?.idVerified;
   const verificationLink = user ? (isFullyVerified ? '/profile' : '/verify-id') : '/login';
@@ -258,7 +262,7 @@ const AboutUs: React.FC = () => {
               <p className="text-sm text-slate-600 mt-3">Email or join the WhatsApp community to get quick assistance.</p>
               <div className="mt-4 flex flex-col gap-2">
                 <a
-                  href="mailto:kodisha.254.ke@gmail.com"
+                  href="mailto:info@leadafrik.com"
                   className="inline-flex justify-center items-center rounded-xl bg-slate-900 text-white px-4 py-2 text-sm font-semibold hover:bg-slate-800 transition"
                 >
                   Email Support
@@ -317,23 +321,23 @@ const AboutUs: React.FC = () => {
                 <ul className="mt-2 space-y-2">
                   <li><Link to="/terms" className="hover:text-slate-900 transition">Terms of Service</Link></li>
                   <li><Link to="/privacy" className="hover:text-slate-900 transition">Privacy Policy</Link></li>
-                  <li><Link to="/privacy" className="hover:text-slate-900 transition">Data Protection</Link></li>
-                  <li><Link to="/privacy" className="hover:text-slate-900 transition">ODPC</Link></li>
+                  <li><Link to="/privacy#data-protection" className="hover:text-slate-900 transition">Data Protection</Link></li>
+                  <li><a href="https://www.odpc.go.ke/" target="_blank" rel="noopener noreferrer" className="hover:text-slate-900 transition">ODPC</a></li>
                 </ul>
               </div>
               <div>
                 <p className="font-semibold text-slate-900">Contact</p>
                 <ul className="mt-2 space-y-2">
-                  <li><a href="mailto:kodisha.254.ke@gmail.com" className="hover:text-slate-900 transition">Email Support</a></li>
+                  <li><a href="mailto:info@leadafrik.com" className="hover:text-slate-900 transition">Email Support</a></li>
                   <li><a href="https://chat.whatsapp.com/HzCaV5YVz86CjwajiOHR5i" target="_blank" rel="noopener noreferrer" className="hover:text-slate-900 transition">WhatsApp Community</a></li>
                   <li><Link to="/contact" className="hover:text-slate-900 transition">Contact Support</Link></li>
                 </ul>
               </div>
             </div>
             <div className="mt-8 text-xs text-slate-500 text-center">
-              <p>Copyright 2025 Agrisoko. All rights reserved.</p>
+              <p>Copyright {currentYear} Agrisoko. All rights reserved.</p>
               <p className="mt-1">By using Agrisoko, you agree to our Terms of Service and Privacy Policy.</p>
-              <p className="mt-1">For data protection inquiries: kodisha.254.ke@gmail.com</p>
+              <p className="mt-1">For data protection inquiries: info@leadafrik.com</p>
             </div>
           </div>
         </footer>

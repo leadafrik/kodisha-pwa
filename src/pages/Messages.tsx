@@ -1,9 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { messageService, MessageThread, Message } from '../services/messageService';
 import { API_ENDPOINTS, apiRequest } from '../config/api';
 import { ChevronLeft, Send, Check, CheckCheck } from 'lucide-react';
 
 const OBJECT_ID_PATTERN = /^[a-f0-9]{24}$/i;
+const THREADS_POLL_INTERVAL_MS = 15000;
+const CONVERSATION_POLL_INTERVAL_MS = 5000;
 
 const valueAsString = (value: unknown): string => {
   return typeof value === 'string' ? value.trim() : '';
@@ -34,6 +37,18 @@ const getProfileDisplayName = (
   return formatUserLabel(userId, fullName || contactValue);
 };
 
+const resolveCounterpartId = (
+  thread: MessageThread,
+  currentUserId: string
+): string => {
+  if (thread.counterpart) return thread.counterpart;
+  if (currentUserId) {
+    if (thread.from === currentUserId && thread.to) return thread.to;
+    if (thread.to === currentUserId && thread.from) return thread.from;
+  }
+  return thread.to || thread.from;
+};
+
 const Messages: React.FC = () => {
   const [threads, setThreads] = useState<MessageThread[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -44,6 +59,84 @@ const Messages: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [userNames, setUserNames] = useState<Record<string, string>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const currentUserId =
+    typeof window !== 'undefined'
+      ? valueAsString(window.localStorage.getItem('userId'))
+      : '';
+
+  const loadThreads = useCallback(async (showLoading = false) => {
+    try {
+      if (showLoading) setLoading(true);
+      setError(null);
+      const data = await messageService.getMessageThreads();
+      setThreads(data);
+
+      const ids = Array.from(
+        new Set(
+          data
+            .map((thread) => resolveCounterpartId(thread, currentUserId))
+            .filter((id): id is string => !!id)
+        )
+      );
+
+      if (ids.length > 0) {
+        const profiles = await Promise.all(
+          ids.map(async (id) => {
+            try {
+              const res = await apiRequest(API_ENDPOINTS.users.getProfile(id));
+              const payload =
+                res && typeof res === 'object'
+                  ? (res as Record<string, unknown>)
+                  : {};
+              const profileSource = payload.data ?? payload.user ?? payload;
+              const profile =
+                profileSource && typeof profileSource === 'object'
+                  ? (profileSource as Record<string, unknown>)
+                  : {};
+              return { id, name: getProfileDisplayName(profile, id) };
+            } catch {
+              return { id, name: formatUserLabel(id) };
+            }
+          })
+        );
+
+        setUserNames((prev) => {
+          const next = { ...prev };
+          profiles.forEach((entry) => {
+            next[entry.id] = entry.name;
+          });
+          return next;
+        });
+      }
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      if (showLoading) setLoading(false);
+    }
+  }, [currentUserId]);
+
+  const loadConversation = useCallback(
+    async (userId: string, showLoading = false) => {
+      try {
+        if (showLoading) setLoading(true);
+        setError(null);
+        const data = await messageService.getConversation(userId);
+        setMessages(data);
+
+        // Mark messages from this user as read
+        try {
+          await messageService.markMessagesAsRead(userId);
+        } catch (markErr) {
+          console.error('Failed to mark messages as read:', markErr);
+        }
+      } catch (err) {
+        setError((err as Error).message);
+      } finally {
+        if (showLoading) setLoading(false);
+      }
+    },
+    []
+  );
 
   // Auto-scroll to bottom
   const scrollToBottom = () => {
@@ -54,88 +147,29 @@ const Messages: React.FC = () => {
     scrollToBottom();
   }, [messages]);
 
-  // Fetch message threads on mount
+  // Fetch message threads on mount and refresh regularly
   useEffect(() => {
-    const loadThreads = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await messageService.getMessageThreads();
-        setThreads(data);
+    loadThreads(true);
 
-        const ids = Array.from(
-          new Set(
-            data
-              .map((thread) => thread.counterpart || thread.to)
-              .filter((id): id is string => !!id)
-          )
-        );
+    const intervalId = window.setInterval(() => {
+      loadThreads(false);
+    }, THREADS_POLL_INTERVAL_MS);
 
-        if (ids.length > 0) {
-          const profiles = await Promise.all(
-            ids.map(async (id) => {
-              try {
-                const res = await apiRequest(API_ENDPOINTS.users.getProfile(id));
-                const payload =
-                  res && typeof res === 'object'
-                    ? (res as Record<string, unknown>)
-                    : {};
-                const profileSource = payload.data ?? payload.user ?? payload;
-                const profile =
-                  profileSource && typeof profileSource === 'object'
-                    ? (profileSource as Record<string, unknown>)
-                    : {};
-                return { id, name: getProfileDisplayName(profile, id) };
-              } catch {
-                return { id, name: formatUserLabel(id) };
-              }
-            })
-          );
+    return () => window.clearInterval(intervalId);
+  }, [loadThreads]);
 
-          setUserNames((prev) => {
-            const next = { ...prev };
-            profiles.forEach((entry) => {
-              next[entry.id] = entry.name;
-            });
-            return next;
-          });
-        }
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadThreads();
-  }, []);
-
-  // Fetch conversation and mark as read when selected user changes
+  // Fetch conversation and keep it updated while a thread is selected
   useEffect(() => {
     if (!selectedUserId) return;
 
-    const loadConversation = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await messageService.getConversation(selectedUserId);
-        setMessages(data);
+    loadConversation(selectedUserId, true);
 
-        // Mark messages from this user as read
-        try {
-          await messageService.markMessagesAsRead(selectedUserId);
-        } catch (markErr) {
-          console.error('Failed to mark messages as read:', markErr);
-        }
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const intervalId = window.setInterval(() => {
+      loadConversation(selectedUserId, false);
+    }, CONVERSATION_POLL_INTERVAL_MS);
 
-    loadConversation();
-  }, [selectedUserId]);
+    return () => window.clearInterval(intervalId);
+  }, [selectedUserId, loadConversation]);
 
   useEffect(() => {
     if (!selectedUserId) return;
@@ -157,9 +191,8 @@ const Messages: React.FC = () => {
       setError(null);
       await messageService.sendMessage(selectedUserId, messageText);
 
-      // Refresh conversation
-      const data = await messageService.getConversation(selectedUserId);
-      setMessages(data);
+      // Refresh immediately after sending
+      await loadConversation(selectedUserId, false);
     } catch (err) {
       setError((err as Error).message);
       setMessageInput(messageText); // Restore input on error
@@ -201,20 +234,50 @@ const Messages: React.FC = () => {
 
           <div className="flex-1 overflow-y-auto">
             {loading && threads.length === 0 && (
-              <p className="p-4 text-gray-500 text-center">Loading conversations...</p>
+              <div className="p-4 space-y-3">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <div key={index} className="animate-pulse rounded-xl border border-gray-100 p-3">
+                    <div className="h-3 w-2/5 rounded bg-gray-200" />
+                    <div className="mt-2 h-3 w-4/5 rounded bg-gray-100" />
+                  </div>
+                ))}
+              </div>
             )}
 
             {error && threads.length === 0 && (
-              <p className="p-4 text-red-500 text-center">{error}</p>
+              <div className="p-4 space-y-3">
+                <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                  {error}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => loadThreads(true)}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+                >
+                  Retry
+                </button>
+              </div>
             )}
 
-            {threads.length === 0 && !loading && (
-              <p className="p-4 text-gray-500 text-center">No conversations yet</p>
+            {threads.length === 0 && !loading && !error && (
+              <div className="p-6 text-center">
+                <p className="text-sm font-semibold text-gray-800">No conversations yet</p>
+                <p className="mt-1 text-xs text-gray-500">
+                  Start from a listing and your chats will appear here.
+                </p>
+                <Link
+                  to="/browse"
+                  className="mt-4 inline-flex min-h-[44px] items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 transition"
+                >
+                  Browse listings
+                </Link>
+              </div>
             )}
 
             <div className="space-y-0">
               {threads.map((thread) => {
-                const otherUserId = thread.counterpart || thread.to;
+                const otherUserId = resolveCounterpartId(thread, currentUserId);
+                if (!otherUserId) return null;
                 const displayName = formatUserLabel(otherUserId, userNames[otherUserId]);
                 const isSelected = selectedUserId === otherUserId;
 
@@ -252,9 +315,17 @@ const Messages: React.FC = () => {
         <div className="md:col-span-2 flex flex-col bg-white">
           {!selectedUserId ? (
             <div className="flex-1 flex items-center justify-center bg-gray-50">
-              <div className="text-center">
-                <p className="text-gray-500 text-lg">Select a conversation to start messaging</p>
-                <p className="text-gray-400 text-sm mt-2">or start a new one from the list</p>
+              <div className="text-center px-4">
+                <p className="text-gray-700 text-lg font-semibold">Select a conversation</p>
+                <p className="text-gray-500 text-sm mt-2">
+                  Choose a thread from the list or start one from any listing.
+                </p>
+                <Link
+                  to="/browse"
+                  className="mt-4 inline-flex min-h-[44px] items-center justify-center rounded-lg border border-green-200 bg-white px-4 py-2 text-sm font-semibold text-green-700 hover:bg-green-50 transition"
+                >
+                  Find listings
+                </Link>
               </div>
             </div>
           ) : (
@@ -272,7 +343,7 @@ const Messages: React.FC = () => {
                 </button>
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900">{selectedUserName}</h2>
-                  <p className="text-xs text-gray-500">Online</p>
+                  <p className="text-xs text-gray-500">Auto-refreshes every 5s</p>
                 </div>
               </div>
 
@@ -284,16 +355,33 @@ const Messages: React.FC = () => {
                   </div>
                 )}
 
-                {messages.length === 0 ? (
+                {loading && messages.length === 0 ? (
+                  <div className="space-y-3 animate-pulse">
+                    {Array.from({ length: 4 }).map((_, index) => (
+                      <div
+                        key={index}
+                        className={`h-14 rounded-xl ${index % 2 === 0 ? 'w-2/3 bg-gray-100' : 'w-1/2 ml-auto bg-green-100'}`}
+                      />
+                    ))}
+                  </div>
+                ) : messages.length === 0 ? (
                   <div className="flex items-center justify-center h-full">
                     <p className="text-gray-500 text-center">
-                      No messages yet.<br />
-                      <span className="text-sm">Start the conversation!</span>
+                      No messages yet with {selectedUserName || 'this user'}.<br />
+                      <span className="text-sm">Send the first message below.</span>
                     </p>
                   </div>
                 ) : (
                   messages.map((msg) => {
-                    const isOwn = msg.from === localStorage.getItem('userId') || msg.from !== selectedUserId;
+                    const isOwn = msg.from === currentUserId;
+                    const senderName = isOwn
+                      ? 'You'
+                      : formatUserLabel(
+                          msg.from,
+                          msg.from === selectedUserId
+                            ? selectedUserName
+                            : userNames[msg.from]
+                        );
 
                     return (
                       <div
@@ -308,6 +396,13 @@ const Messages: React.FC = () => {
                           }`}
                         >
                           <div className="flex-1">
+                            <p
+                              className={`text-[11px] font-semibold ${
+                                isOwn ? 'text-green-100 text-right' : 'text-gray-500'
+                              }`}
+                            >
+                              {senderName}
+                            </p>
                             <p className="text-sm break-words">{msg.body}</p>
                             <div className="flex items-center gap-1 justify-end mt-1">
                               <p className={`text-xs opacity-75 ${isOwn ? 'text-green-50' : ''}`}>
@@ -343,7 +438,7 @@ const Messages: React.FC = () => {
                   <button
                     onClick={handleSendMessage}
                     disabled={!messageInput.trim()}
-                    className="p-2 bg-green-600 text-white rounded-full hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+                    className="min-h-[44px] min-w-[44px] p-2 bg-green-600 text-white rounded-full hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
                   >
                     <Send size={20} />
                   </button>

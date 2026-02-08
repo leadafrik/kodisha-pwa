@@ -27,6 +27,7 @@ interface PropertyContextType {
     county?: string
   ) => ServiceListing[];
   loading: boolean;
+  error: string | null;
   refreshProperties: () => Promise<void>;
   refreshServices: () => Promise<void>;
   refreshProducts: () => Promise<void>;
@@ -113,6 +114,7 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
   const [serviceListings, setServiceListings] = useState<ServiceListing[]>([]);
   const [productListings, setProductListings] = useState<ProductListing[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     refreshProperties();
@@ -122,10 +124,12 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
 
   const refreshProperties = async () => {
     setLoading(true);
+    setError(null);
     try {
       const response = await fetch(API_ENDPOINTS.properties.getAll);
       if (!response.ok) {
         console.warn("Properties fetch failed:", response.status);
+        setError("Unable to load land listings right now.");
         setProperties([]);
         return;
       }
@@ -136,6 +140,7 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
       console.log("Listings loaded:", listings.length);
     } catch (error) {
       console.error("Error loading properties:", error);
+      setError("Unable to load land listings right now.");
       setProperties([]);
     } finally {
       setLoading(false);
@@ -144,12 +149,17 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
 
   const refreshServices = async () => {
     setLoading(true);
+    setError(null);
     try {
       const [equipmentRes, professionalRes, agrovetRes] = await Promise.all([
         fetch(API_ENDPOINTS.services.equipment.list).catch(() => null),
         fetch(API_ENDPOINTS.services.professional.list).catch(() => null),
         fetch(API_ENDPOINTS.services.agrovets.list).catch(() => null),
       ]);
+      const hasAnyServiceResponse = !!equipmentRes?.ok || !!professionalRes?.ok || !!agrovetRes?.ok;
+      if (!hasAnyServiceResponse) {
+        setError("Unable to load service listings right now.");
+      }
 
       const equipment: any[] = [];
       const professional: any[] = [];
@@ -180,6 +190,7 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
       console.log("Services loaded:", combined.length);
     } catch (error) {
       console.error("Error loading services:", error);
+      setError("Unable to load service listings right now.");
       setServiceListings([]);
     } finally {
       setLoading(false);
@@ -187,6 +198,7 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
   };
 
   const refreshProducts = async () => {
+    setError(null);
     try {
       const res = await fetch(API_ENDPOINTS.services.products.list);
       if (!res.ok) throw new Error("Failed to fetch products");
@@ -194,6 +206,7 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
       setProductListings(json.data || []);
     } catch (err) {
       console.error("Error loading products:", err);
+      setError("Unable to load product listings right now.");
       setProductListings([]);
     }
   };
@@ -331,6 +344,7 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
         getPropertiesByCounty,
         getServicesByType,
         loading,
+        error,
         refreshProperties,
         refreshServices,
         refreshProducts,

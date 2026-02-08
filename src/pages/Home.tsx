@@ -14,17 +14,17 @@ const Home: React.FC = () => {
   // Set defaults if content is empty
   const displayHeadline = heroHeadline || "Connecting Kenya's Agricultural Ecosystem";
   const displayDescription = heroDescription || 'A trusted marketplace for farmers, buyers, and agricultural service providers across all 47 counties.';
-  const displayAnnouncement = announcementText || 'Early access launching with zero fees while we scale.';
+  const displayAnnouncement = announcementText || 'Trade with verified profiles, direct messaging, and transparent terms.';
 
   return (
     <main className="min-h-screen bg-white">
       {/* HERO SECTION - Clean & Minimal */}
       <section className="pt-20 pb-24 px-4 md:px-8 border-b border-gray-200">
         <div className="max-w-7xl mx-auto">
-          {/* Beta Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-medium mb-8">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
-            Open Beta • All Listings Free
+          {/* Confidence Badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium mb-8">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+            Trusted marketplace - verified and secure
           </div>
 
           {/* Main Headline */}
@@ -44,13 +44,13 @@ const Home: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-3 mt-10">
             <Link
               to="/browse"
-              className="inline-flex justify-center items-center px-6 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+              className="inline-flex min-h-[48px] justify-center items-center px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors"
             >
               Browse Listings
             </Link>
             <Link
               to={user ? "/create-listing" : "/login?next=/create-listing"}
-              className="inline-flex justify-center items-center px-6 py-3 border border-gray-300 text-gray-900 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+              className="inline-flex min-h-[48px] justify-center items-center px-6 py-3 border border-emerald-300 text-emerald-700 font-semibold rounded-lg hover:bg-emerald-50 transition-colors"
             >
               {user ? "Create Listing" : "Start Selling"}
             </Link>
@@ -72,7 +72,7 @@ const Home: React.FC = () => {
             </div>
             <div>
               <div className="text-2xl font-bold text-gray-900">Free</div>
-              <div className="text-xs text-gray-600 mt-1">Launch Phase</div>
+              <div className="text-xs text-gray-600 mt-1">Transparent Pricing</div>
             </div>
             <div>
               <div className="text-2xl font-bold text-gray-900">24/7</div>
@@ -96,7 +96,7 @@ const Home: React.FC = () => {
 
           <div className="grid md:grid-cols-2 gap-8">
             {/* BUYERS PATH */}
-            <div className="border border-gray-200 rounded-lg p-12 bg-white hover:border-gray-300 transition">
+            <div className="border border-gray-200 rounded-lg p-6 md:p-12 bg-white hover:border-gray-300 transition">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">I'm Looking to Buy</h3>
               <p className="text-gray-600 mb-6">
                 Browse thousands of quality agricultural products, livestock, and professional services from verified sellers across Kenya.
@@ -117,37 +117,37 @@ const Home: React.FC = () => {
               </ul>
               <Link
                 to="/browse"
-                className="inline-flex items-center px-6 py-2 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+                className="inline-flex min-h-[44px] items-center px-6 py-2 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors"
               >
-                Browse Now →
+                Browse now
               </Link>
             </div>
 
             {/* SELLERS PATH */}
-            <div className="border border-gray-200 rounded-lg p-12 bg-white hover:border-gray-300 transition">
+            <div className="border border-gray-200 rounded-lg p-6 md:p-12 bg-white hover:border-gray-300 transition">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">I'm Looking to Sell</h3>
               <p className="text-gray-600 mb-6">
                 List your products to reach verified buyers actively seeking what you produce. Direct connections, no middlemen.
               </p>
               <ul className="space-y-3 mb-8 text-gray-700">
                 <li className="flex items-center gap-2">
-                  <span className="text-blue-600 font-semibold">+</span> Real buyer demand
+                  <span className="text-emerald-600 font-semibold">+</span> Real buyer demand
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-blue-600 font-semibold">+</span> Multiple buyer inquiries
+                  <span className="text-emerald-600 font-semibold">+</span> Multiple buyer inquiries
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-blue-600 font-semibold">+</span> Quick response opportunities
+                  <span className="text-emerald-600 font-semibold">+</span> Quick response opportunities
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-blue-600 font-semibold">+</span> Direct buyer negotiation
+                  <span className="text-emerald-600 font-semibold">+</span> Direct buyer negotiation
                 </li>
               </ul>
               <Link
                 to={user ? "/create-listing" : "/login?next=/create-listing"}
-                className="inline-flex items-center px-6 py-2 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+                className="inline-flex min-h-[44px] items-center px-6 py-2 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors"
               >
-                {user ? "Create Listing" : "Get Started"} →
+                {user ? "Create Listing" : "Get Started"}
               </Link>
             </div>
           </div>
@@ -228,8 +228,8 @@ const Home: React.FC = () => {
 
             {/* Feature 6 */}
             <div className="p-8 bg-white rounded-lg border border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900 mb-3">Free Launch Phase</h3>
-              <p className="text-gray-600">Zero listing fees while we onboard Kenya's agricultural community.</p>
+              <h3 className="text-lg font-bold text-gray-900 mb-3">Transparent Pricing</h3>
+              <p className="text-gray-600">Clear costs and terms before you publish or transact.</p>
             </div>
           </div>
         </div>
@@ -243,25 +243,25 @@ const Home: React.FC = () => {
           <div className="grid md:grid-cols-2 gap-8">
             {/* Produce Category */}
             <div className="border border-gray-200 rounded-lg p-8">
-              <div className="text-4xl mb-4">🌾</div>
+              <div className="text-sm font-semibold text-emerald-700 mb-4">Produce</div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">Agricultural Produce</h3>
               <p className="text-gray-600 mb-6">
                 Fresh vegetables, fruits, grains, and livestock directly from farmers and producers across Kenya.
               </p>
               <Link to="/browse" className="text-gray-900 font-semibold hover:underline">
-                Browse Produce →
+                Browse produce
               </Link>
             </div>
 
             {/* Services Category */}
             <div className="border border-gray-200 rounded-lg p-8">
-              <div className="text-4xl mb-4">🔧</div>
+              <div className="text-sm font-semibold text-emerald-700 mb-4">Services</div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">Agricultural Services</h3>
               <p className="text-gray-600 mb-6">
                 Professional services including land surveying, transportation, equipment rental, and landscaping.
               </p>
               <Link to="/browse" className="text-gray-900 font-semibold hover:underline">
-                Browse Services →
+                Browse services
               </Link>
             </div>
           </div>
@@ -271,9 +271,9 @@ const Home: React.FC = () => {
       {/* FEATURE STATUS BANNER */}
       <section className="py-12 px-4 md:px-8 bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto text-center">
-          <h3 className="text-2xl font-bold mb-2">Open Beta • Core Features Live</h3>
+          <h3 className="text-2xl font-bold mb-2">Core Features Ready for Daily Trade</h3>
           <p className="text-gray-300">
-            Identity verification, document uploads, and in-app messaging are fully operational. Payments and transaction fees will be announced before activation.
+            Identity verification, document uploads, and in-app messaging are active with clear terms.
           </p>
         </div>
       </section>
@@ -292,16 +292,16 @@ const Home: React.FC = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
-                to="/browse"
-                className="inline-flex justify-center items-center px-6 py-3 border border-gray-300 text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                Browse Marketplace
-              </Link>
-              <Link
                 to={user ? "/create-listing" : "/login?next=/create-listing"}
-                className="inline-flex justify-center items-center px-6 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+                className="inline-flex min-h-[48px] justify-center items-center px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors"
               >
                 {user ? "Create Listing" : "Create Account"}
+              </Link>
+              <Link
+                to="/browse"
+                className="inline-flex min-h-[48px] justify-center items-center px-6 py-3 border border-gray-300 text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                Browse Marketplace
               </Link>
             </div>
           </div>
@@ -370,7 +370,7 @@ const Home: React.FC = () => {
 
           {/* Footer Bottom */}
           <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
-            <p>&copy; {new Date().getFullYear()} Agrisoko. All rights reserved. Currently in open beta with zero listing fees.</p>
+            <p>&copy; {new Date().getFullYear()} Agrisoko. All rights reserved. </p>
           </div>
         </div>
       </footer>

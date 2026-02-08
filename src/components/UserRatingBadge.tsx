@@ -16,7 +16,7 @@ const UserRatingBadge: React.FC<UserRatingBadgeProps> = ({
   rating, 
   showCount = true, 
   size = 'md',
-  verified = true 
+  verified = false 
 }) => {
   if (!rating || rating.count === 0) {
     return (
@@ -35,11 +35,12 @@ const UserRatingBadge: React.FC<UserRatingBadgeProps> = ({
   };
 
   const starSize = sizeClasses[size];
+  const ratingSummary = `${rating.average.toFixed(1)} out of 5 from ${rating.count} ${rating.count === 1 ? 'review' : 'reviews'}`;
 
   return (
     <div className={`flex items-center gap-2 ${
       size === 'sm' ? 'text-xs' : size === 'lg' ? 'text-base' : 'text-sm'
-    }`}>
+    }`} aria-label={ratingSummary}>
       {/* Star rating */}
       <div className="flex items-center gap-1">
         {[...Array(5)].map((_, i) => (
@@ -51,6 +52,7 @@ const UserRatingBadge: React.FC<UserRatingBadgeProps> = ({
                 : 'text-gray-300'
             }`}
             viewBox="0 0 20 20"
+            aria-hidden="true"
           >
             <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
           </svg>
@@ -69,12 +71,16 @@ const UserRatingBadge: React.FC<UserRatingBadgeProps> = ({
 
       {/* Verified badge */}
       {verified && (
-        <svg
-          className={`${starSize} text-green-600 fill-current ml-1`}
-          viewBox="0 0 20 20"
-        >
-          <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" />
-        </svg>
+        <>
+          <svg
+            className={`${starSize} text-green-600 fill-current ml-1`}
+            viewBox="0 0 20 20"
+            aria-hidden="true"
+          >
+            <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" />
+          </svg>
+          <span className="sr-only">Verified profile</span>
+        </>
       )}
     </div>
   );
