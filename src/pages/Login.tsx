@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -329,32 +329,21 @@ const Login: React.FC = () => {
       {/* Password */}
       <div>
         <label className="block text-sm font-semibold text-gray-900 mb-2">Password</label>
-        <div className= relative>
+        <div className="relative">
           <input
-            type={visiblePasswords.login ? text : password}
+            type={visiblePasswords.login ? "text" : "password"}
             value={loginData.password}
-            onChange={(e) => handleLoginPasswordChange(e.target.value)}
-            onBlur={() => {
-              if (!loginData.password) {
-                setLoginFieldErrors({
-                  ...loginFieldErrors,
-                  password: Password is required,
-                });
-              }
-            }
-            aria-invalid={!!loginFieldErrors.password}
-            aria-describedby={loginFieldErrors.password ? password-error : undefined}
-            className={w-full border rounded-lg px-4 py-2.5 pr-10 text-sm transition-colors
-              placeholder:text-gray-400
-              focus:outline-none focus:ring-2
-              }
-            placeholder=Enter your password
+            onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-10 text-sm
+              focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100
+              placeholder:text-gray-400 transition-colors"
+            placeholder="Enter your password"
           />
           <button
-            type=button
-            className=absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none
-            aria-label={visiblePasswords.login ? Hide password : Show password}
-            onClick={() => togglePasswordVisibility(login)}
+            type="button"
+            className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+            aria-label={visiblePasswords.login ? "Hide password" : "Show password"}
+            onClick={() => togglePasswordVisibility("login")}
           >
             {visiblePasswords.login ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
@@ -454,31 +443,19 @@ const Login: React.FC = () => {
 
       <div>
         <label className="block text-sm font-medium text-gray-700">Password *</label>
-        <div className=relative>
+        <div className="relative">
           <input
-            type={visiblePasswords.signup ? text : password}
+            type={visiblePasswords.signup ? "text" : "password"}
             value={signupData.password}
-            onChange={(e) => handleSignupPasswordChange(e.target.value)}
-            onBlur={() => {
-              if (!signupData.password) {
-                setSignupFieldErrors({
-                  ...signupFieldErrors,
-                  password: Password is required,
-                });
-              }
-            }
-            aria-invalid={!!signupFieldErrors.password}
-            aria-describedby={signupFieldErrors.password ? password-error : undefined}
-            className={w-full border rounded-lg px-4 py-2.5 pr-10 transition-colors
-              focus:outline-none focus:ring-2
-              }
-            placeholder=Min 6 characters
+            onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
+            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Min 6 characters"
           />
           <button
-            type=button
-            className=absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none
-            aria-label={visiblePasswords.signup ? Hide password : Show password}
-            onClick={() => togglePasswordVisibility(signup)}
+            type="button"
+            className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+            aria-label={visiblePasswords.signup ? "Hide password" : "Show password"}
+            onClick={() => togglePasswordVisibility("signup")}
           >
             {visiblePasswords.signup ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
@@ -487,31 +464,19 @@ const Login: React.FC = () => {
 
       <div>
         <label className="block text-sm font-medium text-gray-700">Confirm Password *</label>
-        <div className=relative>
+        <div className="relative">
           <input
-            type={visiblePasswords.signupConfirm ? text : password}
+            type={visiblePasswords.signupConfirm ? "text" : "password"}
             value={signupData.confirmPassword}
-            onChange={(e) => handleSignupConfirmPasswordChange(e.target.value)}
-            onBlur={() => {
-              if (!signupData.confirmPassword) {
-                setSignupFieldErrors({
-                  ...signupFieldErrors,
-                  confirmPassword: Please confirm your password,
-                });
-              }
-            }
-            aria-invalid={!!signupFieldErrors.confirmPassword}
-            aria-describedby={signupFieldErrors.confirmPassword ? confirm-password-error : undefined}
-            className={w-full border rounded-lg px-4 py-2.5 pr-10 transition-colors
-              focus:outline-none focus:ring-2
-              }
-            placeholder=Confirm password
+            onChange={(e) => setSignupData({ ...signupData, confirmPassword: e.target.value })}
+            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Confirm password"
           />
           <button
-            type=button
-            className=absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none
-            aria-label={visiblePasswords.signupConfirm ? Hide password : Show password}
-            onClick={() => togglePasswordVisibility(signupConfirm)}
+            type="button"
+            className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+            aria-label={visiblePasswords.signupConfirm ? "Hide password" : "Show password"}
+            onClick={() => togglePasswordVisibility("signupConfirm")}
           >
             {visiblePasswords.signupConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
