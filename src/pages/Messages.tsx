@@ -6,6 +6,28 @@ import { SOCKET_URL, API_ENDPOINTS, apiRequest } from '../config/api';
 import { ChevronLeft, Send, Check, CheckCheck } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 
+const OBJECT_ID_PATTERN = /^[a-f0-9]{24}$/i;
+
+const formatUserLabel = (userId: string, value?: string | null) => {
+  const trimmed = value?.trim();
+  if (trimmed) return trimmed;
+  if (OBJECT_ID_PATTERN.test(userId)) {
+    return `User ${userId.slice(-6)}`;
+  }
+  return userId;
+};
+
+const getProfileDisplayName = (profile: any, userId: string) => {
+  const fullName =
+    profile?.fullName ||
+    profile?.name ||
+    profile?.displayName ||
+    [profile?.firstName, profile?.lastName].filter(Boolean).join(' ').trim();
+
+  const contactValue = profile?.email || profile?.phone || profile?.username;
+  return formatUserLabel(userId, fullName || contactValue);
+};
+
 const Messages: React.FC = () => {
   const [threads, setThreads] = useState<MessageThread[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -44,10 +66,10 @@ const Messages: React.FC = () => {
         missing.map(async (id) => {
           try {
             const res: any = await apiRequest(API_ENDPOINTS.users.getProfile(id));
-            const name = res?.data?.fullName || res?.data?.name || res?.user?.fullName || res?.user?.name;
-            return { id, name: name || 'Unknown user' };
+            const profile = res?.data || res?.user || res || {};
+            return { id, name: getProfileDisplayName(profile, id) };
           } catch {
-            return { id, name: 'Unknown user' };
+            return { id, name: formatUserLabel(id) };
           }
         })
       );
@@ -157,8 +179,9 @@ const Messages: React.FC = () => {
   useEffect(() => {
     if (!selectedUserId) return;
     const nextName = userNames[selectedUserId];
-    if (nextName && nextName !== selectedUserName) {
-      setSelectedUserName(nextName);
+    const nextLabel = formatUserLabel(selectedUserId, nextName);
+    if (nextLabel !== selectedUserName) {
+      setSelectedUserName(nextLabel);
     }
   }, [selectedUserId, selectedUserName, userNames]);
 
@@ -201,7 +224,7 @@ const Messages: React.FC = () => {
     initialSelectionDoneRef.current = true;
     setSelectedUserId(userId);
     const existingName = userNames[userId];
-    setSelectedUserName(existingName || userId);
+    setSelectedUserName(formatUserLabel(userId, existingName));
     loadUserNames([userId]);
   }, [location.search, userNames, loadUserNames]);
 
@@ -284,7 +307,7 @@ const Messages: React.FC = () => {
             <div className="space-y-0">
               {threads.map((thread) => {
                 const otherUserId = thread.counterpart || thread.to;
-                const displayName = userNames[otherUserId] || otherUserId;
+                const displayName = formatUserLabel(otherUserId, userNames[otherUserId]);
                 const isSelected = selectedUserId === otherUserId;
 
                 return (

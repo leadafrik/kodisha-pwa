@@ -157,6 +157,8 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
   const [landSearchFile, setLandSearchFile] = useState<File | null>(null);
   const [chiefLetterFile, setChiefLetterFile] = useState<File | null>(null);
   const [docUploading, setDocUploading] = useState(false);
+  const [freeListingsRemaining, setFreeListingsRemaining] = useState<number>(100);
+  const [freeListingOfferActive, setFreeListingOfferActive] = useState(true);
 
   const saveDraft = (data: PropertyFormData) => {
     if (typeof window === 'undefined') return;
@@ -225,6 +227,28 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
       setSelectedPlan('basic');
     }
   }, [firstListingFreeUsed, selectedPlan]);
+
+  // Fetch free listings counter
+  useEffect(() => {
+    const fetchFreeListingsData = async () => {
+      try {
+        const response = await axios.get('/api/unified-listings/count/active');
+        if (response.data.success && response.data.data) {
+          setFreeListingsRemaining(response.data.data.freeListingSpotsRemaining);
+          setFreeListingOfferActive(response.data.data.isFreeListingAvailable);
+        }
+      } catch (error) {
+        console.error('Failed to fetch free listings counter:', error);
+        // Default to 100 remaining if fetch fails
+        setFreeListingsRemaining(100);
+        setFreeListingOfferActive(true);
+      }
+    };
+    fetchFreeListingsData();
+    // Refetch every 30 seconds to keep counter fresh
+    const interval = setInterval(fetchFreeListingsData, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (formData.county) {
@@ -580,6 +604,25 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
       )}
 
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
+        {freeListingOfferActive && (
+          <div className="mb-6 rounded-lg border-2 border-green-400 bg-gradient-to-r from-green-50 to-emerald-50 px-4 py-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-green-900 flex items-center">
+                  <span className="text-2xl mr-2">🎉</span>
+                  Free Listings for First 100 Sellers
+                </h3>
+                <p className="text-sm text-green-800 mt-2">
+                  <strong>{freeListingsRemaining} spots remaining!</strong> Be one of the first sellers on Agrisoko and list for free. Offer expires March 8, 2026.
+                </p>
+              </div>
+              <div className="text-right ml-4">
+                <div className="text-3xl font-bold text-green-600">{freeListingsRemaining}</div>
+                <div className="text-xs text-green-700 mt-1">Spots Left</div>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="mb-6 space-y-4 rounded-2xl border border-green-200 bg-green-50/40 p-4">
           <div>
             <h2 className="text-xl font-semibold text-gray-800">Listing Visibility Options</h2>

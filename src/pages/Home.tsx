@@ -86,6 +86,26 @@ const Home: React.FC = () => {
         </div>
       </section>
 
+      {/* EARLY SELLER INCENTIVE BANNER */}
+      <section className="py-8 px-4 md:px-8 bg-gradient-to-r from-green-500 to-emerald-600">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-6">
+          <div className="flex-1">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
+              🎉 Be One of the First 100 Sellers
+            </h2>
+            <p className="text-green-50 mb-4">
+              List your agricultural products, equipment, or services completely free. Limited to first 100 sellers - offer expires March 8, 2026.
+            </p>
+          </div>
+          <Link
+            to={user ? "/create-listing" : "/login?next=/create-listing"}
+            className="inline-flex justify-center items-center px-6 py-3 bg-white text-green-700 font-bold rounded-lg hover:bg-green-50 transition-colors whitespace-nowrap"
+          >
+            {user ? "List Now Free" : "Sign Up & List"}
+          </Link>
+        </div>
+      </section>
+
       {/* DUAL CTA SECTION - Two User Paths */}
       <section className="py-20 px-4 md:px-8 bg-gray-50">
         <div className="max-w-7xl mx-auto">
