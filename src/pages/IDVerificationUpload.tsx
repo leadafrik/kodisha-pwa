@@ -9,7 +9,8 @@ const IDVerificationUpload: React.FC = () => {
   const { user, refreshUser, updateProfile, logout } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState<"info" | "documents" | "review" | "submitted">("info");
-  const [idFile, setIdFile] = useState<File | null>(null);
+  const [idFrontFile, setIdFrontFile] = useState<File | null>(null);
+  const [idBackFile, setIdBackFile] = useState<File | null>(null);
   const [selfieFile, setSelfieFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
@@ -32,7 +33,10 @@ const IDVerificationUpload: React.FC = () => {
     steps.findIndex((item) => item.key === step)
   );
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "id" | "selfie") => {
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: "idFront" | "idBack" | "selfie"
+  ) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
@@ -45,7 +49,8 @@ const IDVerificationUpload: React.FC = () => {
         return;
       }
       setError("");
-      if (type === "id") setIdFile(file);
+      if (type === "idFront") setIdFrontFile(file);
+      else if (type === "idBack") setIdBackFile(file);
       else setSelfieFile(file);
     }
   };
@@ -148,8 +153,8 @@ const IDVerificationUpload: React.FC = () => {
   }
 
   const handleSubmit = async () => {
-    if (!idFile || !selfieFile) {
-      setError("Please upload both ID and selfie documents");
+    if (!idFrontFile || !idBackFile || !selfieFile) {
+      setError("Please upload ID front, ID back, and selfie documents");
       return;
     }
 
@@ -164,7 +169,8 @@ const IDVerificationUpload: React.FC = () => {
       setSuccess("");
       setUploading(true);
       const formData = new FormData();
-      formData.append("idDocument", idFile);
+      formData.append("idFrontDocument", idFrontFile);
+      formData.append("idBackDocument", idBackFile);
       formData.append("selfieDocument", selfieFile);
 
       // Upload to verification endpoint
@@ -192,7 +198,8 @@ const IDVerificationUpload: React.FC = () => {
       setSuccess("Documents submitted successfully! Admin review typically takes 1-2 business days.");
       await loadLatestStatus();
       setStep("submitted");
-      setIdFile(null);
+      setIdFrontFile(null);
+      setIdBackFile(null);
       setSelfieFile(null);
     } catch (err: any) {
       setError(err.message || "Upload failed");
@@ -214,8 +221,8 @@ const IDVerificationUpload: React.FC = () => {
           </div>
           <h1 className="text-3xl md:text-4xl font-bold mb-3">Identity Verification</h1>
           <p className="text-emerald-100 max-w-2xl">
-            Submit your ID and selfie to display a verified badge, earn higher visibility, and build
-            trust with buyers and sellers.
+            Submit your ID front, ID back, and selfie with ID to display a verified badge, earn
+            higher visibility, and build trust with buyers and sellers.
           </p>
         </div>
 
@@ -285,11 +292,15 @@ const IDVerificationUpload: React.FC = () => {
                   <h3 className="font-bold text-slate-900 mb-4">What you will submit</h3>
                   <div className="space-y-4 text-sm text-slate-600">
                     <div className="rounded-xl border border-slate-200 p-4">
-                      <p className="font-semibold text-slate-900">1. Valid ID document</p>
-                      <p>National ID, passport, or driver's license.</p>
+                      <p className="font-semibold text-slate-900">1. ID front photo</p>
+                      <p>Clear front side of your National ID, passport, or driver's license.</p>
                     </div>
                     <div className="rounded-xl border border-slate-200 p-4">
-                      <p className="font-semibold text-slate-900">2. Selfie with ID</p>
+                      <p className="font-semibold text-slate-900">2. ID back photo</p>
+                      <p>Clear back side of the same document.</p>
+                    </div>
+                    <div className="rounded-xl border border-slate-200 p-4">
+                      <p className="font-semibold text-slate-900">3. Selfie with ID</p>
                       <p>A clear photo of you holding the same document.</p>
                     </div>
                   </div>
@@ -329,24 +340,24 @@ const IDVerificationUpload: React.FC = () => {
                 </div>
               )}
 
-              {/* ID Document */}
+              {/* ID Front */}
               <div>
                 <label className="block font-bold text-gray-900 mb-3">
-                  1. Valid ID Document (National ID, Passport, or Driver's License)
+                  1. ID Front (National ID, Passport, or Driver's License)
                 </label>
                 <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center">
-                  {idFile ? (
+                  {idFrontFile ? (
                     <div>
                       <p className="text-sm text-gray-600 mb-2">Selected file:</p>
-                      <p className="font-semibold text-gray-900 mb-4">{idFile.name}</p>
+                      <p className="font-semibold text-gray-900 mb-4">{idFrontFile.name}</p>
                       <img
-                        src={URL.createObjectURL(idFile)}
-                        alt="ID Preview"
+                        src={URL.createObjectURL(idFrontFile)}
+                        alt="ID Front Preview"
                         onError={handleImageError}
                         className="w-full max-h-48 object-contain mx-auto mb-4"
                       />
                       <button
-                        onClick={() => setIdFile(null)}
+                        onClick={() => setIdFrontFile(null)}
                         className="text-sm text-red-600 hover:text-red-700 font-semibold"
                       >
                         Remove and reselect
@@ -361,12 +372,62 @@ const IDVerificationUpload: React.FC = () => {
                       <input
                         type="file"
                         accept="image/*"
-                        onChange={(e) => handleFileChange(e, "id")}
+                        onChange={(e) => handleFileChange(e, "idFront")}
                         className="hidden"
-                        id="id-input"
+                        id="id-front-input"
                       />
                       <label
-                        htmlFor="id-input"
+                        htmlFor="id-front-input"
+                        className="inline-block px-4 py-2 bg-emerald-600 text-white rounded-lg cursor-pointer hover:bg-emerald-700 transition"
+                      >
+                        Select File
+                      </label>
+                      <p className="text-xs text-gray-500 mt-2">
+                        PNG, JPG up to 5MB
+                      </p>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* ID Back */}
+              <div>
+                <label className="block font-bold text-gray-900 mb-3">
+                  2. ID Back (same document)
+                </label>
+                <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center">
+                  {idBackFile ? (
+                    <div>
+                      <p className="text-sm text-gray-600 mb-2">Selected file:</p>
+                      <p className="font-semibold text-gray-900 mb-4">{idBackFile.name}</p>
+                      <img
+                        src={URL.createObjectURL(idBackFile)}
+                        alt="ID Back Preview"
+                        onError={handleImageError}
+                        className="w-full max-h-48 object-contain mx-auto mb-4"
+                      />
+                      <button
+                        onClick={() => setIdBackFile(null)}
+                        className="text-sm text-red-600 hover:text-red-700 font-semibold"
+                      >
+                        Remove and reselect
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                      <p className="text-gray-600 mb-2">
+                        Drag and drop or click to upload
+                      </p>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleFileChange(e, "idBack")}
+                        className="hidden"
+                        id="id-back-input"
+                      />
+                      <label
+                        htmlFor="id-back-input"
                         className="inline-block px-4 py-2 bg-emerald-600 text-white rounded-lg cursor-pointer hover:bg-emerald-700 transition"
                       >
                         Select File
@@ -382,7 +443,7 @@ const IDVerificationUpload: React.FC = () => {
               {/* Selfie */}
               <div>
                 <label className="block font-bold text-gray-900 mb-3">
-                  2. Selfie with ID Document
+                  3. Selfie with ID Document
                 </label>
                 <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center">
                   {selfieFile ? (
@@ -439,7 +500,7 @@ const IDVerificationUpload: React.FC = () => {
                 </button>
                 <button
                   onClick={() => setStep("review")}
-                  disabled={!idFile || !selfieFile}
+                  disabled={!idFrontFile || !idBackFile || !selfieFile}
                   className="flex-1 px-6 py-3 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 disabled:bg-gray-400 transition"
                 >
                   Review & Submit
@@ -450,12 +511,24 @@ const IDVerificationUpload: React.FC = () => {
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900">Review Your Documents</h2>
 
-              {idFile && (
+              {idFrontFile && (
                 <div>
-                  <p className="font-semibold text-gray-900 mb-3">ID Document</p>
+                  <p className="font-semibold text-gray-900 mb-3">ID Front</p>
                   <img
-                    src={URL.createObjectURL(idFile)}
-                    alt="ID"
+                    src={URL.createObjectURL(idFrontFile)}
+                    alt="ID Front"
+                    onError={handleImageError}
+                    className="w-full max-h-64 object-contain rounded-lg border border-gray-200"
+                  />
+                </div>
+              )}
+
+              {idBackFile && (
+                <div>
+                  <p className="font-semibold text-gray-900 mb-3">ID Back</p>
+                  <img
+                    src={URL.createObjectURL(idBackFile)}
+                    alt="ID Back"
                     onError={handleImageError}
                     className="w-full max-h-64 object-contain rounded-lg border border-gray-200"
                   />
@@ -529,7 +602,7 @@ const IDVerificationUpload: React.FC = () => {
                 </div>
               )}
               <button
-                onClick={() => setStep("info")}
+                onClick={() => navigate("/browse")}
                 className="px-6 py-3 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition"
               >
                 Done

@@ -14,7 +14,7 @@ export interface Message {
   readAt?: string;
   status?: "sent" | "delivered" | "read";
   createdAt: string;
-  listing?: string;
+  listing?: string | { _id?: string; id?: string };
 }
 
 export interface MessageThread {

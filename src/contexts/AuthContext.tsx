@@ -24,6 +24,9 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+const isAdminRole = (role?: string) =>
+  role === "admin" || role === "super_admin" || role === "moderator";
+
 // Map backend user -> frontend User type
 const mapBackendUserToFrontendUser = (apiUser: any): User => {
   const id = apiUser._id?.toString?.() || apiUser.id || "";
@@ -31,7 +34,7 @@ const mapBackendUserToFrontendUser = (apiUser: any): User => {
 
   // Check admin role FIRST, before checking userType
   let type: User["type"] = "buyer";
-  if (apiUser.role === "admin") {
+  if (isAdminRole(apiUser.role) || apiUser.userType === "admin") {
     type = "admin";
   } else if (apiUser.userType === "seller") {
     type = "seller";
@@ -43,9 +46,6 @@ const mapBackendUserToFrontendUser = (apiUser: any): User => {
   } else if (apiUser.userType === "farmer") {
     type = "buyer";
   }
-  
-  // Debug log to help troubleshoot
-  console.log("User mapping - role:", apiUser.role, "userType:", apiUser.userType, "mapped type:", type);
 
   const verificationStatus: User["verificationStatus"] = apiUser.isVerified
     ? "verified"
@@ -69,6 +69,29 @@ const mapBackendUserToFrontendUser = (apiUser: any): User => {
     isVerified: apiUser.isVerified,
     role: apiUser.role,
     verification: apiUser.verification,
+  };
+};
+
+const normalizeStoredUser = (storedUser: any): User => {
+  const mapped = mapBackendUserToFrontendUser(storedUser || {});
+  const normalizedType: User["type"] =
+    isAdminRole(storedUser?.role) ||
+    storedUser?.type === "admin" ||
+    storedUser?.userType === "admin"
+      ? "admin"
+      : (storedUser?.type || mapped.type);
+
+  return {
+    ...mapped,
+    ...storedUser,
+    id: storedUser?.id || storedUser?._id?.toString?.() || mapped.id,
+    _id: storedUser?._id || mapped._id,
+    name: storedUser?.name || storedUser?.fullName || mapped.name,
+    fullName: storedUser?.fullName || storedUser?.name || mapped.fullName,
+    type: normalizedType,
+    role: storedUser?.role || mapped.role,
+    verificationStatus: storedUser?.verificationStatus || mapped.verificationStatus,
+    createdAt: storedUser?.createdAt ? new Date(storedUser.createdAt) : mapped.createdAt,
   };
 };
 
@@ -366,7 +389,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const savedUser = localStorage.getItem("kodisha_user");
       if (savedUser) {
         const parsed = JSON.parse(savedUser);
-        setUser(parsed);
+        const normalized = normalizeStoredUser(parsed);
+        setUser(normalized);
+        localStorage.setItem("kodisha_user", JSON.stringify(normalized));
       }
     } catch (e) {
       console.error("Failed to load saved user", e);

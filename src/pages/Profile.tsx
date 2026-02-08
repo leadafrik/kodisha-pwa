@@ -1,56 +1,160 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Shield, UserCheck, UserX } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useProperties } from "../contexts/PropertyContext";
 import ProfilePictureUpload from "../components/ProfilePictureUpload";
 import { scheduleAccountDeletion } from "../services/userService";
-import { Shield } from "lucide-react";
+
+type ListingsTab = "land" | "services" | "agrovets" | "products";
+
+const ADMIN_ROLES = new Set(["admin", "super_admin", "moderator"]);
+
+const normalizeText = (value?: unknown) =>
+  typeof value === "string" ? value.trim().toLowerCase() : "";
+
+const formatPrice = (value: unknown) => {
+  const amount = Number(value);
+  if (!Number.isFinite(amount) || amount <= 0) return "Contact for price";
+  return `KSh ${amount.toLocaleString()}`;
+};
 
 const Profile: React.FC = () => {
   const { user, logout, updateProfile } = useAuth();
-  const { properties, serviceListings, productListings } = useProperties();
+  const { properties, serviceListings, productListings, loading } = useProperties();
   const navigate = useNavigate();
+
   const [userProfilePicture, setUserProfilePicture] = useState<string | undefined>(user?.profilePicture);
+  const [activeTab, setActiveTab] = useState<ListingsTab>("products");
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  // Update local state when user context changes
-  React.useEffect(() => {
+  useEffect(() => {
     setUserProfilePicture(user?.profilePicture);
   }, [user?.profilePicture]);
 
-  // Safety check: ensure all listing arrays are valid
-  const safeProperties = Array.isArray(properties) ? properties : [];
-  const safeServiceListings = Array.isArray(serviceListings) ? serviceListings : [];
-  const safeProductListings = Array.isArray(productListings) ? productListings : [];
+  const safeProperties = useMemo(
+    () => (Array.isArray(properties) ? properties : []),
+    [properties]
+  );
+  const safeServiceListings = useMemo(
+    () => (Array.isArray(serviceListings) ? serviceListings : []),
+    [serviceListings]
+  );
+  const safeProductListings = useMemo(
+    () => (Array.isArray(productListings) ? productListings : []),
+    [productListings]
+  );
+
+  const ownerIds = useMemo(
+    () => new Set([user?.id, user?._id].filter(Boolean).map((value) => String(value))),
+    [user?.id, user?._id]
+  );
+  const ownerNames = useMemo(
+    () =>
+      new Set(
+        [user?.name, user?.fullName]
+          .filter(Boolean)
+          .map((value) => normalizeText(value))
+          .filter(Boolean)
+      ),
+    [user?.name, user?.fullName]
+  );
+  const ownerEmail = normalizeText(user?.email);
+  const ownerPhone = normalizeText(user?.phone);
+
+  const matchesCurrentUser = useCallback(
+    (
+      ownerId?: unknown,
+      ownerEmailCandidate?: unknown,
+      ownerPhoneCandidate?: unknown,
+      listedByCandidate?: unknown
+    ) => {
+      if (ownerId && ownerIds.has(String(ownerId))) return true;
+
+      const email = normalizeText(ownerEmailCandidate);
+      if (ownerEmail && email && ownerEmail === email) return true;
+
+      const phone = normalizeText(ownerPhoneCandidate);
+      if (ownerPhone && phone && ownerPhone === phone) return true;
+
+      const listedBy = normalizeText(listedByCandidate);
+      if (listedBy && ownerNames.has(listedBy)) return true;
+
+      return false;
+    },
+    [ownerIds, ownerEmail, ownerPhone, ownerNames]
+  );
+
+  const userProperties = useMemo(() => {
+    return safeProperties.filter((property: any) =>
+      matchesCurrentUser(
+        property?.owner?._id || property?.ownerId || property?.userId,
+        property?.owner?.email || property?.email,
+        property?.owner?.phone || property?.contact,
+        property?.listedBy
+      )
+    );
+  }, [safeProperties, matchesCurrentUser]);
+
+  const ownedServiceListings = useMemo(() => {
+    return safeServiceListings.filter((service: any) =>
+      matchesCurrentUser(
+        service?.ownerId || service?.owner?._id || service?.owner,
+        service?.owner?.email || service?.email,
+        service?.contact || service?.owner?.phone || service?.owner?.email,
+        service?.ownerName
+      )
+    );
+  }, [safeServiceListings, matchesCurrentUser]);
+
+  const userServices = useMemo(
+    () => ownedServiceListings.filter((service: any) => service?.type !== "agrovet"),
+    [ownedServiceListings]
+  );
+
+  const userAgrovets = useMemo(
+    () => ownedServiceListings.filter((service: any) => service?.type === "agrovet"),
+    [ownedServiceListings]
+  );
+
+  const userProducts = useMemo(() => {
+    return safeProductListings.filter((product: any) =>
+      matchesCurrentUser(
+        product?.seller?._id || product?.owner?._id || product?.ownerId || product?.userId,
+        product?.seller?.email || product?.owner?.email || product?.email,
+        product?.contact || product?.seller?.phone || product?.owner?.phone,
+        product?.seller?.fullName || product?.seller?.name
+      )
+    );
+  }, [safeProductListings, matchesCurrentUser]);
+
+  const isAdmin =
+    ADMIN_ROLES.has((user?.role || "").toLowerCase()) ||
+    normalizeText(user?.type) === "admin" ||
+    normalizeText((user as any)?.userType) === "admin";
 
   if (!user) {
-    navigate("/login");
-    return null;
+    return <Navigate to="/login" replace />;
   }
-
-  const userProperties = safeProperties.filter((p) => p?.listedBy === "Current User");
-  const userServices = safeServiceListings.filter((s) => s?.contact === user?.phone || s?.ownerId === user?.id || s?.ownerId === user?._id);
-  const userAgrovets = safeServiceListings.filter((s) => s?.type === "agrovet" && (s?.contact === user?.phone || s?.ownerId === user?.id || s?.ownerId === user?._id));
-  const userProducts = safeProductListings.filter((p) => p?.seller?._id === user?._id || p?.seller?.email === user?.email || p?.contact === user?.phone);
 
   const getVerificationBadge = () => {
     switch (user.verificationStatus) {
       case "verified":
         return (
-          <span className="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-sm font-semibold">
+          <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800">
             Verified
           </span>
         );
       case "pending":
         return (
-          <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm font-semibold">
+          <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-800">
             Pending
           </span>
         );
       default:
         return (
-          <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold">
+          <span className="rounded-full bg-red-100 px-3 py-1 text-sm font-semibold text-red-800">
             Not Verified
           </span>
         );
@@ -68,11 +172,12 @@ const Profile: React.FC = () => {
       case "admin":
         return "Admin";
       default:
-        return "User";
+        return isAdmin ? "Admin" : "User";
     }
   };
 
   const verificationDetails: {
+    emailVerified?: boolean;
     phoneVerified?: boolean;
     idVerified?: boolean;
     selfieVerified?: boolean;
@@ -82,334 +187,322 @@ const Profile: React.FC = () => {
     trustScore?: number;
   } = user?.verification || {};
 
-  const verificationItems = [
+  const verificationItems: Array<{ label: string; value: boolean }> = [
+    { label: "Email verified", value: verificationDetails.emailVerified ?? !!user?.email },
+    { label: "Phone verified", value: verificationDetails.phoneVerified ?? false },
     { label: "ID verified", value: verificationDetails.idVerified ?? false },
+    { label: "Selfie verified", value: verificationDetails.selfieVerified ?? false },
   ];
+
+  const listingGroups: Record<
+    ListingsTab,
+    { label: string; items: any[]; emptyMessage: string; emptyCta: string; emptyLink: string }
+  > = {
+    land: {
+      label: "Land",
+      items: userProperties,
+      emptyMessage: "No land listings yet.",
+      emptyCta: "List land",
+      emptyLink: "/create-listing",
+    },
+    services: {
+      label: "Services",
+      items: userServices,
+      emptyMessage: "No service listings yet.",
+      emptyCta: "List a service",
+      emptyLink: "/create-listing",
+    },
+    agrovets: {
+      label: "Agrovets",
+      items: userAgrovets,
+      emptyMessage: "No agrovet listings yet.",
+      emptyCta: "Add agrovet listing",
+      emptyLink: "/create-listing",
+    },
+    products: {
+      label: "Products",
+      items: userProducts,
+      emptyMessage: "No product listings yet.",
+      emptyCta: "List a product",
+      emptyLink: "/create-listing",
+    },
+  };
+
+  const activeListingGroup = listingGroups[activeTab];
+  const visibleItems = activeListingGroup.items.slice(0, 5);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Source+Sans+3:wght@400;600;700&display=swap');
-        .profile-shell {
-          font-family: "Source Sans 3", "Segoe UI", "Tahoma", sans-serif;
-        }
-        .profile-title {
-          font-family: "Space Grotesk", "Segoe UI", "Tahoma", sans-serif;
-        }
-      `}</style>
-      <div className="profile-shell">
-        <div className="max-w-6xl mx-auto px-4 py-10">
-
-      {/* Header */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 mb-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-          <div className="flex-1">
-            <h1 className="profile-title text-3xl font-bold text-slate-900 mb-2">{user.name}</h1>
-            <div className="flex items-center gap-4 mb-2">
-              {getVerificationBadge()}
-              <span className="text-slate-600">{getUserTypeLabel()}</span>
+      <div className="mx-auto max-w-6xl px-4 py-8 md:py-10">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900">{user.name}</h1>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                {getVerificationBadge()}
+                <span className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
+                  {getUserTypeLabel()}
+                </span>
+                {isAdmin && (
+                  <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
+                    Admin access
+                  </span>
+                )}
+              </div>
+              <div className="mt-4 space-y-1 text-sm text-slate-600">
+                {user.phone && user.phone !== user.email && <p>{user.phone}</p>}
+                {user.email && <p>{user.email}</p>}
+              </div>
             </div>
-            {/* Avoid duplicate contact lines when email-only signup stores email in phone */}
-            {user.phone && user.phone !== user.email && (
-              <p className="text-slate-600">{user.phone}</p>
-            )}
-            {user.email && <p className="text-slate-600">{user.email}</p>}
+            <div className="flex flex-col gap-3 md:items-end">
+              <ProfilePictureUpload
+                currentPicture={userProfilePicture}
+                onUploadSuccess={(picture) => {
+                  setUserProfilePicture(picture);
+                  updateProfile({ profilePicture: picture });
+                }}
+                onDeleteSuccess={() => {
+                  setUserProfilePicture(undefined);
+                  updateProfile({ profilePicture: undefined });
+                }}
+              />
+              <button
+                onClick={logout}
+                className="rounded-xl border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+              >
+                Logout
+              </button>
+            </div>
           </div>
-          <div className="flex flex-col items-end gap-4">
-            <ProfilePictureUpload 
-              currentPicture={userProfilePicture}
-              onUploadSuccess={(picture) => {
-                setUserProfilePicture(picture);
-                // Update user context to persist the change
-                updateProfile({ profilePicture: picture });
-              }}
-              onDeleteSuccess={() => {
-                setUserProfilePicture(undefined);
-                // Update user context
-                updateProfile({ profilePicture: undefined });
-              }}
-            />
-            <button
-              onClick={logout}
-              className="border border-red-200 text-red-600 px-6 py-2 rounded-2xl hover:bg-red-50 transition duration-300"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
 
-        <div className="mt-6 grid md:grid-cols-3 gap-4">
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
-            <p className="text-xs font-semibold text-slate-500 uppercase">Verification level</p>
-            <p className="text-lg font-bold text-blue-900 mt-2">
-              {verificationDetails.verificationLevel || "Not set"}
-            </p>
-            <p className="text-sm text-sky-600 mt-1">
-              Trust score: {verificationDetails.trustScore ?? "N/A"}
-            </p>
+          <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
+              <p className="text-2xl font-bold text-emerald-700">{userProperties.length}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Land listings</p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
+              <p className="text-2xl font-bold text-emerald-700">{userServices.length}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Services</p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
+              <p className="text-2xl font-bold text-emerald-700">{userAgrovets.length}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Agrovets</p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
+              <p className="text-2xl font-bold text-emerald-700">{userProducts.length}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Products</p>
+            </div>
           </div>
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm md:col-span-2">
-            <p className="text-xs font-semibold text-emerald-700 uppercase mb-3">Verification status</p>
-            <div className="grid sm:grid-cols-2 gap-2">
-              {verificationItems.map((item) => (
-                <div key={item.label} className="flex items-center gap-2 text-sm text-slate-900">
-                  <span
-                    className={`inline-block h-2.5 w-2.5 rounded-full ${
-                      item.value ? "bg-emerald-500" : "bg-gray-300"
-                    }`}
-                  />
-                  {item.label}
+
+          <div className="mt-6 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+            <div className="space-y-6">
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <h2 className="text-lg font-bold text-slate-900">Quick Actions</h2>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                  <Link
+                    to="/create-listing"
+                    className="rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                  >
+                    List for sale
+                  </Link>
+                  <Link
+                    to="/request/new"
+                    className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                  >
+                    Post buy request
+                  </Link>
+                  <Link
+                    to="/favorites"
+                    className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                  >
+                    Saved listings
+                  </Link>
+                  {isAdmin && (
+                    <Link
+                      to="/admin"
+                      className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700 transition hover:bg-amber-100"
+                    >
+                      Open admin panel
+                    </Link>
+                  )}
                 </div>
-              ))}
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <Shield className="mt-0.5 text-emerald-600" size={22} />
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900">Identity Verification</h3>
+                    <p className="mt-1 text-sm text-slate-600">
+                      {verificationDetails.idVerified
+                        ? "Your identity verification is complete."
+                        : "Complete verification to increase trust and listing visibility."}
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                  {verificationItems.map((item) => (
+                    <div key={item.label} className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                      {item.value ? (
+                        <UserCheck size={14} className="text-emerald-600" />
+                      ) : (
+                        <UserX size={14} className="text-slate-400" />
+                      )}
+                      <span className="text-slate-700">{item.label}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Verification level</p>
+                    <p className="text-sm font-semibold text-emerald-800">
+                      {verificationDetails.verificationLevel || "Not set"}
+                    </p>
+                  </div>
+                  <Link
+                    to="/verify-id"
+                    className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
+                      verificationDetails.idVerified
+                        ? "cursor-not-allowed bg-slate-200 text-slate-500"
+                        : "bg-emerald-600 text-white hover:bg-emerald-700"
+                    }`}
+                    onClick={(event) => {
+                      if (verificationDetails.idVerified) event.preventDefault();
+                    }}
+                  >
+                    {verificationDetails.idVerified ? "Verified" : "Get verified"}
+                  </Link>
+                </div>
+                <p className="mt-3 text-xs text-slate-500">
+                  Trust score: {verificationDetails.trustScore ?? "N/A"}
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-lg font-bold text-slate-900">Your Listings</h2>
+                {loading && (
+                  <span className="text-xs font-medium text-slate-500">Refreshing...</span>
+                )}
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {(Object.keys(listingGroups) as ListingsTab[]).map((tab) => {
+                  const group = listingGroups[tab];
+                  const isActive = activeTab === tab;
+                  return (
+                    <button
+                      key={tab}
+                      type="button"
+                      onClick={() => setActiveTab(tab)}
+                      className={`rounded-xl border px-3 py-2 text-left transition ${
+                        isActive
+                          ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                          : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                      }`}
+                    >
+                      <p className="text-xs font-semibold uppercase tracking-wide">{group.label}</p>
+                      <p className="text-lg font-bold">{group.items.length}</p>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="mt-4 space-y-3">
+                {loading ? (
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
+                    Loading listings...
+                  </div>
+                ) : visibleItems.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center">
+                    <p className="text-sm font-medium text-slate-600">{activeListingGroup.emptyMessage}</p>
+                    <Link
+                      to={activeListingGroup.emptyLink}
+                      className="mt-2 inline-block text-sm font-semibold text-emerald-700 hover:text-emerald-800"
+                    >
+                      {activeListingGroup.emptyCta}
+                    </Link>
+                  </div>
+                ) : (
+                  visibleItems.map((item: any, index: number) => {
+                    const itemKey = item?.id || item?._id || `${activeTab}-${index}`;
+                    const title = item?.title || item?.name || "Untitled listing";
+                    const location =
+                      item?.county ||
+                      item?.location?.county ||
+                      item?.approximateLocation ||
+                      "Location not set";
+                    const category = item?.category || item?.type || item?.listingType || "Listing";
+                    const price = formatPrice(item?.price);
+
+                    return (
+                      <div key={itemKey} className="rounded-xl border border-slate-200 px-4 py-3">
+                        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                          <p className="font-semibold text-slate-900">{title}</p>
+                          <p className="text-sm font-semibold text-emerald-700">{price}</p>
+                        </div>
+                        <p className="mt-1 text-xs uppercase tracking-wide text-slate-500">{category}</p>
+                        <p className="mt-1 text-sm text-slate-600">{location}</p>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              <div className="mt-5 flex flex-wrap items-center gap-3">
+                <Link
+                  to="/create-listing"
+                  className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                >
+                  Add listing
+                </Link>
+                <Link
+                  to="/request"
+                  className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                >
+                  View buy requests
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* ID Verification Card */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 mb-8">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <Shield className="text-emerald-600" size={28} />
-              <h2 className="text-2xl font-bold text-slate-900">Identity Verification</h2>
-            </div>
-            <p className="text-slate-600 mb-4">
-              {verificationDetails.idVerified
-                ? "Your identity has been verified"
-                : "Verify your identity to build trust and unlock premium features"}
+          <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-900">Account Settings</h3>
+            <p className="mt-2 text-sm text-slate-600">
+              Deleting your account permanently removes profile data, listings, and messages after the grace period.
             </p>
-            {!verificationDetails.idVerified && (
-              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-sm text-emerald-900 mb-4">
-                <p className="font-semibold mb-2">Benefits of ID verification:</p>
-                <ul className="list-disc list-inside space-y-1 text-xs">
-                  <li>Display an "ID Verified" badge on your profile and listings</li>
-                  <li>Increase buyer confidence and trust</li>
-                  <li>Higher visibility in marketplace search results</li>
-                  <li>Priority support from the Agrisoko team</li>
-                </ul>
+            {deleteError && (
+              <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
+                {deleteError}
               </div>
             )}
-          </div>
-          <Link
-            to="/verify-id"
-            className={`px-6 py-2 rounded-2xl font-semibold transition whitespace-nowrap ${
-              verificationDetails.idVerified
-                ? "bg-gray-200 text-slate-600 cursor-not-allowed"
-                : "bg-emerald-600 text-white hover:bg-emerald-700"
-            }`}
-            onClick={(e) => verificationDetails.idVerified && e.preventDefault()}
-          >
-            {verificationDetails.idVerified ? "Verified" : "Get Verified"}
-          </Link>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 text-center">
-          <div className="text-3xl font-bold text-emerald-600 mb-2">{userProperties.length}</div>
-          <div className="text-slate-600 text-sm">Land Listings</div>
-        </div>
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 text-center">
-          <div className="text-3xl font-bold text-sky-600 mb-2">{userServices.length}</div>
-          <div className="text-slate-600 text-sm">Services</div>
-        </div>
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 text-center">
-          <div className="text-3xl font-bold text-purple-600 mb-2">{userAgrovets.length}</div>
-          <div className="text-slate-600 text-sm">Agrovets</div>
-        </div>
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 text-center">
-          <div className="text-3xl font-bold text-orange-600 mb-2">{userProducts.length}</div>
-          <div className="text-slate-600 text-sm">Products</div>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 mb-8">
-        <h2 className="text-2xl font-bold text-slate-900 mb-6">Quick Actions</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Link
-            to="/create-listing"
-            className="bg-emerald-600 text-white p-6 rounded-xl hover:bg-emerald-700 transition duration-300 text-center"
-          >
-            <div className="font-semibold text-lg">List for Sale</div>
-            <div className="text-emerald-100 text-sm">Products, livestock, inputs, services</div>
-          </Link>
-          <Link
-            to="/request/new"
-            className="bg-sky-600 text-white p-6 rounded-xl hover:bg-sky-700 transition duration-300 text-center"
-          >
-            <div className="font-semibold text-lg">Post Buy Request</div>
-            <div className="text-sky-100 text-sm">Share what you're looking for</div>
-          </Link>
-          <Link
-            to="/favorites"
-            className="bg-purple-600 text-white p-6 rounded-xl hover:bg-purple-700 transition duration-300 text-center"
-          >
-            <div className="font-semibold text-lg">Saved Listings</div>
-            <div className="text-purple-100 text-sm">View your favorites</div>
-          </Link>
-          {user.type === "admin" && (
-            <Link
-              to="/admin"
-              className="bg-red-600 text-white p-6 rounded-xl hover:bg-red-700 transition duration-300 text-center"
-            >
-              <div className="font-semibold text-lg">Admin Panel</div>
-              <div className="text-red-100 text-sm">Manage marketplace</div>
-            </Link>
-          )}
-        </div>
-      </div>
-
-      {/* Recent Listings */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Land Listings */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
-          <h3 className="text-xl font-bold text-slate-900 mb-4">Your Land Listings</h3>
-          {userProperties.length === 0 ? (
-            <div className="text-center py-8 text-slate-500">
-              <p>No land listings yet</p>
-              <Link to="/create-listing" className="text-emerald-600 font-semibold mt-2 inline-block">
-                List your first property
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {userProperties.slice(0, 3).map((property) => (
-                <div key={property.id} className="border border-slate-200 rounded-2xl p-3 hover:shadow-md transition">
-                  <h4 className="font-semibold text-slate-900 text-sm">{property.title}</h4>
-                  <p className="text-emerald-600 font-bold text-sm">KSh {property.price?.toLocaleString() || 'N/A'}</p>
-                  <p className="text-slate-600 text-xs">{property.county} County</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Buyer Requests Posted */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
-          <h3 className="text-xl font-bold text-slate-900 mb-4">Your Buyer Requests</h3>
-          <div className="text-center py-8 text-slate-500">
-            <p>View and manage your posted needs</p>
-            <Link to="/request" className="text-indigo-600 font-semibold mt-2 inline-block">
-              View your requests
-            </Link>
-          </div>
-        </div>
-
-        {/* Service Listings */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
-          <h3 className="text-xl font-bold text-slate-900 mb-4">Your Service Listings</h3>
-          {userServices.length === 0 ? (
-            <div className="text-center py-8 text-slate-500">
-              <p>No service listings yet</p>
-              <Link to="/create-listing" className="text-sky-600 font-semibold mt-2 inline-block">
-                List your first service
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {userServices.slice(0, 3).map((service) => (
-                <div key={service.id} className="border border-slate-200 rounded-2xl p-3 hover:shadow-md transition">
-                  <h4 className="font-semibold text-slate-900 text-sm">{service.name}</h4>
-                  <p className="text-slate-600 text-xs">{service.type}</p>
-                  <p className="text-slate-600 text-xs">{service.location?.county} County</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Agrovet Listings */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
-          <h3 className="text-xl font-bold text-slate-900 mb-4">Your Agrovet Listings</h3>
-          {userAgrovets.length === 0 ? (
-            <div className="text-center py-8 text-slate-500">
-              <p>No agrovet listings yet</p>
-              <Link to="/create-listing" className="text-purple-600 font-semibold mt-2 inline-block">
-                List your agrovet from the main listing flow
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {userAgrovets.slice(0, 3).map((agrovet) => (
-                <div key={agrovet.id} className="border border-slate-200 rounded-2xl p-3 hover:shadow-md transition">
-                  <h4 className="font-semibold text-slate-900 text-sm">{agrovet.name}</h4>
-                  <p className="text-slate-600 text-xs">
-                    {Array.isArray(agrovet.services) ? agrovet.services.slice(0, 2).join(', ') : 'Services available'}
-                  </p>
-                  <p className="text-slate-600 text-xs">{agrovet.location?.county} County</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Product Listings */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
-          <h3 className="text-xl font-bold text-slate-900 mb-4">Your Product Listings</h3>
-          {userProducts.length === 0 ? (
-            <div className="text-center py-8 text-slate-500">
-              <p>No product listings yet</p>
-              <Link to="/create-listing" className="text-orange-600 font-semibold mt-2 inline-block">
-                List your first product
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {userProducts.slice(0, 3).map((product) => (
-                <div key={product._id || product.id} className="border border-slate-200 rounded-2xl p-3 hover:shadow-md transition">
-                  <h4 className="font-semibold text-slate-900 text-sm">{product.name || product.title}</h4>
-                  <p className="text-orange-600 font-bold text-sm">KSh {product.price?.toLocaleString() || 'N/A'}</p>
-                  <p className="text-slate-600 text-xs">{product.category}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Account Management - Danger Zone */}
-        <div className="mt-8 border-t pt-6">
-          <h3 className="text-lg font-bold text-slate-900 mb-4">Account Settings</h3>
-          {deleteError && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-2xl text-sm font-medium">
-              {deleteError}
-            </div>
-          )}
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
-            <p className="text-sm text-slate-600 mb-4">
-              Once you delete your account, there is no going back. Your account, listings, and messages will be permanently deleted.
-            </p>
             <button
               onClick={async () => {
-                const confirmDelete = window.confirm('Are you sure you want to delete your account? This action cannot be undone.');
-                if (confirmDelete) {
-                  const confirmType = window.confirm('Type DELETE to confirm account deletion. Once deleted, your account cannot be recovered.');
-                  if (confirmType) {
-                    setDeletingAccount(true);
-                    setDeleteError(null);
-                    try {
-                      await scheduleAccountDeletion();
-                      window.alert('Your account has been scheduled for deletion. You have 30 days to reactivate it before permanent deletion.');
-                      logout();
-                      navigate('/login');
-                    } catch (err: any) {
-                      setDeleteError(err.message || 'Failed to delete account');
-                      setDeletingAccount(false);
-                    }
-                  }
+                const confirmDelete = window.confirm("Delete your account? This action cannot be undone.");
+                if (!confirmDelete) return;
+
+                setDeletingAccount(true);
+                setDeleteError(null);
+                try {
+                  await scheduleAccountDeletion();
+                  window.alert(
+                    "Your account is scheduled for deletion. You can reactivate within 30 days by contacting support."
+                  );
+                  logout();
+                  navigate("/login");
+                } catch (error: any) {
+                  setDeleteError(error?.message || "Failed to schedule account deletion.");
+                  setDeletingAccount(false);
                 }
               }}
               disabled={deletingAccount}
-              className="w-full border border-red-200 text-red-700 bg-white px-6 py-3 rounded-2xl font-semibold tracking-wide hover:bg-red-50 transition duration-300 disabled:text-slate-400 disabled:border-slate-200 disabled:cursor-not-allowed"
+              className="mt-4 rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400"
             >
-              {deletingAccount ? 'Deleting account...' : 'Delete Account'}
+              {deletingAccount ? "Scheduling deletion..." : "Delete account"}
             </button>
           </div>
         </div>
-      </div>
-      </div>
       </div>
     </div>
   );

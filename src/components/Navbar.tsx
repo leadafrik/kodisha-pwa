@@ -32,6 +32,12 @@ const Navbar: React.FC = () => {
     }
   };
 
+  const isAdminUser =
+    !!user &&
+    (["admin", "super_admin", "moderator"].includes((user.role || "").toLowerCase()) ||
+      user.type === "admin" ||
+      ((user as any).userType || "").toLowerCase() === "admin");
+
   useEffect(() => {
     return () => {
       if (listCloseTimer.current) {
@@ -222,7 +228,7 @@ const Navbar: React.FC = () => {
                         <div className="font-semibold">Saved Listings</div>
                       </Link>
 
-                      {user.role === 'admin' || user.type === 'admin' ? (
+                      {isAdminUser ? (
                         <>
                           <Link to="/admin/listings-approval" onClick={() => setUserMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50 border-b">
                             <div className="font-semibold">Listing Approvals</div>
@@ -323,7 +329,7 @@ const Navbar: React.FC = () => {
                   <Link to="/profile" onClick={closeMobile}>Dashboard</Link>
                   <Link to="/messages" onClick={closeMobile}>Messages</Link>
                   <Link to="/favorites" onClick={closeMobile}>Saved Listings</Link>
-                  {user.role === 'admin' || user.type === 'admin' ? (
+                  {isAdminUser ? (
                     <>
                       <Link to="/admin/listings-approval" onClick={closeMobile}>Listing Approvals</Link>
                       <Link to="/admin/listing-management" onClick={closeMobile}>Listing Management</Link>

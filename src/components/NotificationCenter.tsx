@@ -1,15 +1,36 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../contexts/NotificationsContext';
 import { useAuth } from '../contexts/AuthContext';
 
 const NotificationCenter: React.FC = () => {
   const { user } = useAuth();
   const { notifications, unreadCount, markAsRead, preferences } = useNotifications();
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
 
-  const handleMarkAsRead = async (notificationId: string) => {
-    await markAsRead(notificationId);
+  const resolveActionPath = (actionUrl?: string) => {
+    if (!actionUrl) return '/messages';
+
+    if (actionUrl.startsWith('/')) {
+      return actionUrl;
+    }
+
+    try {
+      const parsed = new URL(actionUrl);
+      return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+    } catch {
+      return '/messages';
+    }
+  };
+
+  const handleNotificationClick = async (notification: (typeof notifications)[number]) => {
+    if (!notification.read) {
+      await markAsRead(notification.id);
+    }
+    setIsOpen(false);
+    navigate(resolveActionPath(notification.actionUrl));
   };
 
   if (!user) return null;
@@ -113,7 +134,7 @@ const NotificationCenter: React.FC = () => {
                   className={`p-4 hover:bg-gray-50 transition cursor-pointer ${
                     !notification.read ? 'bg-blue-50' : ''
                   }`}
-                  onClick={() => !notification.read && handleMarkAsRead(notification.id)}
+                  onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="flex justify-between items-start gap-2">
                     <div className="flex-1">

@@ -213,7 +213,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
                 channel: 'in-app',
                 read: false,
                 createdAt: asDate(createdAt),
-                actionUrl: '/messages',
+                actionUrl: `/messages?userId=${counterpartId}`,
               });
             }
             return;
@@ -237,7 +237,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
             channel: 'in-app',
             read: false,
             createdAt: asDate(createdAt),
-            actionUrl: '/messages',
+            actionUrl: `/messages?userId=${counterpartId}`,
           });
         });
 

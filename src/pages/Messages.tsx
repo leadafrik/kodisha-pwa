@@ -1,15 +1,43 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { messageService, MessageThread, Message } from '../services/messageService';
 import { API_ENDPOINTS, apiRequest } from '../config/api';
 import { ChevronLeft, Send, Check, CheckCheck } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const OBJECT_ID_PATTERN = /^[a-f0-9]{24}$/i;
 const THREADS_POLL_INTERVAL_MS = 15000;
 const CONVERSATION_POLL_INTERVAL_MS = 5000;
+const AUTO_SCROLL_THRESHOLD_PX = 120;
 
 const valueAsString = (value: unknown): string => {
   return typeof value === 'string' ? value.trim() : '';
+};
+
+const normalizeId = (value: unknown): string => {
+  if (!value) return '';
+
+  if (typeof value === 'string') {
+    return value.trim();
+  }
+
+  if (typeof value === 'object') {
+    const rawObject = value as any;
+    const nestedId = rawObject?._id ?? rawObject?.id ?? rawObject?.$oid;
+    const normalizedNested = normalizeId(nestedId);
+    if (normalizedNested) return normalizedNested;
+
+    const asString = rawObject?.toString?.();
+    if (
+      typeof asString === 'string' &&
+      asString !== '[object Object]' &&
+      asString.trim()
+    ) {
+      return asString.trim();
+    }
+  }
+
+  return '';
 };
 
 const formatUserLabel = (userId: string, value?: string) => {
@@ -41,15 +69,79 @@ const resolveCounterpartId = (
   thread: MessageThread,
   currentUserId: string
 ): string => {
-  if (thread.counterpart) return thread.counterpart;
+  const normalizedCounterpart = normalizeId((thread as any).counterpart);
+  if (normalizedCounterpart) return normalizedCounterpart;
+
+  const fromId = normalizeId((thread as any).from);
+  const toId = normalizeId((thread as any).to);
+
   if (currentUserId) {
-    if (thread.from === currentUserId && thread.to) return thread.to;
-    if (thread.to === currentUserId && thread.from) return thread.from;
+    if (fromId === currentUserId && toId) return toId;
+    if (toId === currentUserId && fromId) return fromId;
   }
-  return thread.to || thread.from;
+  return toId || fromId;
+};
+
+interface ListingPreview {
+  id: string;
+  title: string;
+  category: string;
+  location: string;
+  price: string;
+  image?: string;
+}
+
+const formatPrice = (value: unknown) => {
+  const amount = Number(value);
+  if (!Number.isFinite(amount) || amount <= 0) return 'Contact for price';
+  return `KSh ${amount.toLocaleString()}`;
+};
+
+const getMessageListingId = (message: Message): string => {
+  const rawListing = message?.listing;
+  if (!rawListing) return '';
+  return normalizeId(rawListing);
+};
+
+const buildListingPreview = (listingId: string, listing: any): ListingPreview => {
+  const location =
+    [
+      valueAsString(listing?.location?.county),
+      valueAsString(listing?.location?.constituency),
+      valueAsString(listing?.location?.ward),
+    ]
+      .filter(Boolean)
+      .join(', ') || 'Location not specified';
+
+  return {
+    id: listingId,
+    title: valueAsString(listing?.title || listing?.name) || 'Listing',
+    category:
+      valueAsString(listing?.listingType || listing?.category || listing?.type) || 'Listing',
+    location,
+    price: formatPrice(listing?.price || listing?.pricing),
+    image: Array.isArray(listing?.images) ? listing.images[0] : undefined,
+  };
+};
+
+const isNearBottom = (element: HTMLElement) => {
+  const distanceFromBottom =
+    element.scrollHeight - element.scrollTop - element.clientHeight;
+  return distanceFromBottom <= AUTO_SCROLL_THRESHOLD_PX;
+};
+
+const buildMessagesSignature = (items: Message[]) => {
+  const last = items[items.length - 1];
+  const lastId = normalizeId((last as any)?._id);
+  const lastRead = (last as any)?.read ? '1' : '0';
+  const lastStatus = valueAsString((last as any)?.status);
+  const lastCreatedAt = valueAsString((last as any)?.createdAt);
+  return `${items.length}:${lastId}:${lastRead}:${lastStatus}:${lastCreatedAt}`;
 };
 
 const Messages: React.FC = () => {
+  const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const [threads, setThreads] = useState<MessageThread[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [selectedUserName, setSelectedUserName] = useState<string>('');
@@ -58,11 +150,28 @@ const Messages: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userNames, setUserNames] = useState<Record<string, string>>({});
+  const [listingPreviews, setListingPreviews] = useState<Record<string, ListingPreview | null>>({});
+  const conversationScrollRef = useRef<HTMLDivElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const currentUserId =
-    typeof window !== 'undefined'
-      ? valueAsString(window.localStorage.getItem('userId'))
-      : '';
+  const userPinnedToBottomRef = useRef(true);
+  const forceScrollToBottomRef = useRef(false);
+  const previousMessagesSignatureRef = useRef('');
+  const currentUserId = useMemo(() => {
+    const authId = normalizeId(user?._id) || normalizeId(user?.id);
+    if (authId) return authId;
+
+    if (typeof window === 'undefined') return '';
+
+    try {
+      const rawUser = window.localStorage.getItem('kodisha_user');
+      if (!rawUser) return '';
+      const parsed = JSON.parse(rawUser);
+      return normalizeId(parsed?._id) || normalizeId(parsed?.id);
+    } catch {
+      return '';
+    }
+  }, [user?._id, user?.id]);
+  const requestedUserId = valueAsString(searchParams.get('userId'));
 
   const loadThreads = useCallback(async (showLoading = false) => {
     try {
@@ -121,7 +230,11 @@ const Messages: React.FC = () => {
         if (showLoading) setLoading(true);
         setError(null);
         const data = await messageService.getConversation(userId);
-        setMessages(data);
+        setMessages((previous) => {
+          const previousSignature = buildMessagesSignature(previous);
+          const nextSignature = buildMessagesSignature(data);
+          return previousSignature === nextSignature ? previous : data;
+        });
 
         // Mark messages from this user as read
         try {
@@ -138,14 +251,50 @@ const Messages: React.FC = () => {
     []
   );
 
-  // Auto-scroll to bottom
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const loadListingPreview = useCallback(async (listingId: string) => {
+    try {
+      const res: any = await apiRequest(API_ENDPOINTS.properties.getById(listingId));
+      const listing = res?.data || res;
+      if (!listing || typeof listing !== 'object') {
+        setListingPreviews((prev) => ({ ...prev, [listingId]: null }));
+        return;
+      }
+      setListingPreviews((prev) => ({
+        ...prev,
+        [listingId]: buildListingPreview(listingId, listing),
+      }));
+    } catch {
+      setListingPreviews((prev) => ({ ...prev, [listingId]: null }));
+    }
+  }, []);
+
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'auto') => {
+    messagesEndRef.current?.scrollIntoView({ behavior });
+  }, []);
+
+  const handleConversationScroll = useCallback(() => {
+    const container = conversationScrollRef.current;
+    if (!container) return;
+    userPinnedToBottomRef.current = isNearBottom(container);
+  }, []);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    const signature = buildMessagesSignature(messages);
+    const signatureChanged = signature !== previousMessagesSignatureRef.current;
+    if (!signatureChanged) return;
+
+    const shouldAutoScroll =
+      forceScrollToBottomRef.current || userPinnedToBottomRef.current;
+
+    if (shouldAutoScroll) {
+      const behavior: ScrollBehavior = forceScrollToBottomRef.current ? 'smooth' : 'auto';
+      scrollToBottom(behavior);
+      userPinnedToBottomRef.current = true;
+    }
+
+    previousMessagesSignatureRef.current = signature;
+    forceScrollToBottomRef.current = false;
+  }, [messages, scrollToBottom]);
 
   // Fetch message threads on mount and refresh regularly
   useEffect(() => {
@@ -173,10 +322,37 @@ const Messages: React.FC = () => {
 
   useEffect(() => {
     if (!selectedUserId) return;
+    previousMessagesSignatureRef.current = '';
     setSelectedUserName(formatUserLabel(selectedUserId, userNames[selectedUserId]));
   }, [selectedUserId, userNames]);
 
+  useEffect(() => {
+    if (!requestedUserId) return;
+    forceScrollToBottomRef.current = true;
+    userPinnedToBottomRef.current = true;
+    setSelectedUserId((prev) => (prev === requestedUserId ? prev : requestedUserId));
+    setSelectedUserName(formatUserLabel(requestedUserId, userNames[requestedUserId]));
+  }, [requestedUserId, userNames]);
+
+  useEffect(() => {
+    const listingIds = Array.from(
+      new Set(
+        messages.map((msg) => getMessageListingId(msg)).filter((id): id is string => !!id)
+      )
+    );
+    if (listingIds.length === 0) return;
+
+    const missingIds = listingIds.filter((id) => !(id in listingPreviews));
+    if (missingIds.length === 0) return;
+
+    missingIds.forEach((id) => {
+      void loadListingPreview(id);
+    });
+  }, [messages, listingPreviews, loadListingPreview]);
+
   const handleSelectUser = (userId: string, userName: string) => {
+    forceScrollToBottomRef.current = true;
+    userPinnedToBottomRef.current = true;
     setSelectedUserId(userId);
     setSelectedUserName(userName);
   };
@@ -190,6 +366,8 @@ const Messages: React.FC = () => {
     try {
       setError(null);
       await messageService.sendMessage(selectedUserId, messageText);
+      forceScrollToBottomRef.current = true;
+      userPinnedToBottomRef.current = true;
 
       // Refresh immediately after sending
       await loadConversation(selectedUserId, false);
@@ -224,7 +402,7 @@ const Messages: React.FC = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto h-screen flex flex-col bg-white">
+    <div className="mx-auto flex h-full min-h-0 max-w-6xl flex-col bg-white">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-0 flex-1 overflow-hidden">
         {/* Threads List */}
         <div className="hidden md:flex md:flex-col bg-white border-r border-gray-200">
@@ -343,12 +521,16 @@ const Messages: React.FC = () => {
                 </button>
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900">{selectedUserName}</h2>
-                  <p className="text-xs text-gray-500">Auto-refreshes every 5s</p>
+                  <p className="text-xs text-gray-500">Live updates</p>
                 </div>
               </div>
 
               {/* Messages Area */}
-              <div className="flex-1 overflow-y-auto bg-white space-y-3 p-4">
+              <div
+                ref={conversationScrollRef}
+                onScroll={handleConversationScroll}
+                className="flex-1 overflow-y-auto bg-white space-y-3 p-4"
+              >
                 {error && (
                   <div className="bg-red-50 border border-red-200 rounded p-3 text-red-700 text-sm">
                     {error}
@@ -373,14 +555,17 @@ const Messages: React.FC = () => {
                   </div>
                 ) : (
                   messages.map((msg) => {
-                    const isOwn = msg.from === currentUserId;
+                    const senderId = normalizeId((msg as any).from);
+                    const isOwn = !!currentUserId && senderId === currentUserId;
+                    const listingId = getMessageListingId(msg);
+                    const listingPreview = listingId ? listingPreviews[listingId] : undefined;
                     const senderName = isOwn
                       ? 'You'
                       : formatUserLabel(
-                          msg.from,
-                          msg.from === selectedUserId
+                          senderId || valueAsString((msg as any).from),
+                          senderId === selectedUserId
                             ? selectedUserName
-                            : userNames[msg.from]
+                            : userNames[senderId]
                         );
 
                     return (
@@ -404,6 +589,55 @@ const Messages: React.FC = () => {
                               {senderName}
                             </p>
                             <p className="text-sm break-words">{msg.body}</p>
+                            {listingId && (
+                              <Link
+                                to={`/listings/${listingId}`}
+                                className={`mt-2 block rounded-lg border p-2 transition ${
+                                  isOwn
+                                    ? 'border-green-400 bg-green-500/30 hover:bg-green-500/40'
+                                    : 'border-gray-200 bg-white hover:bg-gray-50'
+                                }`}
+                              >
+                                {listingPreview ? (
+                                  <div className="flex items-center gap-2">
+                                    {listingPreview.image ? (
+                                      <img
+                                        src={listingPreview.image}
+                                        alt={listingPreview.title}
+                                        className="h-12 w-12 rounded-md object-cover flex-shrink-0"
+                                      />
+                                    ) : null}
+                                    <div className="min-w-0">
+                                      <p
+                                        className={`truncate text-xs font-semibold ${
+                                          isOwn ? 'text-white' : 'text-gray-900'
+                                        }`}
+                                      >
+                                        {listingPreview.title}
+                                      </p>
+                                      <p
+                                        className={`truncate text-[11px] ${
+                                          isOwn ? 'text-green-100' : 'text-gray-600'
+                                        }`}
+                                      >
+                                        {listingPreview.category}
+                                      </p>
+                                      <p
+                                        className={`truncate text-[11px] font-semibold ${
+                                          isOwn ? 'text-green-50' : 'text-green-700'
+                                        }`}
+                                      >
+                                        {listingPreview.price}
+                                      </p>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <p className={`text-xs font-semibold ${isOwn ? 'text-green-50' : 'text-green-700'}`}>
+                                    View listing details
+                                  </p>
+                                )}
+                              </Link>
+                            )}
                             <div className="flex items-center gap-1 justify-end mt-1">
                               <p className={`text-xs opacity-75 ${isOwn ? 'text-green-50' : ''}`}>
                                 {formatTime(msg.createdAt)}

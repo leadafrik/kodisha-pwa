@@ -20,7 +20,9 @@ interface IDVerification {
     email?: string;
     phone?: string;
   };
-  idDocumentUrl: string;
+  idDocumentUrl?: string;
+  idFrontUrl?: string;
+  idBackUrl?: string;
   selfieUrl: string;
   status: "pending" | "approved" | "rejected";
   notes?: string;
@@ -347,18 +349,36 @@ const AdminIDVerification: React.FC = () => {
               {/* Documents Section */}
               <div className="space-y-6">
                 <div>
-                  <h3 className="font-bold text-gray-900 mb-3">Government ID Document</h3>
+                  <h3 className="font-bold text-gray-900 mb-3">Government ID Front</h3>
                   <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50 p-4">
-                    {selectedVerification.idDocumentUrl ? (
+                    {selectedVerification.idFrontUrl || selectedVerification.idDocumentUrl ? (
                       <img
-                        src={selectedVerification.idDocumentUrl}
-                        alt="ID Document"
+                        src={selectedVerification.idFrontUrl || selectedVerification.idDocumentUrl}
+                        alt="ID Front"
                         onError={handleImageError}
                         className="w-full max-h-80 object-contain"
                       />
                     ) : (
                       <div className="h-48 flex items-center justify-center">
-                        <p className="text-gray-500">No ID document front provided</p>
+                        <p className="text-gray-500">No ID front provided</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-bold text-gray-900 mb-3">Government ID Back</h3>
+                  <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50 p-4">
+                    {selectedVerification.idBackUrl ? (
+                      <img
+                        src={selectedVerification.idBackUrl}
+                        alt="ID Back"
+                        onError={handleImageError}
+                        className="w-full max-h-80 object-contain"
+                      />
+                    ) : (
+                      <div className="h-48 flex items-center justify-center">
+                        <p className="text-gray-500">No ID back provided</p>
                       </div>
                     )}
                   </div>

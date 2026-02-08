@@ -21,6 +21,29 @@ export default function AdminLogin() {
       localStorage.setItem("kodisha_admin_token", data.token);
       // Mirror admin token into user token so admin routes that use either will pass
       localStorage.setItem("kodisha_token", data.token);
+
+      const adminUser = data.user || {};
+      const normalizedAdminUser = {
+        id: adminUser._id || adminUser.id || "",
+        _id: adminUser._id,
+        name: adminUser.fullName || adminUser.name || "Admin",
+        fullName: adminUser.fullName || adminUser.name || "Admin",
+        email: adminUser.email,
+        phone: adminUser.phone,
+        profilePicture: adminUser.profilePicture,
+        verificationStatus: adminUser.isVerified ? "verified" : "pending",
+        idPhoto: undefined,
+        listings: [],
+        createdAt: new Date().toISOString(),
+        type: "admin",
+        userType: "admin",
+        county: adminUser.county,
+        isVerified: adminUser.isVerified,
+        role: adminUser.role || "admin",
+        verification: adminUser.verification,
+      };
+      localStorage.setItem("kodisha_user", JSON.stringify(normalizedAdminUser));
+
       alert("Admin logged in!");
       window.location.href = "/admin";
 
