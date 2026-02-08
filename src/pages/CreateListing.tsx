@@ -171,6 +171,9 @@ const CreateListing: React.FC = () => {
         return [];
     }
   }, [form.category]);
+  const isServiceCategory = form.category === "service";
+  const showQuantityFields =
+    form.category !== "inputs" && form.category !== "service";
 
   const commission = useMemo(() => {
     const price = Number(form.price) || 0;
@@ -245,7 +248,7 @@ const CreateListing: React.FC = () => {
         setError("Please enter a price");
         return false;
       }
-      if (form.category !== "inputs" && form.category !== "service" && !form.quantity) {
+      if (showQuantityFields && !form.quantity) {
         setError("Please enter a quantity");
         return false;
       }
@@ -253,7 +256,7 @@ const CreateListing: React.FC = () => {
         setError("Please enter a phone number");
         return false;
       }
-      if (form.listingType === "sell" && form.category !== "service" && !form.images.length) {
+      if (form.listingType === "sell" && !isServiceCategory && !form.images.length) {
         setError("Please upload at least one image");
         return false;
       }
@@ -554,7 +557,12 @@ const CreateListing: React.FC = () => {
               <h2 className="text-xl font-bold text-gray-900 mb-6">What do you want to do?</h2>
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  { type: "sell" as const, label: "Sell", icon: "", desc: "Sell your products" },
+                  {
+                    type: "sell" as const,
+                    label: "Sell",
+                    icon: "",
+                    desc: "List products, services, equipment, or inputs",
+                  },
                   { type: "buy" as const, label: "Buy", icon: "", desc: "Post a buy request" },
                 ].map(({ type, label, icon, desc }) => (
                   <button
@@ -601,7 +609,16 @@ const CreateListing: React.FC = () => {
                     key={cat}
                     type="button"
                     onClick={() => {
-                      setForm((prev) => ({ ...prev, category: cat, subcategory: null }));
+                      setForm((prev) => ({
+                        ...prev,
+                        category: cat,
+                        subcategory: null,
+                        // Service listings do not use quantity/unit or product boost flags.
+                        quantity: cat === "service" ? "" : prev.quantity,
+                        unit: cat === "service" ? "kg" : prev.unit,
+                        subscribed: cat === "service" ? false : prev.subscribed,
+                        premiumBadge: cat === "service" ? false : prev.premiumBadge,
+                      }));
                       setError("");
                       setNotice("");
                     }}
@@ -739,7 +756,11 @@ const CreateListing: React.FC = () => {
                   <label className="block text-sm font-semibold text-gray-900 mb-2">Title *</label>
                   <input
                     type="text"
-                    placeholder="e.g., Fresh Tomatoes, Dairy Cow, Tractor"
+                    placeholder={
+                      isServiceCategory
+                        ? "e.g., Tractor Rental, Farm Transport, Irrigation Setup"
+                        : "e.g., Fresh Tomatoes, Dairy Cow, Drip Kit"
+                    }
                     value={form.title}
                     onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -750,7 +771,11 @@ const CreateListing: React.FC = () => {
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-2">Description *</label>
                   <textarea
-                    placeholder="Describe your product in detail - quality, condition, features, etc."
+                    placeholder={
+                      isServiceCategory
+                        ? "Describe the service in detail - what is included, coverage area, schedule, and requirements."
+                        : "Describe your product in detail - quality, condition, features, etc."
+                    }
                     value={form.description}
                     onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
                     rows={5}
@@ -761,7 +786,9 @@ const CreateListing: React.FC = () => {
                 {/* Price and Quantity */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">Price (KSh) *</label>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      {isServiceCategory ? "Service Fee (KSh) *" : "Price (KSh) *"}
+                    </label>
                     <input
                       type="number"
                       placeholder="0"
@@ -776,7 +803,7 @@ const CreateListing: React.FC = () => {
                     )}
                   </div>
 
-                  {form.category !== "inputs" && form.category !== "service" && (
+                  {showQuantityFields && (
                     <div>
                       <label className="block text-sm font-semibold text-gray-900 mb-2">Quantity *</label>
                       <div className="flex gap-2">
@@ -953,7 +980,7 @@ const CreateListing: React.FC = () => {
                         <span className="text-gray-600">Price:</span>
                         <span className="font-semibold text-gray-900 ml-2">KSh {Number(form.price).toLocaleString()}</span>
                       </p>
-                      {form.quantity && (
+                      {!isServiceCategory && form.quantity && (
                         <p>
                           <span className="text-gray-600">Quantity:</span>
                           <span className="font-semibold text-gray-900 ml-2">
@@ -969,21 +996,23 @@ const CreateListing: React.FC = () => {
                   </div>
 
                   {/* Premium Options */}
-                  <div className="bg-blue-50 rounded-lg p-6 border border-blue-200 mb-6">
-                    <h3 className="font-bold text-gray-900 mb-4">Boost Your Listing (Optional)</h3>
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={form.premiumBadge}
-                        onChange={(e) => setForm((prev) => ({ ...prev, premiumBadge: e.target.checked }))}
-                        className="w-5 h-5 text-green-600"
-                      />
-                      <div>
-                        <p className="font-semibold text-gray-900">Premium Badge (KSh 199)</p>
-                        <p className="text-sm text-gray-600">Get a premium badge to stand out</p>
-                      </div>
-                    </label>
-                  </div>
+                  {!isServiceCategory && (
+                    <div className="bg-blue-50 rounded-lg p-6 border border-blue-200 mb-6">
+                      <h3 className="font-bold text-gray-900 mb-4">Boost Your Listing (Optional)</h3>
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={form.premiumBadge}
+                          onChange={(e) => setForm((prev) => ({ ...prev, premiumBadge: e.target.checked }))}
+                          className="w-5 h-5 text-green-600"
+                        />
+                        <div>
+                          <p className="font-semibold text-gray-900">Premium Badge (KSh 199)</p>
+                          <p className="text-sm text-gray-600">Get a premium badge to stand out</p>
+                        </div>
+                      </label>
+                    </div>
+                  )}
 
                   {/* Submit Button */}
                   <button
