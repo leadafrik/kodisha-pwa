@@ -6,7 +6,7 @@ Disallow: /api/
 Disallow: /payment-test
 Disallow: /user/
 
-Sitemap: https://mamamboga254.com/sitemap.xml
+Sitemap: https://agrisoko254.com/sitemap.xml
 
 # Google-specific
 User-agent: Googlebot

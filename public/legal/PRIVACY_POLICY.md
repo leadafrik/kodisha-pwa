@@ -4,7 +4,7 @@
 
 ## INTRODUCTION
 
-Mamamboga Digital Limited ("Mamamboga Digital," "we," "us," or "our"), a company registered under the laws of the Republic of Kenya, respects your privacy and is committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform, including our website and mobile application (collectively, the "Platform").
+Agrisoko Limited ("Agrisoko," "we," "us," or "our"), a company registered under the laws of the Republic of Kenya, respects your privacy and is committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform, including our website and mobile application (collectively, the "Platform").
 
 **This Privacy Policy complies with the Data Protection Act, 2019 (Kenya) and is incorporated into our Terms of Service.**
 
@@ -18,7 +18,7 @@ As per the Data Protection Act, 2019:
 
 - **"Personal Data"** means any information relating to an identified or identifiable natural person.
 - **"Processing"** means any operation performed on personal data, including collection, recording, storage, use, disclosure, or deletion.
-- **"Data Controller"** means Mamamboga Digital Limited, which determines the purposes and means of processing personal data.
+- **"Data Controller"** means Agrisoko Limited, which determines the purposes and means of processing personal data.
 - **"Data Subject"** means you, the individual whose personal data we process.
 - **"Sensitive Personal Data"** includes data revealing tribe, health, biometric data, financial information, and criminal records.
 
@@ -27,13 +27,13 @@ As per the Data Protection Act, 2019:
 ## 2. DATA CONTROLLER INFORMATION
 
 **Data Controller:**  
-Mamamboga Digital Limited  
+Agrisoko Limited  
 Registered Office: Kenya  
-Email: kodisha.254.ke@gmail.com  
+Email: info@leadafrik.com  
 Phone/WhatsApp: +254796389192
 
 **Data Protection Officer:**  
-Email: kodisha.254.ke@gmail.com
+Email: info@leadafrik.com
 
 **Office of the Data Protection Commissioner (Kenya):**  
 https://www.odpc.go.ke/  
@@ -327,14 +327,14 @@ You may request:
 - Information about processing purposes and recipients
 - A copy of your data (free of charge for first request)
 
-**How to Exercise:** Email kodisha.254.ke@gmail.com or use in-app "Download My Data" feature.
+**How to Exercise:** Email info@leadafrik.com or use in-app "Download My Data" feature.
 
 ### 8.2 Right to Rectification (Art. 39)
 You may request correction of:
 - Inaccurate personal data
 - Incomplete personal data
 
-**How to Exercise:** Update your profile settings or contact kodisha.254.ke@gmail.com.
+**How to Exercise:** Update your profile settings or contact info@leadafrik.com.
 
 ### 8.3 Right to Erasure (Art. 40) ("Right to be Forgotten")
 You may request deletion of your personal data when:
@@ -346,7 +346,7 @@ You may request deletion of your personal data when:
 
 **Limitations:** We may retain data for legal obligations, dispute resolution, or fraud prevention.
 
-**How to Exercise:** Use in-app "Delete Account" or email kodisha.254.ke@gmail.com.
+**How to Exercise:** Use in-app "Delete Account" or email info@leadafrik.com.
 
 ### 8.4 Right to Restrict Processing (Art. 41)
 You may request restriction when:
@@ -360,7 +360,7 @@ You may request:
 - Receiving your data in a structured, commonly used format (JSON, CSV)
 - Transmitting your data to another controller
 
-**How to Exercise:** Email kodisha.254.ke@gmail.com with portability request.
+**How to Exercise:** Email info@leadafrik.com with portability request.
 
 ### 8.6 Right to Object (Art. 43)
 You may object to:
@@ -368,7 +368,7 @@ You may object to:
 - Direct marketing (at any time)
 - Profiling for marketing purposes
 
-**How to Exercise:** Click "Unsubscribe" in emails or email kodisha.254.ke@gmail.com.
+**How to Exercise:** Click "Unsubscribe" in emails or email info@leadafrik.com.
 
 ### 8.7 Right Not to be Subject to Automated Decision-Making (Art. 44)
 You have the right not to be subject to decisions based solely on automated processing (including profiling) that produce legal or similarly significant effects.
@@ -391,7 +391,7 @@ Website: https://www.odpc.go.ke/
 
 The Platform is not intended for persons under 18 years of age. We do not knowingly collect personal data from children. If we become aware that a child has provided personal data, we will delete it immediately and terminate the account.
 
-**Parents/Guardians:** If you believe your child has provided personal data, contact us immediately at kodisha.254.ke@gmail.com.
+**Parents/Guardians:** If you believe your child has provided personal data, contact us immediately at info@leadafrik.com.
 
 ---
 
@@ -441,7 +441,7 @@ You may opt out anytime:
 - Click "Unsubscribe" in emails
 - Reply "STOP" to SMS messages
 - Adjust notification settings in your profile
-- Email kodisha.254.ke@gmail.com
+- Email info@leadafrik.com
 
 **Service Messages:** You cannot opt out of essential transactional messages (payment confirmations, security alerts, etc.).
 
@@ -486,7 +486,7 @@ If you access the Platform from outside Kenya:
 
 ## 15. BUSINESS TRANSFERS
 
-If Mamamboga Digital is involved in a merger, acquisition, asset sale, or bankruptcy, your personal data may be transferred to the successor entity. We will notify you before your data is transferred and becomes subject to a different privacy policy.
+If Agrisoko is involved in a merger, acquisition, asset sale, or bankruptcy, your personal data may be transferred to the successor entity. We will notify you before your data is transferred and becomes subject to a different privacy policy.
 
 ---
 
@@ -501,13 +501,13 @@ For high-risk processing activities (e.g., large-scale profiling, sensitive data
 For questions, requests, or complaints regarding this Privacy Policy or our data practices:
 
 **Data Protection Officer:**  
-Mamamboga Digital Limited  
-Email: kodisha.254.ke@gmail.com  
+Agrisoko Limited  
+Email: info@leadafrik.com  
 Phone/WhatsApp: +254796389192  
 Registered Office: Kenya
 
 **General Inquiries:**  
-Email: kodisha.254.ke@gmail.com
+Email: info@leadafrik.com
 WhatsApp: +254796389192
 
 **Response Time:** We will respond to your requests within 21 days as required by the Data Protection Act, 2019.

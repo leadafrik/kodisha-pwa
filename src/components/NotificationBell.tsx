@@ -2,6 +2,9 @@ import React from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { Bell, X, ExternalLink } from 'lucide-react';
+import { io, Socket } from 'socket.io-client';
+import { API_BASE_URL } from '../config/api';
+import { getAuthToken } from '../utils/auth';
 
 interface Notification {
   _id: string;
@@ -16,37 +19,105 @@ interface Notification {
 
 const NotificationBell: React.FC = () => {
   const [open, setOpen] = React.useState(false);
+  const socketRef = React.useRef<Socket | null>(null);
+  const [liveNotifications, setLiveNotifications] = React.useState<Notification[]>([]);
+  const countRefetchRef = React.useRef<(() => void) | null>(null);
 
-  // Fetch unread count
-  const { data: countData } = useQuery({
+  // Fetch unread count - reduced from 30s to 5m polling (fallback only)
+  const { data: countData, refetch: countRefetch } = useQuery({
     queryKey: ['notifications', 'count'],
     queryFn: async () => {
       const response = await axios.get('/api/notifications/unread/count');
       return response.data.data;
     },
-    refetchInterval: 30000, // Refetch every 30s
+    refetchInterval: 300000, // 5 minutes - fallback for socket failures
+    enabled: !socketRef.current?.connected, // Disable if socket is active
   });
 
-  // Fetch notifications
+  // Store refetch in ref for use in socket effect
+  React.useEffect(() => {
+    countRefetchRef.current = countRefetch;
+  }, [countRefetch]);
+
+  // Initialize Socket.io connection for real-time notifications
+  React.useEffect(() => {
+    const token = getAuthToken();
+    if (!token || socketRef.current?.connected) return;
+
+    try {
+      const baseUrl = API_BASE_URL.replace(/\/api$/, '');
+      const socket = io(baseUrl, {
+        auth: { token },
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        reconnectionAttempts: 5,
+      });
+
+      socket.on('connect', () => {
+        console.log('Connected to notification service');
+        socket.emit('notification:subscribe');
+      });
+
+      // Listen for new notifications in real-time
+      socket.on('notification:new', (notification: Notification) => {
+        console.log('New notification received:', notification);
+        setLiveNotifications((prev) => {
+          const exists = prev.some((n) => n._id === notification._id);
+          return exists ? prev : [notification, ...prev];
+        });
+        // Refetch to update count
+        if (countRefetchRef.current) {
+          countRefetchRef.current();
+        }
+      });
+
+      socket.on('disconnect', () => {
+        console.log('Disconnected from notification service');
+      });
+
+      socketRef.current = socket;
+    } catch (err) {
+      console.error('Socket connection failed, will use HTTP polling:', err);
+    }
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+    };
+  }, []);
+
+  // Fetch notifications - only when panel is open
   const { data: notificationsData, refetch } = useQuery({
     queryKey: ['notifications'],
     queryFn: async () => {
       const response = await axios.get('/api/notifications?limit=10&unread=true');
       return response.data.data;
     },
-    enabled: open,
+    enabled: open && liveNotifications.length === 0, // Use live if available
   });
 
   // Mark as read mutation
   const markReadMutation = useMutation({
     mutationFn: async (notificationId: string) => {
       await axios.patch(`/api/notifications/${notificationId}/read`);
+      return notificationId;
     },
-    onSuccess: () => refetch(),
+    onSuccess: (notificationId: string) => {
+      refetch();
+      setLiveNotifications((prev) =>
+        prev.map((n) => (n._id === notificationId ? { ...n, read: true } : n))
+      );
+      countRefetch();
+    },
   });
 
-  const notifications = notificationsData?.notifications || [];
-  const unreadCount = countData?.unreadCount || 0;
+  // Use real-time notifications if available, otherwise use HTTP
+  const notifications = liveNotifications.length > 0 ? liveNotifications : notificationsData?.notifications || [];
+  const unreadCount = countData?.unreadCount || liveNotifications.filter((n) => !n.read).length || 0;
 
   const priorityColors = {
     urgent: 'bg-red-50 border-l-4 border-red-500',
