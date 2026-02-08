@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Star } from 'lucide-react';
 import { API_BASE_URL } from '../config/api';
 import UserRatingBadge from './UserRatingBadge';
 
@@ -95,17 +96,15 @@ const UserRatingsList: React.FC<UserRatingsListProps> = ({ userId, maxReviews = 
                 </div>
                 <div className="flex items-center gap-1">
                   {[...Array(5)].map((_, i) => (
-                    <svg
+                    <Star
                       key={i}
                       className={`w-4 h-4 ${
                         i < rating.score
-                          ? 'text-yellow-400 fill-current'
-                          : 'text-gray-300'
+                          ? 'text-yellow-500 fill-yellow-400'
+                          : 'text-gray-300 fill-transparent'
                       }`}
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                    </svg>
+                      strokeWidth={2}
+                    />
                   ))}
                 </div>
               </div>

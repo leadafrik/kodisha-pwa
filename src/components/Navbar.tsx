@@ -75,7 +75,7 @@ const Navbar: React.FC = () => {
           <div className="flex justify-between items-center py-4">
             {/* LOGO */}
             <Link to="/" className="flex items-center gap-3">
-              <img src="/logo.svg" alt="Agrisoko" className="h-10 w-10" />
+              <img src="/logo.svg" alt="" aria-hidden="true" className="h-10 w-10" />
               <span className="text-2xl font-extrabold text-gray-800 tracking-tight">Agrisoko</span>
             </Link>
 

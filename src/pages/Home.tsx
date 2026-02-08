@@ -14,57 +14,57 @@ const Home: React.FC = () => {
   // Set defaults if content is empty
   const displayHeadline = heroHeadline || "Connecting Kenya's Agricultural Ecosystem";
   const displayDescription = heroDescription || 'A trusted marketplace for farmers, buyers, and agricultural service providers across all 47 counties.';
-  const displayAnnouncement = announcementText || 'Trade with verified profiles, direct messaging, and transparent terms.';
+  const displayAnnouncement = announcementText || 'Verified sellers publish instantly. New sellers can still list with admin review.';
 
   return (
     <main className="min-h-screen bg-white">
       {/* HERO SECTION - Clean & Minimal */}
-      <section className="pt-20 pb-24 px-4 md:px-8 border-b border-gray-200">
+      <section className="pt-14 md:pt-20 pb-14 md:pb-24 px-4 md:px-8 border-b border-gray-200">
         <div className="max-w-7xl mx-auto">
           {/* Confidence Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium mb-8">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-            Trusted marketplace - verified and secure
+            Trusted marketplace with clear trust status
           </div>
 
           {/* Main Headline */}
           <div className="space-y-6 max-w-3xl">
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
               {displayHeadline}
             </h1>
-            <p className="text-xl text-gray-600 leading-relaxed">
+            <p className="text-lg md:text-xl text-gray-600 leading-relaxed">
               {displayDescription}
             </p>
-            <p className="text-lg text-gray-500 font-medium">
+            <p className="text-base md:text-lg text-gray-500 font-medium">
               {displayAnnouncement}
             </p>
           </div>
 
           {/* Primary CTA Row */}
-          <div className="flex flex-col sm:flex-row gap-3 mt-10">
+          <div className="flex flex-col sm:flex-row gap-3 mt-8 md:mt-10">
             <Link
               to="/browse"
-              className="inline-flex min-h-[48px] justify-center items-center px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors"
+              className="inline-flex w-full sm:w-auto min-h-[48px] justify-center items-center px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors"
             >
-              Browse Listings
+              Browse Marketplace
             </Link>
             <Link
               to={user ? "/create-listing" : "/login?next=/create-listing"}
-              className="inline-flex min-h-[48px] justify-center items-center px-6 py-3 border border-emerald-300 text-emerald-700 font-semibold rounded-lg hover:bg-emerald-50 transition-colors"
+              className="inline-flex w-full sm:w-auto min-h-[48px] justify-center items-center px-6 py-3 border border-emerald-300 text-emerald-700 font-semibold rounded-lg hover:bg-emerald-50 transition-colors"
             >
-              {user ? "Create Listing" : "Start Selling"}
+              {user ? "Create Listing" : "List Now"}
             </Link>
           </div>
 
           {/* Key Metrics - Minimal */}
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-8 mt-16 pt-12 border-t border-gray-200">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6 md:gap-8 mt-12 md:mt-16 pt-10 md:pt-12 border-t border-gray-200">
             <div>
               <div className="text-2xl font-bold text-gray-900">47</div>
               <div className="text-xs text-gray-600 mt-1">Counties Covered</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-gray-900">Verified</div>
-              <div className="text-xs text-gray-600 mt-1">ID Verified</div>
+              <div className="text-2xl font-bold text-gray-900">Trust</div>
+              <div className="text-xs text-gray-600 mt-1">Shown On Listings</div>
             </div>
             <div>
               <div className="text-2xl font-bold text-gray-900">Instant</div>
@@ -87,19 +87,19 @@ const Home: React.FC = () => {
       </section>
 
       {/* DUAL CTA SECTION - Two User Paths */}
-      <section className="py-20 px-4 md:px-8 bg-gray-50">
+      <section className="py-14 md:py-20 px-4 md:px-8 bg-gray-50">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">What's Your Role?</h2>
-          <p className="text-lg text-gray-600 mb-12 max-w-2xl">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">What's Your Role?</h2>
+          <p className="text-base md:text-lg text-gray-600 mb-8 md:mb-12 max-w-2xl">
             Whether you're buying fresh produce or selling your harvest, Agrisoko connects you with the right partners.
           </p>
 
           <div className="grid md:grid-cols-2 gap-8">
             {/* BUYERS PATH */}
-            <div className="border border-gray-200 rounded-lg p-6 md:p-12 bg-white hover:border-gray-300 transition">
+            <div className="border border-gray-200 rounded-lg p-6 md:p-10 bg-white hover:border-gray-300 transition">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">I'm Looking to Buy</h3>
               <p className="text-gray-600 mb-6">
-                Browse thousands of quality agricultural products, livestock, and professional services from verified sellers across Kenya.
+                Browse thousands of quality agricultural products, livestock, and professional services from trusted sellers across Kenya.
               </p>
               <ul className="space-y-3 mb-8 text-gray-700">
                 <li className="flex items-center gap-2">
@@ -117,14 +117,14 @@ const Home: React.FC = () => {
               </ul>
               <Link
                 to="/browse"
-                className="inline-flex min-h-[44px] items-center px-6 py-2 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors"
+                className="inline-flex w-full sm:w-auto min-h-[44px] justify-center items-center px-6 py-2 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors"
               >
                 Browse now
               </Link>
             </div>
 
             {/* SELLERS PATH */}
-            <div className="border border-gray-200 rounded-lg p-6 md:p-12 bg-white hover:border-gray-300 transition">
+            <div className="border border-gray-200 rounded-lg p-6 md:p-10 bg-white hover:border-gray-300 transition">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">I'm Looking to Sell</h3>
               <p className="text-gray-600 mb-6">
                 List your products to reach verified buyers actively seeking what you produce. Direct connections, no middlemen.
@@ -145,7 +145,7 @@ const Home: React.FC = () => {
               </ul>
               <Link
                 to={user ? "/create-listing" : "/login?next=/create-listing"}
-                className="inline-flex min-h-[44px] items-center px-6 py-2 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors"
+                className="inline-flex w-full sm:w-auto min-h-[44px] justify-center items-center px-6 py-2 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors"
               >
                 {user ? "Create Listing" : "Get Started"}
               </Link>
@@ -155,51 +155,51 @@ const Home: React.FC = () => {
       </section>
 
       {/* HOW IT WORKS - Simple 3 Step Flow */}
-      <section className="py-20 px-4 md:px-8">
+      <section className="py-14 md:py-20 px-4 md:px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
-          <p className="text-lg text-gray-600 mb-12 max-w-2xl">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
+          <p className="text-base md:text-lg text-gray-600 mb-8 md:mb-12 max-w-2xl">
             Get started in minutes with our straightforward process.
           </p>
 
           <div className="grid md:grid-cols-3 gap-8">
             {/* Step 1 */}
-            <div className="relative">
+            <div className="relative border border-gray-200 rounded-lg p-6">
               <div className="flex items-center justify-center w-12 h-12 bg-gray-900 text-white rounded-full font-bold text-lg mb-4">1</div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Create Account</h3>
-              <p className="text-gray-600">Sign up with email and verify your identity with a photo. Takes just 2 minutes.</p>
+              <p className="text-gray-600">Sign up quickly and complete your profile in minutes.</p>
             </div>
 
             {/* Step 2 */}
-            <div className="relative">
+            <div className="relative border border-gray-200 rounded-lg p-6">
               <div className="flex items-center justify-center w-12 h-12 bg-gray-900 text-white rounded-full font-bold text-lg mb-4">2</div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Browse or List</h3>
-              <p className="text-gray-600">Search our marketplace or post your products. Filter by location, category, and price.</p>
+              <p className="text-gray-600">Search the marketplace or post your listing with clear location, category, and pricing.</p>
             </div>
 
             {/* Step 3 */}
-            <div className="relative">
+            <div className="relative border border-gray-200 rounded-lg p-6">
               <div className="flex items-center justify-center w-12 h-12 bg-gray-900 text-white rounded-full font-bold text-lg mb-4">3</div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Connect & Trade</h3>
-              <p className="text-gray-600">Message sellers directly. Negotiate terms and close deals on your terms.</p>
+              <p className="text-gray-600">Chat directly, close your deal, and verify your ID to unlock instant publishing.</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* PLATFORM FEATURES - Clean Grid */}
-      <section className="py-20 px-4 md:px-8 bg-gray-50 border-y border-gray-200">
+      <section className="py-14 md:py-20 px-4 md:px-8 bg-gray-50 border-y border-gray-200">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">Why Choose Agrisoko</h2>
-          <p className="text-lg text-gray-600 mb-12 max-w-2xl">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Why Choose Agrisoko</h2>
+          <p className="text-base md:text-lg text-gray-600 mb-8 md:mb-12 max-w-2xl">
             Built for Kenya's agricultural community with security, simplicity, and trust at the core.
           </p>
 
           <div className="grid md:grid-cols-3 gap-8">
             {/* Feature 1 */}
             <div className="p-8 bg-white rounded-lg border border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900 mb-3">Verified Traders</h3>
-              <p className="text-gray-600">Every seller is ID-verified and selfie-authenticated. Trade with confidence.</p>
+              <h3 className="text-lg font-bold text-gray-900 mb-3">Trust Labels</h3>
+              <p className="text-gray-600">Verified profiles are ID and selfie-authenticated. Unverified listings go through admin review.</p>
             </div>
 
             {/* Feature 2 */}
@@ -236,9 +236,9 @@ const Home: React.FC = () => {
       </section>
 
       {/* PRODUCT CATEGORIES */}
-      <section className="py-20 px-4 md:px-8">
+      <section className="py-14 md:py-20 px-4 md:px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold text-gray-900 mb-12">What Can You Buy & Sell?</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8 md:mb-12">What Can You Buy & Sell?</h2>
 
           <div className="grid md:grid-cols-2 gap-8">
             {/* Produce Category */}
@@ -271,21 +271,21 @@ const Home: React.FC = () => {
       {/* FEATURE STATUS BANNER */}
       <section className="py-12 px-4 md:px-8 bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto text-center">
-          <h3 className="text-2xl font-bold mb-2">Core Features Ready for Daily Trade</h3>
+          <h3 className="text-2xl font-bold mb-2">Built for Daily Trade</h3>
           <p className="text-gray-300">
-            Identity verification, document uploads, and in-app messaging are active with clear terms.
+            Listings, in-app messaging, and verification review are active with clear trust status on each profile.
           </p>
         </div>
       </section>
 
       {/* FINAL CTA SECTION */}
-      <section className="py-20 px-4 md:px-8">
+      <section className="py-14 md:py-20 px-4 md:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="bg-gray-50 rounded-lg border border-gray-200 p-12 text-center">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <div className="bg-gray-50 rounded-lg border border-gray-200 p-6 md:p-12 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               {user ? "Ready to Grow Your Business?" : "Ready to Get Started?"}
             </h2>
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            <p className="text-base md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
               {user 
                 ? "List your products now and reach verified buyers across all 47 counties."
                 : "Join thousands of farmers, buyers, and service providers already using Agrisoko."}
@@ -293,13 +293,13 @@ const Home: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
                 to={user ? "/create-listing" : "/login?next=/create-listing"}
-                className="inline-flex min-h-[48px] justify-center items-center px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors"
+                className="inline-flex w-full sm:w-auto min-h-[48px] justify-center items-center px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition-colors"
               >
                 {user ? "Create Listing" : "Create Account"}
               </Link>
               <Link
                 to="/browse"
-                className="inline-flex min-h-[48px] justify-center items-center px-6 py-3 border border-gray-300 text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+                className="inline-flex w-full sm:w-auto min-h-[48px] justify-center items-center px-6 py-3 border border-gray-300 text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
               >
                 Browse Marketplace
               </Link>
@@ -308,72 +308,6 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* FOOTER - Clean & Professional */}
-      <footer className="bg-gray-900 text-gray-300 border-t border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-16">
-          {/* Main Footer Content */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-            {/* Brand Column */}
-            <div className="md:col-span-1">
-              <h3 className="text-lg font-bold text-white mb-3">Agrisoko</h3>
-              <p className="text-sm leading-relaxed">
-                Connecting Kenya's agricultural ecosystem. Direct, trusted, fair.
-              </p>
-            </div>
-
-            {/* Platform Links */}
-            <div>
-              <h4 className="font-semibold text-white mb-4">Platform</h4>
-              <ul className="space-y-2 text-sm">
-                <li><Link to="/browse" className="hover:text-white transition">Browse Listings</Link></li>
-                <li><Link to={user ? "/create-listing" : "/login"} className="hover:text-white transition">Create Listing</Link></li>
-                <li><Link to="/request" className="hover:text-white transition">Buy Requests</Link></li>
-                {user && <li><Link to="/profile" className="hover:text-white transition">Your Profile</Link></li>}
-              </ul>
-            </div>
-
-            {/* Legal Links */}
-            <div>
-              <h4 className="font-semibold text-white mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm">
-                <li><Link to="/terms" className="hover:text-white transition">Terms of Service</Link></li>
-                <li><Link to="/privacy" className="hover:text-white transition">Privacy Policy</Link></li>
-                <li><Link to="/about" className="hover:text-white transition">About Us</Link></li>
-              </ul>
-            </div>
-
-            {/* Contact */}
-            <div>
-              <h4 className="font-semibold text-white mb-4">Contact</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <a 
-                    href="https://wa.me/254796389192" 
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-white transition"
-                  >
-                    WhatsApp
-                  </a>
-                </li>
-                <li>
-                  <a 
-                    href="mailto:kodisha.254.ke@gmail.com"
-                    className="hover:text-white transition"
-                  >
-                    Email Support
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Footer Bottom */}
-          <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
-            <p>&copy; {new Date().getFullYear()} Agrisoko. All rights reserved. </p>
-          </div>
-        </div>
-      </footer>
     </main>
   );
 };

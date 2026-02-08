@@ -36,7 +36,6 @@ const AboutUs: React.FC = () => {
   }, []);
 
   const countiesCount = kenyaCounties.length;
-  const currentYear = new Date().getFullYear();
   const userCountLabel =
     userCount !== null ? `${userCount.toLocaleString()} registered users` : 'Fetching registered users...';
   const isFullyVerified =
@@ -262,7 +261,7 @@ const AboutUs: React.FC = () => {
               <p className="text-sm text-slate-600 mt-3">Email or join the WhatsApp community to get quick assistance.</p>
               <div className="mt-4 flex flex-col gap-2">
                 <a
-                  href="mailto:info@leadafrik.com"
+                  href="mailto:info@leadAfrik.com"
                   className="inline-flex justify-center items-center rounded-xl bg-slate-900 text-white px-4 py-2 text-sm font-semibold hover:bg-slate-800 transition"
                 >
                   Email Support
@@ -300,47 +299,6 @@ const AboutUs: React.FC = () => {
           </div>
         </section>
 
-        <footer className="border-t border-slate-200 py-10">
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="grid gap-6 md:grid-cols-4 text-sm text-slate-600">
-              <div>
-                <p className="font-semibold text-slate-900">Agrisoko</p>
-                <p className="mt-2">Connecting Kenya's Agricultural Community</p>
-              </div>
-              <div>
-                <p className="font-semibold text-slate-900">Links</p>
-                <ul className="mt-2 space-y-2">
-                  <li><Link to="/" className="hover:text-slate-900 transition">Home</Link></li>
-                  <li><Link to="/browse" className="hover:text-slate-900 transition">Browse Listings</Link></li>
-                  <li><Link to="/request" className="hover:text-slate-900 transition">Buy Requests</Link></li>
-                  <li><Link to="/create-listing" className="hover:text-slate-900 transition">List Products</Link></li>
-                </ul>
-              </div>
-              <div>
-                <p className="font-semibold text-slate-900">Legal</p>
-                <ul className="mt-2 space-y-2">
-                  <li><Link to="/terms" className="hover:text-slate-900 transition">Terms of Service</Link></li>
-                  <li><Link to="/privacy" className="hover:text-slate-900 transition">Privacy Policy</Link></li>
-                  <li><Link to="/privacy#data-protection" className="hover:text-slate-900 transition">Data Protection</Link></li>
-                  <li><a href="https://www.odpc.go.ke/" target="_blank" rel="noopener noreferrer" className="hover:text-slate-900 transition">ODPC</a></li>
-                </ul>
-              </div>
-              <div>
-                <p className="font-semibold text-slate-900">Contact</p>
-                <ul className="mt-2 space-y-2">
-                  <li><a href="mailto:info@leadafrik.com" className="hover:text-slate-900 transition">Email Support</a></li>
-                  <li><a href="https://chat.whatsapp.com/HzCaV5YVz86CjwajiOHR5i" target="_blank" rel="noopener noreferrer" className="hover:text-slate-900 transition">WhatsApp Community</a></li>
-                  <li><Link to="/contact" className="hover:text-slate-900 transition">Contact Support</Link></li>
-                </ul>
-              </div>
-            </div>
-            <div className="mt-8 text-xs text-slate-500 text-center">
-              <p>Copyright {currentYear} Agrisoko. All rights reserved.</p>
-              <p className="mt-1">By using Agrisoko, you agree to our Terms of Service and Privacy Policy.</p>
-              <p className="mt-1">For data protection inquiries: info@leadafrik.com</p>
-            </div>
-          </div>
-        </footer>
       </div>
     </div>
   );

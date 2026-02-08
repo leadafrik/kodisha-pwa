@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { Star } from 'lucide-react';
 import { API_BASE_URL } from '../config/api';
 import { getAuthToken } from '../utils/auth';
 
@@ -84,17 +85,15 @@ const SubmitRating: React.FC<SubmitRatingProps> = ({
                 aria-pressed={score === star}
                 className="transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 rounded"
               >
-                <svg
+                <Star
                   className={`w-8 h-8 ${
                     star <= score
-                      ? 'text-yellow-400 fill-current'
-                      : 'text-gray-300'
+                      ? 'text-yellow-500 fill-yellow-400'
+                      : 'text-gray-300 fill-transparent'
                   }`}
-                  viewBox="0 0 20 20"
+                  strokeWidth={2}
                   aria-hidden="true"
-                >
-                  <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                </svg>
+                />
               </button>
             ))}
           </div>

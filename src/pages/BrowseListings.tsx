@@ -43,11 +43,10 @@ const buildLocation = (loc: any) =>
     .join(", ");
 
 const getScore = (item: UnifiedCard) => {
-  // Sort by: boosted (3) > paid (2) > verified (1), then by freshness
-  // Boost indicator: items with boost=true appear first
-  const boost = item.boosted ? 3 : 0;
-  const paid = item.paid ? 2 : 0;
-  const verified = item.verified ? 1 : 0;
+  // Sort priority: boosted first, then verified, then paid.
+  const boost = item.boosted ? 4 : 0;
+  const verified = item.verified ? 2 : 0;
+  const paid = item.paid ? 1 : 0;
   return boost + paid + verified;
 };
 

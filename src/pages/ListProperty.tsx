@@ -793,7 +793,7 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
 
       {saleListingsPaused && (
         <div className="mb-6 rounded-lg border-l-4 border-yellow-400 bg-yellow-50 text-yellow-800 px-4 py-3">
-          Note: Listing land for sale is temporarily paused. You can still create rental/lease listings. Contact <a className="font-semibold underline" href="mailto:kodisha.254.ke@gmail.com">kodisha.254.ke@gmail.com</a> to be notified when sales reopen.
+          Note: Listing land for sale is temporarily paused. You can still create rental/lease listings. Contact <a className="font-semibold underline" href="mailto:info@leadAfrik.com">info@leadAfrik.com</a> to be notified when sales reopen.
         </div>
       )}
 

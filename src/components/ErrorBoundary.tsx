@@ -102,8 +102,8 @@ class ErrorBoundary extends React.Component<Props, State> {
             </div>
             <p className="text-xs text-gray-500 mt-6">
               If the issue persists, please contact support at{' '}
-              <a href="mailto:kodisha.254.ke@gmail.com" className="text-blue-600 hover:underline">
-                kodisha.254.ke@gmail.com
+              <a href="mailto:info@leadAfrik.com" className="text-blue-600 hover:underline">
+                info@leadAfrik.com
               </a>
             </p>
           </div>

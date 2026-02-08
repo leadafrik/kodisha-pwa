@@ -7,6 +7,7 @@ import { API_ENDPOINTS, API_BASE_URL, adminApiRequest } from "../config/api";
 import { io, Socket } from "socket.io-client";
 import { favoritesService } from "../services/favoritesService";
 import { handleImageError } from "../utils/imageFallback";
+import { Star } from "lucide-react";
 
 // Helper: Get auth token (user or admin)
 const getAuthToken = (): string | null => {
@@ -817,9 +818,20 @@ const ListingDetails: React.FC = () => {
             {userRatings?.aggregate && userRatings.aggregate.count > 0 && (
               <div className="mb-3 p-2 bg-yellow-50 rounded border border-yellow-200">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-lg font-bold text-yellow-600">
-                    {'⭐'.repeat(Math.round(userRatings.aggregate.average))}
-                  </span>
+                  <div className="flex items-center gap-0.5" aria-label={`Rating ${userRatings.aggregate.average.toFixed(1)} out of 5`}>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`w-4 h-4 ${
+                          star <= Math.round(userRatings.aggregate.average)
+                            ? "text-yellow-500 fill-yellow-400"
+                            : "text-gray-300 fill-transparent"
+                        }`}
+                        strokeWidth={2}
+                        aria-hidden="true"
+                      />
+                    ))}
+                  </div>
                   <span className="text-sm font-semibold">
                     {userRatings.aggregate.average.toFixed(1)} ({userRatings.aggregate.count} reviews)
                   </span>
@@ -866,7 +878,7 @@ const ListingDetails: React.FC = () => {
               }}
               className="w-full mt-2 px-3 py-2 border border-yellow-400 bg-yellow-50 text-yellow-700 rounded-lg text-sm font-semibold hover:bg-yellow-100"
             >
-              ⭐ Rate Seller
+              Rate Seller
             </button>
 
             {/* Subtle Report Seller link */}
@@ -952,11 +964,19 @@ const ListingDetails: React.FC = () => {
                   <button
                     key={star}
                     onClick={() => setRatingScore(star)}
-                    className={`text-3xl ${
-                      star <= ratingScore ? 'text-yellow-500' : 'text-gray-300'
-                    } hover:text-yellow-400 transition`}
+                    aria-label={`${star} star${star > 1 ? "s" : ""}`}
+                    aria-pressed={ratingScore === star}
+                    className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 transition"
                   >
-                    ⭐
+                    <Star
+                      className={`w-8 h-8 ${
+                        star <= ratingScore
+                          ? "text-yellow-500 fill-yellow-400"
+                          : "text-gray-300 fill-transparent"
+                      }`}
+                      strokeWidth={2}
+                      aria-hidden="true"
+                    />
                   </button>
                 ))}
               </div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { CheckCircle, Star } from 'lucide-react';
 
 interface UserRating {
   average: number;
@@ -44,18 +45,16 @@ const UserRatingBadge: React.FC<UserRatingBadgeProps> = ({
       {/* Star rating */}
       <div className="flex items-center gap-1">
         {[...Array(5)].map((_, i) => (
-          <svg
+          <Star
             key={i}
             className={`${starSize} ${
               i < Math.round(rating.average)
-                ? 'text-yellow-400 fill-current'
-                : 'text-gray-300'
+                ? 'text-yellow-500 fill-yellow-400'
+                : 'text-gray-300 fill-transparent'
             }`}
-            viewBox="0 0 20 20"
+            strokeWidth={2}
             aria-hidden="true"
-          >
-            <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-          </svg>
+          />
         ))}
       </div>
 
@@ -72,13 +71,7 @@ const UserRatingBadge: React.FC<UserRatingBadgeProps> = ({
       {/* Verified badge */}
       {verified && (
         <>
-          <svg
-            className={`${starSize} text-green-600 fill-current ml-1`}
-            viewBox="0 0 20 20"
-            aria-hidden="true"
-          >
-            <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" />
-          </svg>
+          <CheckCircle className={`${starSize} text-green-600 fill-current ml-1`} aria-hidden="true" />
           <span className="sr-only">Verified profile</span>
         </>
       )}

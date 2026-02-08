@@ -78,9 +78,13 @@ const AdminProfileVerification: React.FC = () => {
 
   const handleReject = async () => {
     if (!selectedProfile) return;
+    if (!rejectReason.trim()) {
+      setError('Rejection reason is required.');
+      return;
+    }
 
     try {
-      await rejectProfile(selectedProfile._id, rejectReason);
+      await rejectProfile(selectedProfile._id, rejectReason.trim());
       setSuccessMessage(
         `Profile rejected for ${selectedProfile.fullName}${rejectReason ? ': ' + rejectReason : ''}`
       );
@@ -351,7 +355,7 @@ const AdminProfileVerification: React.FC = () => {
               {showRejectForm && (
                 <div className="mt-4 p-4 bg-red-50 rounded">
                   <label className="block text-sm font-medium mb-2">
-                    Reason for rejection (optional)
+                    Reason for rejection (required)
                   </label>
                   <textarea
                     value={rejectReason}

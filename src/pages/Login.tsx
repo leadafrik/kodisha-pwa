@@ -109,7 +109,7 @@ const Login: React.FC = () => {
     resetMessages();
 
     if (!loginData.emailOrPhone.trim() || !loginData.password.trim()) {
-      setError("Enter your email/phone and password.");
+      setError("Enter your email and password.");
       return;
     }
 
@@ -309,9 +309,9 @@ const Login: React.FC = () => {
         </div>
       </div>
 
-      {/* Email/Phone */}
+      {/* Email */}
       <div>
-        <label className="block text-sm font-semibold text-gray-900 mb-2">Email or Phone</label>
+        <label className="block text-sm font-semibold text-gray-900 mb-2">Email</label>
         <input
           type="text"
           value={loginData.emailOrPhone}
@@ -319,10 +319,10 @@ const Login: React.FC = () => {
           className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm
             focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100
             placeholder:text-gray-400 transition-colors"
-          placeholder="name@example.com or +254712345678"
+          placeholder="name@example.com"
         />
         <p className="mt-2 text-xs text-gray-500">
-          Phone verification is not enabled yet. Use email for fastest access.
+          Use your email address to sign in.
         </p>
       </div>
 
@@ -438,7 +438,7 @@ const Login: React.FC = () => {
           className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="your.email@example.com"
         />
-        <p className="text-xs text-gray-500 mt-1">Phone verification will be available soon.</p>
+        <p className="text-xs text-gray-500 mt-1">We'll send account verification to this email.</p>
       </div>
 
       <div>
@@ -683,191 +683,97 @@ const Login: React.FC = () => {
     </form>
   );
 
+  const modeTitle =
+    mode === "signup"
+      ? "Create your account"
+      : mode === "forgot"
+        ? "Reset your password"
+        : mode === "otp-verify"
+          ? "Verify your email"
+          : mode === "otp-reset"
+            ? "Set a new password"
+            : "Welcome back";
+
+  const modeSubtitle =
+    mode === "signup"
+      ? "Set up your Agrisoko profile and start trading."
+      : mode === "forgot" || mode === "otp-reset"
+        ? "Use your email address to regain secure access."
+        : mode === "otp-verify"
+          ? "Enter the code we sent to complete your account setup."
+          : "Sign in securely to continue.";
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50 flex flex-col">
-      {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center px-4 py-10">
-        <div className="w-full max-w-5xl grid md:grid-cols-2 gap-8 items-stretch">
-          {/* Brand Panel */}
-          <div className="hidden md:flex flex-col justify-between rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-600 via-emerald-700 to-emerald-800 text-white p-10 shadow-xl">
+    <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-emerald-50">
+      <div className="pointer-events-none absolute -top-20 right-0 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 left-0 h-72 w-72 rounded-full bg-sky-200/30 blur-3xl" />
+
+      <div className="px-4 py-8 md:py-12">
+        <div className="mx-auto grid w-full max-w-6xl items-stretch gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10">
+          <aside className="hidden lg:flex flex-col justify-between rounded-3xl border border-emerald-200/70 bg-gradient-to-br from-emerald-600 via-emerald-700 to-emerald-800 p-10 text-white shadow-2xl">
             <div>
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-white/15 rounded-xl mb-6">
-                <span className="text-white font-bold text-xl">A</span>
-              </div>
-              <h1 className="text-3xl font-bold leading-tight">Agrisoko</h1>
-              <p className="text-sm text-emerald-100 mt-2">
+              <img src="/logo.svg" alt="" aria-hidden="true" className="h-12 w-12 rounded-xl bg-white/10 p-1" />
+              <h1 className="mt-5 text-4xl font-bold leading-tight">Agrisoko</h1>
+              <p className="mt-2 text-sm text-emerald-100">
                 Trusted agricultural commerce for East Africa.
               </p>
             </div>
-            <div className="space-y-4 text-sm text-emerald-50/90">
+            <div className="space-y-4 text-sm text-emerald-50/95">
               <p>Faster onboarding, verified sellers, and secure sign-in.</p>
-              <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="grid grid-cols-2 gap-3 text-xs font-medium">
                 <span className="rounded-full bg-white/15 px-3 py-1">Verified profiles</span>
                 <span className="rounded-full bg-white/15 px-3 py-1">Secure login</span>
                 <span className="rounded-full bg-white/15 px-3 py-1">Buyer protection</span>
                 <span className="rounded-full bg-white/15 px-3 py-1">Instant messaging</span>
               </div>
             </div>
-          </div>
+          </aside>
 
-          <div className="w-full max-w-md mx-auto">
-            {/* Logo & Branding */}
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-emerald-600 rounded-xl mb-4">
-                <span className="text-white font-bold text-xl">A</span>
-              </div>
-              <h1 className="text-3xl font-bold text-gray-900">Agrisoko</h1>
-              <p className="text-sm text-gray-500 mt-1">
-                {mode === "signup"
-                  ? "Create your account in minutes"
-                  : "Welcome back"}
-              </p>
-            </div>
-
-            {/* Form Card */}
-            <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-            {/* Messages */}
-            {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-700 font-medium">{error}</p>
-              </div>
-            )}
-
-            {info && (
-              <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-                <p className="text-sm text-emerald-700 font-medium">{info}</p>
-              </div>
-            )}
-
-            {/* Render appropriate form */}
-            {mode === "login" && renderLogin()}
-            {mode === "signup" && renderSignup()}
-            {mode === "otp-verify" && renderOtpVerify()}
-            {mode === "forgot" && renderForgot()}
-            {mode === "otp-reset" && renderOtpReset()}
-          </div>
-
-            {/* Trust Badges */}
-            <div className="mt-6 space-y-2 text-center text-xs text-gray-500">
-              <div className="flex items-center justify-center gap-4">
-                <span>Secure and encrypted</span>
-                <span>Verified sellers</span>
+          <section className="w-full max-w-md mx-auto lg:max-w-none">
+            <div className="mb-4 rounded-2xl border border-emerald-100 bg-white/90 p-4 backdrop-blur lg:hidden">
+              <div className="flex items-center gap-3">
+                <img src="/logo.svg" alt="" aria-hidden="true" className="h-10 w-10 rounded-xl bg-emerald-50 p-1" />
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Agrisoko</p>
+                  <p className="text-xs text-slate-600">Trusted agricultural commerce for East Africa.</p>
+                </div>
               </div>
             </div>
-          </div>
+
+            <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur md:p-8">
+              <div className="mb-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Secure Access</p>
+                <h2 className="mt-2 text-2xl font-bold text-slate-900">{modeTitle}</h2>
+                <p className="mt-1 text-sm text-slate-600">{modeSubtitle}</p>
+              </div>
+
+              {error && (
+                <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
+                  <p className="text-sm font-medium text-red-700">{error}</p>
+                </div>
+              )}
+
+              {info && (
+                <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+                  <p className="text-sm font-medium text-emerald-700">{info}</p>
+                </div>
+              )}
+
+              {mode === "login" && renderLogin()}
+              {mode === "signup" && renderSignup()}
+              {mode === "otp-verify" && renderOtpVerify()}
+              {mode === "forgot" && renderForgot()}
+              {mode === "otp-reset" && renderOtpReset()}
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-600">
+              <span className="rounded-full border border-slate-200 bg-white/80 px-3 py-1">Secure and encrypted</span>
+              <span className="rounded-full border border-slate-200 bg-white/80 px-3 py-1">Verified sellers</span>
+              <span className="rounded-full border border-slate-200 bg-white/80 px-3 py-1">Private messaging</span>
+            </div>
+          </section>
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 px-4 py-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">Product</h3>
-              <ul className="space-y-2">
-                <li>
-                  <a href="/about" className="text-sm text-gray-600 hover:text-blue-600">
-                    About Us
-                  </a>
-                </li>
-                <li>
-                  <a href="/features" className="text-sm text-gray-600 hover:text-blue-600">
-                    Features
-                  </a>
-                </li>
-                <li>
-                  <a href="/pricing" className="text-sm text-gray-600 hover:text-blue-600">
-                    Pricing
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">Company</h3>
-              <ul className="space-y-2">
-                <li>
-                  <a href="/blog" className="text-sm text-gray-600 hover:text-blue-600">
-                    Blog
-                  </a>
-                </li>
-                <li>
-                  <a href="/careers" className="text-sm text-gray-600 hover:text-blue-600">
-                    Careers
-                  </a>
-                </li>
-                <li>
-                  <a href="/contact" className="text-sm text-gray-600 hover:text-blue-600">
-                    Contact
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">Legal</h3>
-              <ul className="space-y-2">
-                <li>
-                  <a href="/terms" className="text-sm text-gray-600 hover:text-blue-600">
-                    Terms of Service
-                  </a>
-                </li>
-                <li>
-                  <a href="/privacy" className="text-sm text-gray-600 hover:text-blue-600">
-                    Privacy Policy
-                  </a>
-                </li>
-                <li>
-                  <a href="/cookies" className="text-sm text-gray-600 hover:text-blue-600">
-                    Cookie Policy
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">Support</h3>
-              <ul className="space-y-2">
-                <li>
-                  <a href="/help" className="text-sm text-gray-600 hover:text-blue-600">
-                    Help Center
-                  </a>
-                </li>
-                <li>
-                  <a href="/status" className="text-sm text-gray-600 hover:text-blue-600">
-                    Status
-                  </a>
-                </li>
-                <li>
-                  <a href="/feedback" className="text-sm text-gray-600 hover:text-blue-600">
-                    Feedback
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-200 pt-6 flex items-center justify-between">
-            <p className="text-sm text-gray-500">
-              (c) 2026 Agrisoko. All rights reserved.
-            </p>
-            <div className="flex items-center gap-4">
-              <a href="https://facebook.com/agrisoko" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-600">
-                <span className="sr-only">Facebook</span>
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                </svg>
-              </a>
-              <a href="https://twitter.com/agrisoko" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-600">
-                <span className="sr-only">Twitter</span>
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8.29 20c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-7.655 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.073 4.073 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
-                </svg>
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

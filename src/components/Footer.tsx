@@ -46,30 +46,30 @@ const Footer: React.FC = () => {
   }, []);
   return (
     <footer className="bg-gray-50 border-t border-gray-200 mt-auto">
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-5">
           {/* Logo and Tagline */}
           <div className="text-center md:text-left">
             <h3 className="text-lg font-bold text-green-700">Agrisoko</h3>
-            <p className="text-xs text-gray-600">Connecting Kenya's Agricultural Community</p>
+            <p className="text-xs text-gray-600">Trusted agricultural marketplace across Kenya</p>
           </div>
 
           {/* Legal Links */}
-          <div className="flex flex-wrap justify-center gap-6 text-sm">
+          <div className="flex flex-wrap justify-center gap-5 text-sm">
             <Link
-              to="/legal/terms"
+              to="/terms"
               className="text-gray-600 hover:text-green-700 hover:underline transition"
             >
               Terms of Service
             </Link>
             <Link
-              to="/legal/privacy"
+              to="/privacy"
               className="text-gray-600 hover:text-green-700 hover:underline transition"
             >
               Privacy Policy
             </Link>
             <a
-              href="mailto:info@leadafrik.com"
+              href="mailto:info@leadAfrik.com"
               className="text-gray-600 hover:text-green-700 hover:underline transition"
             >
               Contact Support
@@ -85,9 +85,8 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Copyright */}
-          <div className="text-xs text-gray-500 text-center md:text-right">
+          <div className="text-xs text-gray-500 text-center md:text-right whitespace-nowrap">
             <p>&copy; {new Date().getFullYear()} Agrisoko. All rights reserved.</p>
-            {/* <p className="mt-1">Data Controller Registration: [Pending]</p> */}
           </div>
 
           {/* Download App Button */}
@@ -102,21 +101,14 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Mobile-Optimized Secondary Info */}
-        <div className="mt-4 pt-4 border-t border-gray-200 text-xs text-gray-500 text-center">
+        <div className="mt-5 pt-4 border-t border-gray-200 text-xs text-gray-500 text-center">
           <p>
-            By using Agrisoko, you agree to our{' '}
-            <Link to="/legal/terms" className="text-green-700 hover:underline">
-              Terms of Service
-            </Link>{' '}
-            and{' '}
-            <Link to="/legal/privacy" className="text-green-700 hover:underline">
-              Privacy Policy
-            </Link>
+            Using Agrisoko means you agree to our <Link to="/terms" className="text-green-700 hover:underline">Terms</Link> and <Link to="/privacy" className="text-green-700 hover:underline">Privacy Policy</Link>.
           </p>
           <p className="mt-2">
-            For data protection inquiries:{' '}
-            <a href="mailto:info@leadafrik.com" className="text-green-700 hover:underline">
-              info@leadafrik.com
+            Data protection inquiries:{' '}
+            <a href="mailto:info@leadAfrik.com" className="text-green-700 hover:underline">
+              info@leadAfrik.com
             </a>
           </p>
         </div>

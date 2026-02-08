@@ -131,6 +131,10 @@ const AdminIDVerification: React.FC = () => {
 
   const handleReview = async (verificationId: string, status: "approved" | "rejected") => {
     try {
+      if (status === "rejected" && !reviewNotes.trim()) {
+        setError("Rejection reason is required.");
+        return;
+      }
       setReviewingId(verificationId);
       setReviewingStatus(status);
 
@@ -141,7 +145,7 @@ const AdminIDVerification: React.FC = () => {
         method: "PUT",
         body: JSON.stringify({
           status,
-          notes: reviewNotes || undefined,
+          notes: reviewNotes.trim() || undefined,
         }),
       });
 
@@ -151,6 +155,7 @@ const AdminIDVerification: React.FC = () => {
           prev.filter((v) => v._id !== verificationId)
         );
         setSelectedVerification(null);
+        setReviewNotes("");
 
         // Reload to get fresh data
         await loadVerifications();
@@ -382,7 +387,9 @@ const AdminIDVerification: React.FC = () => {
               {selectedVerification.status === "pending" && (
                 <>
                   <div className="border-t border-gray-200 pt-6">
-                    <label className="block font-bold text-gray-900 mb-3">Review Notes (Optional)</label>
+                    <label className="block font-bold text-gray-900 mb-3">
+                      Review Notes (Required for rejection)
+                    </label>
                     <textarea
                       value={reviewNotes}
                       onChange={(e) => setReviewNotes(e.target.value)}
