@@ -54,6 +54,19 @@ interface Message {
   read?: boolean;
 }
 
+interface SellerReview {
+  _id?: string;
+  score?: number;
+  review?: string;
+  category?: string;
+  createdAt?: string;
+  raterId?: {
+    _id?: string;
+    fullName?: string;
+    name?: string;
+  };
+}
+
 // Type-specific detail section components
 const LandDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
   <div className="bg-gray-100 p-4 rounded-lg mb-6">
@@ -273,6 +286,7 @@ const ListingDetails: React.FC = () => {
   const [sending, setSending] = useState(false);
   const [typing, setTyping] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
+  const [showReviewsModal, setShowReviewsModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [ratingScore, setRatingScore] = useState(0);
   const [ratingReview, setRatingReview] = useState("");
@@ -540,6 +554,7 @@ const ListingDetails: React.FC = () => {
   const coords = listing.coordinates || listing.location?.coordinates;
   const responseTimeLabel = owner.responseTime || owner.responseTimeLabel || "Usually replies within 24 hours";
   const lastActiveLabel = formatLastActive(owner.lastActive || owner.updatedAt || listing.updatedAt || listing.createdAt);
+  const sellerReviews: SellerReview[] = Array.isArray(userRatings?.ratings) ? userRatings.ratings : [];
 
   // Determine owner/admin privileges for marking sold
   const currentUserRaw = localStorage.getItem('kodisha_user');
@@ -841,6 +856,13 @@ const ListingDetails: React.FC = () => {
                     Overall: {userRatings.aggregate.breakdown.overall.toFixed(1)}/5
                   </p>
                 )}
+                <button
+                  type="button"
+                  onClick={() => setShowReviewsModal(true)}
+                  className="mt-1 text-xs font-semibold text-yellow-700 underline decoration-dotted hover:text-yellow-800"
+                >
+                  Read reviews
+                </button>
               </div>
             )}
 
@@ -1009,6 +1031,66 @@ const ListingDetails: React.FC = () => {
               >
                 {submittingRating ? 'Submitting...' : 'Submit Rating'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reviews Modal */}
+      {showReviewsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="w-full max-w-lg rounded-lg bg-white p-6">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h3 className="text-xl font-bold">
+                Seller Reviews
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowReviewsModal(false)}
+                className="rounded border border-gray-300 px-2 py-1 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="max-h-[60vh] space-y-3 overflow-y-auto pr-1">
+              {sellerReviews.length > 0 ? (
+                sellerReviews.map((review, index) => (
+                  <div key={review._id || `review-${index}`} className="rounded-lg border border-gray-200 p-3">
+                    <div className="mb-1 flex items-center justify-between gap-2">
+                      <p className="text-sm font-semibold text-gray-900">
+                        {review.raterId?.fullName || review.raterId?.name || "Buyer"}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : ""}
+                      </p>
+                    </div>
+                    <div className="mb-2 flex items-center gap-0.5">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={`${review._id || index}-${star}`}
+                          className={`h-4 w-4 ${
+                            star <= Math.round(review.score || 0)
+                              ? "fill-yellow-400 text-yellow-500"
+                              : "fill-transparent text-gray-300"
+                          }`}
+                          strokeWidth={2}
+                          aria-hidden="true"
+                        />
+                      ))}
+                    </div>
+                    {review.review ? (
+                      <p className="text-sm text-gray-700">{review.review}</p>
+                    ) : (
+                      <p className="text-sm italic text-gray-500">No written review.</p>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p className="rounded-lg bg-gray-50 p-3 text-sm text-gray-600">
+                  No reviews available yet.
+                </p>
+              )}
             </div>
           </div>
         </div>

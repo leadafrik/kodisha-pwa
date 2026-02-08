@@ -13,6 +13,13 @@ export interface Report {
   createdAt: string;
 }
 
+export interface ReportSubmissionResult {
+  _id?: string;
+  reportId?: string;
+  message?: string;
+  flagsCount?: number;
+}
+
 const getUserToken = () =>
   localStorage.getItem('kodisha_token') ||
   localStorage.getItem('kodisha_admin_token') ||
@@ -22,6 +29,29 @@ const getAdminToken = () =>
   localStorage.getItem('kodisha_admin_token') ||
   localStorage.getItem('kodisha_token') ||
   localStorage.getItem('token');
+
+const normalizeListingType = (
+  listingType?: string
+): 'land' | 'product' | 'equipment' | 'service' | 'agrovet' | undefined => {
+  const value = (listingType || '').trim().toLowerCase();
+  if (!value) return undefined;
+  if (value === 'land') return 'land';
+  if (value === 'product') return 'product';
+  if (value === 'equipment') return 'equipment';
+  if (value === 'agrovet') return 'agrovet';
+  if (value === 'service' || value === 'services' || value === 'professional' || value === 'professional_services') {
+    return 'service';
+  }
+  return undefined;
+};
+
+const normalizeSeverity = (
+  severity?: 'low' | 'medium' | 'high' | string
+): 'low' | 'medium' | 'high' | undefined => {
+  const value = (severity || '').trim().toLowerCase();
+  if (value === 'low' || value === 'medium' || value === 'high') return value;
+  return undefined;
+};
 
 /**
  * Submit a report on a user
@@ -33,23 +63,35 @@ export const submitReport = async (
   listingId?: string,
   listingType?: string,
   severity?: 'low' | 'medium' | 'high'
-): Promise<Report> => {
+): Promise<ReportSubmissionResult> => {
   if (!getUserToken()) {
     throw new Error('Authentication required');
   }
+
+  const normalizedListingType = normalizeListingType(listingType);
+  const normalizedSeverity = normalizeSeverity(severity) || 'medium';
 
   const data = await apiRequest(API_ENDPOINTS.reports.submit(sellerId), {
     method: 'POST',
     body: JSON.stringify({
       reason,
-      description,
-      listingId,
-      listingType,
-      severity,
+      description: (description || '').trim() || undefined,
+      listingId: listingId || undefined,
+      listingType: normalizedListingType,
+      severity: normalizedSeverity,
     }),
   });
 
-  return data.data || data;
+  const payload = data?.data || data;
+  if (!payload || typeof payload !== 'object') {
+    return {};
+  }
+
+  return {
+    ...payload,
+    _id: payload._id || payload.reportId,
+    reportId: payload.reportId || payload._id,
+  };
 };
 
 /**

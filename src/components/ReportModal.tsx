@@ -49,7 +49,7 @@ const ReportModal: React.FC<ReportModalProps> = ({
         severity
       );
 
-      if (!result || !result._id) {
+      if (!result || (!result._id && !result.reportId)) {
         throw new Error('Failed to submit report');
       }
 
