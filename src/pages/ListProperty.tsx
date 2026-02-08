@@ -232,10 +232,11 @@ const ListProperty: React.FC<ListPropertyProps> = ({ initialType }) => {
   useEffect(() => {
     const fetchFreeListingsData = async () => {
       try {
-        const response = await axios.get('/api/unified-listings/count/active');
-        if (response.data.success && response.data.data) {
-          setFreeListingsRemaining(response.data.data.freeListingSpotsRemaining);
-          setFreeListingOfferActive(response.data.data.isFreeListingAvailable);
+        const response = await fetch(`${API_BASE_URL}/unified-listings/count/active`);
+        const data = await response.json();
+        if (response.ok && data.success && data.data) {
+          setFreeListingsRemaining(data.data.freeListingSpotsRemaining);
+          setFreeListingOfferActive(data.data.isFreeListingAvailable);
         }
       } catch (error) {
         console.error('Failed to fetch free listings counter:', error);
