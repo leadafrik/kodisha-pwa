@@ -47,16 +47,21 @@ const normalizeId = (value: unknown): string => {
   return "";
 };
 
-const getListingPath = (item: any): string | null => {
+const getListingPath = (item: any, fallbackId?: unknown): string | null => {
   const listingId =
     normalizeId(item?._id) ||
     normalizeId(item?.id) ||
     normalizeId(item?.listingId) ||
     normalizeId(item?.listing?._id) ||
-    normalizeId(item?.listing?.id);
+    normalizeId(item?.listing?.id) ||
+    normalizeId(item?.listing?.listingId) ||
+    normalizeId(item?.productId) ||
+    normalizeId(item?.serviceId) ||
+    normalizeId(item?.landId) ||
+    normalizeId(fallbackId);
 
   if (!listingId) return null;
-  return `/listings/${listingId}`;
+  return `/listings/${encodeURIComponent(listingId)}`;
 };
 
 const Profile: React.FC = () => {
@@ -470,7 +475,8 @@ const Profile: React.FC = () => {
                   </div>
                 ) : (
                   visibleItems.map((item: any, index: number) => {
-                    const itemKey = item?.id || item?._id || `${activeTab}-${index}`;
+                    const stableListingId = normalizeId(item?._id) || normalizeId(item?.id);
+                    const itemKey = stableListingId || `${activeTab}-${index}`;
                     const title = item?.title || item?.name || "Untitled listing";
                     const location =
                       item?.county ||
@@ -479,7 +485,7 @@ const Profile: React.FC = () => {
                       "Location not set";
                     const category = item?.category || item?.type || item?.listingType || "Listing";
                     const price = formatPrice(item?.price);
-                    const listingPath = getListingPath(item);
+                    const listingPath = getListingPath(item, stableListingId);
 
                     if (!listingPath) {
                       return (
@@ -491,7 +497,7 @@ const Profile: React.FC = () => {
                           <p className="mt-1 text-xs uppercase tracking-wide text-slate-500">{category}</p>
                           <p className="mt-1 text-sm text-slate-600">{location}</p>
                           <p className="mt-3 text-sm font-semibold text-slate-500">
-                            Listing details unavailable
+                            Listing link unavailable
                           </p>
                         </div>
                       );
@@ -501,7 +507,7 @@ const Profile: React.FC = () => {
                       <Link
                         key={itemKey}
                         to={listingPath}
-                        className="block rounded-xl border border-slate-200 px-4 py-3 transition hover:border-emerald-300 hover:bg-emerald-50/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                        className="block cursor-pointer rounded-xl border border-slate-200 px-4 py-3 transition hover:border-emerald-300 hover:bg-emerald-50/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
                       >
                         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                           <p className="font-semibold text-slate-900">{title}</p>
@@ -510,7 +516,7 @@ const Profile: React.FC = () => {
                         <p className="mt-1 text-xs uppercase tracking-wide text-slate-500">{category}</p>
                         <p className="mt-1 text-sm text-slate-600">{location}</p>
                         <p className="mt-3 text-sm font-semibold text-emerald-700 underline decoration-dotted">
-                          View listing
+                          Open listing
                         </p>
                       </Link>
                     );
