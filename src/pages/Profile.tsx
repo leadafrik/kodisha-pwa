@@ -19,9 +19,9 @@ const formatPrice = (value: unknown) => {
   return `KSh ${amount.toLocaleString()}`;
 };
 
-const getListingPath = (item: any) => {
+const getListingPath = (item: any): string | null => {
   const listingId = item?._id || item?.id;
-  if (!listingId) return "/browse";
+  if (!listingId) return null;
   return `/listings/${listingId}`;
 };
 
@@ -459,23 +459,38 @@ const Profile: React.FC = () => {
                     const price = formatPrice(item?.price);
                     const listingPath = getListingPath(item);
 
+                    if (!listingPath) {
+                      return (
+                        <div key={itemKey} className="rounded-xl border border-slate-200 px-4 py-3">
+                          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                            <p className="font-semibold text-slate-900">{title}</p>
+                            <p className="text-sm font-semibold text-emerald-700">{price}</p>
+                          </div>
+                          <p className="mt-1 text-xs uppercase tracking-wide text-slate-500">{category}</p>
+                          <p className="mt-1 text-sm text-slate-600">{location}</p>
+                          <p className="mt-3 text-sm font-semibold text-slate-500">
+                            Listing details unavailable
+                          </p>
+                        </div>
+                      );
+                    }
+
                     return (
-                      <div key={itemKey} className="rounded-xl border border-slate-200 px-4 py-3">
+                      <Link
+                        key={itemKey}
+                        to={listingPath}
+                        className="block rounded-xl border border-slate-200 px-4 py-3 transition hover:border-emerald-300 hover:bg-emerald-50/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                      >
                         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                           <p className="font-semibold text-slate-900">{title}</p>
                           <p className="text-sm font-semibold text-emerald-700">{price}</p>
                         </div>
                         <p className="mt-1 text-xs uppercase tracking-wide text-slate-500">{category}</p>
                         <p className="mt-1 text-sm text-slate-600">{location}</p>
-                        <div className="mt-3">
-                          <Link
-                            to={listingPath}
-                            className="text-sm font-semibold text-emerald-700 underline decoration-dotted hover:text-emerald-800"
-                          >
-                            Open listing
-                          </Link>
-                        </div>
-                      </div>
+                        <p className="mt-3 text-sm font-semibold text-emerald-700 underline decoration-dotted">
+                          View listing
+                        </p>
+                      </Link>
                     );
                   })
                 )}
