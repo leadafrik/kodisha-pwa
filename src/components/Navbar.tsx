@@ -10,12 +10,37 @@ const Chevron: React.FC = () => (
 );
 
 const WHATSAPP_COMMUNITY_URL = "https://chat.whatsapp.com/HzCaV5YVz86CjwajiOHR5i";
+const WHATSAPP_BANNER_HIDE_KEY = "agrisoko_whatsapp_banner_hidden_until";
+const WHATSAPP_BANNER_HIDE_MS = 50 * 60 * 1000;
+
+const shouldShowWhatsAppBanner = () => {
+  if (typeof window === "undefined") return true;
+
+  const hiddenUntilRaw = window.localStorage.getItem(WHATSAPP_BANNER_HIDE_KEY);
+  if (!hiddenUntilRaw) return true;
+
+  const hiddenUntil = Number(hiddenUntilRaw);
+  if (!Number.isFinite(hiddenUntil)) {
+    window.localStorage.removeItem(WHATSAPP_BANNER_HIDE_KEY);
+    return true;
+  }
+
+  if (Date.now() >= hiddenUntil) {
+    window.localStorage.removeItem(WHATSAPP_BANNER_HIDE_KEY);
+    return true;
+  }
+
+  return false;
+};
 
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [listOpen, setListOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [showWhatsAppBanner, setShowWhatsAppBanner] = useState<boolean>(() =>
+    shouldShowWhatsAppBanner()
+  );
   const listCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
 
@@ -73,21 +98,58 @@ const Navbar: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (showWhatsAppBanner) return;
+
+    const hiddenUntilRaw = window.localStorage.getItem(WHATSAPP_BANNER_HIDE_KEY);
+    const hiddenUntil = Number(hiddenUntilRaw);
+    if (!Number.isFinite(hiddenUntil)) {
+      window.localStorage.removeItem(WHATSAPP_BANNER_HIDE_KEY);
+      setShowWhatsAppBanner(true);
+      return;
+    }
+
+    const remainingMs = hiddenUntil - Date.now();
+    if (remainingMs <= 0) {
+      window.localStorage.removeItem(WHATSAPP_BANNER_HIDE_KEY);
+      setShowWhatsAppBanner(true);
+      return;
+    }
+
+    const revealTimer = window.setTimeout(() => {
+      window.localStorage.removeItem(WHATSAPP_BANNER_HIDE_KEY);
+      setShowWhatsAppBanner(true);
+    }, remainingMs);
+
+    return () => {
+      window.clearTimeout(revealTimer);
+    };
+  }, [showWhatsAppBanner]);
+
+  const handleWhatsAppBannerClick = () => {
+    const hiddenUntil = Date.now() + WHATSAPP_BANNER_HIDE_MS;
+    window.localStorage.setItem(WHATSAPP_BANNER_HIDE_KEY, String(hiddenUntil));
+    setShowWhatsAppBanner(false);
+  };
+
   return (
     <>
       {/* GLOBAL NAVBAR */}
       <nav className="bg-white shadow-sm border-b border-[#A0452E]/20 sticky top-0 z-40">
         <div className="h-1 w-full bg-[#A0452E]"></div>
-        <div className="bg-emerald-600 px-3 py-2 text-center">
-          <a
-            href={WHATSAPP_COMMUNITY_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block text-sm font-extrabold tracking-wide text-white underline underline-offset-2 hover:text-emerald-100"
-          >
-            Join our Whatsapp Community Now !
-          </a>
-        </div>
+        {showWhatsAppBanner && (
+          <div className="bg-emerald-600 px-3 py-2 text-center">
+            <a
+              href={WHATSAPP_COMMUNITY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={handleWhatsAppBannerClick}
+              className="inline-block text-sm font-extrabold tracking-wide text-white underline underline-offset-2 hover:text-emerald-100"
+            >
+              Join our Whatsapp Community Now !
+            </a>
+          </div>
+        )}
 
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center py-4">
