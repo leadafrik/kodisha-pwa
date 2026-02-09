@@ -12,6 +12,7 @@ import AboutUs from './pages/AboutUs';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import WhatsAppFloatingButton from './components/WhatsAppFloatingButton';
+import CookieConsentBanner from './components/CookieConsentBanner';
 import NotFound from './pages/NotFound';
 import ServerError from './pages/ServerError';
 import Offline from './pages/Offline';
@@ -172,6 +173,7 @@ function App() {
                 </div>
                               <Footer />
                               <WhatsAppFloatingButton />
+                              <CookieConsentBanner />
               </div>
             </Router>
           </VerificationProvider>
