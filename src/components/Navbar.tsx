@@ -10,27 +10,32 @@ const Chevron: React.FC = () => (
 );
 
 const WHATSAPP_COMMUNITY_URL = "https://chat.whatsapp.com/HzCaV5YVz86CjwajiOHR5i";
-const WHATSAPP_BANNER_HIDE_KEY = "agrisoko_whatsapp_banner_hidden_until";
+const WHATSAPP_BANNER_CLICKED_AT_KEY = "agrisoko_whatsapp_banner_clicked_at";
+const WHATSAPP_BANNER_DISMISSED_KEY = "agrisoko_whatsapp_banner_dismissed";
 const WHATSAPP_BANNER_HIDE_MS = 50 * 60 * 1000;
 
 const shouldShowWhatsAppBanner = () => {
   if (typeof window === "undefined") return true;
 
-  const hiddenUntilRaw = window.localStorage.getItem(WHATSAPP_BANNER_HIDE_KEY);
-  if (!hiddenUntilRaw) return true;
+  if (window.localStorage.getItem(WHATSAPP_BANNER_DISMISSED_KEY) === "1") return false;
 
-  const hiddenUntil = Number(hiddenUntilRaw);
-  if (!Number.isFinite(hiddenUntil)) {
-    window.localStorage.removeItem(WHATSAPP_BANNER_HIDE_KEY);
+  const clickedAtRaw = window.localStorage.getItem(WHATSAPP_BANNER_CLICKED_AT_KEY);
+  if (!clickedAtRaw) return true;
+
+  const clickedAt = Number(clickedAtRaw);
+  if (!Number.isFinite(clickedAt)) {
+    window.localStorage.removeItem(WHATSAPP_BANNER_CLICKED_AT_KEY);
     return true;
   }
 
-  if (Date.now() >= hiddenUntil) {
-    window.localStorage.removeItem(WHATSAPP_BANNER_HIDE_KEY);
-    return true;
+  const disappearAt = clickedAt + WHATSAPP_BANNER_HIDE_MS;
+  if (Date.now() >= disappearAt) {
+    window.localStorage.setItem(WHATSAPP_BANNER_DISMISSED_KEY, "1");
+    window.localStorage.removeItem(WHATSAPP_BANNER_CLICKED_AT_KEY);
+    return false;
   }
 
-  return false;
+  return true;
 };
 
 const Navbar: React.FC = () => {
@@ -99,37 +104,50 @@ const Navbar: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (showWhatsAppBanner) return;
+    if (!showWhatsAppBanner) return;
 
-    const hiddenUntilRaw = window.localStorage.getItem(WHATSAPP_BANNER_HIDE_KEY);
-    const hiddenUntil = Number(hiddenUntilRaw);
-    if (!Number.isFinite(hiddenUntil)) {
-      window.localStorage.removeItem(WHATSAPP_BANNER_HIDE_KEY);
-      setShowWhatsAppBanner(true);
+    if (window.localStorage.getItem(WHATSAPP_BANNER_DISMISSED_KEY) === "1") {
+      setShowWhatsAppBanner(false);
       return;
     }
 
-    const remainingMs = hiddenUntil - Date.now();
+    const clickedAtRaw = window.localStorage.getItem(WHATSAPP_BANNER_CLICKED_AT_KEY);
+    if (!clickedAtRaw) return;
+
+    const clickedAt = Number(clickedAtRaw);
+    if (!Number.isFinite(clickedAt)) {
+      window.localStorage.removeItem(WHATSAPP_BANNER_CLICKED_AT_KEY);
+      return;
+    }
+
+    const remainingMs = clickedAt + WHATSAPP_BANNER_HIDE_MS - Date.now();
     if (remainingMs <= 0) {
-      window.localStorage.removeItem(WHATSAPP_BANNER_HIDE_KEY);
-      setShowWhatsAppBanner(true);
+      window.localStorage.setItem(WHATSAPP_BANNER_DISMISSED_KEY, "1");
+      window.localStorage.removeItem(WHATSAPP_BANNER_CLICKED_AT_KEY);
+      setShowWhatsAppBanner(false);
       return;
     }
 
-    const revealTimer = window.setTimeout(() => {
-      window.localStorage.removeItem(WHATSAPP_BANNER_HIDE_KEY);
-      setShowWhatsAppBanner(true);
+    const dismissTimer = window.setTimeout(() => {
+      window.localStorage.setItem(WHATSAPP_BANNER_DISMISSED_KEY, "1");
+      window.localStorage.removeItem(WHATSAPP_BANNER_CLICKED_AT_KEY);
+      setShowWhatsAppBanner(false);
     }, remainingMs);
 
     return () => {
-      window.clearTimeout(revealTimer);
+      window.clearTimeout(dismissTimer);
     };
   }, [showWhatsAppBanner]);
 
   const handleWhatsAppBannerClick = () => {
-    const hiddenUntil = Date.now() + WHATSAPP_BANNER_HIDE_MS;
-    window.localStorage.setItem(WHATSAPP_BANNER_HIDE_KEY, String(hiddenUntil));
-    setShowWhatsAppBanner(false);
+    if (window.localStorage.getItem(WHATSAPP_BANNER_DISMISSED_KEY) === "1") {
+      setShowWhatsAppBanner(false);
+      return;
+    }
+
+    if (!window.localStorage.getItem(WHATSAPP_BANNER_CLICKED_AT_KEY)) {
+      window.localStorage.setItem(WHATSAPP_BANNER_CLICKED_AT_KEY, String(Date.now()));
+    }
   };
 
   return (
