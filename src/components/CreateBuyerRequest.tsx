@@ -24,6 +24,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
     description: "",
     category: "produce",
     productType: "",
+    contactPhone: user?.phone || "",
     budget: { min: "", max: "", currency: "KES" },
     quantity: "",
     unit: "kg",
@@ -87,6 +88,10 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
 
       const payload = {
         ...formData,
+        contactPhone:
+          formData.contactPhone.trim() !== ""
+            ? formData.contactPhone.trim()
+            : undefined,
         quantity: quantityValue,
         budget:
           budgetMin !== undefined || budgetMax !== undefined
@@ -201,7 +206,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
           />
         </div>
 
-        {/* Product Type & Quantity */}
+        {/* Product Type, Quantity, and Contact */}
         <div className="grid gap-4 md:grid-cols-3">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -250,6 +255,23 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
               ))}
             </select>
           </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Contact Phone <span className="text-xs text-slate-400">(Optional)</span>
+          </label>
+          <input
+            type="tel"
+            name="contactPhone"
+            value={formData.contactPhone}
+            onChange={handleChange}
+            placeholder="+254712345678"
+            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+          />
+          <p className="mt-1 text-xs text-slate-500">
+            Add a reachable number so sellers can call you directly.
+          </p>
         </div>
 
         {/* Budget */}

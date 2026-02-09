@@ -11,7 +11,7 @@ interface BuyerRequest {
   description: string;
   category: "produce" | "service" | "inputs";
   productType?: string;
-  budget?: { min: number; max: number; currency: string };
+  budget?: { min?: number; max?: number; currency?: string };
   quantity?: number;
   unit?: string;
   location: { county: string; constituency?: string; ward?: string };
@@ -132,9 +132,19 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
     setPage(1);
   };
 
-  const formatBudget = (budget?: { min: number; max: number; currency: string }) => {
+  const formatBudget = (budget?: { min?: number; max?: number; currency?: string }) => {
     if (!budget) return "Negotiable";
-    return `${budget.currency} ${budget.min.toLocaleString()} - ${budget.max.toLocaleString()}`;
+
+    const min = Number(budget.min);
+    const max = Number(budget.max);
+    const currency = budget.currency || "KES";
+    const hasMin = Number.isFinite(min) && min > 0;
+    const hasMax = Number.isFinite(max) && max > 0;
+
+    if (hasMin && hasMax) return `${currency} ${min.toLocaleString()} - ${max.toLocaleString()}`;
+    if (hasMin) return `From ${currency} ${min.toLocaleString()}`;
+    if (hasMax) return `Up to ${currency} ${max.toLocaleString()}`;
+    return "Negotiable";
   };
 
   const formatDate = (date: string) => {
