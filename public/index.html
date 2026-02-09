@@ -19,7 +19,8 @@
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://agrisoko254.com/" />
+    <meta property="og:site_name" content="Agrisoko" />
+    <meta property="og:url" content="https://www.agrisoko254.com/" />
     <meta property="og:title" content="Agrisoko - Kenya's Agricultural Marketplace" />
     <meta property="og:description" content="Find agricultural land, equipment, services, and supplies across Kenya. Connect with verified farmers, landowners, and agribusiness professionals." />
     <meta property="og:image" content="%PUBLIC_URL%/logo.svg" />
@@ -27,7 +28,7 @@
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://agrisoko254.com/" />
+    <meta property="twitter:url" content="https://www.agrisoko254.com/" />
     <meta property="twitter:title" content="Agrisoko - Kenya's Agricultural Marketplace" />
     <meta property="twitter:description" content="Find agricultural land, equipment, services, and supplies across Kenya. Free listings for farmers and agribusiness." />
     <meta property="twitter:image" content="%PUBLIC_URL%/logo.svg" />
@@ -39,7 +40,7 @@
     <meta name="format-detection" content="telephone=yes" />
     
     <!-- Canonical URL -->
-    <link rel="canonical" href="https://agrisoko254.com/" />
+    <link rel="canonical" href="https://www.agrisoko254.com/" />
     
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     
@@ -50,11 +51,11 @@
       "@type": "WebSite",
       "name": "Agrisoko",
       "alternateName": "Agrisoko254",
-      "url": "https://agrisoko254.com",
+      "url": "https://www.agrisoko254.com",
       "description": "Kenya's agricultural marketplace for land, equipment, services, and supplies",
       "potentialAction": {
         "@type": "SearchAction",
-        "target": "https://agrisoko254.com/browse?search={search_term_string}",
+        "target": "https://www.agrisoko254.com/browse?search={search_term_string}",
         "query-input": "required name=search_term_string"
       }
     }
@@ -65,12 +66,12 @@
       "@context": "https://schema.org",
       "@type": "Organization",
       "name": "Agrisoko Limited",
-      "url": "https://agrisoko.com",
-      "logo": "https://agrisoko.com/logo512.png",
+      "url": "https://www.agrisoko254.com",
+      "logo": "https://www.agrisoko254.com/logo512.png",
       "sameAs": [],
       "contactPoint": {
         "@type": "ContactPoint",
-        "email": "kodisha.254.ke@gmail.com",
+        "email": "info@leadafrik.com",
         "contactType": "Customer Service",
         "areaServed": "KE",
         "availableLanguage": ["English", "Swahili"]
@@ -80,6 +81,59 @@
         "addressCountry": "KE"
       }
     }
+    </script>
+    <script>
+      (function () {
+        var origin = "https://www.agrisoko254.com";
+        var path = window.location.pathname || "/";
+        var canonicalUrl = origin + (path.charAt(0) === "/" ? path : "/" + path);
+
+        var routeMeta = {
+          "/browse": {
+            title: "Browse Listings | Agrisoko Kenya Agricultural Marketplace",
+            description: "Browse verified agricultural produce, services, land, and farm inputs across Kenya on Agrisoko."
+          }
+        };
+
+        var defaults = {
+          title: "Agrisoko - Digital Agricultural Marketplace for Kenya",
+          description: "Agrisoko: Digitizing Kenya's agricultural marketplace. Connect directly with producers, buyers, and service providers. Buy and sell agricultural produce, professional services, and equipment across all 47 counties."
+        };
+
+        var meta = routeMeta[path] || defaults;
+
+        document.title = meta.title;
+        updateMetaByName("title", meta.title);
+        updateMetaByName("description", meta.description);
+        updateMetaByProperty("og:title", meta.title);
+        updateMetaByProperty("og:description", meta.description);
+        updateMetaByProperty("twitter:title", meta.title);
+        updateMetaByProperty("twitter:description", meta.description);
+        updateMetaByProperty("og:url", canonicalUrl);
+        updateMetaByProperty("twitter:url", canonicalUrl);
+        updateCanonical(canonicalUrl);
+
+        function updateMetaByName(name, content) {
+          var element = document.querySelector('meta[name="' + name + '"]');
+          if (element) {
+            element.setAttribute("content", content);
+          }
+        }
+
+        function updateMetaByProperty(property, content) {
+          var element = document.querySelector('meta[property="' + property + '"]');
+          if (element) {
+            element.setAttribute("content", content);
+          }
+        }
+
+        function updateCanonical(href) {
+          var element = document.querySelector('link[rel="canonical"]');
+          if (element) {
+            element.setAttribute("href", href);
+          }
+        }
+      })();
     </script>
 
   </head>
