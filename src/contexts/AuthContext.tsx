@@ -27,10 +27,41 @@ interface AuthProviderProps {
 const isAdminRole = (role?: string) =>
   role === "admin" || role === "super_admin" || role === "moderator";
 
+const isVerificationApproved = (candidate: any) =>
+  candidate?.isVerified === true ||
+  candidate?.verification?.status === "approved" ||
+  (candidate?.verification?.idVerified && candidate?.verification?.selfieVerified);
+
+const deriveVerificationStatus = (candidate: any): User["verificationStatus"] => {
+  if (isVerificationApproved(candidate)) return "verified";
+  if (candidate?.verification?.status === "rejected") return "rejected";
+  return "pending";
+};
+
+const normalizeVerification = (candidate: any) => {
+  const source = candidate?.verification;
+  if (!source || typeof source !== "object") return undefined;
+
+  const normalized = { ...source };
+
+  // Admin approval is final and implies both checks passed.
+  if (normalized.status === "approved") {
+    normalized.idVerified = true;
+    normalized.selfieVerified = true;
+  }
+
+  return normalized;
+};
+
 // Map backend user -> frontend User type
 const mapBackendUserToFrontendUser = (apiUser: any): User => {
   const id = apiUser._id?.toString?.() || apiUser.id || "";
   const name = apiUser.fullName || apiUser.name || "User";
+  const verification = normalizeVerification(apiUser);
+  const verificationStatus = deriveVerificationStatus({
+    ...apiUser,
+    verification,
+  });
 
   // Check admin role FIRST, before checking userType
   let type: User["type"] = "buyer";
@@ -47,10 +78,6 @@ const mapBackendUserToFrontendUser = (apiUser: any): User => {
     type = "buyer";
   }
 
-  const verificationStatus: User["verificationStatus"] = apiUser.isVerified
-    ? "verified"
-    : "pending";
-
   return {
     id,
     name,
@@ -66,9 +93,9 @@ const mapBackendUserToFrontendUser = (apiUser: any): User => {
     fullName: apiUser.fullName,
     userType: apiUser.userType,
     county: apiUser.county,
-    isVerified: apiUser.isVerified,
+    isVerified: verificationStatus === "verified",
     role: apiUser.role,
-    verification: apiUser.verification,
+    verification,
   };
 };
 
@@ -84,16 +111,29 @@ const normalizeStoredUser = (storedUser: any): User => {
   return {
     ...mapped,
     ...storedUser,
+    verification: normalizeVerification(storedUser) || mapped.verification,
     id: storedUser?.id || storedUser?._id?.toString?.() || mapped.id,
     _id: storedUser?._id || mapped._id,
     name: storedUser?.name || storedUser?.fullName || mapped.name,
     fullName: storedUser?.fullName || storedUser?.name || mapped.fullName,
     type: normalizedType,
     role: storedUser?.role || mapped.role,
-    verificationStatus: storedUser?.verificationStatus || mapped.verificationStatus,
+    verificationStatus: deriveVerificationStatus({
+      ...mapped,
+      ...storedUser,
+      verification: normalizeVerification(storedUser) || mapped.verification,
+    }),
+    isVerified: isVerificationApproved({
+      ...mapped,
+      ...storedUser,
+      verification: normalizeVerification(storedUser) || mapped.verification,
+    }),
     createdAt: storedUser?.createdAt ? new Date(storedUser.createdAt) : mapped.createdAt,
   };
 };
+
+const hasCompleteIdVerification = (candidate: any) =>
+  isVerificationApproved(candidate);
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -125,6 +165,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (res.token) {
         localStorage.setItem("kodisha_token", res.token);
+        await refreshUser();
+        window.setTimeout(() => {
+          refreshUser();
+        }, 1200);
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -157,6 +201,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (res.token) {
         localStorage.setItem("kodisha_token", res.token);
+        await refreshUser();
+        window.setTimeout(() => {
+          refreshUser();
+        }, 1200);
       }
     } catch (error) {
       console.error("Facebook login error:", error);
@@ -189,6 +237,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (res.token) {
         localStorage.setItem("kodisha_token", res.token);
+        await refreshUser();
+        window.setTimeout(() => {
+          refreshUser();
+        }, 1200);
       }
     } catch (error) {
       console.error("Google login error:", error);
@@ -228,6 +280,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
         if (res.token) {
           localStorage.setItem("kodisha_token", res.token);
+          await refreshUser();
+          window.setTimeout(() => {
+            refreshUser();
+          }, 1200);
         }
         return mappedUser;
       }
@@ -274,6 +330,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(mappedUser);
       localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
       localStorage.setItem("kodisha_token", res.token);
+      await refreshUser();
+      window.setTimeout(() => {
+        refreshUser();
+      }, 1200);
     } catch (error) {
       console.error("Email OTP verify error:", error);
       throw error;
@@ -315,6 +375,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(mappedUser);
       localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
       localStorage.setItem("kodisha_token", res.token);
+      await refreshUser();
+      window.setTimeout(() => {
+        refreshUser();
+      }, 1200);
     } catch (error) {
       console.error("SMS OTP verify error:", error);
       throw error;
@@ -347,6 +411,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(mappedUser);
       localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
       localStorage.setItem("kodisha_token", res.token);
+      await refreshUser();
+      window.setTimeout(() => {
+        refreshUser();
+      }, 1200);
     } catch (error) {
       console.error("Password reset error:", error);
       throw error;
@@ -407,6 +475,50 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       refreshUser();
     }
   }, [refreshUser]);
+
+  useEffect(() => {
+    const token =
+      localStorage.getItem("kodisha_token") ||
+      localStorage.getItem("kodisha_admin_token") ||
+      localStorage.getItem("token");
+    if (!token || !user) return;
+
+    const refreshOnFocus = () => {
+      refreshUser();
+    };
+
+    const refreshOnVisible = () => {
+      if (document.visibilityState === "visible") {
+        refreshUser();
+      }
+    };
+
+    window.addEventListener("focus", refreshOnFocus);
+    document.addEventListener("visibilitychange", refreshOnVisible);
+
+    const shouldPoll = !hasCompleteIdVerification(user);
+    const intervalId = shouldPoll
+      ? window.setInterval(() => {
+          if (document.visibilityState === "visible") {
+            refreshUser();
+          }
+        }, 90 * 1000)
+      : null;
+
+    return () => {
+      window.removeEventListener("focus", refreshOnFocus);
+      document.removeEventListener("visibilitychange", refreshOnVisible);
+      if (intervalId !== null) {
+        window.clearInterval(intervalId);
+      }
+    };
+  }, [
+    refreshUser,
+    user,
+    user?.verification?.idVerified,
+    user?.verification?.selfieVerified,
+    user?.verification?.status,
+  ]);
 
   return (
     <AuthContext.Provider

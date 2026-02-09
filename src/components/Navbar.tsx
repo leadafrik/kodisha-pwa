@@ -9,6 +9,8 @@ const Chevron: React.FC = () => (
   </svg>
 );
 
+const WHATSAPP_COMMUNITY_URL = "https://chat.whatsapp.com/HzCaV5YVz86CjwajiOHR5i";
+
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -76,6 +78,16 @@ const Navbar: React.FC = () => {
       {/* GLOBAL NAVBAR */}
       <nav className="bg-white shadow-sm border-b border-[#A0452E]/20 sticky top-0 z-40">
         <div className="h-1 w-full bg-[#A0452E]"></div>
+        <div className="bg-emerald-600 px-3 py-2 text-center">
+          <a
+            href={WHATSAPP_COMMUNITY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block text-sm font-extrabold tracking-wide text-white underline underline-offset-2 hover:text-emerald-100"
+          >
+            Join our Whatsapp Community Now !
+          </a>
+        </div>
 
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center py-4">

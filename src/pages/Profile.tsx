@@ -19,8 +19,14 @@ const formatPrice = (value: unknown) => {
   return `KSh ${amount.toLocaleString()}`;
 };
 
+const getListingPath = (item: any) => {
+  const listingId = item?._id || item?.id;
+  if (!listingId) return "/browse";
+  return `/listings/${listingId}`;
+};
+
 const Profile: React.FC = () => {
-  const { user, logout, updateProfile } = useAuth();
+  const { user, logout, updateProfile, refreshUser } = useAuth();
   const { properties, serviceListings, productListings, loading } = useProperties();
   const navigate = useNavigate();
 
@@ -32,6 +38,22 @@ const Profile: React.FC = () => {
   useEffect(() => {
     setUserProfilePicture(user?.profilePicture);
   }, [user?.profilePicture]);
+
+  useEffect(() => {
+    let isActive = true;
+    refreshUser();
+
+    const delayedRefresh = window.setTimeout(() => {
+      if (isActive) {
+        refreshUser();
+      }
+    }, 1500);
+
+    return () => {
+      isActive = false;
+      window.clearTimeout(delayedRefresh);
+    };
+  }, [refreshUser]);
 
   const safeProperties = useMemo(
     () => (Array.isArray(properties) ? properties : []),
@@ -435,6 +457,7 @@ const Profile: React.FC = () => {
                       "Location not set";
                     const category = item?.category || item?.type || item?.listingType || "Listing";
                     const price = formatPrice(item?.price);
+                    const listingPath = getListingPath(item);
 
                     return (
                       <div key={itemKey} className="rounded-xl border border-slate-200 px-4 py-3">
@@ -444,6 +467,14 @@ const Profile: React.FC = () => {
                         </div>
                         <p className="mt-1 text-xs uppercase tracking-wide text-slate-500">{category}</p>
                         <p className="mt-1 text-sm text-slate-600">{location}</p>
+                        <div className="mt-3">
+                          <Link
+                            to={listingPath}
+                            className="text-sm font-semibold text-emerald-700 underline decoration-dotted hover:text-emerald-800"
+                          >
+                            Open listing
+                          </Link>
+                        </div>
                       </div>
                     );
                   })
