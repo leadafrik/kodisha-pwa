@@ -166,9 +166,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (res.token) {
         localStorage.setItem("kodisha_token", res.token);
         await refreshUser();
-        window.setTimeout(() => {
-          refreshUser();
-        }, 1200);
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -202,9 +199,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (res.token) {
         localStorage.setItem("kodisha_token", res.token);
         await refreshUser();
-        window.setTimeout(() => {
-          refreshUser();
-        }, 1200);
       }
     } catch (error) {
       console.error("Facebook login error:", error);
@@ -238,9 +232,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (res.token) {
         localStorage.setItem("kodisha_token", res.token);
         await refreshUser();
-        window.setTimeout(() => {
-          refreshUser();
-        }, 1200);
       }
     } catch (error) {
       console.error("Google login error:", error);
@@ -281,9 +272,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (res.token) {
           localStorage.setItem("kodisha_token", res.token);
           await refreshUser();
-          window.setTimeout(() => {
-            refreshUser();
-          }, 1200);
         }
         return mappedUser;
       }
@@ -331,9 +319,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
       localStorage.setItem("kodisha_token", res.token);
       await refreshUser();
-      window.setTimeout(() => {
-        refreshUser();
-      }, 1200);
     } catch (error) {
       console.error("Email OTP verify error:", error);
       throw error;
@@ -376,9 +361,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
       localStorage.setItem("kodisha_token", res.token);
       await refreshUser();
-      window.setTimeout(() => {
-        refreshUser();
-      }, 1200);
     } catch (error) {
       console.error("SMS OTP verify error:", error);
       throw error;
@@ -412,9 +394,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
       localStorage.setItem("kodisha_token", res.token);
       await refreshUser();
-      window.setTimeout(() => {
-        refreshUser();
-      }, 1200);
     } catch (error) {
       console.error("Password reset error:", error);
       throw error;

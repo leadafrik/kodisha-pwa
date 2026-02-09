@@ -19,8 +19,42 @@ const formatPrice = (value: unknown) => {
   return `KSh ${amount.toLocaleString()}`;
 };
 
+const normalizeId = (value: unknown): string => {
+  if (!value) return "";
+
+  if (typeof value === "string") {
+    return value.trim();
+  }
+
+  if (typeof value === "object") {
+    const raw = value as any;
+    const nested = raw?._id || raw?.id || raw?.$oid;
+    if (nested) {
+      const nestedId = normalizeId(nested);
+      if (nestedId) return nestedId;
+    }
+
+    const asString = raw?.toString?.();
+    if (
+      typeof asString === "string" &&
+      asString !== "[object Object]" &&
+      asString.trim()
+    ) {
+      return asString.trim();
+    }
+  }
+
+  return "";
+};
+
 const getListingPath = (item: any): string | null => {
-  const listingId = item?._id || item?.id;
+  const listingId =
+    normalizeId(item?._id) ||
+    normalizeId(item?.id) ||
+    normalizeId(item?.listingId) ||
+    normalizeId(item?.listing?._id) ||
+    normalizeId(item?.listing?.id);
+
   if (!listingId) return null;
   return `/listings/${listingId}`;
 };
@@ -40,19 +74,7 @@ const Profile: React.FC = () => {
   }, [user?.profilePicture]);
 
   useEffect(() => {
-    let isActive = true;
     refreshUser();
-
-    const delayedRefresh = window.setTimeout(() => {
-      if (isActive) {
-        refreshUser();
-      }
-    }, 1500);
-
-    return () => {
-      isActive = false;
-      window.clearTimeout(delayedRefresh);
-    };
   }, [refreshUser]);
 
   const safeProperties = useMemo(
