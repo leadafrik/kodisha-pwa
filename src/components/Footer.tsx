@@ -3,47 +3,6 @@ import { Link } from 'react-router-dom';
 import InstallPrompt from './InstallPrompt';
 import { isInstalledAsApp } from '../utils/pwaInstall';
 
-type FooterLink = {
-  label: string;
-  to?: string;
-  href?: string;
-};
-
-const footerColumns: { title: string; links: FooterLink[] }[] = [
-  {
-    title: 'About Agrisoko',
-    links: [
-      { label: 'About us', to: '/about' },
-      { label: 'Careers', to: '/careers' },
-      { label: 'Our mission', to: '/features' },
-    ],
-  },
-  {
-    title: 'Marketplace',
-    links: [
-      { label: 'Browse listings', to: '/browse' },
-      { label: 'Create a listing', to: '/create-listing' },
-      { label: 'Buyer requests', to: '/request' },
-    ],
-  },
-  {
-    title: 'Support & Safety',
-    links: [
-      { label: 'Safety tips', to: '/help' },
-      { label: 'FAQ', to: '/help' },
-      { label: 'Contact support', href: 'mailto:info@leadAfrik.com' },
-    ],
-  },
-  {
-    title: 'Policies',
-    links: [
-      { label: 'Terms of service', to: '/terms' },
-      { label: 'Privacy policy', to: '/privacy' },
-      { label: 'Cookie policy', to: '/cookies' },
-    ],
-  },
-];
-
 const Footer: React.FC = () => {
   const [showInstall, setShowInstall] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
@@ -85,78 +44,77 @@ const Footer: React.FC = () => {
       }
     };
   }, []);
-
   return (
     <footer className="bg-gray-50 border-t border-gray-200 mt-auto">
-      <div className="max-w-7xl mx-auto px-4 py-10 space-y-10">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-3">
+      <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-5">
+          {/* Logo and Tagline */}
+          <div className="text-center md:text-left">
             <h3 className="text-lg font-bold text-green-700">Agrisoko</h3>
-            <p className="text-sm text-gray-600 max-w-sm">
-              Trusted agricultural marketplace connecting farmers, buyers, and service providers across Kenya.
-            </p>
-            <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Real people, trusted trade</p>
+            <p className="text-xs text-gray-600">Trusted agricultural marketplace across Kenya</p>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            {!isInstalled && (
-              <button
-                onClick={() => setShowInstall(true)}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold transition hover:bg-green-700 text-sm"
-              >
-                Download App
-              </button>
-            )}
-            <Link to="/help" className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition">
-              Support center
+
+          {/* Legal Links */}
+          <div className="flex flex-wrap justify-center gap-5 text-sm">
+            <Link
+              to="/terms"
+              className="text-gray-600 hover:text-green-700 hover:underline transition"
+            >
+              Terms of Service
             </Link>
-          </div>
-        </div>
-
-        <div className="grid gap-8 grid-cols-2 md:grid-cols-4 text-sm text-gray-600">
-          {footerColumns.map((column) => (
-            <div key={column.title} className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.3em] text-gray-500">{column.title}</p>
-              <ul className="space-y-1">
-                {column.links.map((link) => (
-                  <li key={link.label}>
-                    {link.href ? (
-                      <a href={link.href} className="hover:text-emerald-700 transition">
-                        {link.label}
-                      </a>
-                    ) : (
-                      <Link to={link.to!} className="hover:text-emerald-700 transition">
-                        {link.label}
-                      </Link>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-
-        <div className="border-t border-gray-200 pt-6 text-xs text-gray-500 space-y-1">
-          <p>© {new Date().getFullYear()} Agrisoko. All rights reserved.</p>
-          <p>
-            Using Agrisoko means you agree to our{' '}
-            <Link to="/terms" className="text-emerald-600 hover:underline">
-              Terms
-            </Link>{' '}
-            and{' '}
-            <Link to="/privacy" className="text-emerald-600 hover:underline">
+            <Link
+              to="/privacy"
+              className="text-gray-600 hover:text-green-700 hover:underline transition"
+            >
               Privacy Policy
             </Link>
-            .
-          </p>
+            <a
+              href="mailto:info@leadAfrik.com"
+              className="text-gray-600 hover:text-green-700 hover:underline transition"
+            >
+              Contact Support
+            </a>
+            <a
+              href="https://www.odpc.go.ke"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-600 hover:text-green-700 hover:underline transition"
+            >
+              ODPC
+            </a>
+          </div>
+
+          {/* Copyright */}
+          <div className="text-xs text-gray-500 text-center md:text-right whitespace-nowrap">
+            <p>&copy; {new Date().getFullYear()} Agrisoko. All rights reserved.</p>
+          </div>
+
+          {/* Download App Button */}
+          {!isInstalled && (
+            <button
+              onClick={() => setShowInstall(true)}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition text-sm"
+            >
+              Download App
+            </button>
+          )}
+        </div>
+
+        {/* Mobile-Optimized Secondary Info */}
+        <div className="mt-5 pt-4 border-t border-gray-200 text-xs text-gray-500 text-center">
           <p>
+            Using Agrisoko means you agree to our <Link to="/terms" className="text-green-700 hover:underline">Terms</Link> and <Link to="/privacy" className="text-green-700 hover:underline">Privacy Policy</Link>.
+          </p>
+          <p className="mt-2">
             Data protection inquiries:{' '}
-            <a href="mailto:info@leadAfrik.com" className="text-emerald-600 hover:underline">
+            <a href="mailto:info@leadAfrik.com" className="text-green-700 hover:underline">
               info@leadAfrik.com
             </a>
           </p>
         </div>
       </div>
 
+      {/* Install Prompt Modal */}
       <InstallPrompt isOpen={showInstall} onClose={() => setShowInstall(false)} />
     </footer>
   );
