@@ -14,6 +14,41 @@ const valueAsString = (value: unknown): string => {
   return typeof value === 'string' ? value.trim() : '';
 };
 
+const bytesToHex = (bytes: number[]): string =>
+  bytes.map((byte) => byte.toString(16).padStart(2, '0')).join('');
+
+const extractHexObjectId = (value: unknown): string => {
+  if (!value || typeof value !== 'object') return '';
+
+  const raw = value as any;
+
+  if (typeof raw?.toHexString === 'function') {
+    const fromMethod = valueAsString(raw.toHexString());
+    if (OBJECT_ID_PATTERN.test(fromMethod)) return fromMethod;
+  }
+
+  if (Array.isArray(raw?.data) && raw?.type === 'Buffer') {
+    const bytes = raw.data.filter((item: unknown) => Number.isInteger(item)) as number[];
+    if (bytes.length === 12) {
+      const hex = bytesToHex(bytes);
+      if (OBJECT_ID_PATTERN.test(hex)) return hex;
+    }
+  }
+
+  if (raw instanceof Uint8Array && raw.length === 12) {
+    const hex = bytesToHex(Array.from(raw));
+    if (OBJECT_ID_PATTERN.test(hex)) return hex;
+  }
+
+  return '';
+};
+
+const hasMostlyPrintableCharacters = (value: string): boolean => {
+  if (!value) return false;
+  const printable = value.replace(/[^\x20-\x7E]/g, '');
+  return printable.length >= Math.max(1, Math.floor(value.length * 0.9));
+};
+
 const normalizeId = (value: unknown): string => {
   if (!value) return '';
 
@@ -23,15 +58,25 @@ const normalizeId = (value: unknown): string => {
 
   if (typeof value === 'object') {
     const rawObject = value as any;
-    const nestedId = rawObject?._id ?? rawObject?.id ?? rawObject?.$oid;
+
+    const objectHexId = extractHexObjectId(rawObject);
+    if (objectHexId) return objectHexId;
+
+    const nestedId = rawObject?._id ?? rawObject?.$oid;
     const normalizedNested = normalizeId(nestedId);
     if (normalizedNested) return normalizedNested;
+
+    if (typeof rawObject?.id === 'string') {
+      const normalizedRawId = normalizeId(rawObject.id);
+      if (normalizedRawId) return normalizedRawId;
+    }
 
     const asString = rawObject?.toString?.();
     if (
       typeof asString === 'string' &&
       asString !== '[object Object]' &&
-      asString.trim()
+      asString.trim() &&
+      hasMostlyPrintableCharacters(asString.trim())
     ) {
       return asString.trim();
     }
@@ -44,7 +89,8 @@ const formatUserLabel = (userId: string, value?: string) => {
   const trimmed = value?.trim();
   if (trimmed) return trimmed;
   if (OBJECT_ID_PATTERN.test(userId)) return `User ${userId.slice(-6)}`;
-  return userId;
+  if (userId && hasMostlyPrintableCharacters(userId)) return userId;
+  return 'User';
 };
 
 const getProfileDisplayName = (
