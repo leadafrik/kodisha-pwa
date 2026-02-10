@@ -29,8 +29,16 @@ type AdminReportSummary = {
   status: string;
   createdAt: string;
   reportingUser?: { fullName: string; email?: string };
+  reportedBy?: { fullName?: string; name?: string; email?: string; phone?: string };
   reportedUser?: { fullName: string; email?: string };
 };
+
+const getReportUserLabel = (user?: {
+  fullName?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+}) => user?.fullName || user?.name || user?.email || user?.phone || "Unknown user";
 
 type AdminVerificationSummary = {
   _id: string;
@@ -500,8 +508,8 @@ const AdminDashboard: React.FC = () => {
                           </span>
                         </div>
                         <p className="mt-2 text-xs text-slate-500">
-                          Reported: {report.reportedUser?.fullName || "Unknown"} | Reporter:{" "}
-                          {report.reportingUser?.fullName || "Unknown"}
+                          Reported: {getReportUserLabel(report.reportedUser)} | Reporter:{" "}
+                          {getReportUserLabel(report.reportedBy || report.reportingUser)}
                         </p>
                       </div>
                     ))

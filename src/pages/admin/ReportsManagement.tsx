@@ -5,6 +5,7 @@ import { API_ENDPOINTS, adminApiRequest } from '../../config/api';
 interface Report {
   _id: string;
   reportingUser?: { fullName?: string; email?: string };
+  reportedBy?: { fullName?: string; name?: string; email?: string; phone?: string };
   reportedUser?: { fullName?: string; email?: string };
   reason: string;
   description?: string;
@@ -13,6 +14,15 @@ interface Report {
   createdAt: string;
   resolvedAt?: string;
 }
+
+const getUserLabel = (user?: {
+  fullName?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+}) => user?.fullName || user?.name || user?.email || user?.phone || 'Unknown user';
+
+const getUserEmail = (user?: { email?: string }) => user?.email || 'No email';
 
 const AdminReportsManagement: React.FC = () => {
   const [reports, setReports] = useState<Report[]>([]);
@@ -163,20 +173,20 @@ const AdminReportsManagement: React.FC = () => {
                     <td className="px-6 py-4">
                       <div>
                         <p className="text-sm font-medium text-gray-900">
-                          {report.reportedUser?.fullName || "Unknown user"}
+                          {getUserLabel(report.reportedUser)}
                         </p>
                         <p className="text-xs text-gray-500">
-                          {report.reportedUser?.email || "No email"}
+                          {getUserEmail(report.reportedUser)}
                         </p>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div>
                         <p className="text-sm font-medium text-gray-900">
-                          {report.reportingUser?.fullName || "Unknown reporter"}
+                          {getUserLabel(report.reportedBy || report.reportingUser)}
                         </p>
                         <p className="text-xs text-gray-500">
-                          {report.reportingUser?.email || "No email"}
+                          {getUserEmail(report.reportedBy || report.reportingUser)}
                         </p>
                       </div>
                     </td>
@@ -285,8 +295,8 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
           <div>
             <h3 className="font-semibold text-gray-900 mb-2">Reported User</h3>
             <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-gray-900 font-medium">{report.reportedUser?.fullName || 'Unknown user'}</p>
-              <p className="text-gray-600 text-sm">{report.reportedUser?.email || 'No email'}</p>
+              <p className="text-gray-900 font-medium">{getUserLabel(report.reportedUser)}</p>
+              <p className="text-gray-600 text-sm">{getUserEmail(report.reportedUser)}</p>
             </div>
           </div>
 
@@ -294,8 +304,8 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
           <div>
             <h3 className="font-semibold text-gray-900 mb-2">Reported By</h3>
             <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-gray-900 font-medium">{report.reportingUser?.fullName || 'Unknown reporter'}</p>
-              <p className="text-gray-600 text-sm">{report.reportingUser?.email || 'No email'}</p>
+              <p className="text-gray-900 font-medium">{getUserLabel(report.reportedBy || report.reportingUser)}</p>
+              <p className="text-gray-600 text-sm">{getUserEmail(report.reportedBy || report.reportingUser)}</p>
             </div>
           </div>
 

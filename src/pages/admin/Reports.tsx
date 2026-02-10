@@ -7,6 +7,7 @@ type UiSeverity = "low" | "medium" | "high" | "critical";
 interface ReportUser {
   _id?: string;
   fullName?: string;
+  name?: string;
   phone?: string;
   email?: string;
   verification?: {
@@ -52,7 +53,7 @@ const formatDateTime = (dateValue?: string) => {
 };
 
 const getUserName = (user?: ReportUser) =>
-  user?.fullName || user?.email || user?.phone || "Unknown user";
+  user?.fullName || user?.name || user?.email || user?.phone || "Unknown user";
 const getUserEmail = (user?: ReportUser) => user?.email || "No email";
 const getUserPhone = (user?: ReportUser) => user?.phone || "No phone";
 
