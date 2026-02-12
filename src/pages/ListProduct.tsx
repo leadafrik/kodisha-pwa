@@ -220,335 +220,324 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid md:grid-cols-2 gap-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-gray-800 mb-1">
-            What are you listing?
+          <p className="text-xs uppercase tracking-wider text-gray-500">Essential details</p>
+          <h2 className="text-xl font-semibold text-gray-900">What you are selling</h2>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          <label className="space-y-1 text-sm text-gray-700">
+            <span className="font-semibold text-gray-900">Category</span>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value as ProductCategory)}
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-700 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+            >
+              <option value="produce">Produce/Harvest</option>
+              <option value="livestock">Livestock</option>
+              <option value="inputs">Inputs</option>
+            </select>
           </label>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value as ProductCategory)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-700 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-          >
-            <option value="produce">Produce/Harvest</option>
-            <option value="livestock">Livestock/Animals</option>
-            <option value="inputs">Farm Inputs</option>
-          </select>
+          <label className="space-y-1 text-sm text-gray-700 md:col-span-2">
+            <span className="font-semibold text-gray-900">Title *</span>
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+              placeholder="e.g., 10 bags of maize, 2 heifers"
+            />
+          </label>
         </div>
-        <div>
-          <label className="block text-sm font-semibold text-gray-800 mb-1">Title *</label>
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+        <div className="grid gap-4 md:grid-cols-3">
+          <label className="space-y-1 text-sm text-gray-700">
+            <span className="font-semibold text-gray-900">Price (KSh) *</span>
+            <input
+              type="number"
+              min="0"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              required
+              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+            />
+            <p className="text-xs text-gray-500">
+              Free for 3 months; afterwards {formatPrice(commission)} commission applies.
+            </p>
+          </label>
+          <label className="space-y-1 text-sm text-gray-700">
+            <span className="font-semibold text-gray-900">Quantity</span>
+            <input
+              type="number"
+              min="0"
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+            />
+          </label>
+          <label className="space-y-1 text-sm text-gray-700">
+            <span className="font-semibold text-gray-900">Unit</span>
+            <select
+              value={unit}
+              onChange={(e) => setUnit(e.target.value)}
+              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+            >
+              <option value="kg">kg</option>
+              <option value="tonne">tonne</option>
+              <option value="piece">piece</option>
+              <option value="bag">bag</option>
+              <option value="litre">litre</option>
+            </select>
+          </label>
+        </div>
+        <label className="space-y-1 text-sm text-gray-700">
+          <span className="font-semibold text-gray-900">Description *</span>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
             required
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-            placeholder="e.g., 10 bags of maize, 2 heifers, drip kit"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+            placeholder="Grade, condition, delivery terms..."
           />
-        </div>
-      </div>
+        </label>
+      </section>
 
-      <div className="grid md:grid-cols-3 gap-4">
+      <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-gray-800 mb-1">Price (KSh) *</label>
-          <input
-            type="number"
-            min="0"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            required
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-          />
-          <p className="text-xs text-gray-500 mt-1">
-            Free for 3 months. After that: {formatPrice(commission)} commission (2.5% of price, minimum KSh 49).
-          </p>
+          <p className="text-xs uppercase tracking-wider text-gray-500">Location</p>
+          <h3 className="text-lg font-semibold text-gray-900">Where buyers meet you</h3>
         </div>
-        <div>
-          <label className="block text-sm font-semibold text-gray-800 mb-1">Quantity</label>
-          <input
-            type="number"
-            min="0"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-semibold text-gray-800 mb-1">Unit</label>
-          <select
-            value={unit}
-            onChange={(e) => setUnit(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-          >
-            <option value="kg">Kg</option>
-            <option value="tonne">Tonne</option>
-            <option value="piece">Piece</option>
-            <option value="bag">Bag</option>
-            <option value="litre">Litre</option>
-          </select>
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-semibold text-gray-800 mb-1">Description *</label>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          rows={3}
-          required
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-          placeholder="Condition, grade, delivery terms, etc."
-        />
-      </div>
-
-      <div className="grid md:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-sm font-semibold text-gray-800 mb-1">County *</label>
-          <select
-            value={county}
-            onChange={(e) => setCounty(e.target.value)}
-            required
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-          >
-            <option value="">Select County</option>
-            {kenyaCounties
-              .sort((a, b) => a.name.localeCompare(b.name))
-              .map((c) => (
-                <option key={c.code} value={c.name.toLowerCase()}>
-                  {c.name}
+        <div className="grid gap-4 md:grid-cols-3">
+          <label className="space-y-1 text-sm text-gray-700">
+            <span className="font-semibold text-gray-900">County *</span>
+            <select
+              value={county}
+              onChange={(e) => setCounty(e.target.value)}
+              required
+              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+            >
+              <option value="">Select County</option>
+              {kenyaCounties
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((c) => (
+                  <option key={c.code} value={c.name.toLowerCase()}>
+                    {c.name}
+                  </option>
+                ))}
+            </select>
+          </label>
+          <label className="space-y-1 text-sm text-gray-700">
+            <span className="font-semibold text-gray-900">Constituency *</span>
+            <select
+              value={constituency}
+              onChange={(e) => setConstituency(e.target.value)}
+              required
+              disabled={!county}
+              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+            >
+              <option value="">Select</option>
+              {constituencies.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
                 </option>
               ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-semibold text-gray-800 mb-1">Constituency *</label>
-          <select
-            value={constituency}
-            onChange={(e) => setConstituency(e.target.value)}
-            required
-            disabled={!county}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-          >
-            <option value="">Select</option>
-            {constituencies.map((c) => (
-              <option key={c.value} value={c.value}>
-                {c.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-semibold text-gray-800 mb-1">Ward *</label>
-          <select
-            value={ward}
-            onChange={(e) => setWard(e.target.value)}
-            required
-            disabled={!constituency}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-          >
-            <option value="">Select</option>
-            {wards.map((w) => (
-              <option key={w.value} value={w.value}>
-                {w.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-semibold text-gray-800 mb-1">
-          Specific Location/Address
-        </label>
-        <input
-          value={approximateLocation}
-          onChange={(e) => setApproximateLocation(e.target.value)}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-          placeholder="e.g., Near main road, market, stage"
-        />
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-semibold text-gray-800 mb-1">
-            Contact Phone *
+            </select>
           </label>
+          <label className="space-y-1 text-sm text-gray-700">
+            <span className="font-semibold text-gray-900">Ward *</span>
+            <select
+              value={ward}
+              onChange={(e) => setWard(e.target.value)}
+              required
+              disabled={!constituency}
+              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+            >
+              <option value="">Select</option>
+              {wards.map((w) => (
+                <option key={w.value} value={w.value}>
+                  {w.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <label className="space-y-1 text-sm text-gray-700">
+          <span className="font-semibold text-gray-900">Reference point</span>
+          <input
+            value={approximateLocation}
+            onChange={(e) => setApproximateLocation(e.target.value)}
+            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+            placeholder="Near main road, market, stage..."
+          />
+        </label>
+      </section>
+
+      <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm space-y-4">
+        <div>
+          <p className="text-xs uppercase tracking-wider text-gray-500">Contact</p>
+          <h3 className="text-lg font-semibold text-gray-900">How buyers reach you</h3>
+        </div>
+        <label className="space-y-1 text-sm text-gray-700">
+          <span className="font-semibold text-gray-900">Phone *</span>
           <input
             type="tel"
             value={contact}
             onChange={(e) => setContact(e.target.value)}
             required
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
             placeholder="07xx..."
             pattern="[0-9]{10}"
           />
-        </div>
-        <div className="flex items-center gap-4 bg-orange-50 rounded-lg border border-orange-100 px-3 py-3">
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-orange-800">
-              Listing Status
-            </p>
-            <p className="text-xs text-orange-700">
-              New accounts enjoy free listings for the first 3 months. After that, a 2.5% commission applies (minimum KSh 49).
-            </p>
-          </div>
-          {/* Future monetization options - commented out during free launch
-          <div className="flex flex-col gap-2 text-sm">
-            <label className="inline-flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={subscribed}
-                onChange={(e) => setSubscribed(e.target.checked)}
-              />
-              <span>Annual subscription</span>
-            </label>
-            <label className="inline-flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={premiumBadge}
-                onChange={(e) => setPremiumBadge(e.target.checked)}
-              />
-              <span>Premium badge (+KSh 199)</span>
-            </label>
-          </div>
-          */}
-        </div>
-      </div>
-
-      {/* Verification Documents Section */}
-      <div className="mb-6 space-y-4 rounded-2xl border border-blue-200 bg-blue-50/40 p-4">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-800">Verification Documents</h2>
-            <p className="text-sm text-gray-600">
-              Upload your ID and selfie for verification. This is required for all product listings to ensure buyer trust.
-            </p>
-          </div>
-          {docUploading && (
-            <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
-              Uploading docs…
-            </span>
-          )}
-        </div>
-
-        {idVerified && selfieVerified ? (
-          <div className="flex items-center space-x-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-            <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <div>
-              <p className="text-green-800 font-semibold">✓ ID Already Verified</p>
-              <p className="text-sm text-green-700">Your identity documents have been verified by our team.</p>
-            </div>
-          </div>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2">
-            <label className="block text-sm text-gray-700">
-              <span className="font-semibold text-gray-900">
-                National ID (Front) {idDocsNeeded ? '*' : ''}
-              </span>
-              <input
-                type="file"
-                accept="image/*,application/pdf"
-                onChange={(e) => setIdFrontFile(e.target.files?.[0] || null)}
-                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
-                required={!idVerified}
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                Required for product listings unless already verified.
-              </p>
-            </label>
-
-            <label className="block text-sm text-gray-700">
-              <span className="font-semibold text-gray-900">
-                National ID (Back) {idDocsNeeded ? '*' : ''}
-              </span>
-              <input
-                type="file"
-                accept="image/*,application/pdf"
-                onChange={(e) => setIdBackFile(e.target.files?.[0] || null)}
-                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
-                required={!idVerified}
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                Required for product listings unless already verified.
-              </p>
-            </label>
-
-            <label className="block text-sm text-gray-700 md:col-span-2">
-              <span className="font-semibold text-gray-900">
-                Selfie holding ID {selfieNeeded ? '*' : ''}
-              </span>
-              <input
-                type="file"
-                accept="image/*,application/pdf"
-                onChange={(e) => setSelfieFile(e.target.files?.[0] || null)}
-                className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
-                required={!selfieVerified}
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                Take a clear photo holding your ID next to your face. Required unless already verified.
-              </p>
-            </label>
-          </div>
-        )}
-
-        <div className="bg-blue-100/50 border border-blue-200 rounded-lg p-3">
-          <p className="text-xs text-blue-800">
-            <strong>Note:</strong> These documents are reviewed by our admin team. Once verified, you won't need to upload them again for future listings.
+        </label>
+        <div className="rounded-xl border border-dashed border-gray-200 bg-orange-50/60 p-4 text-sm text-gray-700">
+          <p className="font-semibold text-orange-700">Listing status</p>
+          <p className="text-xs">
+            Free for 3 months; afterwards {formatPrice(commission)} commission applies (min KSh 49).
           </p>
         </div>
-      </div>
+      </section>
 
-      <div>
-        <label className="block text-sm font-semibold text-gray-800 mb-2">
-          Images (up to 5)
-        </label>
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-orange-400 transition-colors">
-          <input
-            type="file"
-            multiple
-            accept="image/*"
-            onChange={handleImageUpload}
-            className="hidden"
-            id="product-images-upload"
-          />
-          <label htmlFor="product-images-upload" className="cursor-pointer text-sm font-semibold text-gray-700">
-            Click to upload or drag & drop
+      <details className="group rounded-2xl border border-gray-200 bg-white p-5 shadow-sm" open>
+        <summary className="flex cursor-pointer items-center justify-between text-sm font-semibold text-gray-800">
+          Optional boosts
+          <span className="text-xs text-gray-500 transition-all group-open:rotate-45">+</span>
+        </summary>
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          <label className="inline-flex items-center gap-2 text-sm text-gray-800">
+            <input
+              type="checkbox"
+              checked={subscribed}
+              onChange={(e) => setSubscribed(e.target.checked)}
+            />
+            <span>Annual subscription (soon)</span>
           </label>
-          <p className="text-xs text-gray-500">Max 5 images, 5MB each.</p>
+          <label className="inline-flex items-center gap-2 text-sm text-gray-800">
+            <input
+              type="checkbox"
+              checked={premiumBadge}
+              onChange={(e) => setPremiumBadge(e.target.checked)}
+            />
+            <span>Premium badge (+KSh 199)</span>
+          </label>
         </div>
-        {selectedImages.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {selectedImages.map((file, idx) => (
-              <div key={idx} className="bg-gray-100 rounded-lg px-2 py-1 text-xs flex items-center gap-2">
-                <span className="truncate max-w-[140px]">{file.name}</span>
-                <button
-                  type="button"
-                  onClick={() => removeImage(idx)}
-                  className="text-red-600 font-bold"
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-          </div>
+      </details>
+
+      <details
+        className="group rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
+        open={!idVerified || !selfieVerified}
+      >
+        <summary className="flex cursor-pointer items-center justify-between text-sm font-semibold text-gray-800">
+          {idVerified && selfieVerified ? "Verification complete" : "Upload verification docs"}
+          <span className="text-xs text-gray-500 transition-all group-open:rotate-45">+</span>
+        </summary>
+        <div className="mt-4 space-y-3">
+          {idVerified && selfieVerified ? (
+            <div className="flex items-center gap-3 rounded-lg border border-green-100 bg-green-50 p-3 text-sm text-green-800">
+              <svg className="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M16.707 5.293a1 1 0 00-1.414-1.414L9 10.172 5.707 6.879a1 1 0 00-1.414 1.414l4 4a1 1 0 001.414 0l6.586-6.586z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span>Your documents are verified. Future listings skip uploads.</span>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              <label className="space-y-1 text-sm text-gray-700">
+                <span className="font-semibold text-gray-900">ID (Front){idDocsNeeded ? " *" : ""}</span>
+                <input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => setIdFrontFile(e.target.files?.[0] || null)}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  required={!idVerified}
+                />
+              </label>
+              <label className="space-y-1 text-sm text-gray-700">
+                <span className="font-semibold text-gray-900">ID (Back){idDocsNeeded ? " *" : ""}</span>
+                <input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => setIdBackFile(e.target.files?.[0] || null)}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  required={!idVerified}
+                />
+              </label>
+              <label className="space-y-1 text-sm text-gray-700 md:col-span-2">
+                <span className="font-semibold text-gray-900">Selfie with ID{selfieNeeded ? " *" : ""}</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setSelfieFile(e.target.files?.[0] || null)}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  required={!selfieVerified}
+                />
+              </label>
+            </div>
+          )}
+          <p className="text-xs text-gray-500">
+            Docs are reviewed by admin. Once approved future listings skip this step.
+          </p>
+        </div>
+        {docUploading && (
+          <p className="mt-2 text-xs text-gray-600">Uploading documents...</p>
         )}
-      </div>
+      </details>
+
+      <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm space-y-4">
+        <div>
+          <p className="text-xs uppercase tracking-wider text-gray-500">Images</p>
+          <h3 className="text-lg font-semibold text-gray-900">Add photos (up to 5)</h3>
+        </div>
+        <div className="space-y-3">
+          <div className="border-2 border-dashed border-gray-300 rounded-xl px-4 py-6 text-center transition hover:border-orange-400">
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
+              id="product-images-upload"
+            />
+            <label htmlFor="product-images-upload" className="cursor-pointer text-sm font-semibold text-gray-700">
+              Click to upload or drag & drop
+            </label>
+            <p className="text-xs text-gray-500">5MB per photo.</p>
+          </div>
+          {selectedImages.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {selectedImages.map((file, idx) => (
+                <div key={idx} className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1 text-xs">
+                  <span className="truncate max-w-[140px]">{file.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeImage(idx)}
+                    className="rounded-full bg-white px-2 text-red-600 shadow-sm"
+                  >
+                    x
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
 
       <button
         type="submit"
         disabled={uploading || docUploading}
-        className={`w-full py-3 rounded-lg font-semibold text-lg transition duration-300 ${
-          uploading || docUploading ? "bg-gray-400 cursor-not-allowed" : "bg-orange-600 hover:bg-orange-700 text-white"
+        className={`w-full rounded-2xl px-6 py-3 text-lg font-semibold transition ${
+          uploading || docUploading ? "bg-gray-300 text-gray-600" : "bg-orange-600 text-white hover:bg-orange-700"
         }`}
       >
-        {docUploading ? "Uploading Documents..." : uploading ? "Listing Product..." : "List Product"}
+        {docUploading ? "Uploading documents..." : uploading ? "Listing product..." : "Publish listing"}
       </button>
-      <p className="text-xs text-gray-500 text-center">
-        {idVerified && selfieVerified 
-          ? "Your identity is verified. Free listings for 3 months, then 2.5% commission applies." 
-          : "ID + selfie verification required. One-time upload reviewed by admin."}
+      <p className="text-xs text-center text-gray-500">
+        {idVerified && selfieVerified
+          ? "Identity verified. Free listings for 3 months, then 2.5% commission applies."
+          : "ID + selfie verification required. Admin reviews once then you skip future uploads."}
       </p>
     </form>
   );
