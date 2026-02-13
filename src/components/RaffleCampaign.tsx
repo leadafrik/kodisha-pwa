@@ -126,7 +126,22 @@ const RaffleCampaign: React.FC = () => {
   }
 
   return (
-    <section className="rounded-3xl border border-emerald-100 bg-white/90 p-6 shadow-lg fade-up space-y-6">
+    <>
+      <a
+        href="#raffle-campaign"
+        className="fixed bottom-24 right-4 sm:bottom-6 sm:right-6 z-50 inline-flex items-center gap-2 rounded-full border-2 border-amber-300 bg-amber-400 px-4 py-3 text-xs sm:text-sm font-extrabold uppercase tracking-[0.08em] text-slate-900 shadow-xl hover:bg-amber-300 transition animate-pulse"
+      >
+        <span className="relative flex h-2.5 w-2.5">
+          <span className="absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-75 animate-ping" />
+          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-rose-600" />
+        </span>
+        Raffle Live - Win KSh 20,000
+      </a>
+
+      <section
+        id="raffle-campaign"
+        className="scroll-mt-24 rounded-3xl border border-emerald-100 bg-white/90 p-6 shadow-lg fade-up space-y-6"
+      >
       <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-600">
@@ -291,7 +306,8 @@ const RaffleCampaign: React.FC = () => {
           </ul>
         )}
       </div>
-    </section>
+      </section>
+    </>
   );
 };
 
