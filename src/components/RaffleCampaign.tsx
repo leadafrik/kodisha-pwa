@@ -2,6 +2,10 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Sparkles, Ticket, CheckCircle2, Zap } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { apiRequest, API_ENDPOINTS } from "../config/api";
+import {
+  isRaffleCampaignActive,
+  raffleCampaignConfig,
+} from "../config/raffleCampaign";
 
 const TARGET_LISTINGS = 3000;
 
@@ -21,6 +25,7 @@ const prizes: Winner[] = [
 
 const RaffleCampaign: React.FC = () => {
   const { user } = useAuth();
+  const campaignActive = isRaffleCampaignActive();
   const [listingCount, setListingCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +35,13 @@ const RaffleCampaign: React.FC = () => {
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
   const [winners, setWinners] = useState<Winner[]>([]);
   const [isSpinning, setIsSpinning] = useState(false);
+  const endDateLabel = raffleCampaignConfig.endAt
+    ? raffleCampaignConfig.endAt.toLocaleDateString()
+    : null;
+
+  useEffect(() => {
+    setInviteCode(user?.id || user?._id || "");
+  }, [user?.id, user?._id]);
 
   const remaining = useMemo(() => {
     if (listingCount === null) return TARGET_LISTINGS;
@@ -49,6 +61,11 @@ const RaffleCampaign: React.FC = () => {
     : "Sign up, verify, then list to join automatically.";
 
   useEffect(() => {
+    if (!campaignActive) {
+      setLoading(false);
+      return;
+    }
+
     const fetchCount = async () => {
       setLoading(true);
       setError(null);
@@ -72,7 +89,7 @@ const RaffleCampaign: React.FC = () => {
     fetchCount();
     const interval = window.setInterval(fetchCount, 60_000);
     return () => window.clearInterval(interval);
-  }, []);
+  }, [campaignActive]);
 
   const handleCopyCode = async () => {
     if (!inviteCode.trim()) return;
@@ -103,6 +120,10 @@ const RaffleCampaign: React.FC = () => {
       setIsSpinning(false);
     }, 1300);
   };
+
+  if (!campaignActive) {
+    return null;
+  }
 
   return (
     <section className="rounded-3xl border border-emerald-100 bg-white/90 p-6 shadow-lg fade-up space-y-6">
@@ -238,7 +259,8 @@ const RaffleCampaign: React.FC = () => {
           </span>
         </div>
         <p className="text-sm text-slate-600">
-          The raffle ends automatically once the platform hits {TARGET_LISTINGS.toLocaleString()} listings. Winners receive confirmation emails.
+          The raffle ends automatically once the platform hits {TARGET_LISTINGS.toLocaleString()} listings
+          {endDateLabel ? ` or on ${endDateLabel}` : ""}. Winners receive confirmation emails.
         </p>
         <div className="flex flex-wrap items-center gap-3">
           <button
