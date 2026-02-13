@@ -166,6 +166,9 @@ const BrowseListings: React.FC = () => {
     const serviceCards =
       (serviceListings as any[])?.map((s: any) => {
         if (!isServiceVisible(s)) return null;
+        const firstServiceImage =
+          (Array.isArray(s.images) ? s.images[0] : undefined) ||
+          (Array.isArray(s.photos) ? s.photos[0] : undefined);
         const boostFlag =
           s.monetization?.boostOption &&
           s.monetization?.boostOption !== "none";
@@ -192,7 +195,7 @@ const BrowseListings: React.FC = () => {
           paid: !!paidFlag,
           boosted: !!boostFlag,
           createdAt: s.createdAt ? new Date(s.createdAt) : undefined,
-          image: s.images?.[0],
+          image: firstServiceImage,
           ownerId: s.owner?._id || s.ownerId || s.owner,
           contact: s.contact || s.owner?.phone || s.owner?.email,
           ownerResponseTime,

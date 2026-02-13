@@ -5,6 +5,7 @@ import { kenyaCounties } from "../data/kenyaCounties";
 import { ServiceListing } from "../types/property";
 import { useAuth } from "../contexts/AuthContext";
 import { API_ENDPOINTS } from "../config/api";
+import { handleImageError } from "../utils/imageFallback";
 
 type ServiceType = "equipment" | "agrovet" | "professional_services";
 
@@ -454,6 +455,8 @@ const FindServices: React.FC = () => {
               {paginatedServices.map((service: ServiceListing) => {
                 const normalizedTags = normalizeServices(service.services);
                 const locationLabel = getLocationLabel(service);
+                const previewImage =
+                  (service as any)?.images?.[0] || service.photos?.[0];
                 return (
                   <div
                     key={service.id}
@@ -469,6 +472,20 @@ const FindServices: React.FC = () => {
                       }`}
                     >
                       {typeLabels[service.type as ServiceType]}
+                    </div>
+                    <div className="h-40 bg-gray-100">
+                      {previewImage ? (
+                        <img
+                          src={previewImage}
+                          alt={service.name}
+                          onError={handleImageError}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-xs font-medium text-gray-500">
+                          No image available
+                        </div>
+                      )}
                     </div>
 
                     <div className="p-5 flex flex-col gap-3 flex-1">
