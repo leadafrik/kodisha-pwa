@@ -217,7 +217,7 @@ const RaffleCampaign: React.FC = () => {
             <h2 className="mt-3 text-3xl font-black text-slate-900">
               Win KSh 20,000 - Built on trust
             </h2>
-            <p className="mt-2 text-sm text-slate-700 max-w-2xl">
+            <p className="mt-2 text-base font-semibold text-slate-900 max-w-2xl">
               Verified users who post at least one listing are entered automatically. Invite
               others using your code and gain extra entries once they sign up, verify, and list.
             </p>
@@ -225,8 +225,9 @@ const RaffleCampaign: React.FC = () => {
           <div className="rounded-2xl border border-emerald-200 bg-white/90 px-4 py-3 shadow-sm">
             <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Progress</p>
             <p className="text-lg font-bold text-slate-900">
-              {loading ? "--" : `${percent}%`} of 3,000
+              {loading ? "--" : `${percent}% complete`}
             </p>
+            <p className="text-xs font-semibold text-slate-600">Target: 3,000 listings</p>
           </div>
         </div>
 
