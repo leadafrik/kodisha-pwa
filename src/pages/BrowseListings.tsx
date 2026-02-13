@@ -5,6 +5,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { kenyaCounties } from "../data/kenyaCounties";
 import { handleImageError } from "../utils/imageFallback";
 import { Search, Filter } from "lucide-react";
+import RaffleCampaign from "../components/RaffleCampaign";
 
 type Category = "all" | "produce" | "livestock" | "inputs" | "service";
 type ServiceSubType = "all" | "equipment" | "professional_services";
@@ -359,6 +360,10 @@ const BrowseListings: React.FC = () => {
                 Browse the latest inventory and contact sellers instantly. New listings are added daily.
               </div>
             </div>
+          </div>
+
+          <div className="fade-up">
+            <RaffleCampaign />
           </div>
 
           <div className="rounded-3xl border border-slate-200 bg-white p-5 md:p-6 shadow-sm fade-up">

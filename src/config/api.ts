@@ -91,6 +91,9 @@ export const API_ENDPOINTS = {
       markSold: (id: string) => `${API_BASE_URL}/products/${id}/mark-sold`,
     },
   },
+  unifiedListings: {
+    countActive: `${API_BASE_URL}/unified-listings/count/active`,
+  },
   messages: {
     send: `${API_BASE_URL}/messages`,
     threads: `${API_BASE_URL}/messages/threads`,
