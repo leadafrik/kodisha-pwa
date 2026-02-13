@@ -96,6 +96,9 @@ const mapBackendUserToFrontendUser = (apiUser: any): User => {
     isVerified: verificationStatus === "verified",
     role: apiUser.role,
     verification,
+    referralCode: apiUser.referralCode,
+    referredByCode: apiUser.referredByCode,
+    raffle: apiUser.raffle,
   };
 };
 
@@ -253,6 +256,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         county: userData.county,
         constituency: userData.constituency,
         ward: userData.ward,
+        inviteCode: userData.inviteCode,
         legalConsents: userData.legalConsents,
       };
 

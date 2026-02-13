@@ -94,6 +94,9 @@ export const API_ENDPOINTS = {
   unifiedListings: {
     countActive: `${API_BASE_URL}/unified-listings/count/active`,
   },
+  raffle: {
+    me: `${API_BASE_URL}/raffle/me`,
+  },
   messages: {
     send: `${API_BASE_URL}/messages`,
     threads: `${API_BASE_URL}/messages/threads`,

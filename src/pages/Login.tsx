@@ -67,6 +67,7 @@ const Login: React.FC = () => {
     confirmPassword: "",
     userType: "buyer" as "buyer" | "seller",
     county: "",
+    inviteCode: "",
   });
 
   // OTP State (email only for now)
@@ -168,6 +169,7 @@ const Login: React.FC = () => {
         password: signupData.password,
         type: signupData.userType,
         county: signupData.county,
+        inviteCode: signupData.inviteCode.trim() || undefined,
         legalConsents: {
           termsAccepted: true,
           privacyAccepted: true,
@@ -509,6 +511,25 @@ const Login: React.FC = () => {
             </option>
           ))}
         </select>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Invite Code (Optional)</label>
+        <input
+          type="text"
+          value={signupData.inviteCode}
+          onChange={(e) =>
+            setSignupData({
+              ...signupData,
+              inviteCode: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""),
+            })
+          }
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="AGR123ABC"
+        />
+        <p className="mt-1 text-xs text-gray-500">
+          If someone invited you, enter their code here.
+        </p>
       </div>
 
       <button

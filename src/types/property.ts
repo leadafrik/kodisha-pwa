@@ -224,6 +224,15 @@ export interface User {
   county?: string;
   isVerified?: boolean;
   role?: "user" | "admin" | "moderator" | "super_admin";
+  referralCode?: string;
+  referredByCode?: string;
+  raffle?: {
+    entered: boolean;
+    enteredAt?: string;
+    totalEntries: number;
+    referralBonusEntries: number;
+    referralQualifiedCount: number;
+  };
 
   verification?: {
     phoneVerified: boolean;
@@ -264,6 +273,7 @@ export interface UserFormData {
   county: string;
   constituency?: string;
   ward?: string;
+  inviteCode?: string;
   legalConsents?: {
     termsAccepted: boolean;
     privacyAccepted: boolean;
