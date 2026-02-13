@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { usePageContent } from '../hooks/usePageContent';
+import RaffleCampaign from '../components/RaffleCampaign';
 
 const Home: React.FC = () => {
   const { user } = useAuth();
@@ -83,6 +84,12 @@ const Home: React.FC = () => {
               <div className="text-xs text-gray-600 mt-1">No Middlemen</div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="py-10 px-4 md:px-8 bg-gray-50 border-b border-gray-200">
+        <div className="max-w-7xl mx-auto">
+          <RaffleCampaign />
         </div>
       </section>
 
