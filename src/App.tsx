@@ -79,7 +79,8 @@ function App() {
                       }
                     />
                     <Route path="/browse" element={<BrowseListings />} />
-                    <Route path="/listings" element={<BrowseListings />} />
+                    <Route path="/listings" element={<Navigate to="/browse" replace />} />
+                    <Route path="/marketplace" element={<Navigate to="/browse" replace />} />
                     <Route path="/find-services" element={<BrowseListings />} />
                     <Route path="/request" element={<BrowseBuyerRequestsPage />} />
                     <Route 
@@ -138,7 +139,8 @@ function App() {
                         </ProtectedRoute>
                       } 
                     />
-                    <Route path="/listings/:id" element={<ProtectedRoute><ListingDetails /></ProtectedRoute>} />
+                    <Route path="/listing/:id" element={<ListingDetails />} />
+                    <Route path="/listings/:id" element={<ListingDetails />} />
                     <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
                     <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
                     <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import GoogleMapsLoader from "../components/GoogleMapsLoader";
 import ListingMap from "../components/ListingMap";
 import ReportModal from "../components/ReportModal";
@@ -273,6 +273,7 @@ const AdminControlsSection: React.FC<AdminControlsProps> = ({ listing, onUpdate 
 const ListingDetails: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [listing, setListing] = useState<any>(null);
   const [markingSold, setMarkingSold] = useState(false);
   const [soldMessage, setSoldMessage] = useState("");
@@ -499,14 +500,12 @@ const ListingDetails: React.FC = () => {
     }
   };
 
-  // Redirect to login if not authenticated
+  // Canonicalize legacy listing URLs.
   useEffect(() => {
-    const token = getAuthToken();
-    if (!token) {
-      navigate(`/login?next=/listings/${id}`);
-      return;
+    if (id && location.pathname.startsWith("/listing/")) {
+      navigate(`/listings/${id}`, { replace: true });
     }
-  }, [id, navigate]);
+  }, [id, location.pathname, navigate]);
 
   useEffect(() => {
     fetchListing();
@@ -528,6 +527,39 @@ const ListingDetails: React.FC = () => {
       }
     };
   }, [listing?.owner?._id]);
+
+  useEffect(() => {
+    if (!listing || !id) return;
+
+    const title = listing.title || listing.name || "Agricultural Listing";
+    const county = listing.location?.county || listing.county;
+    const metaDescription = county
+      ? `${title} in ${county}, Kenya. Connect directly with verified sellers on Agrisoko.`
+      : `${title}. Connect directly with verified sellers on Agrisoko Kenya.`;
+    const canonicalUrl = `https://www.agrisoko254.com/listings/${id}`;
+
+    document.title = `${title} | Agrisoko`;
+
+    const descriptionMeta = document.querySelector('meta[name="description"]');
+    if (descriptionMeta) {
+      descriptionMeta.setAttribute("content", metaDescription);
+    }
+
+    const canonicalLink = document.querySelector('link[rel="canonical"]');
+    if (canonicalLink) {
+      canonicalLink.setAttribute("href", canonicalUrl);
+    }
+
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    if (ogUrl) {
+      ogUrl.setAttribute("content", canonicalUrl);
+    }
+
+    const twitterUrl = document.querySelector('meta[property="twitter:url"]');
+    if (twitterUrl) {
+      twitterUrl.setAttribute("content", canonicalUrl);
+    }
+  }, [listing, id]);
 
   if (loading) {
     return <div className="p-4 text-center text-gray-600">Loading listing...</div>;

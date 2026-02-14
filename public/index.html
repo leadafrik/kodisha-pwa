@@ -7,10 +7,10 @@
     <meta name="theme-color" content="#16a34a" />
     
     <!-- Primary Meta Tags -->
-    <title>Agrisoko - Digital Agricultural Marketplace for Kenya</title>
-    <meta name="title" content="Agrisoko - Connect, Buy & Sell Agricultural Products & Services" />
-    <meta name="description" content="Agrisoko: Digitizing Kenya's agricultural marketplace. Connect directly with producers, buyers, and service providers. Buy and sell agricultural produce, professional services, and equipment across all 47 counties." />
-    <meta name="keywords" content="agricultural marketplace Kenya, buy agricultural products, farm services Kenya, agricultural produce Kenya, farming equipment Kenya, agribusiness Kenya, Agrisoko" />
+    <title>Agrisoko Kenya - Online Agricultural Marketplace</title>
+    <meta name="title" content="Agrisoko Kenya - Buy and Sell Farm Produce, Inputs, and Services" />
+    <meta name="description" content="Agrisoko is Kenya's online agricultural marketplace. Buy and sell farm produce, livestock, farm inputs, and agricultural services across all 47 counties." />
+    <meta name="keywords" content="Agrisoko, agriculture marketplace Kenya, online agricultural marketplace Kenya, buy and sell farm produce Kenya, farm inputs Kenya, livestock marketplace Kenya, agricultural services Kenya" />
     <meta name="author" content="Agrisoko Limited" />
     <meta name="robots" content="index, follow" />
     <meta name="language" content="English" />
@@ -84,23 +84,56 @@
     </script>
     <script>
       (function () {
+        var preferredHost = "www.agrisoko254.com";
+        var host = window.location.hostname || "";
+        var shouldRedirectToPrimary =
+          host === "mamamboga254.com" ||
+          host === "www.mamamboga254.com" ||
+          host === "agrisoko254.com";
+
+        if (shouldRedirectToPrimary) {
+          var destination =
+            "https://" +
+            preferredHost +
+            (window.location.pathname || "/") +
+            (window.location.search || "") +
+            (window.location.hash || "");
+          window.location.replace(destination);
+          return;
+        }
+
         var origin = "https://www.agrisoko254.com";
-        var path = window.location.pathname || "/";
-        var canonicalUrl = origin + (path.charAt(0) === "/" ? path : "/" + path);
+        var rawPath = window.location.pathname || "/";
+        var normalizedPath = rawPath.indexOf("/listing/") === 0
+          ? rawPath.replace("/listing/", "/listings/")
+          : rawPath;
+        var canonicalUrl = origin + (normalizedPath.charAt(0) === "/" ? normalizedPath : "/" + normalizedPath);
 
         var routeMeta = {
+          "/": {
+            title: "Agrisoko Kenya - Online Agricultural Marketplace",
+            description: "Buy and sell farm produce, livestock, farm inputs, and agricultural services across all 47 counties in Kenya."
+          },
           "/browse": {
             title: "Browse Listings | Agrisoko Kenya Agricultural Marketplace",
             description: "Browse verified agricultural produce, services, land, and farm inputs across Kenya on Agrisoko."
+          },
+          "/about": {
+            title: "About Agrisoko | Kenya Agricultural Marketplace",
+            description: "Learn how Agrisoko connects farmers, buyers, and agricultural service providers across Kenya."
+          },
+          "/request": {
+            title: "Buy Requests | Agrisoko Kenya",
+            description: "See active buy requests from verified buyers and connect directly on Agrisoko."
           }
         };
 
         var defaults = {
-          title: "Agrisoko - Digital Agricultural Marketplace for Kenya",
-          description: "Agrisoko: Digitizing Kenya's agricultural marketplace. Connect directly with producers, buyers, and service providers. Buy and sell agricultural produce, professional services, and equipment across all 47 counties."
+          title: "Agrisoko Kenya - Online Agricultural Marketplace",
+          description: "Agrisoko is Kenya's online agricultural marketplace. Buy and sell farm produce, livestock, farm inputs, and agricultural services across all 47 counties."
         };
 
-        var meta = routeMeta[path] || defaults;
+        var meta = routeMeta[normalizedPath] || defaults;
 
         document.title = meta.title;
         updateMetaByName("title", meta.title);
