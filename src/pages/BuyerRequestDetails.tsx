@@ -1,25 +1,9 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { API_BASE_URL } from '../config/api';
 import * as Sentry from '@sentry/react';
 import { handleImageError } from "../utils/imageFallback";
-
-type BudgetRange = {
-  min?: number;
-  max?: number;
-  currency?: string;
-};
-
-type BuyerRequestResponse = {
-  _id: string;
-  sellerId: string;
-  sellerName: string;
-  sellerPhone?: string;
-  sellerEmail?: string;
-  message: string;
-  createdAt: string;
-};
 
 interface BuyerRequest {
   _id: string;
@@ -27,8 +11,11 @@ interface BuyerRequest {
   description: string;
   category: string;
   productType?: string;
-  contactPhone?: string;
-  budget?: number | BudgetRange;
+  budget?: {
+    min?: number;
+    max?: number;
+    currency?: string;
+  };
   quantity?: number;
   unit?: string;
   location: {
@@ -44,47 +31,37 @@ interface BuyerRequest {
     fullName: string;
     ratings?: number;
     phone?: string;
-    email?: string;
   };
   createdAt: string;
   updatedAt: string;
-  responses?: BuyerRequestResponse[];
+  responses?: Array<{
+    _id: string;
+    sellerId: string;
+    sellerName: string;
+    message: string;
+    createdAt: string;
+  }>;
 }
 
-const CONTACT_POLL_INTERVAL_MS = 8000;
+const getUrgencyBadgeStyles = (urgency?: string) => {
+  if (urgency === 'high') return 'bg-red-100 text-red-800';
+  if (urgency === 'medium') return 'bg-amber-100 text-amber-800';
+  return 'bg-blue-100 text-blue-800';
+};
 
-const normalizePhoneForTel = (phone?: string) =>
-  (phone || "").replace(/\s+/g, "");
+const getUrgencyLabel = (urgency?: string) => {
+  if (urgency === 'high') return 'High';
+  if (urgency === 'medium') return 'Medium';
+  return 'Low';
+};
 
-const formatCurrencyAmount = (value: number, currency = "KES") =>
-  `${currency} ${value.toLocaleString()}`;
-
-const formatBudget = (budget?: number | BudgetRange, unit?: string) => {
-  if (budget === undefined || budget === null) return "Negotiable";
-
-  if (typeof budget === "number") {
-    return `${formatCurrencyAmount(budget)}${unit ? `/${unit}` : ""}`;
-  }
-
-  const minValue = Number(budget.min);
-  const maxValue = Number(budget.max);
-  const currency = budget.currency || "KES";
-  const hasMin = Number.isFinite(minValue) && minValue > 0;
-  const hasMax = Number.isFinite(maxValue) && maxValue > 0;
-
-  if (hasMin && hasMax) {
-    return `${formatCurrencyAmount(minValue, currency)} - ${formatCurrencyAmount(maxValue, currency)}${unit ? `/${unit}` : ""}`;
-  }
-
-  if (hasMin) {
-    return `From ${formatCurrencyAmount(minValue, currency)}${unit ? `/${unit}` : ""}`;
-  }
-
-  if (hasMax) {
-    return `Up to ${formatCurrencyAmount(maxValue, currency)}${unit ? `/${unit}` : ""}`;
-  }
-
-  return "Negotiable";
+const formatBudgetRange = (budget?: { min?: number; max?: number; currency?: string }) => {
+  if (!budget) return 'Negotiable';
+  const currency = budget.currency || 'KES';
+  const min = typeof budget.min === 'number' ? budget.min.toLocaleString() : '-';
+  const max = typeof budget.max === 'number' ? budget.max.toLocaleString() : '-';
+  if (min === '-' && max === '-') return 'Negotiable';
+  return `${currency} ${min} - ${max}`;
 };
 
 const BuyerRequestDetails: React.FC = () => {
@@ -100,81 +77,73 @@ const BuyerRequestDetails: React.FC = () => {
   const [submitted, setSubmitted] = useState(false);
   const [markingFulfilled, setMarkingFulfilled] = useState(false);
 
-  // Try to get request from route state for instant paint, then hydrate from API.
+  // Try to get request from location state first
   const initialRequest = (location.state as any)?.request;
 
+  // Helper: Get auth token
   const getAuthToken = (): string | null => {
     return localStorage.getItem("kodisha_token") || localStorage.getItem("kodisha_admin_token");
   };
 
-  const buildAuthHeaders = useCallback((): Record<string, string> => {
-    const token = getAuthToken();
-    if (!token) return {};
-    return { Authorization: `Bearer ${token}` };
-  }, []);
-
-  const fetchRequestDetails = useCallback(
-    async (showLoader: boolean) => {
-      if (!id) {
-        setError("Invalid request ID");
-        if (showLoader) setLoading(false);
-        return;
-      }
-
+  useEffect(() => {
+    const fetchRequest = async () => {
       try {
-        if (showLoader) setLoading(true);
+        setLoading(true);
+        
+        // If we have request from state, use it
+        if (initialRequest) {
+          setRequest(initialRequest);
+          setLoading(false);
+          return;
+        }
 
-        const response = await fetch(`${API_BASE_URL}/buyer-requests/${id}`, {
-          headers: buildAuthHeaders(),
-        });
+        // Otherwise fetch from API
+        if (!id) {
+          setError('Invalid request ID');
+          setLoading(false);
+          return;
+        }
+
+        const response = await fetch(
+          `${API_BASE_URL}/buyer-requests/${id}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${getAuthToken()}`,
+            }
+          }
+        );
 
         if (!response.ok) {
           if (response.status === 404) {
-            setError("Buy request not found");
+            setError('Buy request not found');
           } else {
             setError(`Failed to load request: ${response.statusText}`);
           }
-          if (showLoader) setLoading(false);
+          setLoading(false);
           return;
         }
 
         const data = await response.json();
         setRequest(data.data);
-        setError(null);
+        setLoading(false);
       } catch (err) {
-        console.error("Error fetching buyer request:", err);
-        setError(err instanceof Error ? err.message : "Failed to load request");
+        console.error('Error fetching buyer request:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load request');
+        setLoading(false);
+        // Report to Sentry for monitoring
         try {
           Sentry.captureException(err);
-        } catch {
-          // Ignore telemetry issues
+        } catch (e) {
+          // Silently ignore Sentry errors
         }
-      } finally {
-        if (showLoader) setLoading(false);
       }
-    },
-    [buildAuthHeaders, id]
-  );
+    };
 
-  useEffect(() => {
-    if (initialRequest) {
-      setRequest(initialRequest);
-      setLoading(false);
-    }
-  }, [initialRequest]);
-
-  useEffect(() => {
-    void fetchRequestDetails(!initialRequest);
-    const intervalId = window.setInterval(() => {
-      void fetchRequestDetails(false);
-    }, CONTACT_POLL_INTERVAL_MS);
-
-    return () => window.clearInterval(intervalId);
-  }, [fetchRequestDetails, initialRequest]);
+    fetchRequest();
+  }, [id, initialRequest]);
 
   const handleReplySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
 
     if (!replyMessage.trim()) {
       setError('Please enter a message');
@@ -188,7 +157,6 @@ const BuyerRequestDetails: React.FC = () => {
 
     try {
       setSubmitting(true);
-      const messageToSend = replyMessage.trim();
 
       const response = await fetch(
         `${API_BASE_URL}/buyer-requests/${request._id}/respond`,
@@ -196,10 +164,10 @@ const BuyerRequestDetails: React.FC = () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            ...buildAuthHeaders(),
+            'Authorization': `Bearer ${getAuthToken()}`,
           },
           body: JSON.stringify({
-            message: messageToSend,
+            message: replyMessage.trim(),
           })
         }
       );
@@ -209,20 +177,6 @@ const BuyerRequestDetails: React.FC = () => {
         throw new Error(errorData.message || `Failed to submit reply: ${response.statusText}`);
       }
 
-      const result = await response.json();
-      const createdResponse = result?.data as BuyerRequestResponse | undefined;
-
-      if (createdResponse?._id) {
-        setRequest((prev) => {
-          if (!prev) return prev;
-          const existing = prev.responses || [];
-          const alreadyExists = existing.some((item) => item._id === createdResponse._id);
-          return alreadyExists
-            ? prev
-            : { ...prev, responses: [createdResponse, ...existing] };
-        });
-      }
-
       // Success
       setSubmitted(true);
       setReplyMessage('');
@@ -230,8 +184,20 @@ const BuyerRequestDetails: React.FC = () => {
         setSubmitted(false);
       }, 3000);
 
-      // Refresh in the background so server data stays canonical.
-      await fetchRequestDetails(false);
+      // Refresh the request to show the new response
+      const refreshResponse = await fetch(
+        `${API_BASE_URL}/buyer-requests/${request._id}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${getAuthToken()}`,
+          }
+        }
+      );
+
+      if (refreshResponse.ok) {
+        const refreshData = await refreshResponse.json();
+        setRequest(refreshData.data);
+      }
     } catch (err) {
       console.error('Error submitting reply:', err);
       setError(err instanceof Error ? err.message : 'Failed to submit reply');
@@ -244,7 +210,6 @@ const BuyerRequestDetails: React.FC = () => {
   const handleMarkFulfilled = async () => {
     if (!request) return;
 
-    setError(null);
     setMarkingFulfilled(true);
     try {
       const response = await fetch(
@@ -253,7 +218,7 @@ const BuyerRequestDetails: React.FC = () => {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            ...buildAuthHeaders(),
+            'Authorization': `Bearer ${getAuthToken()}`,
           },
         }
       );
@@ -318,11 +283,7 @@ const BuyerRequestDetails: React.FC = () => {
     );
   }
 
-  const currentUserId = user?._id || user?.id;
-  const isOwnRequest = !!currentUserId && currentUserId === request.userId._id;
-  const buyerPhone = request.contactPhone || request.userId.phone;
-  const budgetLabel = formatBudget(request.budget, request.unit);
-  const messageBuyerPath = `/messages?userId=${request.userId._id}`;
+  const isOwnRequest = user?._id === request.userId._id;
 
   return (
     <div className="flex-1 py-8">
@@ -332,7 +293,7 @@ const BuyerRequestDetails: React.FC = () => {
             onClick={() => navigate('/request')}
             className="mb-6 flex items-center text-green-600 hover:text-green-700 font-semibold transition"
           >
-            <span className="mr-2">&lt;</span> Back to Buy Requests
+            <span className="mr-2">←</span> Back to Buy Requests
           </button>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -348,11 +309,9 @@ const BuyerRequestDetails: React.FC = () => {
                         {request.category}
                       </span>
                       <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
-                        request.urgency === 'urgent' ? 'bg-red-100 text-red-800' :
-                        request.urgency === 'high' ? 'bg-orange-100 text-orange-800' :
-                        'bg-blue-100 text-blue-800'
+                        getUrgencyBadgeStyles(request.urgency)
                       }`}>
-                        {request.urgency?.charAt(0).toUpperCase() + request.urgency?.slice(1) || 'Normal'}
+                        {getUrgencyLabel(request.urgency)}
                       </span>
                     </div>
                   </div>
@@ -373,10 +332,14 @@ const BuyerRequestDetails: React.FC = () => {
                       {request.location.constituency && `, ${request.location.constituency}`}
                     </p>
                   </div>
-                  <div>
-                    <p className="text-gray-500 text-sm">Budget</p>
-                    <p className="text-gray-800 font-semibold">{budgetLabel}</p>
-                  </div>
+                  {request.budget && (
+                    <div>
+                      <p className="text-gray-500 text-sm">Budget</p>
+                      <p className="text-gray-800 font-semibold">
+                        {formatBudgetRange(request.budget)}
+                      </p>
+                    </div>
+                  )}
                   {request.quantity && (
                     <div>
                       <p className="text-gray-500 text-sm">Quantity Needed</p>
@@ -433,30 +396,17 @@ const BuyerRequestDetails: React.FC = () => {
                     )}
                   </div>
                 </div>
-                {(buyerPhone || request.userId.email) && (
-                  <div className="mt-3 text-sm text-gray-700">
-                    {buyerPhone && <p>Phone: {buyerPhone}</p>}
-                    {!buyerPhone && request.userId.email && <p>Email: {request.userId.email}</p>}
-                  </div>
-                )}
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {buyerPhone && (
+                {/* Call/Contact Options */}
+                {request.userId.phone && (
+                  <div className="mt-4 flex gap-2">
                     <a
-                      href={`tel:${normalizePhoneForTel(buyerPhone)}`}
-                      className="flex-1 min-w-[140px] px-3 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 text-center"
+                      href={`tel:${request.userId.phone}`}
+                      className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 text-center"
                     >
                       Call Buyer
                     </a>
-                  )}
-                  {user && !isOwnRequest && (
-                    <Link
-                      to={messageBuyerPath}
-                      className="flex-1 min-w-[140px] px-3 py-2 border border-blue-200 bg-blue-50 text-blue-700 rounded-lg text-sm font-semibold hover:bg-blue-100 text-center"
-                    >
-                      Message Buyer
-                    </Link>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
 
               {/* Mark as Fulfilled Button */}
@@ -467,23 +417,23 @@ const BuyerRequestDetails: React.FC = () => {
                       <h3 className="text-lg font-bold text-gray-800">Order Status</h3>
                       <p className="text-sm text-gray-600 mt-1">Mark this order as fulfilled when complete</p>
                     </div>
-                                        <button
+                    <button
                       onClick={handleMarkFulfilled}
-                      disabled={markingFulfilled || request.status !== "active"}
+                      disabled={markingFulfilled}
                       className={`${
-                        markingFulfilled || request.status !== "active"
+                        markingFulfilled
                           ? 'bg-gray-400 cursor-not-allowed'
                           : 'bg-orange-600 hover:bg-orange-700'
                       } text-white font-semibold py-2 px-6 rounded-lg transition flex items-center gap-2`}
                     >
                       {markingFulfilled ? (
                         <>
-                          <span className="animate-spin">...</span> Marking...
+                          <span className="animate-spin">⏳</span> Marking...
                         </>
-                      ) : request.status !== "active" ? (
-                        <>Fulfilled</>
                       ) : (
-                        <>Mark as Fulfilled</>
+                        <>
+                          <span>✓</span> Mark as Fulfilled
+                        </>
                       )}
                     </button>
                   </div>
@@ -511,26 +461,6 @@ const BuyerRequestDetails: React.FC = () => {
                         <p className="text-gray-700 leading-relaxed">
                           {response.message}
                         </p>
-                        {(response.sellerPhone || response.sellerId) && (
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            {response.sellerPhone && (
-                              <a
-                                href={`tel:${normalizePhoneForTel(response.sellerPhone)}`}
-                                className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
-                              >
-                                Call seller
-                              </a>
-                            )}
-                            {user && response.sellerId && response.sellerId !== currentUserId && (
-                              <Link
-                                to={`/messages?userId=${response.sellerId}`}
-                                className="rounded-md border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100"
-                              >
-                                Message seller
-                              </Link>
-                            )}
-                          </div>
-                        )}
                       </div>
                     ))}
                   </div>
@@ -546,14 +476,8 @@ const BuyerRequestDetails: React.FC = () => {
                     This is your buy request. You cannot reply to your own request.
                   </p>
                   <p className="text-sm text-gray-600 mt-2">
-                    New responses refresh automatically every few seconds. Use the response cards to call or message sellers.
+                    You can view and manage your responses from the requests dashboard.
                   </p>
-                  <Link
-                    to="/messages"
-                    className="mt-4 inline-flex w-full items-center justify-center rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-100"
-                  >
-                    Open Messages
-                  </Link>
                 </div>
               ) : (
                 <div className="bg-white rounded-lg shadow-md p-6 sticky top-4">
@@ -561,7 +485,9 @@ const BuyerRequestDetails: React.FC = () => {
 
                   {submitted && (
                     <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                      <p className="text-green-800 font-semibold">Reply submitted successfully.</p>
+                      <p className="text-green-800 font-semibold">
+                        ✓ Reply submitted successfully!
+                      </p>
                     </div>
                   )}
 
@@ -577,7 +503,7 @@ const BuyerRequestDetails: React.FC = () => {
                         Please log in to reply to this buy request.
                       </p>
                       <button
-                        onClick={() => navigate(`/login?next=/request/${request._id}`)}
+                        onClick={() => navigate('/login')}
                         className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition"
                       >
                         Log In
@@ -608,14 +534,8 @@ const BuyerRequestDetails: React.FC = () => {
                       </button>
 
                       <p className="text-xs text-gray-500 text-center">
-                        Replies are saved here and also start a direct message thread.
+                        The buyer will see your message and can contact you directly.
                       </p>
-                      <Link
-                        to={messageBuyerPath}
-                        className="block text-center text-sm font-semibold text-blue-700 hover:text-blue-800"
-                      >
-                        Open chat with buyer
-                      </Link>
                     </form>
                   )}
                 </div>
@@ -628,5 +548,3 @@ const BuyerRequestDetails: React.FC = () => {
 };
 
 export default BuyerRequestDetails;
-
-

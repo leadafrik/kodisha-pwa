@@ -11,7 +11,7 @@ interface BuyerRequest {
   description: string;
   category: "produce" | "service" | "inputs";
   productType?: string;
-  budget?: { min?: number; max?: number; currency?: string };
+  budget?: { min: number; max: number; currency: string };
   quantity?: number;
   unit?: string;
   location: { county: string; constituency?: string; ward?: string };
@@ -132,19 +132,9 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
     setPage(1);
   };
 
-  const formatBudget = (budget?: { min?: number; max?: number; currency?: string }) => {
+  const formatBudget = (budget?: { min: number; max: number; currency: string }) => {
     if (!budget) return "Negotiable";
-
-    const min = Number(budget.min);
-    const max = Number(budget.max);
-    const currency = budget.currency || "KES";
-    const hasMin = Number.isFinite(min) && min > 0;
-    const hasMax = Number.isFinite(max) && max > 0;
-
-    if (hasMin && hasMax) return `${currency} ${min.toLocaleString()} - ${max.toLocaleString()}`;
-    if (hasMin) return `From ${currency} ${min.toLocaleString()}`;
-    if (hasMax) return `Up to ${currency} ${max.toLocaleString()}`;
-    return "Negotiable";
+    return `${budget.currency} ${budget.min.toLocaleString()} - ${budget.max.toLocaleString()}`;
   };
 
   const formatDate = (date: string) => {
@@ -197,32 +187,31 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
         <div className="absolute -top-24 left-1/3 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
         <div className="absolute -bottom-16 right-0 h-72 w-72 rounded-full bg-amber-200/40 blur-3xl" />
 
-        <div className="max-w-6xl mx-auto px-4 pt-12 pb-8">
+        <div className="max-w-6xl mx-auto px-4 pt-10 md:pt-12 pb-8">
           <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] items-center">
             <div className="space-y-4 fade-rise">
               <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">
-                Agrisoko Buy Requests
+                Agrisoko Demand Board
               </p>
-              <h1 className="buy-hero-title text-4xl md:text-5xl text-slate-900">
-                Connect with buyers who are ready to purchase now
+              <h1 className="buy-hero-title text-3xl sm:text-4xl md:text-5xl text-slate-900">
+                Find buyers ready to buy
               </h1>
               <p className="text-base text-slate-600 max-w-xl">
-                Scan real demand, reply fast, and win repeat business. Filter by county, urgency,
-                or category to find the right match today.
+                Browse live demand and respond quickly.
               </p>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={() =>
                     navigate(user ? "/request/new" : "/login?next=/request/new")
                   }
-                  className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition"
+                  className="inline-flex w-full sm:w-auto justify-center items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200/60 hover:bg-emerald-700 transition"
                 >
                   <Plus size={18} />
-                  Post a Request
+                  Post Demand
                 </button>
                 <Link
                   to="/browse"
-                  className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-white px-5 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 transition"
+                  className="inline-flex w-full sm:w-auto justify-center items-center gap-2 rounded-xl border border-emerald-200 bg-white px-5 py-3 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 transition"
                 >
                   Browse Listings
                 </Link>
@@ -233,19 +222,19 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
               <div className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm">
                 <p className="text-xs text-slate-500 uppercase tracking-wider">Active requests</p>
                 <p className="text-2xl font-semibold text-slate-900">{pagination.total}</p>
-                <p className="text-xs text-slate-500">Across Kenya</p>
+                <p className="text-xs text-slate-500">Nationwide</p>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm">
                 <p className="text-xs text-slate-500 uppercase tracking-wider">Urgent this week</p>
                 <p className="text-2xl font-semibold text-slate-900">
                   {requests.filter((req) => req.urgency === "high").length}
                 </p>
-                <p className="text-xs text-slate-500">Ready to close fast</p>
+                <p className="text-xs text-slate-500">High priority</p>
               </div>
-              <div className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm sm:col-span-2">
+              <div className="hidden sm:block rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm sm:col-span-2">
                 <p className="text-xs text-slate-500 uppercase tracking-wider">Your filter focus</p>
                 <p className="text-sm text-slate-700">
-                  {activeFilters.length ? activeFilters.join(" - ") : "All categories, all counties, all urgency"}
+                  {activeFilters.length ? activeFilters.join(" - ") : "All requests"}
                 </p>
               </div>
             </div>
@@ -268,9 +257,9 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                 className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
               >
                 <option value="">All Categories</option>
-                <option value="produce">Agricultural Produce</option>
+                <option value="produce">Produce</option>
                 <option value="inputs">Farm Inputs</option>
-                <option value="service">Agricultural Services</option>
+                <option value="service">Services</option>
               </select>
             </div>
 
@@ -305,9 +294,9 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                 className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
               >
                 <option value="">All Urgency Levels</option>
-                <option value="low">Low - Can Wait</option>
-                <option value="medium">Medium - Within a Week</option>
-                <option value="high">High - Urgent</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
               </select>
             </div>
 
@@ -356,12 +345,8 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
           </div>
         ) : requests.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-slate-600 text-lg">
-              No buyer requests found matching your filters.
-            </p>
-            <p className="text-slate-500">
-              Try adjusting your filters or check back later.
-            </p>
+            <p className="text-slate-600 text-lg">No matching requests.</p>
+            <p className="text-slate-500">Try different filters.</p>
           </div>
         ) : !Array.isArray(requests) ? (
           <div className="text-center py-16">
@@ -495,10 +480,8 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
 
         <div className="mt-16 p-8 rounded-3xl bg-gradient-to-r from-white via-emerald-50 to-amber-50 border border-emerald-100">
           <div className="max-w-4xl mx-auto text-center">
-            <h3 className="text-2xl font-bold text-slate-900 mb-3">Looking to Buy Instead?</h3>
-            <p className="text-slate-600 mb-6">
-              Browse thousands of products and services from verified sellers across Kenya. Find exactly what you need with direct connections to farmers and producers.
-            </p>
+            <h3 className="text-2xl font-bold text-slate-900 mb-3">Need products instead?</h3>
+            <p className="text-slate-600 mb-6">Switch to marketplace listings and contact sellers directly.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 to="/browse"
@@ -510,7 +493,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                 to={user ? "/create-listing" : "/login?next=/create-listing"}
                 className="inline-flex justify-center items-center px-6 py-3 rounded-xl border-2 border-emerald-600 text-emerald-700 font-semibold hover:bg-emerald-50 transition"
               >
-                Post a Buy Request
+                Create Listing
               </Link>
             </div>
           </div>

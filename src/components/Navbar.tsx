@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import NotificationCenter from "./NotificationCenter";
@@ -9,45 +9,11 @@ const Chevron: React.FC = () => (
   </svg>
 );
 
-const WHATSAPP_COMMUNITY_URL = "https://chat.whatsapp.com/HzCaV5YVz86CjwajiOHR5i";
-const WHATSAPP_BANNER_CLICKED_AT_KEY = "agrisoko_whatsapp_banner_clicked_at";
-const WHATSAPP_BANNER_DISMISSED_KEY = "agrisoko_whatsapp_banner_dismissed";
-const WHATSAPP_BANNER_HIDE_MS = 50 * 60 * 1000;
-
-const shouldShowWhatsAppBanner = () => {
-  if (typeof window === "undefined") return true;
-
-  if (window.localStorage.getItem(WHATSAPP_BANNER_DISMISSED_KEY) === "1") return false;
-
-  const clickedAtRaw = window.localStorage.getItem(WHATSAPP_BANNER_CLICKED_AT_KEY);
-  if (!clickedAtRaw) return true;
-
-  const clickedAt = Number(clickedAtRaw);
-  if (!Number.isFinite(clickedAt)) {
-    window.localStorage.removeItem(WHATSAPP_BANNER_CLICKED_AT_KEY);
-    return true;
-  }
-
-  const disappearAt = clickedAt + WHATSAPP_BANNER_HIDE_MS;
-  if (Date.now() >= disappearAt) {
-    window.localStorage.setItem(WHATSAPP_BANNER_DISMISSED_KEY, "1");
-    window.localStorage.removeItem(WHATSAPP_BANNER_CLICKED_AT_KEY);
-    return false;
-  }
-
-  return true;
-};
-
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [listOpen, setListOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [showWhatsAppBanner, setShowWhatsAppBanner] = useState<boolean>(() =>
-    shouldShowWhatsAppBanner()
-  );
   const listCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const userMenuRef = useRef<HTMLDivElement | null>(null);
 
   const closeMobile = () => setMobileOpen(false);
   const scheduleListClose = () => {
@@ -64,116 +30,17 @@ const Navbar: React.FC = () => {
     }
   };
 
-  const isAdminUser =
-    !!user &&
-    (["admin", "super_admin", "moderator"].includes((user.role || "").toLowerCase()) ||
-      user.type === "admin" ||
-      ((user as any).userType || "").toLowerCase() === "admin");
-
-  useEffect(() => {
-    return () => {
-      if (listCloseTimer.current) {
-        clearTimeout(listCloseTimer.current);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleMouseDown = (event: MouseEvent) => {
-      const target = event.target as Node;
-      if (userMenuRef.current && !userMenuRef.current.contains(target)) {
-        setUserMenuOpen(false);
-      }
-    };
-
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setListOpen(false);
-        setUserMenuOpen(false);
-        setMobileOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleMouseDown);
-    document.addEventListener("keydown", handleEscape);
-
-    return () => {
-      document.removeEventListener("mousedown", handleMouseDown);
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!showWhatsAppBanner) return;
-
-    if (window.localStorage.getItem(WHATSAPP_BANNER_DISMISSED_KEY) === "1") {
-      setShowWhatsAppBanner(false);
-      return;
-    }
-
-    const clickedAtRaw = window.localStorage.getItem(WHATSAPP_BANNER_CLICKED_AT_KEY);
-    if (!clickedAtRaw) return;
-
-    const clickedAt = Number(clickedAtRaw);
-    if (!Number.isFinite(clickedAt)) {
-      window.localStorage.removeItem(WHATSAPP_BANNER_CLICKED_AT_KEY);
-      return;
-    }
-
-    const remainingMs = clickedAt + WHATSAPP_BANNER_HIDE_MS - Date.now();
-    if (remainingMs <= 0) {
-      window.localStorage.setItem(WHATSAPP_BANNER_DISMISSED_KEY, "1");
-      window.localStorage.removeItem(WHATSAPP_BANNER_CLICKED_AT_KEY);
-      setShowWhatsAppBanner(false);
-      return;
-    }
-
-    const dismissTimer = window.setTimeout(() => {
-      window.localStorage.setItem(WHATSAPP_BANNER_DISMISSED_KEY, "1");
-      window.localStorage.removeItem(WHATSAPP_BANNER_CLICKED_AT_KEY);
-      setShowWhatsAppBanner(false);
-    }, remainingMs);
-
-    return () => {
-      window.clearTimeout(dismissTimer);
-    };
-  }, [showWhatsAppBanner]);
-
-  const handleWhatsAppBannerClick = () => {
-    if (window.localStorage.getItem(WHATSAPP_BANNER_DISMISSED_KEY) === "1") {
-      setShowWhatsAppBanner(false);
-      return;
-    }
-
-    if (!window.localStorage.getItem(WHATSAPP_BANNER_CLICKED_AT_KEY)) {
-      window.localStorage.setItem(WHATSAPP_BANNER_CLICKED_AT_KEY, String(Date.now()));
-    }
-  };
-
   return (
     <>
       {/* GLOBAL NAVBAR */}
       <nav className="bg-white shadow-sm border-b border-[#A0452E]/20 sticky top-0 z-40">
         <div className="h-1 w-full bg-[#A0452E]"></div>
-        {showWhatsAppBanner && (
-          <div className="bg-emerald-600 px-3 py-2 text-center">
-            <a
-              href={WHATSAPP_COMMUNITY_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={handleWhatsAppBannerClick}
-              className="inline-block text-sm font-extrabold tracking-wide text-white underline underline-offset-2 hover:text-emerald-100"
-            >
-              Join our Whatsapp Community Now !
-            </a>
-          </div>
-        )}
 
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center py-4">
             {/* LOGO */}
             <Link to="/" className="flex items-center gap-3">
-              <img src="/logo.svg" alt="" aria-hidden="true" className="h-10 w-10" />
+              <img src="/logo.svg" alt="Agrisoko" className="h-10 w-10" />
               <span className="text-2xl font-extrabold text-gray-800 tracking-tight">Agrisoko</span>
             </Link>
 
@@ -197,7 +64,7 @@ const Navbar: React.FC = () => {
 
               <Link 
                 to="/about" 
-                className="px-4 py-2 rounded-lg hover:bg-gray-100 transition text-gray-700 font-semibold text-sm"
+                className="px-4 py-2 rounded-lg hover:bg-gray-100 transition text-gray-700 font-semibold text-sm min-h-[44px] flex items-center"
               >
                 About
               </Link>
@@ -213,15 +80,11 @@ const Navbar: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setListOpen((prev) => !prev)}
-                  aria-haspopup="menu"
-                  aria-expanded={listOpen}
-                  aria-controls="list-menu"
-                  className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition font-semibold flex items-center gap-2"
+                  className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition font-semibold flex items-center gap-2 min-h-[44px]"
                 >
                   + List <Chevron />
                 </button>
                 <div
-                  id="list-menu"
                   className={`absolute ${listOpen ? "block" : "hidden"} bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 z-50`}
                   onMouseEnter={cancelListClose}
                   onMouseLeave={scheduleListClose}
@@ -242,7 +105,7 @@ const Navbar: React.FC = () => {
                         className="block px-4 py-3 hover:bg-blue-50"
                         onClick={() => setListOpen(false)}
                       >
-                        <div className="font-semibold text-blue-700">Post buy request</div>
+                        <div className="font-semibold text-blue-700">Post demand</div>
                         <p className="text-sm text-gray-600">Looking to buy something?</p>
                       </Link>
                     </>
@@ -262,7 +125,7 @@ const Navbar: React.FC = () => {
                         className="block px-4 py-3 hover:bg-blue-50"
                         onClick={() => setListOpen(false)}
                       >
-                        <div className="font-semibold text-blue-700">Post buy request</div>
+                        <div className="font-semibold text-blue-700">Post demand</div>
                         <p className="text-sm text-gray-600">Looking to buy something?</p>
                       </Link>
                     </>
@@ -276,20 +139,8 @@ const Navbar: React.FC = () => {
                   <NotificationCenter />
 
                   {/* USER DROPDOWN */}
-                  <div
-                    ref={userMenuRef}
-                    className="relative"
-                    onMouseEnter={() => setUserMenuOpen(true)}
-                    onMouseLeave={() => setUserMenuOpen(false)}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setUserMenuOpen((prev) => !prev)}
-                      aria-haspopup="menu"
-                      aria-expanded={userMenuOpen}
-                      aria-controls="user-menu"
-                      className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition flex items-center gap-2 font-semibold text-gray-800"
-                    >
+                  <div className="group relative">
+                    <button className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition flex items-center gap-2 font-semibold text-gray-800">
                       <span className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden">
                         {user.profilePicture ? (
                           <img src={user.profilePicture} alt={user.name} className="w-full h-full object-cover" />
@@ -301,58 +152,51 @@ const Navbar: React.FC = () => {
                       <Chevron />
                     </button>
 
-                    <div
-                      id="user-menu"
-                      className={`absolute ${userMenuOpen ? "block" : "hidden"} bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 right-0 z-50`}
-                    >
+                    <div className="absolute hidden group-hover:block bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 right-0 z-50">
                       <div className="px-4 py-3 border-b bg-gray-50">
                         <div className="font-semibold truncate">{user.name || "User"}</div>
                         <div className="text-sm text-gray-600 truncate">{user.email}</div>
                       </div>
 
-                      <Link to="/profile" onClick={() => setUserMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50 border-b">
+                      <Link to="/profile" className="block px-4 py-3 hover:bg-gray-50 border-b">
                         <div className="font-semibold">Dashboard</div>
                       </Link>
-                      <Link to="/messages" onClick={() => setUserMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50 border-b">
+                      <Link to="/messages" className="block px-4 py-3 hover:bg-gray-50 border-b">
                         <div className="font-semibold">Messages</div>
                       </Link>
-                      <Link to="/favorites" onClick={() => setUserMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50 border-b">
+                      <Link to="/favorites" className="block px-4 py-3 hover:bg-gray-50 border-b">
                         <div className="font-semibold">Saved Listings</div>
                       </Link>
 
-                      {isAdminUser ? (
+                      {user.role === 'admin' || user.type === 'admin' ? (
                         <>
-                          <Link to="/admin/listings-approval" onClick={() => setUserMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50 border-b">
+                          <Link to="/admin/listings-approval" className="block px-4 py-3 hover:bg-gray-50 border-b">
                             <div className="font-semibold">Listing Approvals</div>
                           </Link>
-                          <Link to="/admin/listing-management" onClick={() => setUserMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50 border-b">
+                          <Link to="/admin/listing-management" className="block px-4 py-3 hover:bg-gray-50 border-b">
                             <div className="font-semibold">Listing Management</div>
                           </Link>
-                          <Link to="/admin/id-verification" onClick={() => setUserMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50 border-b">
+                          <Link to="/admin/id-verification" className="block px-4 py-3 hover:bg-gray-50 border-b">
                             <div className="font-semibold">ID Verification</div>
                           </Link>
-                          <Link to="/admin/reports" onClick={() => setUserMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50 border-b">
+                          <Link to="/admin/reports" className="block px-4 py-3 hover:bg-gray-50 border-b">
                             <div className="font-semibold">User Reports</div>
                           </Link>
-                          <Link to="/admin/profile-verification" onClick={() => setUserMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50 border-b">
+                          <Link to="/admin/profile-verification" className="block px-4 py-3 hover:bg-gray-50 border-b">
                             <div className="font-semibold">Profile Verification</div>
                           </Link>
-                          <Link to="/admin/analytics" onClick={() => setUserMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50 border-b">
+                          <Link to="/admin/analytics" className="block px-4 py-3 hover:bg-gray-50 border-b">
                             <div className="font-semibold">Analytics</div>
                           </Link>
                         </>
                       ) : null}
 
                       <div className="border-b">
-                        <Link to="/create-listing" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2 hover:bg-gray-50 text-sm">Create Listing</Link>
+                        <Link to="/create-listing" className="block px-4 py-2 hover:bg-gray-50 text-sm">Create Listing</Link>
                       </div>
 
                       <button
-                        type="button"
-                        onClick={() => {
-                          setUserMenuOpen(false);
-                          logout();
-                        }}
+                        onClick={logout}
                         className="w-full text-left px-4 py-3 hover:bg-red-50 text-red-600 font-semibold"
                       >
                         Logout
@@ -362,7 +206,7 @@ const Navbar: React.FC = () => {
                 </div>
               ) : (
                 <div className="flex items-center gap-4">
-                  <Link to="/login" className="px-5 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 font-semibold transition">
+                  <Link to="/login" className="px-5 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 font-semibold transition min-h-[44px] flex items-center">
                     Login
                   </Link>
                 </div>
@@ -370,13 +214,12 @@ const Navbar: React.FC = () => {
             </div>
 
             {/* MOBILE MENU ICON */}
-            <button
-              type="button"
-              className="lg:hidden flex flex-col gap-1"
+            <button 
+              className="lg:hidden flex flex-col gap-1 p-3 -mr-3 min-h-[48px] min-w-[48px] items-center justify-center"
               onClick={() => setMobileOpen(true)}
               aria-label="Open menu"
               aria-expanded={mobileOpen}
-              aria-controls="mobile-menu"
+              aria-haspopup="menu"
             >
               <span className="w-6 h-0.5 bg-gray-900"></span>
               <span className="w-6 h-0.5 bg-gray-900"></span>
@@ -390,61 +233,157 @@ const Navbar: React.FC = () => {
       {mobileOpen && (
         <div className="fixed inset-0 bg-black/50 z-50" onClick={closeMobile}>
           <div
-            id="mobile-menu"
             className="absolute top-0 left-0 h-full w-72 bg-white shadow-xl p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-8">
               <span className="text-xl font-bold">Menu</span>
-              <button type="button" onClick={closeMobile} aria-label="Close menu" className="text-2xl leading-none">
-                <span aria-hidden="true">&times;</span>
+              <button onClick={closeMobile} aria-label="Close menu" className="text-2xl leading-none">
+                ×
               </button>
             </div>
 
-            <div className="flex flex-col gap-4 text-lg font-medium">
+            <div className="flex flex-col gap-1 text-lg font-medium">
               {/* Browse Toggle for Mobile */}
-              <div className="flex flex-col gap-2 bg-gray-100 rounded-lg p-2">
-                <Link to="/browse" onClick={closeMobile} className="px-3 py-2 rounded hover:bg-white transition font-semibold">
+              <div className="flex flex-col gap-1 bg-gray-100 rounded-lg p-2">
+                <Link 
+                  to="/browse" 
+                  onClick={closeMobile} 
+                  className="px-3 py-3 rounded hover:bg-white transition font-semibold min-h-[48px] flex items-center"
+                >
                   Browse Listings
                 </Link>
-                <Link to="/request" onClick={closeMobile} className="px-3 py-2 rounded hover:bg-white transition font-semibold">
+                <Link 
+                  to="/request" 
+                  onClick={closeMobile} 
+                  className="px-3 py-3 rounded hover:bg-white transition font-semibold min-h-[48px] flex items-center"
+                >
                   Browse Buy Requests
                 </Link>
               </div>
-              <Link to="/about" onClick={closeMobile} className="px-3 py-2 font-semibold">
+              <Link 
+                to="/about" 
+                onClick={closeMobile} 
+                className="px-3 py-3 font-semibold min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
+              >
                 About Agrisoko
               </Link>
               <hr />
 
               {user ? (
                 <>
-                  <Link to="/profile" onClick={closeMobile}>Dashboard</Link>
-                  <Link to="/messages" onClick={closeMobile}>Messages</Link>
-                  <Link to="/favorites" onClick={closeMobile}>Saved Listings</Link>
-                  {isAdminUser ? (
+                  <Link 
+                    to="/profile" 
+                    onClick={closeMobile}
+                    className="px-3 py-3 min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
+                  >
+                    Dashboard
+                  </Link>
+                  <Link 
+                    to="/messages" 
+                    onClick={closeMobile}
+                    className="px-3 py-3 min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
+                  >
+                    Messages
+                  </Link>
+                  <Link 
+                    to="/favorites" 
+                    onClick={closeMobile}
+                    className="px-3 py-3 min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
+                  >
+                    Saved Listings
+                  </Link>
+                  {user.role === 'admin' || user.type === 'admin' ? (
                     <>
-                      <Link to="/admin/listings-approval" onClick={closeMobile}>Listing Approvals</Link>
-                      <Link to="/admin/listing-management" onClick={closeMobile}>Listing Management</Link>
-                      <Link to="/admin/id-verification" onClick={closeMobile}>ID Verification</Link>
-                      <Link to="/admin/reports" onClick={closeMobile}>User Reports</Link>
-                      <Link to="/admin/profile-verification" onClick={closeMobile}>Profile Verification</Link>
-                      <Link to="/admin/analytics" onClick={closeMobile}>Analytics</Link>
+                      <div className="text-sm text-gray-600 font-semibold mt-2 mb-1">Admin</div>
+                      <Link 
+                        to="/admin/listings-approval" 
+                        onClick={closeMobile}
+                        className="px-3 py-3 text-base min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
+                      >
+                        Listing Approvals
+                      </Link>
+                      <Link 
+                        to="/admin/listing-management" 
+                        onClick={closeMobile}
+                        className="px-3 py-3 text-base min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
+                      >
+                        Listing Management
+                      </Link>
+                      <Link 
+                        to="/admin/id-verification" 
+                        onClick={closeMobile}
+                        className="px-3 py-3 text-base min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
+                      >
+                        ID Verification
+                      </Link>
+                      <Link 
+                        to="/admin/reports" 
+                        onClick={closeMobile}
+                        className="px-3 py-3 text-base min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
+                      >
+                        User Reports
+                      </Link>
+                      <Link 
+                        to="/admin/profile-verification" 
+                        onClick={closeMobile}
+                        className="px-3 py-3 text-base min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
+                      >
+                        Profile Verification
+                      </Link>
+                      <Link 
+                        to="/admin/analytics" 
+                        onClick={closeMobile}
+                        className="px-3 py-3 text-base min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
+                      >
+                        Analytics
+                      </Link>
                     </>
                   ) : null}
-                  <Link to="/create-listing" onClick={closeMobile}>List for sale</Link>
-                  <Link to="/request/new" onClick={closeMobile}>Post buy request</Link>
+                  <Link 
+                    to="/create-listing" 
+                    onClick={closeMobile}
+                    className="px-3 py-3 min-h-[48px] flex items-center rounded hover:bg-green-50 transition font-semibold text-green-600 mt-2"
+                  >
+                    List for sale
+                  </Link>
+                  <Link 
+                    to="/request/new" 
+                    onClick={closeMobile}
+                    className="px-3 py-3 min-h-[48px] flex items-center rounded hover:bg-green-50 transition font-semibold text-green-600"
+                  >
+                    Post demand
+                  </Link>
                   <button
                     onClick={() => { logout(); closeMobile(); }}
-                    className="text-left text-red-600 font-semibold mt-4"
+                    className="text-left px-3 py-3 text-red-600 font-semibold mt-4 min-h-[48px] flex items-center rounded hover:bg-red-50 transition"
                   >
                     Logout
                   </button>
                 </>
               ) : (
                 <>
-                  <Link to="/login" onClick={closeMobile}>Login</Link>
-                  <Link to="/login?next=/create-listing" onClick={closeMobile}>List for sale</Link>
-                  <Link to="/login?next=/request/new" onClick={closeMobile}>Post buy request</Link>
+                  <Link 
+                    to="/login" 
+                    onClick={closeMobile}
+                    className="px-3 py-3 min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
+                  >
+                    Login
+                  </Link>
+                  <Link 
+                    to="/login?next=/create-listing" 
+                    onClick={closeMobile}
+                    className="px-3 py-3 min-h-[48px] flex items-center rounded hover:bg-green-50 transition font-semibold text-green-600 mt-2"
+                  >
+                    List for sale
+                  </Link>
+                  <Link 
+                    to="/login?next=/request/new" 
+                    onClick={closeMobile}
+                    className="px-3 py-3 min-h-[48px] flex items-center rounded hover:bg-green-50 transition font-semibold text-green-600"
+                  >
+                    Post demand
+                  </Link>
                 </>
               )}
             </div>
@@ -456,4 +395,3 @@ const Navbar: React.FC = () => {
 };
 
 export default Navbar;
-

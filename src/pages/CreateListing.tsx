@@ -2,8 +2,9 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from "../data/kenyaCounties";
-import { API_ENDPOINTS } from "../config/api";
+import { API_BASE_URL } from "../config/api";
 import { AlertCircle, CheckCircle2, MapPin, Tag, Calendar, Camera, FileText } from "lucide-react";
+import { ErrorAlert } from "../components/ui";
 
 type ListingCategory = "produce" | "livestock" | "inputs" | "service";
 type ListingType = "sell" | "buy";
@@ -38,19 +39,7 @@ const LIVESTOCK_SUBCATEGORIES: LivestockSubcategory[] = ["cattle", "poultry", "g
 const INPUTS_SUBCATEGORIES: InputsSubcategory[] = ["fertilizer", "pesticides", "seeds", "tools", "equipment", "feeds", "other"];
 const SERVICE_SUBCATEGORIES: ServiceSubcategory[] = ["equipment_rental", "consulting", "labor", "transportation", "processing", "other"];
 
-const SERVICE_SUBCATEGORY_LABELS: Record<ServiceSubcategory, string> = {
-  equipment_rental: "Equipment Rental",
-  consulting: "Consulting",
-  labor: "Labor",
-  transportation: "Transportation",
-  processing: "Processing",
-  other: "Other",
-};
-
 const UNITS = ["kg", "bag", "ton", "bunch", "dozen", "piece", "liter", "gallon", "box", "crate"];
-const COMMISSION_WAIVER_END_ISO = "2026-03-08T20:59:59.999Z"; // 2026-03-08 23:59 EAT
-const PREMIUM_BADGE_PRICE_KES = 199;
-const SERVICE_PREMIUM_BOOST_OPTION = "premium_badge";
 
 const CATEGORY_DESCRIPTIONS = {
   produce: "Agricultural products like crops, fruits, and vegetables",
@@ -63,7 +52,7 @@ const DRAFT_STORAGE_KEY = "kodisha_listing_draft_v1";
 
 const CreateListing: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [form, setForm] = useState<ListingFormData>({
     step: 1,
     listingType: null,
@@ -93,6 +82,38 @@ const CreateListing: React.FC = () => {
   const [idVerified, setIdVerified] = useState(false);
   const [selfieVerified, setSelfieVerified] = useState(false);
   const [hasDraft, setHasDraft] = useState(false);
+  const verificationErrorMessage = "Please upload your ID and selfie before listing";
+  const verificationState = (user?.verification || {}) as {
+    idVerificationPending?: boolean;
+    idVerificationSubmitted?: boolean;
+  };
+  const hasPendingIdVerification =
+    !!verificationState.idVerificationPending || !!verificationState.idVerificationSubmitted;
+  const isVerificationPending =
+    hasPendingIdVerification && (!idVerified || !selfieVerified);
+  const requiresVerification = (!idVerified || !selfieVerified) && !isVerificationPending;
+  const verifyIdPath = "/verify-id?next=%2Fcreate-listing";
+
+  /**
+   * Check if user is actually verified in backend
+   */
+  const isUserVerified = () => {
+    const hasIdVerified = user?.verification?.idVerified === true;
+    const hasSelfieVerified = user?.verification?.selfieVerified === true;
+    
+    // Debug log
+    if (user?._id) {
+      console.debug('Verification Check:', {
+        userId: user._id,
+        idVerified: hasIdVerified,
+        selfieVerified: hasSelfieVerified,
+        canList: hasIdVerified && hasSelfieVerified
+      });
+    }
+    
+    // User can list if they have both verification flags
+    return hasIdVerified && hasSelfieVerified;
+  };
 
   // Pre-fill contact
   useEffect(() => {
@@ -101,6 +122,12 @@ const CreateListing: React.FC = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.phone]);
+
+  useEffect(() => {
+    if (user?._id) {
+      refreshUser();
+    }
+  }, [user?._id, refreshUser]);
 
   // Check for draft on load
   useEffect(() => {
@@ -129,11 +156,19 @@ const CreateListing: React.FC = () => {
   // Update verification status
   useEffect(() => {
     if (user?.verification) {
-      const approved = user.verification.status === "approved";
-      setIdVerified(approved || !!user.verification.idVerified);
-      setSelfieVerified(approved || !!user.verification.selfieVerified);
+      setIdVerified(!!user.verification.idVerified);
+      setSelfieVerified(!!user.verification.selfieVerified);
     }
   }, [user]);
+
+  useEffect(() => {
+    if (
+      (idVerified && selfieVerified) ||
+      (hasPendingIdVerification && error === verificationErrorMessage)
+    ) {
+      setError("");
+    }
+  }, [idVerified, selfieVerified, hasPendingIdVerification, error, verificationErrorMessage]);
 
   // Update constituencies when county changes
   useEffect(() => {
@@ -173,27 +208,11 @@ const CreateListing: React.FC = () => {
         return [];
     }
   }, [form.category]);
-  const isServiceCategory = form.category === "service";
-  const isFullyVerified = idVerified && selfieVerified;
-  const showQuantityFields =
-    form.category !== "inputs" && form.category !== "service";
 
   const commission = useMemo(() => {
     const price = Number(form.price) || 0;
     return Math.max(price * 0.005, 49);
   }, [form.price]);
-
-  const isCommissionWaived = useMemo(() => {
-    return Date.now() <= new Date(COMMISSION_WAIVER_END_ISO).getTime();
-  }, []);
-
-  const commissionWaiverEndsLabel = useMemo(() => {
-    return new Date(COMMISSION_WAIVER_END_ISO).toLocaleDateString("en-KE", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -263,7 +282,7 @@ const CreateListing: React.FC = () => {
         setError("Please enter a price");
         return false;
       }
-      if (showQuantityFields && !form.quantity) {
+      if (form.category !== "inputs" && !form.quantity) {
         setError("Please enter a quantity");
         return false;
       }
@@ -271,7 +290,7 @@ const CreateListing: React.FC = () => {
         setError("Please enter a phone number");
         return false;
       }
-      if (form.listingType === "sell" && !isServiceCategory && !form.images.length) {
+      if (form.listingType === "sell" && !form.images.length) {
         setError("Please upload at least one image");
         return false;
       }
@@ -279,6 +298,10 @@ const CreateListing: React.FC = () => {
     }
 
     if (form.step === 5) {
+      if ((!idVerified || !selfieVerified) && !hasPendingIdVerification) {
+        setError(verificationErrorMessage);
+        return false;
+      }
       return true;
     }
 
@@ -301,90 +324,62 @@ const CreateListing: React.FC = () => {
     e.preventDefault();
     if (!validateStep() || !user) return;
 
+    // Check if user is actually verified before attempting to create listing
+    if (!isUserVerified()) {
+      setError("Your identity verification is not complete. Please verify your ID and take a selfie in your Profile before creating listings.");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     setUploading(true);
     setError("");
 
     try {
-      if (!form.category || !form.subcategory || !form.listingType) {
-        setError("Please complete all required steps before submitting.");
-        setUploading(false);
-        return;
-      }
-
       const formData = new FormData();
-      const isServiceListing = form.category === "service";
-      const serviceType =
-        form.subcategory === "equipment_rental"
-          ? "equipment"
-          : "professional_services";
-      const premiumBadgePrice =
-        form.premiumBadge ? (isCommissionWaived ? 0 : PREMIUM_BADGE_PRICE_KES) : 0;
-      let endpoint = API_ENDPOINTS.services.products.create;
-
-      if (isServiceListing) {
-        formData.append("type", serviceType);
-        formData.append("name", form.title.trim());
-        formData.append("description", form.description.trim());
-        formData.append("county", form.county);
-        formData.append("constituency", form.constituency);
-        formData.append("ward", form.ward);
-        formData.append("approximateLocation", form.approximateLocation.trim());
-        formData.append("contact", form.contact.trim());
-        formData.append("services", SERVICE_SUBCATEGORY_LABELS[form.subcategory as ServiceSubcategory]);
-        if (form.price) formData.append("pricing", form.price);
-        formData.append(
-          "boostOption",
-          form.premiumBadge ? SERVICE_PREMIUM_BOOST_OPTION : "none"
-        );
-        formData.append("boostPrice", String(premiumBadgePrice));
-        if (form.availableFrom) formData.append("availableFrom", form.availableFrom);
-        endpoint =
-          serviceType === "equipment"
-            ? API_ENDPOINTS.services.equipment.create
-            : API_ENDPOINTS.services.professional.create;
-      } else {
-        formData.append("title", form.title.trim());
-        formData.append("description", form.description.trim());
-        formData.append("category", form.category);
-        formData.append("subcategory", form.subcategory);
-        formData.append("listingType", form.listingType);
-        formData.append("price", form.price);
-        formData.append("quantity", form.quantity);
-        formData.append("unit", form.unit);
-        formData.append("county", form.county);
-        formData.append("constituency", form.constituency);
-        formData.append("ward", form.ward);
-        formData.append("approximateLocation", form.approximateLocation.trim());
-        formData.append("availableFrom", form.availableFrom);
-        formData.append("contact", form.contact.trim());
-        formData.append("subscriptionActive", form.subscribed ? "true" : "false");
-        formData.append("premiumBadge", form.premiumBadge ? "true" : "false");
-        formData.append("premiumBadgePrice", String(premiumBadgePrice));
-      }
+      formData.append("title", form.title.trim());
+      formData.append("description", form.description.trim());
+      formData.append("category", form.category!);
+      formData.append("subcategory", form.subcategory!);
+      formData.append("listingType", form.listingType!);
+      formData.append("price", form.price);
+      formData.append("quantity", form.quantity);
+      formData.append("unit", form.unit);
+      formData.append("county", form.county);
+      formData.append("constituency", form.constituency);
+      formData.append("ward", form.ward);
+      formData.append("approximateLocation", form.approximateLocation.trim());
+      formData.append("availableFrom", form.availableFrom);
+      formData.append("contact", form.contact.trim());
+      formData.append("subscriptionActive", form.subscribed ? "true" : "false");
+      formData.append("premiumBadge", form.premiumBadge ? "true" : "false");
+      formData.append("premiumBadgePrice", form.premiumBadge ? "199" : "0");
 
       form.images.forEach((img) => formData.append("images", img));
 
-      const token =
-        localStorage.getItem("kodisha_token") || localStorage.getItem("token");
-      if (!token) {
-        setError("Session expired. Please sign in again.");
-        setUploading(false);
-        navigate("/login?next=/create-listing", { replace: true });
-        return;
-      }
-      const response = await fetch(endpoint, {
+      const token = localStorage.getItem("kodisha_token");
+      const response = await fetch(`${API_BASE_URL}/products`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
-        credentials: "include",
         body: formData,
       });
 
       const result = await response.json();
 
-      if (!response.ok || result?.success === false) {
-        const errorMessage =
-          result?.message || result?.error || "Failed to create listing";
-        setError(errorMessage);
+      if (!response.ok || !result.success) {
+        let errorMsg = result.message || "Failed to create listing";
+        
+        // Provide better error messaging for 403 (verification required)
+        if (response.status === 403) {
+          errorMsg = "Verification required: Please verify your identity (ID + Selfie) in your Profile before creating listings";
+          
+          // Log verification status for debugging
+          console.warn("Verification Status:", {
+            idVerified: user?.verification?.idVerified,
+            selfieVerified: user?.verification?.selfieVerified
+          });
+        }
+        
+        setError(errorMsg);
         setUploading(false);
         return;
       }
@@ -392,13 +387,8 @@ const CreateListing: React.FC = () => {
       // Success!
       localStorage.removeItem(DRAFT_STORAGE_KEY);
       setHasDraft(false);
-      alert(
-        result?.message ||
-          (isServiceListing
-            ? "Service listing created successfully."
-            : "Listing created successfully.")
-      );
-      navigate("/listings");
+      alert("Listing created successfully! Awaiting admin review...");
+      navigate("/browse");
     } catch (err: any) {
       setError(err.message || "An error occurred while creating your listing");
       setUploading(false);
@@ -453,8 +443,6 @@ const CreateListing: React.FC = () => {
     setHasDraft(true);
     setNotice("Draft saved.");
   };
-  const flowSteps = ["Type", "Category", "Location", "Details", isFullyVerified ? "Review" : "Verify"];
-  const totalSteps = flowSteps.length;
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -495,7 +483,7 @@ const CreateListing: React.FC = () => {
               <div className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm fade-rise">
                 <p className="text-xs uppercase tracking-widest text-slate-500">Progress</p>
                 <div className="mt-4 space-y-3">
-                  {flowSteps.map((label, idx) => {
+                  {(["Type", "Category", "Location", "Details", "Verify"] as const).map((label, idx) => {
                     const step = idx + 1;
                     const isActive = form.step === step;
                     const isDone = form.step > step;
@@ -516,7 +504,7 @@ const CreateListing: React.FC = () => {
                           <p className={`text-sm font-semibold ${isActive ? "text-slate-900" : "text-slate-600"}`}>
                             {label}
                           </p>
-                          <p className="text-xs text-slate-500">Step {step} of {totalSteps}</p>
+                          <p className="text-xs text-slate-500">Step {step} of 5</p>
                         </div>
                       </div>
                     );
@@ -525,7 +513,7 @@ const CreateListing: React.FC = () => {
                 <div className="mt-5 h-2 rounded-full bg-slate-100 overflow-hidden">
                   <div
                     className="h-full bg-emerald-600 transition-all"
-                    style={{ width: `${(Math.min(form.step, totalSteps) / totalSteps) * 100}%` }}
+                    style={{ width: `${(form.step / 5) * 100}%` }}
                   />
                 </div>
               </div>
@@ -535,6 +523,30 @@ const CreateListing: React.FC = () => {
 
         <div className="max-w-5xl mx-auto px-4 pb-16">
           <p className="mb-6 text-sm text-slate-500">Drafts save automatically on this device.</p>
+
+          {requiresVerification && (
+            <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 flex flex-wrap items-center gap-3">
+              <p className="text-amber-900 font-semibold flex-1">
+                Listing requires ID + selfie verification. Complete verification now, or continue drafting and submit later.
+              </p>
+              <button
+                type="button"
+                onClick={() => navigate(verifyIdPath)}
+                className="px-4 py-2 rounded-lg bg-amber-600 text-white text-sm font-semibold hover:bg-amber-700"
+              >
+                Verify now
+              </button>
+            </div>
+          )}
+
+          {isVerificationPending && (
+            <div className="mb-6 rounded-2xl border border-blue-200 bg-blue-50 p-4">
+              <p className="text-blue-900 font-semibold">Verification submitted</p>
+              <p className="text-blue-700 text-sm mt-1">
+                Your ID review is pending approval. You can keep drafting your listing and publish once verification is approved.
+              </p>
+            </div>
+          )}
 
           {hasDraft && (
             <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex flex-wrap items-center gap-3">
@@ -558,10 +570,11 @@ const CreateListing: React.FC = () => {
 
           {/* Error Alert */}
           {error && (
-            <div className="mb-6 bg-red-50 border border-red-200 rounded-2xl p-4 flex gap-3">
-              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-              <p className="text-red-700">{error}</p>
-            </div>
+            <ErrorAlert
+              message={error}
+              onRetry={() => setError("")}
+              className="mb-6"
+            />
           )}
           {notice && !error && (
             <div className="mb-6 bg-blue-50 border border-blue-200 rounded-2xl p-4 flex gap-3">
@@ -578,12 +591,7 @@ const CreateListing: React.FC = () => {
               <h2 className="text-xl font-bold text-gray-900 mb-6">What do you want to do?</h2>
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  {
-                    type: "sell" as const,
-                    label: "Sell",
-                    icon: "",
-                    desc: "List products, services, equipment, or inputs",
-                  },
+                  { type: "sell" as const, label: "Sell", icon: "", desc: "Sell your products" },
                   { type: "buy" as const, label: "Buy", icon: "", desc: "Post a buy request" },
                 ].map(({ type, label, icon, desc }) => (
                   <button
@@ -630,15 +638,7 @@ const CreateListing: React.FC = () => {
                     key={cat}
                     type="button"
                     onClick={() => {
-                      setForm((prev) => ({
-                        ...prev,
-                        category: cat,
-                        subcategory: null,
-                        // Service listings do not use quantity/unit.
-                        quantity: cat === "service" ? "" : prev.quantity,
-                        unit: cat === "service" ? "kg" : prev.unit,
-                        subscribed: cat === "service" ? false : prev.subscribed,
-                      }));
+                      setForm((prev) => ({ ...prev, category: cat, subcategory: null }));
                       setError("");
                       setNotice("");
                     }}
@@ -776,11 +776,7 @@ const CreateListing: React.FC = () => {
                   <label className="block text-sm font-semibold text-gray-900 mb-2">Title *</label>
                   <input
                     type="text"
-                    placeholder={
-                      isServiceCategory
-                        ? "e.g., Tractor Rental, Farm Transport, Irrigation Setup"
-                        : "e.g., Fresh Tomatoes, Dairy Cow, Drip Kit"
-                    }
+                    placeholder="e.g., Fresh Tomatoes, Dairy Cow, Tractor"
                     value={form.title}
                     onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -791,11 +787,7 @@ const CreateListing: React.FC = () => {
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-2">Description *</label>
                   <textarea
-                    placeholder={
-                      isServiceCategory
-                        ? "Describe the service in detail - what is included, coverage area, schedule, and requirements."
-                        : "Describe your product in detail - quality, condition, features, etc."
-                    }
+                    placeholder="Describe your product in detail - quality, condition, features, etc."
                     value={form.description}
                     onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
                     rows={5}
@@ -806,37 +798,22 @@ const CreateListing: React.FC = () => {
                 {/* Price and Quantity */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
-                      Price (KSh) *
-                    </label>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">Price (KSh) *</label>
                     <input
                       type="number"
-                      placeholder={isServiceCategory ? "e.g., 2000" : "e.g., 1500"}
+                      placeholder="0"
                       value={form.price}
                       onChange={(e) => setForm((prev) => ({ ...prev, price: e.target.value }))}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     />
                     {commission > 0 && (
                       <p className="text-xs text-gray-600 mt-1">
-                        {isCommissionWaived ? (
-                          <>
-                            Commission:{" "}
-                            <span className="line-through text-gray-500">
-                              KSh {commission.toFixed(0)}
-                            </span>{" "}
-                            <span className="font-semibold text-green-700">KSh 0</span>{" "}
-                            <span className="text-green-700">
-                              (promo ends {commissionWaiverEndsLabel})
-                            </span>
-                          </>
-                        ) : (
-                          <>Commission: KSh {commission.toFixed(0)}</>
-                        )}
+                        Commission: KSh {commission.toFixed(0)}
                       </p>
                     )}
                   </div>
 
-                  {showQuantityFields && (
+                  {form.category !== "inputs" && (
                     <div>
                       <label className="block text-sm font-semibold text-gray-900 mb-2">Quantity *</label>
                       <div className="flex gap-2">
@@ -894,7 +871,7 @@ const CreateListing: React.FC = () => {
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-2">
                     <Camera className="w-4 h-4 inline mr-2" />
-                    Upload Images ({form.images.length}/5){form.category === "service" ? "" : " *"}
+                    Upload Images ({form.images.length}/5) *
                   </label>
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                     <input
@@ -946,145 +923,159 @@ const CreateListing: React.FC = () => {
                 <FileText className="w-5 h-5" /> Review & Confirm
               </h2>
 
-              {isFullyVerified ? (
-                <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-xl p-4">
-                  <p className="text-emerald-800 font-semibold flex items-center gap-2">
-                    <CheckCircle2 className="w-5 h-5" />
-                    Account verified
+              {/* Verification Status */}
+              <div className="mb-6 space-y-3">
+                <div className={`p-4 rounded-xl border ${
+                  idVerified
+                    ? "bg-emerald-50 border-emerald-200"
+                    : isVerificationPending
+                    ? "bg-amber-50 border-amber-200"
+                    : "bg-red-50 border-red-200"
+                }`}>
+                  <p className={`flex items-center gap-2 font-semibold ${
+                    idVerified
+                      ? "text-emerald-700"
+                      : isVerificationPending
+                      ? "text-amber-700"
+                      : "text-red-700"
+                  }`}>
+                    {idVerified ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+                    National ID verification
                   </p>
-                  <p className="text-sm text-emerald-700 mt-1">
-                    Your ID and selfie are verified. This listing will go live immediately after submission.
+                  <p className={`text-sm mt-1 ${
+                    idVerified
+                      ? "text-emerald-600"
+                      : isVerificationPending
+                      ? "text-amber-600"
+                      : "text-red-600"
+                  }`}>
+                    {idVerified
+                      ? "Verified"
+                      : isVerificationPending
+                      ? "Submitted - pending approval"
+                      : "Required - please upload ID"}
                   </p>
                 </div>
-              ) : (
-                <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4">
-                  <p className="text-amber-800 font-semibold flex items-center gap-2">
-                    <AlertCircle className="w-5 h-5" />
-                    Verification recommended
+
+                <div className={`p-4 rounded-xl border ${
+                  selfieVerified
+                    ? "bg-emerald-50 border-emerald-200"
+                    : isVerificationPending
+                    ? "bg-amber-50 border-amber-200"
+                    : "bg-red-50 border-red-200"
+                }`}>
+                  <p className={`flex items-center gap-2 font-semibold ${
+                    selfieVerified
+                      ? "text-emerald-700"
+                      : isVerificationPending
+                      ? "text-amber-700"
+                      : "text-red-700"
+                  }`}>
+                    {selfieVerified ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+                    Selfie verification
                   </p>
-                  <p className="text-sm text-amber-700 mt-1">
-                    You can still submit now. Your listing will go live after admin approval and will display as unverified until your ID is verified.
+                  <p className={`text-sm mt-1 ${
+                    selfieVerified
+                      ? "text-emerald-600"
+                      : isVerificationPending
+                      ? "text-amber-600"
+                      : "text-red-600"
+                  }`}>
+                    {selfieVerified
+                      ? "Verified"
+                      : isVerificationPending
+                      ? "Submitted - pending approval"
+                      : "Required - please upload selfie"}
+                  </p>
+                </div>
+              </div>
+
+              {requiresVerification ? (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+                  <p className="text-amber-800 font-semibold mb-2">Complete your verification first</p>
+                  <p className="text-amber-700 text-sm mb-4">
+                    You must upload your ID and selfie before listing. Open verification to submit these documents.
                   </p>
                   <button
                     type="button"
-                    onClick={() => navigate("/verify-id")}
-                    className="mt-3 bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700"
+                    onClick={() => navigate(verifyIdPath)}
+                    className="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700"
                   >
-                    Verify ID now
+                    Go to Verification
                   </button>
                 </div>
-              )}
-
-              {/* Listing Summary */}
-              <div className="bg-gray-50 rounded-lg p-6 mb-6 border border-gray-200">
-                <h3 className="font-bold text-gray-900 mb-4">Listing Summary</h3>
-                <div className="space-y-3 text-sm">
-                  <p>
-                    <span className="text-gray-600">Type:</span>
-                    <span className="font-semibold text-gray-900 ml-2 capitalize">{form.listingType}</span>
-                  </p>
-                  <p>
-                    <span className="text-gray-600">Category:</span>
-                    <span className="font-semibold text-gray-900 ml-2 capitalize">
-                      {form.category} - {form.subcategory}
-                    </span>
-                  </p>
-                  <p>
-                    <span className="text-gray-600">Trust status:</span>
-                    <span className={`font-semibold ml-2 ${isFullyVerified ? "text-emerald-700" : "text-amber-700"}`}>
-                      {isFullyVerified ? "Verified" : "Unverified (admin review required)"}
-                    </span>
-                  </p>
-                  <p>
-                    <span className="text-gray-600">Location:</span>
-                    <span className="font-semibold text-gray-900 ml-2">
-                      {form.ward}, {form.constituency}, {form.county}
-                    </span>
-                  </p>
-                  <p>
-                    <span className="text-gray-600">Title:</span>
-                    <span className="font-semibold text-gray-900 ml-2">{form.title}</span>
-                  </p>
-                  <p>
-                    <span className="text-gray-600">Price:</span>
-                    <span className="font-semibold text-gray-900 ml-2">KSh {Number(form.price).toLocaleString()}</span>
-                  </p>
-                  {!isServiceCategory && form.quantity && (
-                    <p>
-                      <span className="text-gray-600">Quantity:</span>
-                      <span className="font-semibold text-gray-900 ml-2">
-                        {form.quantity} {form.unit}
-                      </span>
-                    </p>
-                  )}
-                  <p>
-                    <span className="text-gray-600">Images:</span>
-                    <span className="font-semibold text-gray-900 ml-2">{form.images.length} uploaded</span>
-                  </p>
-                  {form.premiumBadge && (
-                    <p>
-                      <span className="text-gray-600">Premium Badge:</span>
-                      <span className="font-semibold text-gray-900 ml-2">
-                        {isCommissionWaived ? (
-                          <>
-                            <span className="line-through text-gray-500">
-                              KSh {PREMIUM_BADGE_PRICE_KES}
-                            </span>{" "}
-                            <span className="text-green-700">KSh 0</span>
-                          </>
-                        ) : (
-                          <>KSh {PREMIUM_BADGE_PRICE_KES}</>
-                        )}
-                      </span>
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Premium Options */}
-              <div className="bg-blue-50 rounded-lg p-6 border border-blue-200 mb-6">
-                <h3 className="font-bold text-gray-900 mb-4">Boost Your Listing (Optional)</h3>
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={form.premiumBadge}
-                    onChange={(e) => setForm((prev) => ({ ...prev, premiumBadge: e.target.checked }))}
-                    className="w-5 h-5 text-green-600"
-                  />
-                  <div>
-                    <p className="font-semibold text-gray-900">
-                      Premium Badge{" "}
-                      {isCommissionWaived ? (
-                        <>
-                          (<span className="line-through text-gray-500">KSh {PREMIUM_BADGE_PRICE_KES}</span>{" "}
-                          <span className="text-green-700">KSh 0</span>)
-                        </>
-                      ) : (
-                        <> (KSh {PREMIUM_BADGE_PRICE_KES})</>
-                      )}
-                    </p>
-                    <p className="text-sm text-gray-600">Get a premium badge to stand out</p>
-                    {isCommissionWaived && (
-                      <p className="text-xs text-green-700 mt-1">
-                        Promo ends {commissionWaiverEndsLabel}
+              ) : (
+                <>
+                  {/* Listing Summary */}
+                  <div className="bg-gray-50 rounded-lg p-6 mb-6 border border-gray-200">
+                    <h3 className="font-bold text-gray-900 mb-4">Listing Summary</h3>
+                    <div className="space-y-3 text-sm">
+                      <p>
+                        <span className="text-gray-600">Type:</span>
+                        <span className="font-semibold text-gray-900 ml-2 capitalize">{form.listingType}</span>
                       </p>
-                    )}
+                      <p>
+                        <span className="text-gray-600">Category:</span>
+                        <span className="font-semibold text-gray-900 ml-2 capitalize">
+                          {form.category} - {form.subcategory}
+                        </span>
+                      </p>
+                      <p>
+                        <span className="text-gray-600">Location:</span>
+                        <span className="font-semibold text-gray-900 ml-2">
+                          {form.ward}, {form.constituency}, {form.county}
+                        </span>
+                      </p>
+                      <p>
+                        <span className="text-gray-600">Title:</span>
+                        <span className="font-semibold text-gray-900 ml-2">{form.title}</span>
+                      </p>
+                      <p>
+                        <span className="text-gray-600">Price:</span>
+                        <span className="font-semibold text-gray-900 ml-2">KSh {Number(form.price).toLocaleString()}</span>
+                      </p>
+                      {form.quantity && (
+                        <p>
+                          <span className="text-gray-600">Quantity:</span>
+                          <span className="font-semibold text-gray-900 ml-2">
+                            {form.quantity} {form.unit}
+                          </span>
+                        </p>
+                      )}
+                      <p>
+                        <span className="text-gray-600">Images:</span>
+                        <span className="font-semibold text-gray-900 ml-2">{form.images.length} uploaded</span>
+                      </p>
+                    </div>
                   </div>
-                </label>
-              </div>
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={uploading}
-                className="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 disabled:opacity-50 transition-all"
-              >
-                {uploading
-                  ? "Creating Listing..."
-                  : isFullyVerified
-                  ? "Create Listing"
-                  : "Submit for Admin Approval"}
-              </button>
+                  {/* Premium Options */}
+                  <div className="bg-blue-50 rounded-lg p-6 border border-blue-200 mb-6">
+                    <h3 className="font-bold text-gray-900 mb-4">Boost Your Listing (Optional)</h3>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={form.premiumBadge}
+                        onChange={(e) => setForm((prev) => ({ ...prev, premiumBadge: e.target.checked }))}
+                        className="w-5 h-5 text-green-600"
+                      />
+                      <div>
+                        <p className="font-semibold text-gray-900">Premium Badge (KSh 199)</p>
+                        <p className="text-sm text-gray-600">Get a premium badge to stand out</p>
+                      </div>
+                    </label>
+                  </div>
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    disabled={uploading}
+                    className="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 disabled:opacity-50 transition-all"
+                  >
+                    {uploading ? "Creating Listing..." : "Create Listing"}
+                  </button>
+                </>
+              )}
             </div>
           )}
 
