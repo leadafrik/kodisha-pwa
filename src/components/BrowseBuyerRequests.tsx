@@ -134,7 +134,24 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
 
   const formatBudget = (budget?: { min: number; max: number; currency: string }) => {
     if (!budget) return "Negotiable";
-    return `${budget.currency} ${budget.min.toLocaleString()} - ${budget.max.toLocaleString()}`;
+
+    const currency = budget.currency || "KES";
+    const hasMin = typeof budget.min === "number" && Number.isFinite(budget.min);
+    const hasMax = typeof budget.max === "number" && Number.isFinite(budget.max);
+
+    if (hasMin && hasMax) {
+      return `${currency} ${budget.min.toLocaleString()} - ${budget.max.toLocaleString()}`;
+    }
+
+    if (hasMin) {
+      return `From ${currency} ${budget.min.toLocaleString()}`;
+    }
+
+    if (hasMax) {
+      return `Up to ${currency} ${budget.max.toLocaleString()}`;
+    }
+
+    return "Negotiable";
   };
 
   const formatDate = (date: string) => {
