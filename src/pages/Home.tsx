@@ -13,11 +13,15 @@ const Home: React.FC = () => {
   const { content: announcementText } = usePageContent('home.announcement.banner');
   
   // Set defaults if content is empty
-  const displayHeadline = heroHeadline || "Connecting Kenya's Agricultural Ecosystem";
-  const displayDescription = heroDescription || 'Sell faster and buy safer across all 47 counties with verified profiles, direct chat, and transparent terms.';
-  const displayAnnouncement = announcementText || 'Launch window: listing fee is KSh 0. Keep more margin on every sale.';
+  const displayHeadline = heroHeadline || "In new markets, the first trusted sellers win for years.";
+  const displayDescription =
+    heroDescription ||
+    "Agrisoko helps farmers, traders, and agrovets become the go-to suppliers in their counties through verified profiles and direct buyer chat.";
+  const displayAnnouncement =
+    announcementText ||
+    "Listing is KSh 0 in the launch window. This early-seller advantage will not stay open forever.";
   const primaryCtaHref = user ? "/create-listing" : "/login?next=/create-listing";
-  const primaryCtaLabel = user ? "List Now Before Fees Start" : "Start Free Listing";
+  const primaryCtaLabel = user ? "Lock In My Early-Seller Advantage" : "Start Free Listing";
   const launchOfferEndsAt = new Date("2026-03-08T23:59:59+03:00");
   const daysLeft = Math.max(
     0,
@@ -57,8 +61,8 @@ const Home: React.FC = () => {
           </p>
           <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-emerald-100">
             <span className="rounded-full border border-emerald-300/50 bg-emerald-500/20 px-3 py-1">47 counties live</span>
-            <span className="rounded-full border border-emerald-300/50 bg-emerald-500/20 px-3 py-1">Verified traders</span>
-            <span className="rounded-full border border-emerald-300/50 bg-emerald-500/20 px-3 py-1">Direct chat deals</span>
+            <span className="rounded-full border border-emerald-300/50 bg-emerald-500/20 px-3 py-1">Verified seller profiles</span>
+            <span className="rounded-full border border-emerald-300/50 bg-emerald-500/20 px-3 py-1">Direct buyer chat</span>
           </div>
         </div>
       </section>
@@ -70,7 +74,7 @@ const Home: React.FC = () => {
         <div className="home-display mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
           <div className="home-float">
             <p className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-emerald-800">
-              Trusted by serious buyers and sellers
+              Early seller window is open
             </p>
             <h1 className="home-headline mt-5 text-4xl leading-tight text-slate-900 sm:text-5xl md:text-6xl">
               {displayHeadline}
@@ -79,7 +83,7 @@ const Home: React.FC = () => {
               {displayDescription}
             </p>
             <p className="mt-3 max-w-2xl text-base font-semibold text-emerald-800">
-              {displayAnnouncement} First movers capture repeat buyers while competition is still thin.
+              {displayAnnouncement}
             </p>
 
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
@@ -93,7 +97,7 @@ const Home: React.FC = () => {
                 to="/browse"
                 className="inline-flex w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-base font-semibold text-slate-900 transition hover:bg-slate-50 sm:w-auto"
               >
-                See Active Demand
+                Browse Active Demand
               </Link>
             </div>
 
@@ -103,43 +107,44 @@ const Home: React.FC = () => {
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">First listing</p>
               </div>
               <div className="rounded-xl border border-emerald-100 bg-white/85 px-4 py-3">
-                <p className="text-2xl font-black text-emerald-700">Auto</p>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">No data loss</p>
+                <p className="text-2xl font-black text-emerald-700">Trust</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Verified profile edge</p>
               </div>
               <div className="rounded-xl border border-emerald-100 bg-white/85 px-4 py-3">
                 <p className="text-2xl font-black text-emerald-700">Live</p>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Close faster</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Direct buyer chats</p>
               </div>
             </div>
           </div>
 
           <aside className="home-float rounded-2xl border border-emerald-200 bg-white/95 p-6 shadow-[0_25px_55px_-32px_rgba(16,185,129,0.7)]">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-700">Your unfair advantage</p>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-700">Why early sellers win</p>
             <h2 className="mt-3 text-2xl font-extrabold text-slate-900">
               Start now, build compounding trust
             </h2>
             <ul className="mt-4 space-y-3 text-sm text-slate-700">
               <li className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-                <strong className="text-slate-900">1. Loss aversion:</strong> each delayed day can cost buyer attention to faster sellers.
+                <strong className="text-slate-900">1.</strong> Buyers message active sellers first, then return to trusted contacts.
               </li>
               <li className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-                <strong className="text-slate-900">2. Social proof:</strong> verified badges and active listings raise buyer confidence.
+                <strong className="text-slate-900">2.</strong> Verified badges and visible listings reduce buyer hesitation.
               </li>
               <li className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-                <strong className="text-slate-900">3. Goal gradient:</strong> each listing pushes the raffle target closer and keeps users engaged.
+                <strong className="text-slate-900">3.</strong> Consistent listing activity keeps you easier to find as demand grows.
               </li>
             </ul>
             <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+              <p className="text-xs font-semibold text-amber-800">You can finish your first listing in about 3 minutes.</p>
               <p className="text-xs font-bold uppercase tracking-[0.15em] text-amber-700">Today&apos;s action</p>
               <p className="mt-1 text-sm font-semibold text-slate-900">
-                Post one listing now, then a second tomorrow to dominate your category with visible activity.
+                Post one listing now, then add another tomorrow to keep your profile active and easy to find.
               </p>
             </div>
             <Link
               to={primaryCtaHref}
               className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
             >
-              Start my first listing
+              {user ? "Lock In My Early-Seller Advantage" : "Post My First Listing (3 Minutes)"}
             </Link>
           </aside>
         </div>
@@ -183,10 +188,10 @@ const Home: React.FC = () => {
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-6">
           <div className="flex-1">
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
-              Launch Advantage: Keep More of Every Sale
+              Launch Advantage: Keep 100% of Your Margin
             </h2>
             <p className="text-green-50 mb-4">
-              Listing fee is KSh 0 during launch. Delay means less visibility while early sellers lock buyer relationships.
+              Listing fee is KSh 0 now. Later sellers will spend more to catch up on buyer trust and visibility.
             </p>
           </div>
           <Link
@@ -202,7 +207,7 @@ const Home: React.FC = () => {
       <section className="py-20 px-4 md:px-8 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">Choose Your Growth Path</h2>
-          <p className="text-lg text-gray-600 mb-12 max-w-2xl">Buy with confidence or sell with urgency.</p>
+          <p className="text-lg text-gray-600 mb-12 max-w-2xl">Buy with confidence or sell with momentum.</p>
 
           <div className="grid md:grid-cols-2 gap-8">
             {/* BUYERS PATH */}
@@ -263,7 +268,7 @@ const Home: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
           <p className="text-lg text-gray-600 mb-12 max-w-2xl">
-            Three steps to trusted trade and repeat business.
+            Three simple steps to trusted trade.
           </p>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -416,72 +421,6 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* FOOTER - Clean & Professional */}
-      <footer className="bg-gray-900 text-gray-300 border-t border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-16">
-          {/* Main Footer Content */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-            {/* Brand Column */}
-            <div className="md:col-span-1">
-              <h3 className="text-lg font-bold text-white mb-3">Agrisoko</h3>
-              <p className="text-sm leading-relaxed">
-                Kenya's direct marketplace for trusted agri trade.
-              </p>
-            </div>
-
-            {/* Platform Links */}
-            <div>
-              <h4 className="font-semibold text-white mb-4">Platform</h4>
-              <ul className="space-y-2 text-sm">
-                <li><Link to="/browse" className="hover:text-white transition">Browse Listings</Link></li>
-                <li><Link to={user ? "/create-listing" : "/login"} className="hover:text-white transition">Create Listing</Link></li>
-                <li><Link to="/request" className="hover:text-white transition">Buy Requests</Link></li>
-                {user && <li><Link to="/profile" className="hover:text-white transition">Your Profile</Link></li>}
-              </ul>
-            </div>
-
-            {/* Legal Links */}
-            <div>
-              <h4 className="font-semibold text-white mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm">
-                <li><Link to="/terms" className="hover:text-white transition">Terms of Service</Link></li>
-                <li><Link to="/privacy" className="hover:text-white transition">Privacy Policy</Link></li>
-                <li><Link to="/about" className="hover:text-white transition">About Us</Link></li>
-              </ul>
-            </div>
-
-            {/* Contact */}
-            <div>
-              <h4 className="font-semibold text-white mb-4">Contact</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <a 
-                    href="https://wa.me/254796389192" 
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-white transition"
-                  >
-                    WhatsApp
-                  </a>
-                </li>
-                <li>
-                  <a 
-                    href="mailto:info@leadafrik.com"
-                    className="hover:text-white transition"
-                  >
-                    Email Support
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Footer Bottom */}
-          <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
-            <p>&copy; {new Date().getFullYear()} Agrisoko. Launch pricing active with zero listing fees.</p>
-          </div>
-        </div>
-      </footer>
     </main>
   );
 };
