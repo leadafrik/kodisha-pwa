@@ -575,7 +575,7 @@ const BrowseListings: React.FC = () => {
                   key={index}
                   className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm"
                 >
-                  <div className="aspect-[4/3] animate-pulse bg-slate-100" />
+                  <div className="h-52 sm:h-56 animate-pulse bg-slate-100" />
                   <div className="p-4 space-y-3">
                     <div className="h-4 w-2/5 rounded bg-slate-100 animate-pulse" />
                     <div className="h-5 w-4/5 rounded bg-slate-100 animate-pulse" />
@@ -647,13 +647,13 @@ const BrowseListings: React.FC = () => {
                 className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg fade-up"
                 style={{ animationDelay: `${Math.min(index * 40, 360)}ms` }}
               >
-                <div className="relative aspect-[4/3] bg-slate-100">
+                <div className="relative h-52 sm:h-56 bg-slate-100">
                   {card.image ? (
                     <img
                       src={card.image}
                       alt={card.title}
                       onError={handleImageError}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (
                     <div className="flex h-full items-center justify-center text-slate-400 text-sm font-medium">
