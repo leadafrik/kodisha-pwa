@@ -54,15 +54,34 @@ const Home: React.FC = () => {
         }
       `}</style>
 
-      <section className="border-b border-emerald-900/20 bg-[#103021] px-4 py-3 text-emerald-50 md:px-8">
-        <div className="mx-auto flex max-w-7xl flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <p className="home-display text-sm font-semibold md:text-base">
-            Move now: {urgencyLine}
-          </p>
-          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-emerald-100">
-            <span className="rounded-full border border-emerald-300/50 bg-emerald-500/20 px-3 py-1">47 counties live</span>
-            <span className="rounded-full border border-emerald-300/50 bg-emerald-500/20 px-3 py-1">Verified seller profiles</span>
-            <span className="rounded-full border border-emerald-300/50 bg-emerald-500/20 px-3 py-1">Direct buyer chat</span>
+      <section className="sticky top-16 z-30 border-b-2 border-amber-300 bg-gradient-to-r from-[#0b3f2b] via-[#0d5138] to-[#126a4a] px-4 py-3 text-emerald-50 md:px-8">
+        <div className="mx-auto max-w-7xl rounded-2xl border border-white/20 bg-black/20 px-4 py-3 backdrop-blur">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0">
+              <p className="inline-flex items-center gap-2 rounded-full bg-amber-300 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.12em] text-slate-900">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-500" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-rose-600" />
+                </span>
+                Launch Fee Alert
+              </p>
+              <p className="home-display mt-2 text-base font-extrabold leading-tight text-white md:text-lg">
+                Move now: {urgencyLine}
+              </p>
+            </div>
+
+            <Link
+              to={primaryCtaHref}
+              className="inline-flex w-full items-center justify-center rounded-xl bg-amber-300 px-4 py-2.5 text-sm font-extrabold uppercase tracking-[0.08em] text-slate-900 shadow-sm transition hover:bg-amber-200 lg:w-auto"
+            >
+              {user ? "List Before Fees" : "Start Free Listing"}
+            </Link>
+          </div>
+
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-emerald-100">
+            <span className="rounded-full border border-emerald-200/50 bg-emerald-500/25 px-3 py-1">47 counties live</span>
+            <span className="rounded-full border border-emerald-200/50 bg-emerald-500/25 px-3 py-1">Verified seller profiles</span>
+            <span className="rounded-full border border-emerald-200/50 bg-emerald-500/25 px-3 py-1">Direct buyer chat</span>
           </div>
         </div>
       </section>

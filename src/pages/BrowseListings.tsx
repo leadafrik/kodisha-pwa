@@ -4,7 +4,7 @@ import { useProperties } from "../contexts/PropertyContext";
 import { useAuth } from "../contexts/AuthContext";
 import { kenyaCounties } from "../data/kenyaCounties";
 import { handleImageError } from "../utils/imageFallback";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, ChevronDown, ChevronUp } from "lucide-react";
 import RaffleCampaign from "../components/RaffleCampaign";
 
 type Category = "all" | "produce" | "livestock" | "inputs" | "service";
@@ -108,6 +108,7 @@ const BrowseListings: React.FC = () => {
   const [search, setSearch] = useState<string>("");
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [verifiedOnlyManual, setVerifiedOnlyManual] = useState(false);
+  const [showRaffle, setShowRaffle] = useState(false);
   const isHighValueCategory =
     category !== "all" && highValueCategories.includes(category);
 
@@ -365,8 +366,43 @@ const BrowseListings: React.FC = () => {
             </div>
           </div>
 
-          <div className="fade-up">
-            <RaffleCampaign />
+          <div className="fade-up rounded-2xl border border-slate-200 bg-white p-4 md:p-5 shadow-sm">
+            <button
+              type="button"
+              onClick={() => setShowRaffle((prev) => !prev)}
+              className="flex w-full items-center justify-between gap-4 text-left"
+            >
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+                  Campaign
+                </p>
+                <p className="mt-1 text-base font-semibold text-slate-900">
+                  {showRaffle ? "Hide raffle details" : "Open raffle details"}
+                </p>
+                <p className="mt-1 text-sm text-slate-600">
+                  Keep browsing listings without interruption. Open when ready.
+                </p>
+              </div>
+              <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-semibold text-slate-700">
+                {showRaffle ? (
+                  <>
+                    <ChevronUp className="mr-1 h-4 w-4" />
+                    Collapse
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="mr-1 h-4 w-4" />
+                    Expand
+                  </>
+                )}
+              </span>
+            </button>
+
+            {showRaffle && (
+              <div className="mt-4">
+                <RaffleCampaign />
+              </div>
+            )}
           </div>
 
           <div className="rounded-3xl border border-slate-200 bg-white p-5 md:p-6 shadow-sm fade-up">
