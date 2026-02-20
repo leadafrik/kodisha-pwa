@@ -40,6 +40,12 @@ const INPUTS_SUBCATEGORIES: InputsSubcategory[] = ["fertilizer", "pesticides", "
 const SERVICE_SUBCATEGORIES: ServiceSubcategory[] = ["equipment_rental", "consulting", "labor", "transportation", "processing", "other"];
 
 const UNITS = ["kg", "bag", "ton", "bunch", "dozen", "piece", "liter", "gallon", "box", "crate"];
+const RECOMMENDED_UNIT_BY_CATEGORY: Record<ListingCategory, string> = {
+  produce: "kg",
+  livestock: "piece",
+  inputs: "bag",
+  service: "piece",
+};
 
 const CATEGORY_DESCRIPTIONS = {
   produce: "Agricultural products like crops, fruits, and vegetables",
@@ -213,6 +219,40 @@ const CreateListing: React.FC = () => {
     const price = Number(form.price) || 0;
     return Math.max(price * 0.005, 49);
   }, [form.price]);
+
+  const recommendedUnit = form.category
+    ? RECOMMENDED_UNIT_BY_CATEGORY[form.category]
+    : null;
+
+  const trustSignals = useMemo(
+    () => [
+      { label: "Clear title", done: form.title.trim().length >= 12 },
+      { label: "Detailed description", done: form.description.trim().length >= 80 },
+      { label: "Complete location", done: !!form.county && !!form.constituency && !!form.ward },
+      { label: "Public contact added", done: !!form.contact.trim() },
+      {
+        label: "At least 3 photos",
+        done: form.listingType === "buy" ? true : form.images.length >= 3,
+      },
+      { label: "ID + selfie verified", done: idVerified && selfieVerified },
+    ],
+    [
+      form.title,
+      form.description,
+      form.county,
+      form.constituency,
+      form.ward,
+      form.contact,
+      form.listingType,
+      form.images.length,
+      idVerified,
+      selfieVerified,
+    ]
+  );
+
+  const trustCompletedCount = trustSignals.filter((signal) => signal.done).length;
+  const trustScore = Math.round((trustCompletedCount / trustSignals.length) * 100);
+  const trustNextAction = trustSignals.find((signal) => !signal.done)?.label;
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -771,6 +811,36 @@ const CreateListing: React.FC = () => {
               </h2>
 
               <div className="space-y-5">
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-emerald-900">Trust readiness</p>
+                    <p className="text-sm font-bold text-emerald-800">{trustScore}%</p>
+                  </div>
+                  <div className="mt-2 h-2 rounded-full bg-white overflow-hidden">
+                    <div
+                      className="h-full bg-emerald-600 transition-all"
+                      style={{ width: `${trustScore}%` }}
+                    />
+                  </div>
+                  <p className="mt-3 text-xs text-emerald-800">
+                    {trustNextAction
+                      ? `Next high-impact action: ${trustNextAction}.`
+                      : "Great setup. Your listing has strong trust signals."}
+                  </p>
+                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                    {trustSignals.map((signal) => (
+                      <p
+                        key={signal.label}
+                        className={`text-xs font-semibold ${
+                          signal.done ? "text-emerald-700" : "text-slate-600"
+                        }`}
+                      >
+                        {signal.done ? "✓" : "○"} {signal.label}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Title */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-2">Title *</label>
@@ -836,6 +906,22 @@ const CreateListing: React.FC = () => {
                           ))}
                         </select>
                       </div>
+                      {recommendedUnit && (
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                          <p className="text-xs text-gray-600">
+                            Recommended unit for this category: <span className="font-semibold">{recommendedUnit}</span>
+                          </p>
+                          {form.unit !== recommendedUnit && (
+                            <button
+                              type="button"
+                              onClick={() => setForm((prev) => ({ ...prev, unit: recommendedUnit }))}
+                              className="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+                            >
+                              Use recommended
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1045,6 +1131,10 @@ const CreateListing: React.FC = () => {
                       <p>
                         <span className="text-gray-600">Images:</span>
                         <span className="font-semibold text-gray-900 ml-2">{form.images.length} uploaded</span>
+                      </p>
+                      <p>
+                        <span className="text-gray-600">Trust readiness:</span>
+                        <span className="font-semibold text-gray-900 ml-2">{trustScore}%</span>
                       </p>
                     </div>
                   </div>
