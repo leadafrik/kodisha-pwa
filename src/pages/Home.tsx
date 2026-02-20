@@ -14,75 +14,160 @@ const Home: React.FC = () => {
   
   // Set defaults if content is empty
   const displayHeadline = heroHeadline || "Connecting Kenya's Agricultural Ecosystem";
-  const displayDescription = heroDescription || 'A trusted marketplace for farmers, buyers, and service providers in all 47 counties.';
-  const displayAnnouncement = announcementText || 'Open beta: listings are free during launch.';
+  const displayDescription = heroDescription || 'Sell faster and buy safer across all 47 counties with verified profiles, direct chat, and transparent terms.';
+  const displayAnnouncement = announcementText || 'Launch window: listing fee is KSh 0. Keep more margin on every sale.';
+  const primaryCtaHref = user ? "/create-listing" : "/login?next=/create-listing";
+  const primaryCtaLabel = user ? "List Now Before Fees Start" : "Start Free Listing";
+  const launchOfferEndsAt = new Date("2026-03-08T23:59:59+03:00");
+  const daysLeft = Math.max(
+    0,
+    Math.ceil((launchOfferEndsAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+  );
+  const urgencyLine =
+    daysLeft > 0
+      ? `${daysLeft} day${daysLeft === 1 ? "" : "s"} left: listing fee stays at KSh 0.`
+      : "Launch fee waiver closes soon. List now and lock in momentum.";
 
   return (
-    <main className="min-h-screen bg-white">
-      {/* HERO SECTION - Clean & Minimal */}
-      <section className="pt-14 md:pt-20 pb-16 md:pb-24 px-4 md:px-8 border-b border-gray-200">
-        <div className="max-w-7xl mx-auto">
-          {/* Beta Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-medium mb-8">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
-            Open Beta - Listings Free
-          </div>
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#f7fff3_0%,_#ffffff_58%)]">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap');
+        .home-display {
+          font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+        }
+        .home-headline {
+          font-family: "Fraunces", Georgia, serif;
+        }
+        .hook-glow {
+          box-shadow: 0 18px 40px -18px rgba(16, 185, 129, 0.65);
+        }
+        .home-float {
+          animation: rise 0.9s ease both;
+        }
+        @keyframes rise {
+          from { opacity: 0; transform: translateY(16px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
 
-          {/* Main Headline */}
-          <div className="space-y-4 md:space-y-6 max-w-3xl">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
+      <section className="border-b border-emerald-900/20 bg-[#103021] px-4 py-3 text-emerald-50 md:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <p className="home-display text-sm font-semibold md:text-base">
+            Move now: {urgencyLine}
+          </p>
+          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-emerald-100">
+            <span className="rounded-full border border-emerald-300/50 bg-emerald-500/20 px-3 py-1">47 counties live</span>
+            <span className="rounded-full border border-emerald-300/50 bg-emerald-500/20 px-3 py-1">Verified traders</span>
+            <span className="rounded-full border border-emerald-300/50 bg-emerald-500/20 px-3 py-1">Direct chat deals</span>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden border-b border-emerald-100 px-4 pb-16 pt-14 md:px-8 md:pb-24 md:pt-20">
+        <div className="pointer-events-none absolute -left-20 top-12 h-64 w-64 rounded-full bg-emerald-200/40 blur-3xl" />
+        <div className="pointer-events-none absolute -right-24 top-20 h-64 w-64 rounded-full bg-amber-200/35 blur-3xl" />
+
+        <div className="home-display mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+          <div className="home-float">
+            <p className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-emerald-800">
+              Trusted by serious buyers and sellers
+            </p>
+            <h1 className="home-headline mt-5 text-4xl leading-tight text-slate-900 sm:text-5xl md:text-6xl">
               {displayHeadline}
             </h1>
-            <p className="text-lg md:text-xl text-gray-600 leading-relaxed">
+            <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-700 md:text-xl">
               {displayDescription}
             </p>
-            <p className="hidden sm:block text-base md:text-lg text-gray-500 font-medium">
-              {displayAnnouncement}
+            <p className="mt-3 max-w-2xl text-base font-semibold text-emerald-800">
+              {displayAnnouncement} First movers capture repeat buyers while competition is still thin.
             </p>
+
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <Link
+                to={primaryCtaHref}
+                className="hook-glow inline-flex w-full items-center justify-center rounded-xl bg-emerald-600 px-6 py-3.5 text-base font-bold text-white transition hover:bg-emerald-700 sm:w-auto"
+              >
+                {primaryCtaLabel}
+              </Link>
+              <Link
+                to="/browse"
+                className="inline-flex w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-base font-semibold text-slate-900 transition hover:bg-slate-50 sm:w-auto"
+              >
+                See Active Demand
+              </Link>
+            </div>
+
+            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-xl border border-emerald-100 bg-white/85 px-4 py-3">
+                <p className="text-2xl font-black text-emerald-700">3 min</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">First listing</p>
+              </div>
+              <div className="rounded-xl border border-emerald-100 bg-white/85 px-4 py-3">
+                <p className="text-2xl font-black text-emerald-700">Auto</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">No data loss</p>
+              </div>
+              <div className="rounded-xl border border-emerald-100 bg-white/85 px-4 py-3">
+                <p className="text-2xl font-black text-emerald-700">Live</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Close faster</p>
+              </div>
+            </div>
           </div>
 
-          {/* Primary CTA Row */}
-          <div className="flex flex-col sm:flex-row gap-3 mt-8 md:mt-10">
+          <aside className="home-float rounded-2xl border border-emerald-200 bg-white/95 p-6 shadow-[0_25px_55px_-32px_rgba(16,185,129,0.7)]">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-700">Your unfair advantage</p>
+            <h2 className="mt-3 text-2xl font-extrabold text-slate-900">
+              Start now, build compounding trust
+            </h2>
+            <ul className="mt-4 space-y-3 text-sm text-slate-700">
+              <li className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                <strong className="text-slate-900">1. Loss aversion:</strong> each delayed day can cost buyer attention to faster sellers.
+              </li>
+              <li className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                <strong className="text-slate-900">2. Social proof:</strong> verified badges and active listings raise buyer confidence.
+              </li>
+              <li className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                <strong className="text-slate-900">3. Goal gradient:</strong> each listing pushes the raffle target closer and keeps users engaged.
+              </li>
+            </ul>
+            <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+              <p className="text-xs font-bold uppercase tracking-[0.15em] text-amber-700">Today&apos;s action</p>
+              <p className="mt-1 text-sm font-semibold text-slate-900">
+                Post one listing now, then a second tomorrow to dominate your category with visible activity.
+              </p>
+            </div>
             <Link
-              to="/browse"
-              className="inline-flex w-full sm:w-auto justify-center items-center px-6 py-3.5 bg-gray-900 text-white font-semibold rounded-lg shadow-lg shadow-gray-300/60 hover:bg-gray-800 transition-colors"
+              to={primaryCtaHref}
+              className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
             >
-              Browse Listings
+              Start my first listing
             </Link>
-            <Link
-              to={user ? "/create-listing" : "/login?next=/create-listing"}
-              className="inline-flex w-full sm:w-auto justify-center items-center px-6 py-3 border border-gray-300 text-gray-900 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              {user ? "Create Listing" : "Start Selling"}
-            </Link>
-          </div>
+          </aside>
+        </div>
 
-          {/* Key Metrics - Minimal */}
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-4 md:gap-8 mt-10 md:mt-16 pt-8 md:pt-12 border-t border-gray-200">
-            <div>
-              <div className="text-2xl font-bold text-gray-900">47</div>
-              <div className="text-xs text-gray-600 mt-1">Counties Covered</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">Verified</div>
-              <div className="text-xs text-gray-600 mt-1">ID Verified</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">Instant</div>
-              <div className="text-xs text-gray-600 mt-1">Chat Support</div>
-            </div>
-            <div className="hidden md:block">
-              <div className="text-2xl font-bold text-gray-900">Free</div>
-              <div className="text-xs text-gray-600 mt-1">Launch Phase</div>
-            </div>
-            <div className="hidden md:block">
-              <div className="text-2xl font-bold text-gray-900">24/7</div>
-              <div className="text-xs text-gray-600 mt-1">Available</div>
-            </div>
-            <div className="hidden md:block">
-              <div className="text-2xl font-bold text-gray-900">Direct</div>
-              <div className="text-xs text-gray-600 mt-1">No Middlemen</div>
-            </div>
+        <div className="mx-auto mt-12 grid max-w-7xl grid-cols-3 gap-4 border-t border-slate-200 pt-8 text-center md:grid-cols-6 md:gap-6 md:text-left">
+          <div>
+            <div className="text-2xl font-bold text-slate-900">47</div>
+            <div className="mt-1 text-xs text-slate-600">Counties Covered</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-slate-900">Verified</div>
+            <div className="mt-1 text-xs text-slate-600">ID Verified</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-slate-900">Instant</div>
+            <div className="mt-1 text-xs text-slate-600">Chat Support</div>
+          </div>
+          <div className="hidden md:block">
+            <div className="text-2xl font-bold text-slate-900">KSh 0</div>
+            <div className="mt-1 text-xs text-slate-600">Launch Fee Waiver</div>
+          </div>
+          <div className="hidden md:block">
+            <div className="text-2xl font-bold text-slate-900">24/7</div>
+            <div className="mt-1 text-xs text-slate-600">Buyer Activity</div>
+          </div>
+          <div className="hidden md:block">
+            <div className="text-2xl font-bold text-slate-900">Direct</div>
+            <div className="mt-1 text-xs text-slate-600">No Middlemen</div>
           </div>
         </div>
       </section>
@@ -98,17 +183,17 @@ const Home: React.FC = () => {
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-6">
           <div className="flex-1">
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
-              Be Among the First 100 Sellers
+              Launch Advantage: Keep More of Every Sale
             </h2>
             <p className="text-green-50 mb-4">
-              List products and services free in launch phase. First-100 seller offer ends March 8, 2026.
+              Listing fee is KSh 0 during launch. Delay means less visibility while early sellers lock buyer relationships.
             </p>
           </div>
           <Link
             to={user ? "/create-listing" : "/login?next=/create-listing"}
             className="inline-flex justify-center items-center px-6 py-3 bg-white text-green-700 font-bold rounded-lg hover:bg-green-50 transition-colors whitespace-nowrap"
           >
-            {user ? "List Now Free" : "Sign Up & List"}
+            {user ? "List Before Fees Start" : "Join & List Free"}
           </Link>
         </div>
       </section>
@@ -116,15 +201,15 @@ const Home: React.FC = () => {
       {/* DUAL CTA SECTION - Two User Paths */}
       <section className="py-20 px-4 md:px-8 bg-gray-50">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">Choose Your Path</h2>
-          <p className="text-lg text-gray-600 mb-12 max-w-2xl">Buy or sell faster with verified users.</p>
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">Choose Your Growth Path</h2>
+          <p className="text-lg text-gray-600 mb-12 max-w-2xl">Buy with confidence or sell with urgency.</p>
 
           <div className="grid md:grid-cols-2 gap-8">
             {/* BUYERS PATH */}
             <div className="border border-gray-200 rounded-lg p-12 bg-white hover:border-gray-300 transition">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">I'm Buying</h3>
               <p className="text-gray-600 mb-6">
-                Find produce, livestock, inputs, and services.
+                Compare verified options and negotiate directly.
               </p>
               <ul className="space-y-3 mb-8 text-gray-700">
                 <li className="flex items-center gap-2">
@@ -149,24 +234,24 @@ const Home: React.FC = () => {
             <div className="border border-gray-200 rounded-lg p-12 bg-white hover:border-gray-300 transition">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">I'm Selling</h3>
               <p className="text-gray-600 mb-6">
-                Reach active buyers and close deals quickly.
+                Reach buyers already searching and close faster.
               </p>
               <ul className="space-y-3 mb-8 text-gray-700">
                 <li className="flex items-center gap-2">
-                  <span className="text-blue-600 font-semibold">+</span> Live buyer demand
+                  <span className="text-blue-600 font-semibold">+</span> Buyer demand already live
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-blue-600 font-semibold">+</span> More inbound inquiries
+                  <span className="text-blue-600 font-semibold">+</span> Higher trust with verified badge
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-blue-600 font-semibold">+</span> Faster deal cycles
+                  <span className="text-blue-600 font-semibold">+</span> Faster repeat deals
                 </li>
               </ul>
               <Link
                 to={user ? "/create-listing" : "/login?next=/create-listing"}
                 className="inline-flex items-center px-6 py-2 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
               >
-                {user ? "Create Listing" : "Get Started"}
+                {user ? "Start Selling Today" : "Get Started"}
               </Link>
             </div>
           </div>
@@ -178,7 +263,7 @@ const Home: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
           <p className="text-lg text-gray-600 mb-12 max-w-2xl">
-            Three steps from signup to trade.
+            Three steps to trusted trade and repeat business.
           </p>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -211,7 +296,7 @@ const Home: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">Why Choose Agrisoko</h2>
           <p className="text-lg text-gray-600 mb-12 max-w-2xl">
-            Built for trust, speed, and direct trade.
+            Built to convert trust into real transactions.
           </p>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -247,8 +332,8 @@ const Home: React.FC = () => {
 
             {/* Feature 6 */}
             <div className="p-8 bg-white rounded-lg border border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900 mb-3">Free Launch Phase</h3>
-              <p className="text-gray-600">Zero listing fees during launch.</p>
+              <h3 className="text-lg font-bold text-gray-900 mb-3">Launch Fee Waiver</h3>
+              <p className="text-gray-600">List at KSh 0 now before standard fees activate.</p>
             </div>
           </div>
         </div>
@@ -294,9 +379,9 @@ const Home: React.FC = () => {
       {/* FEATURE STATUS BANNER */}
       <section className="py-12 px-4 md:px-8 bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto text-center">
-          <h3 className="text-2xl font-bold mb-2">Open Beta - Core Features Live</h3>
+          <h3 className="text-2xl font-bold mb-2">Core Features Live</h3>
           <p className="text-gray-300">
-            Verification and in-app messaging are live. Payment fees will be announced before activation.
+            Verification, messaging, and moderation are live so every trade starts with trust.
           </p>
         </div>
       </section>
@@ -306,12 +391,12 @@ const Home: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <div className="bg-gray-50 rounded-lg border border-gray-200 p-12 text-center">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              {user ? "Ready to Grow Your Business?" : "Ready to Get Started?"}
+              {user ? "Ready to Capture More Buyers?" : "Ready to Launch Your First Listing?"}
             </h2>
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
               {user 
-                ? "List now and reach buyers across all 47 counties."
-                : "Create an account and start trading today."}
+                ? "Post now while listing is free and lock in repeat buyer relationships."
+                : "Create your account, verify once, and list in minutes."}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
@@ -324,7 +409,7 @@ const Home: React.FC = () => {
                 to={user ? "/create-listing" : "/login?next=/create-listing"}
                 className="inline-flex justify-center items-center px-6 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
               >
-                {user ? "Create Listing" : "Create Account"}
+                {user ? "Claim Free Listing" : "Create Account"}
               </Link>
             </div>
           </div>
@@ -381,7 +466,7 @@ const Home: React.FC = () => {
                 </li>
                 <li>
                   <a 
-                    href="mailto:kodisha.254.ke@gmail.com"
+                    href="mailto:info@leadafrik.com"
                     className="hover:text-white transition"
                   >
                     Email Support
@@ -393,7 +478,7 @@ const Home: React.FC = () => {
 
           {/* Footer Bottom */}
           <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
-            <p>&copy; {new Date().getFullYear()} Agrisoko. Open beta with zero listing fees.</p>
+            <p>&copy; {new Date().getFullYear()} Agrisoko. Launch pricing active with zero listing fees.</p>
           </div>
         </div>
       </footer>

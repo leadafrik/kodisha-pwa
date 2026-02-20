@@ -88,6 +88,8 @@ export const API_ENDPOINTS = {
     products: {
       list: `${API_BASE_URL}/products`,
       create: `${API_BASE_URL}/products`,
+      edit: (id: string) => `${API_BASE_URL}/products/${id}`,
+      listAgain: (id: string) => `${API_BASE_URL}/products/${id}/list-again`,
       markSold: (id: string) => `${API_BASE_URL}/products/${id}/mark-sold`,
     },
   },
