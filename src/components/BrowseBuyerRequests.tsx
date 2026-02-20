@@ -30,8 +30,15 @@ interface BrowseBuyerRequestsProps {
   onSelectRequest?: (request: BuyerRequest) => void;
 }
 
+interface BuyerRequestCache {
+  data: BuyerRequest[];
+  pagination: { pages: number; total: number; page: number };
+  savedAt: string;
+}
+
 // Use all 47 Kenyan counties from data source
 const COUNTIES = ["All Counties", ...kenyaCounties.map(c => c.name)];
+const REQUEST_CACHE_KEY = "agrisoko_buyer_requests_cache_v1";
 
 const URGENCY_COLORS: Record<string, string> = {
   low: "bg-blue-100 text-blue-800",
@@ -74,10 +81,60 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
 
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ pages: 1, total: 0, page: 1 });
+  const [cachedAt, setCachedAt] = useState<string | null>(null);
+
+  const getCachedRequests = (): BuyerRequestCache | null => {
+    try {
+      const raw = localStorage.getItem(REQUEST_CACHE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed?.data)) return null;
+      if (!parsed?.pagination || typeof parsed.pagination !== "object") return null;
+      return parsed as BuyerRequestCache;
+    } catch {
+      return null;
+    }
+  };
+
+  const setCachedRequests = (
+    items: BuyerRequest[],
+    pageData: { pages: number; total: number; page: number }
+  ) => {
+    const payload: BuyerRequestCache = {
+      data: items,
+      pagination: pageData,
+      savedAt: new Date().toISOString(),
+    };
+    localStorage.setItem(REQUEST_CACHE_KEY, JSON.stringify(payload));
+    setCachedAt(payload.savedAt);
+  };
+
+  const applyCachedRequests = (cached: BuyerRequestCache, message: string) => {
+    setRequests(cached.data);
+    setPagination(cached.pagination);
+    setCachedAt(cached.savedAt);
+    setError(message);
+  };
 
   const fetchRequests = useCallback(async () => {
     setLoading(true);
     setError("");
+
+    const cached = getCachedRequests();
+
+    if (!navigator.onLine) {
+      if (cached) {
+        applyCachedRequests(
+          cached,
+          "You are offline. Showing the last synced buy requests."
+        );
+      } else {
+        setError("You are offline. Reconnect and try again.");
+      }
+      setLoading(false);
+      return;
+    }
+
     try {
       const params = new URLSearchParams();
       params.append("page", page.toString());
@@ -113,8 +170,17 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
       
       setRequests(data.data);
       setPagination(data.pagination || { total: 0, pages: 1, page: 1 });
+      setCachedRequests(data.data, data.pagination || { total: 0, pages: 1, page: 1 });
     } catch (err: any) {
-      setError(err.message || "An error occurred while fetching buyer requests");
+      const message = err.message || "An error occurred while fetching buyer requests";
+      if (cached) {
+        applyCachedRequests(
+          cached,
+          "Live updates failed. Showing saved buy requests."
+        );
+      } else {
+        setError(message);
+      }
     } finally {
       setLoading(false);
     }
@@ -122,6 +188,14 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
 
   useEffect(() => {
     fetchRequests();
+  }, [fetchRequests]);
+
+  useEffect(() => {
+    const handleOnline = () => {
+      fetchRequests();
+    };
+    window.addEventListener("online", handleOnline);
+    return () => window.removeEventListener("online", handleOnline);
   }, [fetchRequests]);
 
   const handleFilterChange = (
@@ -350,9 +424,23 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
         </div>
 
         {error && (
-          <div className="mb-6 mt-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded flex items-center gap-2">
+          <div className="mb-6 mt-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded flex flex-wrap items-center gap-3">
             <AlertCircle size={20} />
-            <span>{error}</span>
+            <span className="flex-1">
+              {error}
+              {cachedAt && (
+                <span className="block text-xs text-red-600 mt-1">
+                  Cached at: {new Date(cachedAt).toLocaleString("en-KE")}
+                </span>
+              )}
+            </span>
+            <button
+              type="button"
+              onClick={fetchRequests}
+              className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700"
+            >
+              Retry
+            </button>
           </div>
         )}
 
