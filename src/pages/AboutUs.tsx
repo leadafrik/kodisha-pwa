@@ -1,43 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { API_BASE_URL } from '../config/api';
 import { kenyaCounties } from '../data/kenyaCounties';
 
 const AboutUs: React.FC = () => {
   const { user } = useAuth();
-  const [userCount, setUserCount] = useState<number | null>(null);
-
-  useEffect(() => {
-    let isMounted = true;
-    const REFRESH_INTERVAL_MS = 60000;
-
-    const loadUserCount = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/metrics/community`);
-        const data = await response.json().catch(() => ({}));
-        const total = data?.data?.users?.total;
-
-        if (isMounted && typeof total === 'number') {
-          setUserCount(total);
-        }
-      } catch (error) {
-        // Silent fail to keep the page functional if metrics are unavailable.
-      }
-    };
-
-    loadUserCount();
-    const intervalId = window.setInterval(loadUserCount, REFRESH_INTERVAL_MS);
-
-    return () => {
-      isMounted = false;
-      window.clearInterval(intervalId);
-    };
-  }, []);
 
   const countiesCount = kenyaCounties.length;
-  const userCountLabel =
-    userCount !== null ? `${userCount.toLocaleString()} registered users` : 'Fetching registered users...';
   const isFullyVerified =
     user?.verification?.status === "approved" || !!user?.verification?.idVerified;
   const verificationLink = user ? (isFullyVerified ? '/profile' : '/verify-id') : '/login';
@@ -71,6 +40,69 @@ const AboutUs: React.FC = () => {
       `}</style>
 
       <div className="about-shell">
+        <script type="application/ld+json">
+          {JSON.stringify(
+            {
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "Agrisoko Limited",
+              url: "https://www.agrisoko254.com",
+              logo: "https://www.agrisoko254.com/logo512.png",
+              contactPoint: {
+                "@type": "ContactPoint",
+                contactType: "Customer Service",
+                telephone: "+254796389192",
+                email: "info@leadafrik.com",
+                areaServed: "KE",
+                availableLanguage: ["English", "Swahili"],
+              },
+              address: {
+                "@type": "PostalAddress",
+                addressCountry: "KE",
+                addressLocality: "Kenya",
+              },
+              sameAs: [],
+            },
+            null,
+            2
+          )}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(
+            {
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: [
+                {
+                  "@type": "Question",
+                  name: "What is Agrisoko?",
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: "Agrisoko is a Kenyan agricultural marketplace where farmers, buyers, and service providers connect to trade produce, inputs, livestock, and services directly.",
+                  },
+                },
+                {
+                  "@type": "Question",
+                  name: "How does verification work?",
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: "Sellers submit ID and selfie verification to build trust. Verified profiles receive higher visibility and faster approvals.",
+                  },
+                },
+                {
+                  "@type": "Question",
+                  name: "How do I list on Agrisoko?",
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: "Create an account, fill in your listing details, and publish. You can also post a buy request if you are looking to purchase.",
+                  },
+                },
+              ],
+            },
+            null,
+            2
+          )}
+        </script>
         <section className="relative overflow-hidden">
           <div className="absolute -top-24 left-1/3 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
           <div className="absolute -bottom-24 right-0 h-72 w-72 rounded-full bg-amber-200/40 blur-3xl" />
@@ -82,12 +114,15 @@ const AboutUs: React.FC = () => {
                   About Agrisoko
                 </p>
                 <h1 className="about-title text-4xl md:text-5xl text-slate-900">
-                  Kenya's agricultural marketplace, built for real trade.
+                  Built by Kenyans, for Kenyan agriculture.
                 </h1>
                 <p className="text-base text-slate-600 max-w-xl">
-                  Agrisoko connects farmers, producers, service providers, and buyers across Kenya.
-                  Verified profiles, direct chat, and fair pricing keep transactions clear and fast.
+                  Agrisoko connects farmers, traders, agrovets, and buyers across all 47 counties.
+                  We help Kenyans trade directly, reduce broker costs, and build trust through verified profiles.
                 </p>
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                  Karibuni. Biashara bila middlemen — direct to farm, direct to buyer.
+                </div>
                 <div className="flex flex-wrap gap-3">
                   {!user && (
                     <Link
@@ -119,8 +154,8 @@ const AboutUs: React.FC = () => {
                 </div>
                 <div className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm sm:col-span-2">
                   <p className="text-xs uppercase tracking-wider text-slate-500">Active community</p>
-                  <p className="text-lg font-semibold text-slate-900">{userCountLabel}</p>
-                  <p className="text-xs text-slate-500">Farmers, buyers, and service providers</p>
+                  <p className="text-lg font-semibold text-slate-900">Farmers, buyers, and service providers</p>
+                  <p className="text-xs text-slate-500">Growing daily across Kenya</p>
                 </div>
               </div>
             </div>
@@ -131,16 +166,16 @@ const AboutUs: React.FC = () => {
           <div className="grid gap-6 md:grid-cols-2">
             <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
               <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">Our Mission</p>
-              <h2 className="about-title text-3xl text-slate-900 mt-3">Digitize the market</h2>
+              <h2 className="about-title text-3xl text-slate-900 mt-3">Make direct trade normal</h2>
               <p className="text-slate-600 mt-3 leading-relaxed">
-                Put agriculture online with simple tools for listing, buying, and messaging. No middlemen. No noise.
+                Help Kenyan farmers and agribusinesses sell and buy directly, without broker pressure, with clear pricing and trusted profiles.
               </p>
             </div>
             <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
               <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">Our Vision</p>
-              <h2 className="about-title text-3xl text-slate-900 mt-3">A trusted ecosystem</h2>
+              <h2 className="about-title text-3xl text-slate-900 mt-3">A trusted Kenyan marketplace</h2>
               <p className="text-slate-600 mt-3 leading-relaxed">
-                A platform where every farmer, buyer, and service provider can trade with confidence, backed by verification.
+                A platform where every farmer, buyer, agrovet, and service provider can trade with confidence, backed by verification and accountability.
               </p>
             </div>
           </div>
@@ -151,7 +186,7 @@ const AboutUs: React.FC = () => {
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">What we offer</p>
-                <h2 className="about-title text-3xl text-slate-900 mt-2">The full agricultural stack</h2>
+                <h2 className="about-title text-3xl text-slate-900 mt-2">Everything for your farm and agribusiness</h2>
               </div>
               <Link
                 to="/browse"
@@ -167,7 +202,7 @@ const AboutUs: React.FC = () => {
                   <div className="h-12 w-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">PR</div>
                   <h3 className="text-xl font-semibold text-slate-900">Produce</h3>
                 </div>
-                <p className="text-sm text-slate-600 mt-3">Fresh produce listed directly by farmers and producers.</p>
+                <p className="text-sm text-slate-600 mt-3">High-quality maize, onions, potatoes, fruits, and vegetables listed by farmers.</p>
                 <ul className="mt-4 space-y-2 text-sm text-slate-600">
                   <li>- Vegetables and fruits</li>
                   <li>- Grains and cereals</li>
@@ -180,7 +215,7 @@ const AboutUs: React.FC = () => {
                   <div className="h-12 w-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">IN</div>
                   <h3 className="text-xl font-semibold text-slate-900">Inputs</h3>
                 </div>
-                <p className="text-sm text-slate-600 mt-3">Trusted suppliers for reliable agricultural inputs.</p>
+                <p className="text-sm text-slate-600 mt-3">Certified seeds, fertilizer, and tools from verified suppliers.</p>
                 <ul className="mt-4 space-y-2 text-sm text-slate-600">
                   <li>- Seeds and seedlings</li>
                   <li>- Fertilizers and crop care</li>
@@ -193,7 +228,7 @@ const AboutUs: React.FC = () => {
                   <div className="h-12 w-12 rounded-2xl bg-sky-100 text-sky-700 flex items-center justify-center font-bold">SV</div>
                   <h3 className="text-xl font-semibold text-slate-900">Services</h3>
                 </div>
-                <p className="text-sm text-slate-600 mt-3">Professional services for modern farms and agribusiness.</p>
+                <p className="text-sm text-slate-600 mt-3">Tractors, transport, land prep, and agribusiness services across Kenya.</p>
                 <ul className="mt-4 space-y-2 text-sm text-slate-600">
                   <li>- Equipment rental</li>
                   <li>- Transport and logistics</li>
@@ -212,7 +247,7 @@ const AboutUs: React.FC = () => {
                 <p><span className="font-semibold text-slate-800">Direct connections:</span> Fair pricing without middlemen.</p>
                 <p><span className="font-semibold text-slate-800">Verified profiles:</span> Trust signals on every transaction.</p>
                 <p><span className="font-semibold text-slate-800">Nationwide reach:</span> Listings across {countiesCount} counties.</p>
-                <p><span className="font-semibold text-slate-800">Data protection:</span> Secure handling of your information.</p>
+                <p><span className="font-semibold text-slate-800">Data protection:</span> ODPC-aligned handling of your information.</p>
                 <p><span className="font-semibold text-slate-800">Ratings and reviews:</span> Transparent reputation building.</p>
               </div>
             </div>
@@ -261,7 +296,7 @@ const AboutUs: React.FC = () => {
               <p className="text-sm text-slate-600 mt-3">Email or join the WhatsApp community to get quick assistance.</p>
               <div className="mt-4 flex flex-col gap-2">
                 <a
-                  href="mailto:info@leadAfrik.com"
+                  href="mailto:info@leadafrik.com"
                   className="inline-flex justify-center items-center rounded-xl bg-slate-900 text-white px-4 py-2 text-sm font-semibold hover:bg-slate-800 transition"
                 >
                   Email Support
@@ -281,8 +316,8 @@ const AboutUs: React.FC = () => {
               <h3 className="text-xl font-semibold text-slate-900 mt-2">Growing every week</h3>
               <div className="mt-4 space-y-3 text-sm text-slate-600">
                 <p><span className="font-semibold text-slate-800">{countiesCount} counties</span> connected nationwide.</p>
-                <p><span className="font-semibold text-slate-800">{userCountLabel}</span> and growing.</p>
-                <p><span className="font-semibold text-slate-800">Support</span> available to the community.</p>
+                <p><span className="font-semibold text-slate-800">Active listings</span> updated daily.</p>
+                <p><span className="font-semibold text-slate-800">Support</span> available through email and WhatsApp.</p>
               </div>
             </div>
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">

@@ -141,16 +141,39 @@ const CreateListing: React.FC = () => {
     }
   }, [form.step, form.listingType]);
 
+  const hasMeaningfulDraft = (raw: string | null) => {
+    if (!raw) return false;
+    try {
+      const parsed = JSON.parse(raw);
+      return Boolean(
+        parsed?.category ||
+          parsed?.subcategory ||
+          parsed?.title ||
+          parsed?.description ||
+          parsed?.county ||
+          parsed?.price ||
+          parsed?.quantity ||
+          parsed?.contact
+      );
+    } catch {
+      return false;
+    }
+  };
+
   // Check for draft on load
   useEffect(() => {
     const draft = localStorage.getItem(DRAFT_STORAGE_KEY);
-    setHasDraft(!!draft);
+    if (!hasMeaningfulDraft(draft)) {
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+      setHasDraft(false);
+      return;
+    }
+    setHasDraft(true);
   }, []);
 
   // Auto-save draft (excluding images)
   useEffect(() => {
     const shouldSave =
-      form.listingType ||
       form.category ||
       form.subcategory ||
       form.title ||
@@ -279,14 +302,6 @@ const CreateListing: React.FC = () => {
     setError("");
     setNotice("");
 
-    if (form.step === 1) {
-      if (!form.listingType) {
-        setError("Please select whether you want to buy or sell");
-        return false;
-      }
-      return true;
-    }
-
     if (form.step === 2) {
       if (!form.category) {
         setError("Please select a category");
@@ -363,7 +378,7 @@ const CreateListing: React.FC = () => {
   const handlePrevStep = () => {
     setError("");
     setNotice("");
-    setForm((prev) => ({ ...prev, step: Math.max(1, prev.step - 1) }));
+    setForm((prev) => ({ ...prev, step: Math.max(2, prev.step - 1) }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -463,11 +478,12 @@ const CreateListing: React.FC = () => {
     if (!draftRaw) return;
     try {
       const parsed = JSON.parse(draftRaw);
+      const restoredStep = Math.min(Math.max(Number(parsed.step) || 2, 2), 5);
       setForm((prev) => ({
         ...prev,
         ...parsed,
         images: [],
-        step: Math.min(Math.max(Number(parsed.step) || 1, 1), 5),
+        step: restoredStep,
       }));
       setHasDraft(false);
       setNotice("Draft restored. Continue where you left off.");
@@ -529,10 +545,11 @@ const CreateListing: React.FC = () => {
               <div className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm fade-rise">
                 <p className="text-xs uppercase tracking-widest text-slate-500">Progress</p>
                 <div className="mt-4 space-y-3">
-                  {(["Type", "Category", "Location", "Details", "Verify"] as const).map((label, idx) => {
+                  {(["Category", "Location", "Details", "Verify"] as const).map((label, idx) => {
                     const step = idx + 1;
-                    const isActive = form.step === step;
-                    const isDone = form.step > step;
+                    const progressStep = Math.max(1, Math.min(4, form.step - 1));
+                    const isActive = progressStep === step;
+                    const isDone = progressStep > step;
                     return (
                       <div key={label} className="flex items-center gap-3">
                         <div
@@ -550,7 +567,7 @@ const CreateListing: React.FC = () => {
                           <p className={`text-sm font-semibold ${isActive ? "text-slate-900" : "text-slate-600"}`}>
                             {label}
                           </p>
-                          <p className="text-xs text-slate-500">Step {step} of 5</p>
+                          <p className="text-xs text-slate-500">Step {step} of 4</p>
                         </div>
                       </div>
                     );
@@ -559,7 +576,7 @@ const CreateListing: React.FC = () => {
                 <div className="mt-5 h-2 rounded-full bg-slate-100 overflow-hidden">
                   <div
                     className="h-full bg-emerald-600 transition-all"
-                    style={{ width: `${(form.step / 5) * 100}%` }}
+                    style={{ width: `${(Math.max(1, Math.min(4, form.step - 1)) / 4) * 100}%` }}
                   />
                 </div>
               </div>
@@ -631,49 +648,6 @@ const CreateListing: React.FC = () => {
 
         {/* Form Container */}
         <form onSubmit={form.step === 5 ? handleSubmit : (e) => e.preventDefault()}>
-          {/* Step 1: Listing Type */}
-          {form.step === 1 && (
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">What do you want to do?</h2>
-              <div className="grid grid-cols-2 gap-4">
-                {[
-                  { type: "sell" as const, label: "Sell", icon: "", desc: "Sell your products" },
-                  { type: "buy" as const, label: "Buy", icon: "", desc: "Post a buy request" },
-                ].map(({ type, label, icon, desc }) => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => {
-                      if (type === "buy") {
-                        navigate("/request/new");
-                        return;
-                      }
-                      setForm((prev) => ({
-                        ...prev,
-                        listingType: type,
-                        step: Math.max(prev.step, 2),
-                      }));
-                      setError("");
-                      setNotice("");
-                    }}
-                    className={`p-6 rounded-lg border-2 transition-all text-center ${
-                      form.listingType === type
-                        ? "border-green-600 bg-green-50"
-                        : "border-gray-200 hover:border-green-300"
-                    }`}
-                  >
-                    <div className="text-4xl mb-2">{icon}</div>
-                    <p className="font-bold text-gray-900">{label}</p>
-                    <p className="text-sm text-gray-600 mt-1">{desc}</p>
-                  </button>
-                ))}
-              </div>
-              <p className="mt-4 text-xs text-gray-500">
-                Buying? You will be redirected to the buy request form for a cleaner flow.
-              </p>
-            </div>
-          )}
-
           {/* Step 2: Category Selection */}
           {form.step === 2 && (
             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
@@ -1189,7 +1163,7 @@ const CreateListing: React.FC = () => {
 
           {/* Navigation Buttons */}
           <div className="flex gap-4 mt-6">
-            {form.step > 1 && (
+            {form.step > 2 && (
               <button
                 type="button"
                 onClick={handlePrevStep}
