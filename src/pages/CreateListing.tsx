@@ -135,6 +135,12 @@ const CreateListing: React.FC = () => {
     }
   }, [user?._id, refreshUser]);
 
+  useEffect(() => {
+    if (form.step === 1 && !form.listingType) {
+      setForm((prev) => ({ ...prev, listingType: "sell", step: 2 }));
+    }
+  }, [form.step, form.listingType]);
+
   // Check for draft on load
   useEffect(() => {
     const draft = localStorage.getItem(DRAFT_STORAGE_KEY);
@@ -671,6 +677,18 @@ const CreateListing: React.FC = () => {
           {/* Step 2: Category Selection */}
           {form.step === 2 && (
             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                <span className="font-semibold">
+                  Listing is set to Sell. Looking to buy instead?
+                </span>
+                <button
+                  type="button"
+                  onClick={() => navigate("/request/new")}
+                  className="rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 transition"
+                >
+                  Post a buy request
+                </button>
+              </div>
               <h2 className="text-xl font-bold text-gray-900 mb-6">What are you listing?</h2>
               <div className="space-y-4 mb-8">
                 {(["produce", "livestock", "inputs", "service"] as const).map((cat) => (
