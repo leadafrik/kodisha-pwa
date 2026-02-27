@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { kenyaCounties } from "../data/kenyaCounties";
 import GoogleLoginButton from "../components/GoogleLoginButtonV2";
 import FacebookLoginButton from "../components/FacebookLoginButtonV2";
+import { trackGoogleEvent, trackGooglePageView } from "../utils/cookieConsent";
 
 type Mode = "login" | "signup" | "otp-verify" | "forgot" | "otp-reset";
 type PasswordFieldKey = "login" | "signup" | "signupConfirm" | "resetNew" | "resetConfirm";
@@ -111,6 +112,18 @@ const Login: React.FC = () => {
     }
   }, [requestedMode]);
 
+  useEffect(() => {
+    if (mode !== "signup") return;
+
+    trackGooglePageView({
+      pagePath: "/login?mode=signup",
+      pageTitle: "Agrisoko Signup",
+    });
+    trackGoogleEvent("view_sign_up_page", {
+      page_path: "/login?mode=signup",
+    });
+  }, [mode]);
+
   const resetMessages = () => {
     setError(null);
     setInfo(null);
@@ -188,6 +201,7 @@ const Login: React.FC = () => {
           dataProcessingConsent: true,
         },
       });
+      trackGoogleEvent("sign_up", { method: "email" });
 
       try {
         await login(email, signupData.password);
@@ -429,13 +443,19 @@ const Login: React.FC = () => {
           Fastest signup
         </p>
         <GoogleLoginButton
-          onSuccess={() => navigate(redirectTo)}
+          onSuccess={() => {
+            trackGoogleEvent("sign_up", { method: "google" });
+            navigate(redirectTo);
+          }}
           onError={(error) => setError(error)}
           className="text-sm w-full"
         />
         <p className="text-center text-xs text-gray-500">No forms. No password. Instant access.</p>
         <FacebookLoginButton
-          onSuccess={() => navigate(redirectTo)}
+          onSuccess={() => {
+            trackGoogleEvent("sign_up", { method: "facebook" });
+            navigate(redirectTo);
+          }}
           onError={(error) => setError(error)}
           className="text-sm w-full"
         />

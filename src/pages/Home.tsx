@@ -3,8 +3,6 @@ import { Link } from "react-router-dom";
 import {
   ArrowRight,
   BadgeCheck,
-  Clock3,
-  MapPin,
   MessageCircle,
   Search,
   ShieldCheck,
@@ -39,11 +37,11 @@ const conversionPillars = [
 const tradeSteps = [
   {
     title: "Create account",
-    copy: "Open your account and set up your profile.",
+    copy: "Open your account in seconds and secure your place early.",
   },
   {
     title: "Verify profile",
-    copy: "Submit ID and selfie once to build buyer trust.",
+    copy: "Add ID and selfie verification to build trust and rank higher.",
   },
   {
     title: "Post first listing",
@@ -73,18 +71,6 @@ const trustFeatures = [
     title: "Smart discovery",
     copy: "Filter by county, category, and pricing expectations.",
     icon: Search,
-  },
-  {
-    title: "County coverage",
-    copy: "Agrisoko supports trade across all 47 counties.",
-    icon: MapPin,
-  },
-  {
-    title: "Launch fee window",
-    copy: PAYMENTS_ENABLED
-      ? `List at KSh 0 for your first ${FREE_WINDOW_DAYS} days after signup.`
-      : "Listings are currently free platform-wide.",
-    icon: Clock3,
   },
   {
     title: "Proof-led reputation",
@@ -164,13 +150,6 @@ const Home: React.FC = () => {
   const browseTo = user ? "/browse" : "/login?mode=signup&next=/browse";
   const demandCtaTo = user ? buyRequestsTo : primaryCtaTo;
   const demandCtaLabel = user ? "View Buy Requests" : signupCtaLabel;
-  const urgencyHeadline = isGlobalFreeListing
-    ? "Listings are currently free to post"
-    : user
-    ? daysLeft > 0
-      ? `Your free listing window has ${daysLeft} day${daysLeft === 1 ? "" : "s"} left`
-      : "Your free listing window has ended"
-    : `Free listing for your first ${FREE_WINDOW_DAYS} days after signup`;
   const urgencyBody = isGlobalFreeListing
     ? "There is no listing fee right now. Post now and build trust momentum while launch pricing is active."
     : user
@@ -178,6 +157,20 @@ const Home: React.FC = () => {
       ? "Use your active free window to post now and lock in trust early."
       : "You can still list and build trust momentum even after the initial free window."
     : `Every new account gets a personal ${FREE_WINDOW_DAYS}-day KSh 0 listing window.`;
+  const heroFocusItems = [
+    {
+      title: isGlobalFreeListing ? "Free to list right now" : "Launch window active",
+      copy: urgencyBody,
+    },
+    {
+      title: "Founding seller advantage",
+      copy: "47 counties are still open for traders building early reputation and repeat demand.",
+    },
+    {
+      title: "No ID needed to start",
+      copy: "Open your account first. Add verification when you are ready to strengthen trust.",
+    },
+  ];
   const finalCallCopy = isGlobalFreeListing
     ? "Create account, verify once, and post your first listing. Listing is currently free platform-wide."
     : user && daysLeft <= 0
@@ -212,115 +205,85 @@ const Home: React.FC = () => {
           <div className="pointer-events-none absolute -bottom-12 right-0 h-72 w-72 rounded-full bg-amber-200/35 blur-3xl" />
 
           <div className="relative mx-auto max-w-7xl px-4 pb-12 pt-14 md:pb-16 md:pt-20">
-            <div className="max-w-4xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-amber-800">
-                <Sparkles className="h-3.5 w-3.5" />
-                Free Listing Window
-                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] tracking-[0.12em]">
-                  {launchWindowLabel}
-                </span>
+            <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+              <div className="max-w-4xl">
+                <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-amber-800">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Free Listing Window
+                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] tracking-[0.12em]">
+                    {launchWindowLabel}
+                  </span>
+                </div>
+
+                <h1 className="home-title mt-5 text-4xl leading-tight text-slate-900 md:text-6xl">
+                  {displayHeadline}
+                </h1>
+                <p className="mt-4 max-w-3xl text-base leading-relaxed text-slate-700 md:text-lg">
+                  {displayDescription}
+                </p>
+
+                <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                  <Link
+                    to={primaryCtaTo}
+                    className="inline-flex min-h-[46px] items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-300/40 transition hover:bg-emerald-700"
+                  >
+                    {primaryCtaLabel}
+                  </Link>
+                </div>
+                {!user && (
+                  <p className="mt-3 text-sm font-medium text-slate-600">
+                    Create your free account now. You can list later when you are ready.
+                  </p>
+                )}
+                <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
+                  <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1">
+                    {liveListingCount.toLocaleString()} listings live
+                  </span>
+                  <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1">
+                    47 counties open
+                  </span>
+                  <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1">
+                    Direct buyer chat
+                  </span>
+                </div>
               </div>
 
-              <h1 className="home-title mt-5 text-4xl leading-tight text-slate-900 md:text-6xl">
-                {displayHeadline}
-              </h1>
-              <p className="mt-4 max-w-3xl text-base leading-relaxed text-slate-700 md:text-lg">
-                {displayDescription}
-              </p>
-
-              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                <Link
-                  to={primaryCtaTo}
-                  className="inline-flex min-h-[46px] items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-300/40 transition hover:bg-emerald-700"
-                >
-                  {primaryCtaLabel}
-                </Link>
-              </div>
-              {!user && (
-                <p className="mt-3 text-sm font-semibold text-emerald-800">
-                  Kisumu, Nakuru, Uasin Gishu and 44 other counties are open for founding sellers.
+              <aside className="rounded-3xl border border-slate-200 bg-white/95 p-6 shadow-sm">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">
+                  Why sellers move now
                 </p>
-              )}
-              {!user && (
-                <p className="mt-3 text-sm font-medium text-slate-600">
-                  Create your free account now. You can list later when you are ready.
-                </p>
-              )}
-              <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
-                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1">
-                  {liveListingCount.toLocaleString()} founding listings live
-                </span>
-                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1">
-                  47 counties open
-                </span>
-              </div>
+                <h2 className="home-title mt-3 text-3xl text-slate-900">
+                  Fast start. Strong trust. No broker drag.
+                </h2>
+                <div className="mt-5 space-y-3">
+                  {heroFocusItems.map((item) => (
+                    <div
+                      key={item.title}
+                      className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                    >
+                      <p className="text-sm font-semibold text-slate-900">{item.title}</p>
+                      <p className="mt-1 text-sm text-slate-600">{item.copy}</p>
+                    </div>
+                  ))}
+                </div>
+              </aside>
             </div>
           </div>
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-14">
-          <div className="grid items-start gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-            <article className="rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-7 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">Founding seller advantage</p>
-              <h2 className="home-title mt-3 text-3xl text-slate-900 md:text-4xl">
-                Secure your county before the category gets crowded
-              </h2>
-              <ul className="mt-5 space-y-2 text-sm text-slate-700">
-                <li className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
-                  Appear earlier in buyer discovery
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
-                  Earn buyer trust with verification
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
-                  Build repeat customers before late entrants
-                </li>
-              </ul>
-              <Link
-                to={primaryCtaTo}
-                className="mt-6 inline-flex min-h-[44px] items-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
-              >
-                {primaryCtaLabel}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </article>
-
-            <article className="rounded-3xl border border-amber-200 bg-amber-50 p-7 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-800">Urgency window</p>
-              <h3 className="mt-3 text-2xl font-semibold text-slate-900">
-                {urgencyHeadline}
-              </h3>
-              <p className="mt-2 text-sm text-slate-700">
-                {urgencyBody}
+          <div className="mb-7 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
+                Why Agrisoko works
               </p>
-              <Link
-                to={primaryCtaTo}
-                className="mt-6 inline-flex min-h-[44px] items-center rounded-xl border border-amber-300 bg-white px-5 py-2.5 text-sm font-semibold text-amber-900 transition hover:bg-amber-100"
-              >
-                {primaryCtaLabel}
-              </Link>
-            </article>
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-4 pb-14">
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-            <p className="text-sm font-semibold text-emerald-900">
-              No ID needed to start. No listing required.
+              <h2 className="home-title mt-2 text-3xl text-slate-900 md:text-4xl">
+                Clear reasons to act without overthinking
+              </h2>
+            </div>
+            <p className="max-w-md text-sm text-slate-600">
+              Start with your account. Add verification and more detail as your trading reputation grows.
             </p>
-            <p className="mt-1 text-sm text-emerald-800">
-              Open your account first, explore the market, then complete verification when ready to list.
-            </p>
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-4 pb-14">
-          <div className="mb-7">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">How you make more profit on Agrisoko</p>
-            <h2 className="home-title mt-2 text-3xl text-slate-900 md:text-4xl">Outcomes that move revenue</h2>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {conversionPillars.map((pillar) => (
@@ -330,28 +293,11 @@ const Home: React.FC = () => {
               </article>
             ))}
           </div>
-        </section>
-
-        <section className="border-y border-slate-200 bg-white px-4 py-12">
-          <div className="mx-auto max-w-7xl">
-            <div className="mb-7">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">Early market activity</p>
-              <h2 className="home-title mt-2 text-3xl text-slate-900 md:text-4xl">Momentum is already building</h2>
-            </div>
-            <div className="grid gap-4 md:grid-cols-3">
-              <article className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                <p className="text-sm font-semibold text-slate-900">{liveListingCount.toLocaleString()} founding listings</p>
-                <p className="mt-1 text-sm text-slate-600">Early suppliers are already visible to buyers.</p>
-              </article>
-              <article className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                <p className="text-sm font-semibold text-slate-900">47 counties open</p>
-                <p className="mt-1 text-sm text-slate-600">Every county is available for trusted seller growth.</p>
-              </article>
-              <article className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                <p className="text-sm font-semibold text-slate-900">Direct negotiation model</p>
-                <p className="mt-1 text-sm text-slate-600">No broker layers between you and your buyer.</p>
-              </article>
-            </div>
+          <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+            <p className="text-sm font-semibold text-emerald-900">No ID needed to start. No listing required.</p>
+            <p className="mt-1 text-sm text-emerald-800">
+              Open your account first, explore the market, then complete verification when ready to list.
+            </p>
           </div>
         </section>
 
@@ -377,7 +323,16 @@ const Home: React.FC = () => {
         </section>
 
         <section className="mx-auto max-w-7xl px-4 pb-14">
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="mb-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
+              Live demand and trust
+            </p>
+            <h2 className="home-title mt-2 text-3xl text-slate-900 md:text-4xl">
+              Buyers are searching. Trust closes the gap.
+            </h2>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
             <article className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
               <p className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-700">
                 Buyer demand
@@ -393,6 +348,28 @@ const Home: React.FC = () => {
                   </li>
                 ))}
               </ul>
+              <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                    Live now
+                  </p>
+                  <p className="mt-1 text-lg font-semibold text-slate-900">
+                    {liveListingCount.toLocaleString()} listings
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                    Coverage
+                  </p>
+                  <p className="mt-1 text-lg font-semibold text-slate-900">47 counties</p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                    Model
+                  </p>
+                  <p className="mt-1 text-lg font-semibold text-slate-900">Direct negotiation</p>
+                </div>
+              </div>
               <Link
                 to={demandCtaTo}
                 className="mt-6 inline-flex min-h-[44px] items-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-100"
@@ -404,14 +381,23 @@ const Home: React.FC = () => {
 
             <article className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
               <p className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-emerald-800">
-                Trust engine
+                Trade safely on Agrisoko
               </p>
               <h3 className="mt-3 text-2xl font-semibold text-slate-900">
-                Verified traders close deals faster
+                High-trust marketplace mechanics built into every profile
               </h3>
               <p className="mt-2 text-sm text-slate-600">
-                Your public profile, verification status, and listing activity remove hesitation before price talks.
+                Verification, direct chat, discovery, and visible activity reduce hesitation before price talks.
               </p>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                {trustFeatures.map((feature) => (
+                  <div key={feature.title} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <feature.icon className="h-5 w-5 text-emerald-700" />
+                    <p className="mt-3 text-sm font-semibold text-slate-900">{feature.title}</p>
+                    <p className="mt-1 text-sm text-slate-600">{feature.copy}</p>
+                  </div>
+                ))}
+              </div>
               <Link
                 to={primaryCtaTo}
                 className="mt-6 inline-flex min-h-[44px] items-center rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
@@ -445,26 +431,7 @@ const Home: React.FC = () => {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 py-14">
-          <div className="mb-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">Why Agrisoko</p>
-            <h2 className="home-title mt-2 text-3xl text-slate-900 md:text-4xl">
-              A trusted Kenyan marketplace engineered for conversion
-            </h2>
-          </div>
-
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {trustFeatures.map((feature) => (
-              <article key={feature.title} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <feature.icon className="h-5 w-5 text-emerald-700" />
-                <h3 className="mt-3 text-lg font-semibold text-slate-900">{feature.title}</h3>
-                <p className="mt-1 text-sm text-slate-600">{feature.copy}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-4 pb-16 pt-2">
+        <section className="mx-auto max-w-7xl px-4 pb-16 pt-8">
           <div className="rounded-3xl bg-gradient-to-r from-emerald-700 to-teal-700 p-8 text-white shadow-lg md:p-10">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-100">Final call</p>
             <h2 className="home-title mt-3 text-3xl md:text-4xl">Your county is still open. Lock your position now.</h2>

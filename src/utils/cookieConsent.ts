@@ -59,3 +59,39 @@ export const enableGoogleAdsTracking = () => {
   window.__agrisokoAdsInitialized = true;
 };
 
+const hasTrackingConsent = () => getCookieConsent() === "accepted";
+
+const ensureTrackingReady = () => {
+  if (!hasTrackingConsent()) return false;
+  enableGoogleAdsTracking();
+  return typeof window.gtag === "function";
+};
+
+export const trackGooglePageView = ({
+  pagePath,
+  pageTitle,
+}: {
+  pagePath: string;
+  pageTitle?: string;
+}) => {
+  if (typeof window === "undefined" || !ensureTrackingReady()) return;
+
+  window.gtag?.("event", "page_view", {
+    send_to: GOOGLE_ADS_TAG_ID,
+    page_path: pagePath,
+    page_title: pageTitle || document.title,
+    page_location: window.location.href,
+  });
+};
+
+export const trackGoogleEvent = (
+  eventName: string,
+  params: Record<string, unknown> = {}
+) => {
+  if (typeof window === "undefined" || !ensureTrackingReady()) return;
+
+  window.gtag?.("event", eventName, {
+    send_to: GOOGLE_ADS_TAG_ID,
+    ...params,
+  });
+};
