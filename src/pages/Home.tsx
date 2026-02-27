@@ -1,445 +1,387 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import {
+  ArrowRight,
+  BadgeCheck,
+  Clock3,
+  MapPin,
+  MessageCircle,
+  Search,
+  ShieldCheck,
+  Sparkles,
+} from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { usePageContent } from '../hooks/usePageContent';
 import RaffleCampaign from '../components/RaffleCampaign';
 
+const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
+const launchFeeDeadline = new Date('2026-03-08T23:59:59+03:00');
+const launchFeeDeadlineLabel = launchFeeDeadline.toLocaleDateString('en-KE', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+});
+
+const sellerAdvantages = [
+  {
+    title: 'Buyers find you first',
+    copy: 'Early verified sellers get the first conversations and build repeat buyer relationships faster.',
+  },
+  {
+    title: 'Verified badge closes deals',
+    copy: 'Identity-verified profiles reduce hesitation and improve trust before pricing discussions start.',
+  },
+  {
+    title: 'Consistency compounds',
+    copy: 'Frequent, clear listings keep your profile active while demand grows in your county.',
+  },
+];
+
+const tradeSteps = [
+  {
+    title: 'Create account',
+    copy: 'Sign up and complete your profile in minutes.',
+  },
+  {
+    title: 'Browse or list',
+    copy: 'Post what you are selling or scan active requests and inventory.',
+  },
+  {
+    title: 'Connect and trade',
+    copy: 'Chat directly, agree terms, and close deals without middle layers.',
+  },
+];
+
+const trustFeatures = [
+  {
+    title: 'Verified traders',
+    copy: 'ID and selfie verification for safer and more credible trade.',
+    icon: ShieldCheck,
+  },
+  {
+    title: 'Instant messaging',
+    copy: 'Real-time buyer and seller chat to move from inquiry to agreement quickly.',
+    icon: MessageCircle,
+  },
+  {
+    title: '47 counties covered',
+    copy: 'Find supply and demand across Kenya with county-specific discovery.',
+    icon: MapPin,
+  },
+  {
+    title: 'Smart search filters',
+    copy: 'Filter listings by location, category, and pricing expectations.',
+    icon: Search,
+  },
+  {
+    title: 'Launch fee waiver',
+    copy: `List at KSh 0 during the early window ending ${launchFeeDeadlineLabel}.`,
+    icon: Clock3,
+  },
+  {
+    title: 'Trust-backed growth',
+    copy: 'Build your public reputation with transparent profile and listing activity.',
+    icon: BadgeCheck,
+  },
+];
+
 const Home: React.FC = () => {
   const { user } = useAuth();
-  
-  // Fetch dynamic content with fallbacks
+
   const { content: heroHeadline } = usePageContent('home.hero.headline');
   const { content: heroDescription } = usePageContent('home.hero.description');
   const { content: announcementText } = usePageContent('home.announcement.banner');
-  
-  // Set defaults if content is empty
-  const displayHeadline = heroHeadline || "In new markets, the first trusted sellers win for years.";
-  const displayDescription =
-    heroDescription ||
-    "Agrisoko helps farmers, traders, and agrovets become the go-to suppliers in their counties through verified profiles and direct buyer chat.";
-  const displayAnnouncement =
-    announcementText ||
-    "Listing is KSh 0 in the launch window. This early-seller advantage will not stay open forever.";
-  const primaryCtaHref = user ? "/create-listing" : "/login?next=/create-listing";
-  const primaryCtaLabel = user ? "Lock In My Early-Seller Advantage" : "Start Free Listing";
-  const launchOfferEndsAt = new Date("2026-03-08T23:59:59+03:00");
+
   const daysLeft = Math.max(
     0,
-    Math.ceil((launchOfferEndsAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    Math.ceil((launchFeeDeadline.getTime() - Date.now()) / MILLISECONDS_IN_DAY)
   );
-  const urgencyLine =
-    daysLeft > 0
-      ? `${daysLeft} day${daysLeft === 1 ? "" : "s"} left: listing fee stays at KSh 0.`
-      : "Launch fee waiver closes soon. List now and lock in momentum.";
+  const launchWindowLabel =
+    daysLeft > 0 ? `${daysLeft} day${daysLeft === 1 ? '' : 's'} left at KSh 0` : 'Launch fee window ended';
+
+  const displayHeadline = heroHeadline || 'Become the go-to seller in your county';
+  const displayDescription =
+    heroDescription ||
+    'Join farmers, traders, and agrovets building trusted seller profiles now. Verify once, list for free, and start direct buyer conversations.';
+  const displayAnnouncement =
+    announcementText || 'In new markets, the first trusted sellers usually capture long-term buyer loyalty.';
+
+  const primaryCtaTo = user ? '/create-listing' : '/login?next=/create-listing';
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#f7fff3_0%,_#ffffff_58%)]">
+    <main className="min-h-screen bg-slate-50 text-slate-900">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap');
-        .home-display {
-          font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700&family=Sora:wght@400;500;600;700&display=swap');
+        .home-shell {
+          font-family: "Sora", "Segoe UI", "Tahoma", sans-serif;
         }
-        .home-headline {
-          font-family: "Fraunces", Georgia, serif;
-        }
-        .hook-glow {
-          box-shadow: 0 18px 40px -18px rgba(16, 185, 129, 0.65);
-        }
-        .home-float {
-          animation: rise 0.9s ease both;
-        }
-        @keyframes rise {
-          from { opacity: 0; transform: translateY(16px); }
-          to { opacity: 1; transform: translateY(0); }
+        .home-title {
+          font-family: "Fraunces", "Georgia", serif;
         }
       `}</style>
 
-      <section className="sticky top-16 z-30 border-b-2 border-amber-300 bg-gradient-to-r from-[#0b3f2b] via-[#0d5138] to-[#126a4a] px-4 py-3 text-emerald-50 md:px-8">
-        <div className="mx-auto max-w-7xl rounded-2xl border border-white/20 bg-black/20 px-4 py-3 backdrop-blur">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="min-w-0">
-              <p className="inline-flex items-center gap-2 rounded-full bg-amber-300 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.12em] text-slate-900">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-500" />
-                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-rose-600" />
-                </span>
+      <div className="home-shell">
+        <section className="relative overflow-hidden border-b border-slate-200 bg-white">
+          <div className="pointer-events-none absolute -top-16 left-1/3 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-12 right-0 h-72 w-72 rounded-full bg-amber-200/35 blur-3xl" />
+
+          <div className="relative mx-auto max-w-7xl px-4 pb-12 pt-14 md:pb-16 md:pt-20">
+            <div className="max-w-4xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-amber-800">
+                <Sparkles className="h-3.5 w-3.5" />
                 Launch Fee Alert
+                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] tracking-[0.12em]">
+                  {launchWindowLabel}
+                </span>
+              </div>
+
+              <h1 className="home-title mt-5 text-4xl leading-tight text-slate-900 md:text-6xl">{displayHeadline}</h1>
+              <p className="mt-4 max-w-3xl text-base leading-relaxed text-slate-600 md:text-lg">
+                {displayDescription}
               </p>
-              <p className="home-display mt-2 text-base font-extrabold leading-tight text-white md:text-lg">
-                Move now: {urgencyLine}
-              </p>
+              <p className="mt-3 text-sm font-medium text-slate-500">{displayAnnouncement}</p>
+
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  to={primaryCtaTo}
+                  className="inline-flex min-h-[46px] items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-300/40 transition hover:bg-emerald-700"
+                >
+                  List for Free
+                  <span className="ml-1 text-xs text-emerald-100">(takes ~3 mins)</span>
+                </Link>
+                <Link
+                  to="/request"
+                  className="inline-flex min-h-[46px] items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-100"
+                >
+                  Browse Active Demand
+                </Link>
+              </div>
             </div>
-
-            <Link
-              to={primaryCtaHref}
-              className="inline-flex w-full items-center justify-center rounded-xl bg-amber-300 px-4 py-2.5 text-sm font-extrabold uppercase tracking-[0.08em] text-slate-900 shadow-sm transition hover:bg-amber-200 lg:w-auto"
-            >
-              {user ? "List Before Fees" : "Start Free Listing"}
-            </Link>
           </div>
+        </section>
 
-          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-emerald-100">
-            <span className="rounded-full border border-emerald-200/50 bg-emerald-500/25 px-3 py-1">47 counties live</span>
-            <span className="rounded-full border border-emerald-200/50 bg-emerald-500/25 px-3 py-1">Verified seller profiles</span>
-            <span className="rounded-full border border-emerald-200/50 bg-emerald-500/25 px-3 py-1">Direct buyer chat</span>
+        <section className="border-b border-slate-200 bg-slate-900 px-4 py-4 text-white">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-2 text-sm font-medium">
+            <span className="inline-flex items-center gap-2">
+              <BadgeCheck className="h-4 w-4 text-emerald-300" />
+              47 counties live
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <BadgeCheck className="h-4 w-4 text-emerald-300" />
+              Verified seller profiles
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <BadgeCheck className="h-4 w-4 text-emerald-300" />
+              Direct buyer chat
+            </span>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="relative overflow-hidden border-b border-emerald-100 px-4 pb-16 pt-14 md:px-8 md:pb-24 md:pt-20">
-        <div className="pointer-events-none absolute -left-20 top-12 h-64 w-64 rounded-full bg-emerald-200/40 blur-3xl" />
-        <div className="pointer-events-none absolute -right-24 top-20 h-64 w-64 rounded-full bg-amber-200/35 blur-3xl" />
-
-        <div className="home-display mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
-          <div className="home-float">
-            <p className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-emerald-800">
-              Early seller window is open
-            </p>
-            <h1 className="home-headline mt-5 text-4xl leading-tight text-slate-900 sm:text-5xl md:text-6xl">
-              {displayHeadline}
-            </h1>
-            <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-700 md:text-xl">
-              {displayDescription}
-            </p>
-            <p className="mt-3 max-w-2xl text-base font-semibold text-emerald-800">
-              {displayAnnouncement}
-            </p>
-
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+        <section className="mx-auto max-w-7xl px-4 py-14">
+          <div className="grid items-start gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">Why now</p>
+              <h2 className="home-title mt-3 text-3xl text-slate-900 md:text-4xl">
+                Early sellers on Agrisoko build the strongest edge
+              </h2>
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 md:text-base">
+                Trust takes time to build. The launch window gives you a head start while listing stays free until{' '}
+                {launchFeeDeadlineLabel}.
+              </p>
               <Link
-                to={primaryCtaHref}
-                className="hook-glow inline-flex w-full items-center justify-center rounded-xl bg-emerald-600 px-6 py-3.5 text-base font-bold text-white transition hover:bg-emerald-700 sm:w-auto"
+                to={primaryCtaTo}
+                className="mt-6 inline-flex min-h-[44px] items-center rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
               >
-                {primaryCtaLabel}
-              </Link>
-              <Link
-                to="/browse"
-                className="inline-flex w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-base font-semibold text-slate-900 transition hover:bg-slate-50 sm:w-auto"
-              >
-                Browse Active Demand
+                List for Free
               </Link>
             </div>
 
-            <div className="mt-8 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-xl border border-emerald-100 bg-white/85 px-4 py-3">
-                <p className="text-2xl font-black text-emerald-700">3 min</p>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">First listing</p>
-              </div>
-              <div className="rounded-xl border border-emerald-100 bg-white/85 px-4 py-3">
-                <p className="text-2xl font-black text-emerald-700">Trust</p>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Verified profile edge</p>
-              </div>
-              <div className="rounded-xl border border-emerald-100 bg-white/85 px-4 py-3">
-                <p className="text-2xl font-black text-emerald-700">Live</p>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Direct buyer chats</p>
-              </div>
+            <div className="grid gap-4">
+              {sellerAdvantages.map((item) => (
+                <article key={item.title} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <p className="text-base font-semibold text-slate-900">{item.title}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-slate-600">{item.copy}</p>
+                </article>
+              ))}
             </div>
           </div>
+        </section>
 
-          <aside className="home-float rounded-2xl border border-emerald-200 bg-white/95 p-6 shadow-[0_25px_55px_-32px_rgba(16,185,129,0.7)]">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-700">Why early sellers win</p>
-            <h2 className="mt-3 text-2xl font-extrabold text-slate-900">
-              Start now, build compounding trust
-            </h2>
-            <ul className="mt-4 space-y-3 text-sm text-slate-700">
-              <li className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-                <strong className="text-slate-900">1.</strong> Buyers message active sellers first, then return to trusted contacts.
-              </li>
-              <li className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-                <strong className="text-slate-900">2.</strong> Verified badges and visible listings reduce buyer hesitation.
-              </li>
-              <li className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-                <strong className="text-slate-900">3.</strong> Consistent listing activity keeps you easier to find as demand grows.
-              </li>
-            </ul>
-            <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-              <p className="text-xs font-semibold text-amber-800">You can finish your first listing in about 3 minutes.</p>
-              <p className="text-xs font-bold uppercase tracking-[0.15em] text-amber-700">Today&apos;s action</p>
-              <p className="mt-1 text-sm font-semibold text-slate-900">
-                Post one listing now, then add another tomorrow to keep your profile active and easy to find.
+        <section className="border-y border-slate-200 bg-white px-4 py-10">
+          <div className="mx-auto max-w-7xl">
+            <RaffleCampaign />
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 py-14">
+          <div className="mb-7">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">Choose your path</p>
+            <h2 className="home-title mt-2 text-3xl text-slate-900 md:text-4xl">Buy or sell with verified confidence</h2>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            <article className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
+              <p className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-700">
+                I&apos;m buying
               </p>
-            </div>
-            <Link
-              to={primaryCtaHref}
-              className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
-            >
-              {user ? "Lock In My Early-Seller Advantage" : "Post My First Listing (3 Minutes)"}
-            </Link>
-          </aside>
-        </div>
-
-        <div className="mx-auto mt-12 grid max-w-7xl grid-cols-3 gap-4 border-t border-slate-200 pt-8 text-center md:grid-cols-6 md:gap-6 md:text-left">
-          <div>
-            <div className="text-2xl font-bold text-slate-900">47</div>
-            <div className="mt-1 text-xs text-slate-600">Counties Covered</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-slate-900">Verified</div>
-            <div className="mt-1 text-xs text-slate-600">ID Verified</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-slate-900">Instant</div>
-            <div className="mt-1 text-xs text-slate-600">Chat Support</div>
-          </div>
-          <div className="hidden md:block">
-            <div className="text-2xl font-bold text-slate-900">KSh 0</div>
-            <div className="mt-1 text-xs text-slate-600">Launch Fee Waiver</div>
-          </div>
-          <div className="hidden md:block">
-            <div className="text-2xl font-bold text-slate-900">24/7</div>
-            <div className="mt-1 text-xs text-slate-600">Buyer Activity</div>
-          </div>
-          <div className="hidden md:block">
-            <div className="text-2xl font-bold text-slate-900">Direct</div>
-            <div className="mt-1 text-xs text-slate-600">No Middlemen</div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-10 px-4 md:px-8 bg-gray-50 border-b border-gray-200">
-        <div className="max-w-7xl mx-auto">
-          <RaffleCampaign />
-        </div>
-      </section>
-
-      {/* EARLY SELLER INCENTIVE BANNER */}
-      <section className="py-8 px-4 md:px-8 bg-gradient-to-r from-green-500 to-emerald-600">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-6">
-          <div className="flex-1">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
-              Launch Advantage: Keep 100% of Your Margin
-            </h2>
-            <p className="text-green-50 mb-4">
-              Listing fee is KSh 0 now. Later sellers will spend more to catch up on buyer trust and visibility.
-            </p>
-          </div>
-          <Link
-            to={user ? "/create-listing" : "/login?next=/create-listing"}
-            className="inline-flex justify-center items-center px-6 py-3 bg-white text-green-700 font-bold rounded-lg hover:bg-green-50 transition-colors whitespace-nowrap"
-          >
-            {user ? "List Before Fees Start" : "Join & List Free"}
-          </Link>
-        </div>
-      </section>
-
-      {/* DUAL CTA SECTION - Two User Paths */}
-      <section className="py-20 px-4 md:px-8 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">Choose Your Growth Path</h2>
-          <p className="text-lg text-gray-600 mb-12 max-w-2xl">Buy with confidence or sell with momentum.</p>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* BUYERS PATH */}
-            <div className="border border-gray-200 rounded-lg p-12 bg-white hover:border-gray-300 transition">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">I'm Buying</h3>
-              <p className="text-gray-600 mb-6">
-                Compare verified options and negotiate directly.
-              </p>
-              <ul className="space-y-3 mb-8 text-gray-700">
+              <h3 className="mt-3 text-2xl font-semibold text-slate-900">Find verified sellers fast</h3>
+              <p className="mt-2 text-sm text-slate-600">Compare options and negotiate directly without middle layers.</p>
+              <ul className="mt-5 space-y-2 text-sm text-slate-700">
                 <li className="flex items-center gap-2">
-                  <span className="text-green-600 font-semibold">+</span> Produce and livestock
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
+                  Produce and livestock
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-green-600 font-semibold">+</span> Inputs and equipment
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
+                  Inputs and equipment
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-green-600 font-semibold">+</span> Verified service providers
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
+                  Verified service providers
                 </li>
               </ul>
               <Link
                 to="/browse"
-                className="inline-flex items-center px-6 py-2 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+                className="mt-6 inline-flex min-h-[44px] items-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-100"
               >
-                Browse Now
+                Browse Marketplace
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
-            </div>
+            </article>
 
-            {/* SELLERS PATH */}
-            <div className="border border-gray-200 rounded-lg p-12 bg-white hover:border-gray-300 transition">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">I'm Selling</h3>
-              <p className="text-gray-600 mb-6">
-                Reach buyers already searching and close faster.
+            <article className="rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-7 shadow-sm">
+              <p className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-emerald-800">
+                I&apos;m selling
               </p>
-              <ul className="space-y-3 mb-8 text-gray-700">
+              <h3 className="mt-3 text-2xl font-semibold text-slate-900">Reach buyers already searching</h3>
+              <p className="mt-2 text-sm text-slate-600">Build a trusted profile and turn one listing into repeat business.</p>
+              <ul className="mt-5 space-y-2 text-sm text-slate-700">
                 <li className="flex items-center gap-2">
-                  <span className="text-blue-600 font-semibold">+</span> Buyer demand already live
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
+                  Live buyer demand by county
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-blue-600 font-semibold">+</span> Higher trust with verified badge
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
+                  Verification badge advantage
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-blue-600 font-semibold">+</span> Faster repeat deals
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
+                  Faster repeat deals
                 </li>
               </ul>
               <Link
-                to={user ? "/create-listing" : "/login?next=/create-listing"}
-                className="inline-flex items-center px-6 py-2 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
+                to={primaryCtaTo}
+                className="mt-6 inline-flex min-h-[44px] items-center rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
               >
-                {user ? "Start Selling Today" : "Get Started"}
+                List for Free
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
+            </article>
+          </div>
+        </section>
+
+        <section className="border-y border-slate-200 bg-white px-4 py-14">
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">How it works</p>
+              <h2 className="home-title mt-2 text-3xl text-slate-900 md:text-4xl">
+                Three simple steps to trusted trade
+              </h2>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              {tradeSteps.map((step, index) => (
+                <article key={step.title} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">
+                    {index + 1}
+                  </span>
+                  <h3 className="mt-3 text-lg font-semibold text-slate-900">{step.title}</h3>
+                  <p className="mt-1 text-sm text-slate-600">{step.copy}</p>
+                </article>
+              ))}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* HOW IT WORKS - Simple 3 Step Flow */}
-      <section className="py-20 px-4 md:px-8">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
-          <p className="text-lg text-gray-600 mb-12 max-w-2xl">
-            Three simple steps to trusted trade.
-          </p>
+        <section className="mx-auto max-w-7xl px-4 py-14">
+          <div className="mb-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">Why Agrisoko</p>
+            <h2 className="home-title mt-2 text-3xl text-slate-900 md:text-4xl">Built to turn trust into transactions</h2>
+          </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Step 1 */}
-            <div className="relative">
-              <div className="flex items-center justify-center w-12 h-12 bg-gray-900 text-white rounded-full font-bold text-lg mb-4">1</div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Create Account</h3>
-              <p className="text-gray-600">Sign up and verify your profile.</p>
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {trustFeatures.map((feature) => (
+              <article key={feature.title} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <feature.icon className="h-5 w-5 text-emerald-700" />
+                <h3 className="mt-3 text-lg font-semibold text-slate-900">{feature.title}</h3>
+                <p className="mt-1 text-sm text-slate-600">{feature.copy}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="border-y border-slate-200 bg-white px-4 py-14">
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">Top categories</p>
+              <h2 className="home-title mt-2 text-3xl text-slate-900 md:text-4xl">What you can find on Agrisoko</h2>
             </div>
 
-            {/* Step 2 */}
-            <div className="relative">
-              <div className="flex items-center justify-center w-12 h-12 bg-gray-900 text-white rounded-full font-bold text-lg mb-4">2</div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Browse or List</h3>
-              <p className="text-gray-600">Browse listings or post what you have.</p>
-            </div>
-
-            {/* Step 3 */}
-            <div className="relative">
-              <div className="flex items-center justify-center w-12 h-12 bg-gray-900 text-white rounded-full font-bold text-lg mb-4">3</div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Connect & Trade</h3>
-              <p className="text-gray-600">Message directly and close the deal.</p>
+            <div className="grid gap-6 md:grid-cols-2">
+              <article className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
+                <h3 className="text-2xl font-semibold text-slate-900">Agricultural produce</h3>
+                <p className="mt-2 text-sm text-slate-600">
+                  Fresh produce and livestock from trusted sellers in active counties.
+                </p>
+                <Link
+                  to="/browse"
+                  className="mt-5 inline-flex items-center text-sm font-semibold text-emerald-700 transition hover:text-emerald-800"
+                >
+                  Browse produce
+                  <ArrowRight className="ml-1 h-4 w-4" />
+                </Link>
+              </article>
+              <article className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
+                <h3 className="text-2xl font-semibold text-slate-900">Agricultural services</h3>
+                <p className="mt-2 text-sm text-slate-600">
+                  Transport, equipment hire, and technical farm support from verified providers.
+                </p>
+                <Link
+                  to="/browse"
+                  className="mt-5 inline-flex items-center text-sm font-semibold text-emerald-700 transition hover:text-emerald-800"
+                >
+                  Browse services
+                  <ArrowRight className="ml-1 h-4 w-4" />
+                </Link>
+              </article>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* PLATFORM FEATURES - Clean Grid */}
-      <section className="py-20 px-4 md:px-8 bg-gray-50 border-y border-gray-200">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">Why Choose Agrisoko</h2>
-          <p className="text-lg text-gray-600 mb-12 max-w-2xl">
-            Built to convert trust into real transactions.
-          </p>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="p-8 bg-white rounded-lg border border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900 mb-3">Verified Traders</h3>
-              <p className="text-gray-600">ID and selfie verification for safer trade.</p>
-            </div>
-
-            {/* Feature 2 */}
-            <div className="p-8 bg-white rounded-lg border border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900 mb-3">Instant Messaging</h3>
-              <p className="text-gray-600">Chat in real time with buyers and sellers.</p>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="p-8 bg-white rounded-lg border border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900 mb-3">No Middlemen</h3>
-              <p className="text-gray-600">Direct deals for better pricing.</p>
-            </div>
-
-            {/* Feature 4 */}
-            <div className="p-8 bg-white rounded-lg border border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900 mb-3">47 Counties</h3>
-              <p className="text-gray-600">Find buyers and sellers across Kenya.</p>
-            </div>
-
-            {/* Feature 5 */}
-            <div className="p-8 bg-white rounded-lg border border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900 mb-3">Smart Search</h3>
-              <p className="text-gray-600">Filter by location, category, and price.</p>
-            </div>
-
-            {/* Feature 6 */}
-            <div className="p-8 bg-white rounded-lg border border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900 mb-3">Launch Fee Waiver</h3>
-              <p className="text-gray-600">List at KSh 0 now before standard fees activate.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* PRODUCT CATEGORIES */}
-      <section className="py-20 px-4 md:px-8">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold text-gray-900 mb-12">Top Categories</h2>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Produce Category */}
-            <div className="border border-gray-200 rounded-lg p-8">
-              <div className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-emerald-50 text-emerald-700 font-semibold mb-4">
-                P
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Agricultural Produce</h3>
-              <p className="text-gray-600 mb-6">
-                Fresh produce and livestock from trusted sellers.
-              </p>
-              <Link to="/browse" className="text-gray-900 font-semibold hover:underline">
-                Browse Produce
-              </Link>
-            </div>
-
-            {/* Services Category */}
-            <div className="border border-gray-200 rounded-lg p-8">
-              <div className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-blue-50 text-blue-700 font-semibold mb-4">
-                S
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Agricultural Services</h3>
-              <p className="text-gray-600 mb-6">
-                Transport, equipment hire, and technical support.
-              </p>
-              <Link to="/browse" className="text-gray-900 font-semibold hover:underline">
-                Browse Services
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FEATURE STATUS BANNER */}
-      <section className="py-12 px-4 md:px-8 bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto text-center">
-          <h3 className="text-2xl font-bold mb-2">Core Features Live</h3>
-          <p className="text-gray-300">
-            Verification, messaging, and moderation are live so every trade starts with trust.
-          </p>
-        </div>
-      </section>
-
-      {/* FINAL CTA SECTION */}
-      <section className="py-20 px-4 md:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-gray-50 rounded-lg border border-gray-200 p-12 text-center">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              {user ? "Ready to Capture More Buyers?" : "Ready to Launch Your First Listing?"}
-            </h2>
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              {user 
-                ? "Post now while listing is free and lock in repeat buyer relationships."
-                : "Create your account, verify once, and list in minutes."}
+        <section className="mx-auto max-w-7xl px-4 pb-16 pt-14">
+          <div className="rounded-3xl bg-gradient-to-r from-emerald-700 to-teal-700 p-8 text-white shadow-lg md:p-10">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-100">Final call</p>
+            <h2 className="home-title mt-3 text-3xl md:text-4xl">Ready to launch your first listing?</h2>
+            <p className="mt-3 max-w-2xl text-sm text-emerald-100 md:text-base">
+              Create your account, complete verification once, and start selling in minutes while launch listing is still free.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Link
+                to={primaryCtaTo}
+                className="inline-flex min-h-[46px] items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50"
+              >
+                List for Free
+              </Link>
               <Link
                 to="/browse"
-                className="inline-flex justify-center items-center px-6 py-3 border border-gray-300 text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+                className="inline-flex min-h-[46px] items-center justify-center rounded-xl border border-white/80 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
               >
                 Browse Marketplace
               </Link>
-              <Link
-                to={user ? "/create-listing" : "/login?next=/create-listing"}
-                className="inline-flex justify-center items-center px-6 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors"
-              >
-                {user ? "Claim Free Listing" : "Create Account"}
-              </Link>
             </div>
           </div>
-        </div>
-      </section>
-
+        </section>
+      </div>
     </main>
   );
 };
