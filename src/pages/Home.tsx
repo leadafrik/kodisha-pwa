@@ -113,7 +113,6 @@ const Home: React.FC = () => {
 
   const { content: heroHeadline } = usePageContent("home.hero.headline");
   const { content: heroDescription } = usePageContent("home.hero.description");
-  const { content: announcementText } = usePageContent("home.announcement.banner");
 
   const liveListingCount = useMemo(() => {
     const liveProducts = (productListings || []).filter((item: any) =>
@@ -140,16 +139,17 @@ const Home: React.FC = () => {
       : "Launch fee window closing";
 
   const displayHeadline =
-    heroHeadline || "Get your first direct buyers in your county - without brokers.";
+    heroHeadline || "Get direct buyers in your county - without brokers.";
   const displayDescription =
     heroDescription ||
-    "Built in Kenya for Kenyan farmers, traders, agrovets, and service providers. Verify once, list fast, and win repeat buyers.";
-  const displayAnnouncement =
-    announcementText ||
-    `Launch listing remains KSh 0 until ${launchFeeDeadlineLabel}. Secure your early seller position now.`;
-
+    "Create your free Agrisoko account in 10 seconds. List when you are ready.";
+  const signupCtaLabel = "Create Free Account - 10 seconds";
   const primaryCtaTo = user ? "/profile" : "/login?mode=signup&next=/profile";
-  const primaryCtaLabel = user ? "Open My Dashboard" : "Create Free Account";
+  const primaryCtaLabel = user ? "Open My Dashboard" : signupCtaLabel;
+  const buyRequestsTo = user ? "/request" : "/login?mode=signup&next=/request";
+  const browseTo = user ? "/browse" : "/login?mode=signup&next=/browse";
+  const demandCtaTo = user ? buyRequestsTo : primaryCtaTo;
+  const demandCtaLabel = user ? "View Buy Requests" : signupCtaLabel;
 
   return (
     <main className="min-h-screen bg-slate-50 pb-24 text-slate-900">
@@ -187,7 +187,6 @@ const Home: React.FC = () => {
               <p className="mt-4 max-w-3xl text-base leading-relaxed text-slate-700 md:text-lg">
                 {displayDescription}
               </p>
-              <p className="mt-3 text-sm font-medium text-emerald-800">{displayAnnouncement}</p>
 
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                 <Link
@@ -195,32 +194,27 @@ const Home: React.FC = () => {
                   className="inline-flex min-h-[46px] items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-300/40 transition hover:bg-emerald-700"
                 >
                   {primaryCtaLabel}
-                  {!user && <span className="ml-1 text-xs text-emerald-100">(takes ~10 secs)</span>}
                 </Link>
               </div>
+              {!user && (
+                <p className="mt-3 text-sm font-semibold text-emerald-800">
+                  Kisumu, Nakuru, Uasin Gishu and 44 other counties are open for founding sellers.
+                </p>
+              )}
               {!user && (
                 <p className="mt-3 text-sm font-medium text-slate-600">
                   Create your free account now. You can list later when you are ready.
                 </p>
               )}
+              <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
+                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1">
+                  {liveListingCount.toLocaleString()} founding listings live
+                </span>
+                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1">
+                  47 counties open
+                </span>
+              </div>
             </div>
-          </div>
-        </section>
-
-        <section className="border-b border-emerald-100 bg-gradient-to-r from-emerald-50 via-white to-emerald-50 px-4 py-4 text-slate-900">
-          <div className="mx-auto grid max-w-7xl gap-3 sm:grid-cols-3">
-            <span className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800">
-              <BadgeCheck className="h-4 w-4 shrink-0 text-emerald-600" />
-              <span>{liveListingCount.toLocaleString()} founding listings live</span>
-            </span>
-            <span className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800">
-              <BadgeCheck className="h-4 w-4 shrink-0 text-emerald-600" />
-              <span>47 counties open for trade</span>
-            </span>
-            <span className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800">
-              <BadgeCheck className="h-4 w-4 shrink-0 text-emerald-600" />
-              <span>Verified profiles and direct buyer chat</span>
-            </span>
           </div>
         </section>
 
@@ -249,7 +243,7 @@ const Home: React.FC = () => {
                 to={primaryCtaTo}
                 className="mt-6 inline-flex min-h-[44px] items-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
               >
-                Create Free Account
+                {primaryCtaLabel}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </article>
@@ -266,7 +260,7 @@ const Home: React.FC = () => {
                 to={primaryCtaTo}
                 className="mt-6 inline-flex min-h-[44px] items-center rounded-xl border border-amber-300 bg-white px-5 py-2.5 text-sm font-semibold text-amber-900 transition hover:bg-amber-100"
               >
-                Create Free Account
+                {primaryCtaLabel}
               </Link>
             </article>
           </div>
@@ -285,7 +279,7 @@ const Home: React.FC = () => {
 
         <section className="mx-auto max-w-7xl px-4 pb-14">
           <div className="mb-7">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">Why sellers convert</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">How you make more profit on Agrisoko</p>
             <h2 className="home-title mt-2 text-3xl text-slate-900 md:text-4xl">Outcomes that move revenue</h2>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
@@ -360,10 +354,10 @@ const Home: React.FC = () => {
                 ))}
               </ul>
               <Link
-                to="/request"
+                to={demandCtaTo}
                 className="mt-6 inline-flex min-h-[44px] items-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-100"
               >
-                View Buy Requests
+                {demandCtaLabel}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </article>
@@ -382,7 +376,7 @@ const Home: React.FC = () => {
                 to={primaryCtaTo}
                 className="mt-6 inline-flex min-h-[44px] items-center rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
               >
-                Create Free Account
+                {primaryCtaLabel}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </article>
@@ -442,10 +436,10 @@ const Home: React.FC = () => {
                 to={primaryCtaTo}
                 className="inline-flex min-h-[46px] items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50"
               >
-                Create Free Account
+                {primaryCtaLabel}
               </Link>
               <Link
-                to="/browse"
+                to={browseTo}
                 className="inline-flex min-h-[46px] items-center justify-center rounded-xl border border-white/80 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
               >
                 Browse Marketplace
@@ -464,7 +458,7 @@ const Home: React.FC = () => {
             to={primaryCtaTo}
             className="inline-flex min-h-[42px] items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
           >
-            Create Free Account
+            {primaryCtaLabel}
           </Link>
         </div>
       </div>
