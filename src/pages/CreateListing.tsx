@@ -535,10 +535,10 @@ const CreateListing: React.FC = () => {
               <div className="space-y-4 fade-rise">
                 <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">Create a Listing</p>
                 <h1 className="listing-title text-4xl md:text-5xl text-slate-900">
-                  List in minutes, close faster
+                  Create your listing in 2 minutes
                 </h1>
                 <p className="text-base text-slate-600 max-w-xl">
-                  Share what you have, set clear prices, and connect directly with verified buyers across Kenya.
+                  Start with the essentials now, then improve trust signals to attract more buyer inquiries.
                 </p>
               </div>
 
@@ -804,33 +804,10 @@ const CreateListing: React.FC = () => {
 
               <div className="space-y-5">
                 <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-semibold text-emerald-900">Trust readiness</p>
-                    <p className="text-sm font-bold text-emerald-800">{trustScore}%</p>
-                  </div>
-                  <div className="mt-2 h-2 rounded-full bg-white overflow-hidden">
-                    <div
-                      className="h-full bg-emerald-600 transition-all"
-                      style={{ width: `${trustScore}%` }}
-                    />
-                  </div>
-                  <p className="mt-3 text-xs text-emerald-800">
-                    {trustNextAction
-                      ? `Next high-impact action: ${trustNextAction}.`
-                      : "Great setup. Your listing has strong trust signals."}
+                  <p className="text-sm font-semibold text-emerald-900">Required to publish (about 30 seconds)</p>
+                  <p className="mt-1 text-xs text-emerald-800">
+                    Add a title, price, contact number, and at least one photo. You can optimize the rest after publishing.
                   </p>
-                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                    {trustSignals.map((signal) => (
-                      <p
-                        key={signal.label}
-                        className={`text-xs font-semibold ${
-                          signal.done ? "text-emerald-700" : "text-slate-600"
-                        }`}
-                      >
-                        {signal.done ? "✓" : "○"} {signal.label}
-                      </p>
-                    ))}
-                  </div>
                 </div>
 
                 {/* Title */}
@@ -942,7 +919,9 @@ const CreateListing: React.FC = () => {
                     onChange={(e) => setForm((prev) => ({ ...prev, contact: e.target.value }))}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
-                  <p className="text-xs text-gray-600 mt-1">Your phone number will be visible to potential buyers</p>
+                  <p className="text-xs text-gray-600 mt-1">
+                    Buyers contact you faster with this number. Add a line you can answer quickly.
+                  </p>
                 </div>
 
                 {/* Images */}
@@ -964,7 +943,7 @@ const CreateListing: React.FC = () => {
                     <label htmlFor="imageInput" className="cursor-pointer">
                       <Camera className="w-8 h-8 mx-auto text-gray-400 mb-2" />
                       <p className="text-sm font-semibold text-gray-900">Click to upload or drag and drop</p>
-                      <p className="text-xs text-gray-600">PNG, JPG up to 5 images</p>
+                      <p className="text-xs text-gray-600">PNG, JPG up to 5 images. Listings with photos get more buyer calls.</p>
                     </label>
                   </div>
 
@@ -989,6 +968,38 @@ const CreateListing: React.FC = () => {
                       ))}
                     </div>
                   )}
+                </div>
+
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-emerald-900">
+                      Listings with these details get more buyer chats
+                    </p>
+                    <p className="text-sm font-bold text-emerald-800">{trustScore}%</p>
+                  </div>
+                  <div className="mt-2 h-2 rounded-full bg-white overflow-hidden">
+                    <div
+                      className="h-full bg-emerald-600 transition-all"
+                      style={{ width: `${trustScore}%` }}
+                    />
+                  </div>
+                  <p className="mt-3 text-xs text-emerald-800">
+                    {trustNextAction
+                      ? `Next high-impact action: ${trustNextAction}.`
+                      : "Great setup. Your listing has strong trust signals."}
+                  </p>
+                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                    {trustSignals.map((signal) => (
+                      <p
+                        key={signal.label}
+                        className={`text-xs font-semibold ${
+                          signal.done ? "text-emerald-700" : "text-slate-600"
+                        }`}
+                      >
+                        [{signal.done ? "x" : " "}] {signal.label}
+                      </p>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1154,7 +1165,7 @@ const CreateListing: React.FC = () => {
                     disabled={uploading}
                     className="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 disabled:opacity-50 transition-all"
                   >
-                    {uploading ? "Creating Listing..." : "Create Listing"}
+                    {uploading ? "Publishing listing..." : "Publish Listing - start receiving buyer inquiries"}
                   </button>
                 </>
               )}
