@@ -40,6 +40,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get("next") || "/profile";
+  const requestedMode = searchParams.get("mode");
 
   // UI State
   const [mode, setMode] = useState<Mode>("login");
@@ -93,6 +94,14 @@ const Login: React.FC = () => {
       setCanResendOtp(true);
     }
   }, [otpTimer, mode]);
+
+  useEffect(() => {
+    if (requestedMode === "signup") {
+      setMode("signup");
+    } else if (requestedMode === "login") {
+      setMode("login");
+    }
+  }, [requestedMode]);
 
   const resetMessages = () => {
     setError(null);

@@ -148,8 +148,8 @@ const Home: React.FC = () => {
     announcementText ||
     `Launch listing remains KSh 0 until ${launchFeeDeadlineLabel}. Secure your early seller position now.`;
 
-  const primaryCtaTo = user ? "/create-listing" : "/login?next=/create-listing";
-  const primaryCtaLabel = user ? "Post Your First Listing" : "Get Verified & List Free";
+  const primaryCtaTo = user ? "/profile" : "/login?mode=signup&next=/profile";
+  const primaryCtaLabel = user ? "Open My Dashboard" : "Create Free Account";
 
   return (
     <main className="min-h-screen bg-slate-50 pb-24 text-slate-900">
@@ -195,15 +195,14 @@ const Home: React.FC = () => {
                   className="inline-flex min-h-[46px] items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-300/40 transition hover:bg-emerald-700"
                 >
                   {primaryCtaLabel}
-                  <span className="ml-1 text-xs text-emerald-100">(takes ~3 mins)</span>
-                </Link>
-                <Link
-                  to="/request"
-                  className="inline-flex min-h-[46px] items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-100"
-                >
-                  See Who&apos;s Buying in My County
+                  {!user && <span className="ml-1 text-xs text-emerald-100">(takes ~10 secs)</span>}
                 </Link>
               </div>
+              {!user && (
+                <p className="mt-3 text-sm font-medium text-slate-600">
+                  Create your free account now. You can list later when you are ready.
+                </p>
+              )}
             </div>
           </div>
         </section>
@@ -250,7 +249,7 @@ const Home: React.FC = () => {
                 to={primaryCtaTo}
                 className="mt-6 inline-flex min-h-[44px] items-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
               >
-                Secure My County Position
+                Create Free Account
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </article>
@@ -267,9 +266,20 @@ const Home: React.FC = () => {
                 to={primaryCtaTo}
                 className="mt-6 inline-flex min-h-[44px] items-center rounded-xl border border-amber-300 bg-white px-5 py-2.5 text-sm font-semibold text-amber-900 transition hover:bg-amber-100"
               >
-                Get Verified & List Free
+                Create Free Account
               </Link>
             </article>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 pb-14">
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+            <p className="text-sm font-semibold text-emerald-900">
+              No ID needed to start. No listing required.
+            </p>
+            <p className="mt-1 text-sm text-emerald-800">
+              Open your account first, explore the market, then complete verification when ready to list.
+            </p>
           </div>
         </section>
 
@@ -372,7 +382,7 @@ const Home: React.FC = () => {
                 to={primaryCtaTo}
                 className="mt-6 inline-flex min-h-[44px] items-center rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
               >
-                Start Trusted Seller Profile
+                Create Free Account
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </article>
@@ -432,7 +442,7 @@ const Home: React.FC = () => {
                 to={primaryCtaTo}
                 className="inline-flex min-h-[46px] items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50"
               >
-                Get Verified & List Free
+                Create Free Account
               </Link>
               <Link
                 to="/browse"
@@ -454,7 +464,7 @@ const Home: React.FC = () => {
             to={primaryCtaTo}
             className="inline-flex min-h-[42px] items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
           >
-            List for Free Now
+            Create Free Account
           </Link>
         </div>
       </div>
