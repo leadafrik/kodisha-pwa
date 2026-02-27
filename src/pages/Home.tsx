@@ -118,16 +118,16 @@ const Home: React.FC = () => {
       : "Launch fee window ending soon";
 
   const displayHeadline =
-    heroHeadline || "Get direct buyers in your county without broker pressure.";
+    heroHeadline || "Sell your produce faster. Pay KSh 0 listing fees.";
   const displayDescription =
     heroDescription ||
-    "Verify once, list in minutes, and build repeat trade with trusted buyer conversations on Agrisoko.";
+    "A Kenyan marketplace for farmers, traders, and agrovets. Verify once, list quickly, and get direct buyer chats without broker pressure.";
   const displayAnnouncement =
     announcementText ||
     `Listing remains KSh 0 until ${launchFeeDeadlineLabel}. Early verified sellers usually win repeat buyers first.`;
 
   const primaryCtaTo = user ? "/create-listing" : "/login?next=/create-listing";
-  const primaryCtaLabel = user ? "Post My First Listing" : "Get Verified & List Free";
+  const primaryCtaLabel = user ? "List My First Item - Free" : "Get Verified & List Free";
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
@@ -166,6 +166,7 @@ const Home: React.FC = () => {
                 {displayDescription}
               </p>
               <p className="mt-3 text-sm font-medium text-emerald-800">{displayAnnouncement}</p>
+              <p className="mt-2 text-sm font-medium text-slate-600">Built in Kenya for all 47 counties.</p>
 
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                 <Link
@@ -173,7 +174,7 @@ const Home: React.FC = () => {
                   className="inline-flex min-h-[46px] items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-300/40 transition hover:bg-emerald-700"
                 >
                   {primaryCtaLabel}
-                  <span className="ml-1 text-xs text-emerald-100">(takes ~3 mins)</span>
+                  <span className="ml-1 text-xs text-emerald-100">(quick setup)</span>
                 </Link>
                 <Link
                   to="/browse"
@@ -223,6 +224,34 @@ const Home: React.FC = () => {
                 <p className="mt-1 text-sm text-slate-600">{step.copy}</p>
               </article>
             ))}
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 pb-14">
+          <div className="mb-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
+              Why sellers convert
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            <article className="rounded-2xl border border-slate-200 bg-white p-5">
+              <h3 className="text-lg font-semibold text-slate-900">No middlemen</h3>
+              <p className="mt-1 text-sm text-slate-600">
+                Chat directly with buyers and keep full control of your margin.
+              </p>
+            </article>
+            <article className="rounded-2xl border border-slate-200 bg-white p-5">
+              <h3 className="text-lg font-semibold text-slate-900">Instant trust</h3>
+              <p className="mt-1 text-sm text-slate-600">
+                Verified badge and clear profile details increase buyer confidence.
+              </p>
+            </article>
+            <article className="rounded-2xl border border-slate-200 bg-white p-5">
+              <h3 className="text-lg font-semibold text-slate-900">Zero launch risk</h3>
+              <p className="mt-1 text-sm text-slate-600">
+                Listing fee is KSh 0 during launch, so you can test demand safely.
+              </p>
+            </article>
           </div>
         </section>
 
@@ -330,6 +359,20 @@ const Home: React.FC = () => {
             </div>
           </div>
         </section>
+      </div>
+
+      <div className="fixed bottom-3 left-1/2 z-30 w-[calc(100%-1rem)] max-w-3xl -translate-x-1/2 rounded-2xl border border-emerald-300 bg-white/95 px-4 py-3 shadow-xl backdrop-blur">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm font-semibold text-slate-900">
+            Free listing ends soon: {daysLeft > 0 ? `${daysLeft} day${daysLeft === 1 ? "" : "s"} left` : "launch window closing"}
+          </p>
+          <Link
+            to={primaryCtaTo}
+            className="inline-flex min-h-[42px] items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
+          >
+            List for Free Now
+          </Link>
+        </div>
       </div>
     </main>
   );
