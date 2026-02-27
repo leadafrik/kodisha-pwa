@@ -222,7 +222,7 @@ const Navbar: React.FC = () => {
                         : "bg-gray-900 text-white hover:bg-gray-800"
                     }`}
                   >
-                    Create Free Account - 10 seconds
+                    Create Free Account
                   </Link>
                 </div>
               )}
@@ -383,7 +383,7 @@ const Navbar: React.FC = () => {
                     onClick={closeMobile}
                     className="px-3 py-3 min-h-[48px] flex items-center justify-center rounded-lg bg-emerald-600 text-white transition font-semibold hover:bg-emerald-700 mb-2"
                   >
-                    Create Free Account - 10 seconds
+                    Create Free Account
                   </Link>
                   <Link 
                     to="/login" 

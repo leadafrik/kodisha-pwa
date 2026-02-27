@@ -367,9 +367,6 @@ const Login: React.FC = () => {
             placeholder:text-gray-400 transition-colors"
           placeholder="name@example.com"
         />
-        <p className="mt-2 text-xs text-gray-500">
-          Use your email address to sign in.
-        </p>
       </div>
 
       {/* Password */}
@@ -450,7 +447,6 @@ const Login: React.FC = () => {
           onError={(error) => setError(error)}
           className="text-sm w-full"
         />
-        <p className="text-center text-xs text-gray-500">No forms. No password. Instant access.</p>
         <FacebookLoginButton
           onSuccess={() => {
             trackGoogleEvent("sign_up", { method: "facebook" });
@@ -530,10 +526,6 @@ const Login: React.FC = () => {
           </select>
         </div>
       </div>
-
-      <p className="text-xs text-gray-500">
-        Account first. Complete the rest of your profile after signup.
-      </p>
 
       <button
         type="submit"
@@ -709,7 +701,7 @@ const Login: React.FC = () => {
 
   const modeTitle =
     mode === "signup"
-      ? "Create your free Agrisoko account in 10 seconds"
+      ? "Create your free account"
       : mode === "forgot"
         ? "Reset your password"
         : mode === "otp-verify"
@@ -720,7 +712,7 @@ const Login: React.FC = () => {
 
   const modeSubtitle =
     mode === "signup"
-      ? "Start with your account now. You can complete your profile later."
+      ? "About 10 seconds."
       : mode === "forgot" || mode === "otp-reset"
         ? "Use your email address to regain secure access."
         : mode === "otp-verify"
@@ -739,17 +731,14 @@ const Login: React.FC = () => {
               <img src="/logo.svg" alt="" aria-hidden="true" className="h-12 w-12 rounded-xl bg-white/10 p-1" />
               <h1 className="mt-5 text-4xl font-bold leading-tight">Agrisoko</h1>
               <p className="mt-2 text-sm text-emerald-100">
-                Trusted agricultural commerce for East Africa.
+                Trusted agricultural marketplace across Kenya.
               </p>
             </div>
-            <div className="space-y-4 text-sm text-emerald-50/95">
-              <p>Faster onboarding, verified sellers, and secure sign-in.</p>
-              <div className="grid grid-cols-2 gap-3 text-xs font-medium">
-                <span className="rounded-full bg-white/15 px-3 py-1">Verified profiles</span>
-                <span className="rounded-full bg-white/15 px-3 py-1">Secure login</span>
-                <span className="rounded-full bg-white/15 px-3 py-1">Buyer protection</span>
-                <span className="rounded-full bg-white/15 px-3 py-1">Instant messaging</span>
-              </div>
+            <div className="grid grid-cols-2 gap-3 text-xs font-medium text-emerald-50/95">
+              <span className="rounded-full bg-white/15 px-3 py-1">Verified profiles</span>
+              <span className="rounded-full bg-white/15 px-3 py-1">Secure login</span>
+              <span className="rounded-full bg-white/15 px-3 py-1">Direct chat</span>
+              <span className="rounded-full bg-white/15 px-3 py-1">Fast signup</span>
             </div>
           </aside>
 
@@ -759,14 +748,13 @@ const Login: React.FC = () => {
                 <img src="/logo.svg" alt="" aria-hidden="true" className="h-10 w-10 rounded-xl bg-emerald-50 p-1" />
                 <div>
                   <p className="text-sm font-semibold text-slate-900">Agrisoko</p>
-                  <p className="text-xs text-slate-600">Trusted agricultural commerce for East Africa.</p>
+                  <p className="text-xs text-slate-600">Trusted agricultural marketplace across Kenya.</p>
                 </div>
               </div>
             </div>
 
             <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur md:p-8">
               <div className="mb-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Secure Access</p>
                 <h2 className="mt-2 text-2xl font-bold text-slate-900">{modeTitle}</h2>
                 <p className="mt-1 text-sm text-slate-600">{modeSubtitle}</p>
               </div>
@@ -791,9 +779,8 @@ const Login: React.FC = () => {
             </div>
 
             <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-600">
-              <span className="rounded-full border border-slate-200 bg-white/80 px-3 py-1">Secure and encrypted</span>
-              <span className="rounded-full border border-slate-200 bg-white/80 px-3 py-1">Verified sellers</span>
-              <span className="rounded-full border border-slate-200 bg-white/80 px-3 py-1">Private messaging</span>
+              <span className="rounded-full border border-slate-200 bg-white/80 px-3 py-1">Secure login</span>
+              <span className="rounded-full border border-slate-200 bg-white/80 px-3 py-1">Verified profiles</span>
             </div>
           </section>
         </div>

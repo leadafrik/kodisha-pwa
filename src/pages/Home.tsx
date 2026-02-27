@@ -37,15 +37,15 @@ const conversionPillars = [
 const tradeSteps = [
   {
     title: "Create account",
-    copy: "Open your account in seconds and secure your place early.",
+    copy: "Create your account.",
   },
   {
     title: "Verify profile",
-    copy: "Add ID and selfie verification to build trust and rank higher.",
+    copy: "Verify to rank higher.",
   },
   {
     title: "Post first listing",
-    copy: "List your offer and start receiving direct inquiries.",
+    copy: "Post and receive inquiries.",
   },
 ];
 
@@ -53,28 +53,28 @@ const buyerDemandSignals = [
   "Maize and beans suppliers",
   "Poultry and livestock",
   "Transport and tractor services",
-  "Agrovet inputs and farm supplies",
+  "Agrovet inputs",
 ];
 
 const trustFeatures = [
   {
     title: "Verified traders",
-    copy: "ID and selfie verification to reduce fraud and improve confidence.",
+    copy: "ID and selfie verification.",
     icon: ShieldCheck,
   },
   {
     title: "Direct buyer chat",
-    copy: "Real-time messaging to negotiate and close quickly.",
+    copy: "Negotiate directly.",
     icon: MessageCircle,
   },
   {
     title: "Smart discovery",
-    copy: "Filter by county, category, and pricing expectations.",
+    copy: "Filter by county and category.",
     icon: Search,
   },
   {
     title: "Proof-led reputation",
-    copy: "Active listings and verified status strengthen your profile over time.",
+    copy: "Verified profiles build reputation.",
     icon: BadgeCheck,
   },
 ];
@@ -131,7 +131,7 @@ const Home: React.FC = () => {
       : Math.max(0, Math.ceil((freeWindowEndsAt - Date.now()) / MILLISECONDS_IN_DAY));
   const isGlobalFreeListing = !PAYMENTS_ENABLED;
   const launchWindowLabel = isGlobalFreeListing
-    ? "Listings are currently free"
+    ? "Free now"
     : user
     ? daysLeft > 0
       ? `${daysLeft} day${daysLeft === 1 ? "" : "s"} left at KSh 0`
@@ -141,9 +141,8 @@ const Home: React.FC = () => {
   const displayHeadline =
     heroHeadline || "Get direct buyers in your county - without brokers.";
   const displayDescription =
-    heroDescription ||
-    "Create your free Agrisoko account in 10 seconds. List when you are ready.";
-  const signupCtaLabel = "Create Free Account - 10 seconds";
+    heroDescription || "Create your free account in 10 seconds. List later.";
+  const signupCtaLabel = "Create Free Account";
   const primaryCtaTo = user ? "/profile" : "/login?mode=signup&next=/profile";
   const primaryCtaLabel = user ? "Open My Dashboard" : signupCtaLabel;
   const buyRequestsTo = user ? "/request" : "/login?mode=signup&next=/request";
@@ -151,7 +150,7 @@ const Home: React.FC = () => {
   const demandCtaTo = user ? buyRequestsTo : primaryCtaTo;
   const demandCtaLabel = user ? "View Buy Requests" : signupCtaLabel;
   const urgencyBody = isGlobalFreeListing
-    ? "There is no listing fee right now. Post now and build trust momentum while launch pricing is active."
+    ? "No listing fee right now."
     : user
     ? daysLeft > 0
       ? "Use your active free window to post now and lock in trust early."
@@ -159,25 +158,25 @@ const Home: React.FC = () => {
     : `Every new account gets a personal ${FREE_WINDOW_DAYS}-day KSh 0 listing window.`;
   const heroFocusItems = [
     {
-      title: isGlobalFreeListing ? "Free to list right now" : "Launch window active",
-      copy: urgencyBody,
+      title: isGlobalFreeListing ? "Free to list" : "Launch window",
+      copy: isGlobalFreeListing ? "No listing fee right now." : urgencyBody,
     },
     {
-      title: "Founding seller advantage",
-      copy: "47 counties are still open for traders building early reputation and repeat demand.",
+      title: "Early position",
+      copy: "47 counties are open for early reputation.",
     },
     {
-      title: "No ID needed to start",
-      copy: "Open your account first. Add verification when you are ready to strengthen trust.",
+      title: "Trust later",
+      copy: "Start now. Verify when ready.",
     },
   ];
   const finalCallCopy = isGlobalFreeListing
-    ? "Create account, verify once, and post your first listing. Listing is currently free platform-wide."
+    ? "Create your account and post your first listing. Listing is free right now."
     : user && daysLeft <= 0
     ? "Your county is still open. Keep posting and stay visible to active buyers."
     : "Create account, verify once, and post your first listing while your free 10-day window is active.";
   const stickyWindowText = isGlobalFreeListing
-    ? "Listing is currently free to post"
+    ? "Free to list right now"
     : user
     ? daysLeft > 0
       ? `Your free listing window: ${daysLeft} day${daysLeft === 1 ? "" : "s"} left`
@@ -230,11 +229,6 @@ const Home: React.FC = () => {
                     {primaryCtaLabel}
                   </Link>
                 </div>
-                {!user && (
-                  <p className="mt-3 text-sm font-medium text-slate-600">
-                    Create your free account now. You can list later when you are ready.
-                  </p>
-                )}
                 <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
                   <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1">
                     {liveListingCount.toLocaleString()} listings live
@@ -242,18 +236,15 @@ const Home: React.FC = () => {
                   <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1">
                     47 counties open
                   </span>
-                  <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1">
-                    Direct buyer chat
-                  </span>
                 </div>
               </div>
 
               <aside className="rounded-3xl border border-slate-200 bg-white/95 p-6 shadow-sm">
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">
-                  Why sellers move now
+                  Why now
                 </p>
                 <h2 className="home-title mt-3 text-3xl text-slate-900">
-                  Fast start. Strong trust. No broker drag.
+                  Fast start. Strong trust.
                 </h2>
                 <div className="mt-5 space-y-3">
                   {heroFocusItems.map((item) => (
@@ -272,18 +263,15 @@ const Home: React.FC = () => {
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-14">
-          <div className="mb-7 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div className="mb-7">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
-                Why Agrisoko works
+                Why Agrisoko
               </p>
               <h2 className="home-title mt-2 text-3xl text-slate-900 md:text-4xl">
-                Clear reasons to act without overthinking
+                Why people sign up
               </h2>
             </div>
-            <p className="max-w-md text-sm text-slate-600">
-              Start with your account. Add verification and more detail as your trading reputation grows.
-            </p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {conversionPillars.map((pillar) => (
@@ -293,19 +281,13 @@ const Home: React.FC = () => {
               </article>
             ))}
           </div>
-          <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-            <p className="text-sm font-semibold text-emerald-900">No ID needed to start. No listing required.</p>
-            <p className="mt-1 text-sm text-emerald-800">
-              Open your account first, explore the market, then complete verification when ready to list.
-            </p>
-          </div>
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-14">
           <div className="mb-8">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">How it works</p>
             <h2 className="home-title mt-2 text-3xl text-slate-900 md:text-4xl">
-              Create account, verify, list - then receive inquiries
+              3 steps
             </h2>
           </div>
 
@@ -325,10 +307,10 @@ const Home: React.FC = () => {
         <section className="mx-auto max-w-7xl px-4 pb-14">
           <div className="mb-8">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
-              Live demand and trust
+              Market proof
             </p>
             <h2 className="home-title mt-2 text-3xl text-slate-900 md:text-4xl">
-              Buyers are searching. Trust closes the gap.
+              Buyers are active.
             </h2>
           </div>
 
@@ -338,7 +320,7 @@ const Home: React.FC = () => {
                 Buyer demand
               </p>
               <h3 className="mt-3 text-2xl font-semibold text-slate-900">
-                Buyers are already searching for core categories
+                Buyers are searching for
               </h3>
               <ul className="mt-4 space-y-2 text-sm text-slate-700">
                 {buyerDemandSignals.map((signal) => (
@@ -384,11 +366,8 @@ const Home: React.FC = () => {
                 Trade safely on Agrisoko
               </p>
               <h3 className="mt-3 text-2xl font-semibold text-slate-900">
-                High-trust marketplace mechanics built into every profile
+                Trust built into every profile
               </h3>
-              <p className="mt-2 text-sm text-slate-600">
-                Verification, direct chat, discovery, and visible activity reduce hesitation before price talks.
-              </p>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 {trustFeatures.map((feature) => (
                   <div key={feature.title} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -417,7 +396,7 @@ const Home: React.FC = () => {
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Founding seller reward pool</p>
                   <p className="text-lg font-semibold text-slate-900">Open raffle details</p>
                   <p className="text-sm text-slate-600">
-                    Bonus incentive for qualified verified sellers. Core flow stays focused on listings.
+                    Bonus reward for qualified sellers.
                   </p>
                 </div>
                 <span className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-700">
@@ -434,7 +413,7 @@ const Home: React.FC = () => {
         <section className="mx-auto max-w-7xl px-4 pb-16 pt-8">
           <div className="rounded-3xl bg-gradient-to-r from-emerald-700 to-teal-700 p-8 text-white shadow-lg md:p-10">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-100">Final call</p>
-            <h2 className="home-title mt-3 text-3xl md:text-4xl">Your county is still open. Lock your position now.</h2>
+            <h2 className="home-title mt-3 text-3xl md:text-4xl">Ready to start?</h2>
             <p className="mt-3 max-w-2xl text-sm text-emerald-100 md:text-base">
               {finalCallCopy}
             </p>
