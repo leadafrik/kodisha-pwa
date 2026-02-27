@@ -88,7 +88,6 @@ const CreateListing: React.FC = () => {
   const [idVerified, setIdVerified] = useState(false);
   const [selfieVerified, setSelfieVerified] = useState(false);
   const [hasDraft, setHasDraft] = useState(false);
-  const verificationErrorMessage = "Please upload your ID and selfie before listing";
   const verificationState = (user?.verification || {}) as {
     idVerificationPending?: boolean;
     idVerificationSubmitted?: boolean;
@@ -97,29 +96,9 @@ const CreateListing: React.FC = () => {
     !!verificationState.idVerificationPending || !!verificationState.idVerificationSubmitted;
   const isVerificationPending =
     hasPendingIdVerification && (!idVerified || !selfieVerified);
-  const requiresVerification = (!idVerified || !selfieVerified) && !isVerificationPending;
+  const isUnverifiedSeller = !idVerified || !selfieVerified;
+  const showVerificationNudge = isUnverifiedSeller && !isVerificationPending;
   const verifyIdPath = "/verify-id?next=%2Fcreate-listing";
-
-  /**
-   * Check if user is actually verified in backend
-   */
-  const isUserVerified = () => {
-    const hasIdVerified = user?.verification?.idVerified === true;
-    const hasSelfieVerified = user?.verification?.selfieVerified === true;
-    
-    // Debug log
-    if (user?._id) {
-      console.debug('Verification Check:', {
-        userId: user._id,
-        idVerified: hasIdVerified,
-        selfieVerified: hasSelfieVerified,
-        canList: hasIdVerified && hasSelfieVerified
-      });
-    }
-    
-    // User can list if they have both verification flags
-    return hasIdVerified && hasSelfieVerified;
-  };
 
   // Pre-fill contact
   useEffect(() => {
@@ -197,13 +176,10 @@ const CreateListing: React.FC = () => {
   }, [user]);
 
   useEffect(() => {
-    if (
-      (idVerified && selfieVerified) ||
-      (hasPendingIdVerification && error === verificationErrorMessage)
-    ) {
+    if (idVerified && selfieVerified) {
       setError("");
     }
-  }, [idVerified, selfieVerified, hasPendingIdVerification, error, verificationErrorMessage]);
+  }, [idVerified, selfieVerified]);
 
   // Update constituencies when county changes
   useEffect(() => {
@@ -359,10 +335,6 @@ const CreateListing: React.FC = () => {
     }
 
     if (form.step === 5) {
-      if ((!idVerified || !selfieVerified) && !hasPendingIdVerification) {
-        setError(verificationErrorMessage);
-        return false;
-      }
       return true;
     }
 
@@ -384,13 +356,6 @@ const CreateListing: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateStep() || !user) return;
-
-    // Check if user is actually verified before attempting to create listing
-    if (!isUserVerified()) {
-      setError("Your identity verification is not complete. Please verify your ID and take a selfie in your Profile before creating listings.");
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
 
     setUploading(true);
     setError("");
@@ -429,15 +394,8 @@ const CreateListing: React.FC = () => {
       if (!response.ok || !result.success) {
         let errorMsg = result.message || "Failed to create listing";
         
-        // Provide better error messaging for 403 (verification required)
         if (response.status === 403) {
-          errorMsg = "Verification required: Please verify your identity (ID + Selfie) in your Profile before creating listings";
-          
-          // Log verification status for debugging
-          console.warn("Verification Status:", {
-            idVerified: user?.verification?.idVerified,
-            selfieVerified: user?.verification?.selfieVerified
-          });
+          errorMsg = "You do not have permission to publish right now. Please try again or contact support.";
         }
         
         setError(errorMsg);
@@ -448,7 +406,14 @@ const CreateListing: React.FC = () => {
       // Success!
       localStorage.removeItem(DRAFT_STORAGE_KEY);
       setHasDraft(false);
-      alert("Listing created successfully! Awaiting admin review...");
+      const publishStatus = String(result?.data?.publishStatus || "").toLowerCase();
+      if (publishStatus === "active") {
+        alert("Listing published successfully! It is now visible to buyers.");
+      } else {
+        alert(
+          "Listing submitted successfully! It will go live after admin approval. Verify your ID + selfie to speed up future listings."
+        );
+      }
       navigate("/browse");
     } catch (err: any) {
       setError(err.message || "An error occurred while creating your listing");
@@ -587,17 +552,17 @@ const CreateListing: React.FC = () => {
         <div className="max-w-5xl mx-auto px-4 pb-16">
           <p className="mb-6 text-sm text-slate-500">Drafts save automatically on this device.</p>
 
-          {requiresVerification && (
+          {showVerificationNudge && (
             <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 flex flex-wrap items-center gap-3">
               <p className="text-amber-900 font-semibold flex-1">
-                Listing requires ID + selfie verification. Complete verification now, or continue drafting and submit later.
+                Verification is optional for now, but verified profiles build trust and go live faster.
               </p>
               <button
                 type="button"
                 onClick={() => navigate(verifyIdPath)}
                 className="px-4 py-2 rounded-lg bg-amber-600 text-white text-sm font-semibold hover:bg-amber-700"
               >
-                Verify now
+                Verify to boost trust
               </button>
             </div>
           )}
@@ -1079,96 +1044,103 @@ const CreateListing: React.FC = () => {
                 </div>
               </div>
 
-              {requiresVerification ? (
+              {showVerificationNudge && (
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
-                  <p className="text-amber-800 font-semibold mb-2">Complete your verification first</p>
+                  <p className="text-amber-800 font-semibold mb-2">Publish now, verify to rank higher</p>
                   <p className="text-amber-700 text-sm mb-4">
-                    You must upload your ID and selfie before listing. Open verification to submit these documents.
+                    Your listing can still be submitted. Verification helps future listings go live faster and builds buyer trust.
                   </p>
                   <button
                     type="button"
                     onClick={() => navigate(verifyIdPath)}
                     className="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700"
                   >
-                    Go to Verification
+                    Verify profile
                   </button>
                 </div>
-              ) : (
-                <>
-                  {/* Listing Summary */}
-                  <div className="bg-gray-50 rounded-lg p-6 mb-6 border border-gray-200">
-                    <h3 className="font-bold text-gray-900 mb-4">Listing Summary</h3>
-                    <div className="space-y-3 text-sm">
-                      <p>
-                        <span className="text-gray-600">Type:</span>
-                        <span className="font-semibold text-gray-900 ml-2 capitalize">{form.listingType}</span>
-                      </p>
-                      <p>
-                        <span className="text-gray-600">Category:</span>
-                        <span className="font-semibold text-gray-900 ml-2 capitalize">
-                          {form.category} - {form.subcategory}
-                        </span>
-                      </p>
-                      <p>
-                        <span className="text-gray-600">Location:</span>
-                        <span className="font-semibold text-gray-900 ml-2">
-                          {form.ward}, {form.constituency}, {form.county}
-                        </span>
-                      </p>
-                      <p>
-                        <span className="text-gray-600">Title:</span>
-                        <span className="font-semibold text-gray-900 ml-2">{form.title}</span>
-                      </p>
-                      <p>
-                        <span className="text-gray-600">Price:</span>
-                        <span className="font-semibold text-gray-900 ml-2">KSh {Number(form.price).toLocaleString()}</span>
-                      </p>
-                      {form.quantity && (
-                        <p>
-                          <span className="text-gray-600">Quantity:</span>
-                          <span className="font-semibold text-gray-900 ml-2">
-                            {form.quantity} {form.unit}
-                          </span>
-                        </p>
-                      )}
-                      <p>
-                        <span className="text-gray-600">Images:</span>
-                        <span className="font-semibold text-gray-900 ml-2">{form.images.length} uploaded</span>
-                      </p>
-                      <p>
-                        <span className="text-gray-600">Trust readiness:</span>
-                        <span className="font-semibold text-gray-900 ml-2">{trustScore}%</span>
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Premium Options */}
-                  <div className="bg-blue-50 rounded-lg p-6 border border-blue-200 mb-6">
-                    <h3 className="font-bold text-gray-900 mb-4">Boost Your Listing (Optional)</h3>
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={form.premiumBadge}
-                        onChange={(e) => setForm((prev) => ({ ...prev, premiumBadge: e.target.checked }))}
-                        className="w-5 h-5 text-green-600"
-                      />
-                      <div>
-                        <p className="font-semibold text-gray-900">Premium Badge (KSh 199)</p>
-                        <p className="text-sm text-gray-600">Get a premium badge to stand out</p>
-                      </div>
-                    </label>
-                  </div>
-
-                  {/* Submit Button */}
-                  <button
-                    type="submit"
-                    disabled={uploading}
-                    className="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 disabled:opacity-50 transition-all"
-                  >
-                    {uploading ? "Publishing listing..." : "Publish Listing - start receiving buyer inquiries"}
-                  </button>
-                </>
               )}
+
+              {/* Listing Summary */}
+              <div className="bg-gray-50 rounded-lg p-6 mb-6 border border-gray-200">
+                <h3 className="font-bold text-gray-900 mb-4">Listing Summary</h3>
+                <div className="space-y-3 text-sm">
+                  <p>
+                    <span className="text-gray-600">Type:</span>
+                    <span className="font-semibold text-gray-900 ml-2 capitalize">{form.listingType}</span>
+                  </p>
+                  <p>
+                    <span className="text-gray-600">Category:</span>
+                    <span className="font-semibold text-gray-900 ml-2 capitalize">
+                      {form.category} - {form.subcategory}
+                    </span>
+                  </p>
+                  <p>
+                    <span className="text-gray-600">Location:</span>
+                    <span className="font-semibold text-gray-900 ml-2">
+                      {form.ward}, {form.constituency}, {form.county}
+                    </span>
+                  </p>
+                  <p>
+                    <span className="text-gray-600">Title:</span>
+                    <span className="font-semibold text-gray-900 ml-2">{form.title}</span>
+                  </p>
+                  <p>
+                    <span className="text-gray-600">Price:</span>
+                    <span className="font-semibold text-gray-900 ml-2">KSh {Number(form.price).toLocaleString()}</span>
+                  </p>
+                  {form.quantity && (
+                    <p>
+                      <span className="text-gray-600">Quantity:</span>
+                      <span className="font-semibold text-gray-900 ml-2">
+                        {form.quantity} {form.unit}
+                      </span>
+                    </p>
+                  )}
+                  <p>
+                    <span className="text-gray-600">Images:</span>
+                    <span className="font-semibold text-gray-900 ml-2">{form.images.length} uploaded</span>
+                  </p>
+                  <p>
+                    <span className="text-gray-600">Trust readiness:</span>
+                    <span className="font-semibold text-gray-900 ml-2">{trustScore}%</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Premium Options */}
+              <div className="bg-blue-50 rounded-lg p-6 border border-blue-200 mb-6">
+                <h3 className="font-bold text-gray-900 mb-4">Boost Your Listing (Optional)</h3>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={form.premiumBadge}
+                    onChange={(e) => setForm((prev) => ({ ...prev, premiumBadge: e.target.checked }))}
+                    className="w-5 h-5 text-green-600"
+                  />
+                  <div>
+                    <p className="font-semibold text-gray-900">Premium Badge (KSh 199)</p>
+                    <p className="text-sm text-gray-600">Get a premium badge to stand out</p>
+                  </div>
+                </label>
+              </div>
+
+              <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+                <p className="font-semibold mb-2">Your listing will be:</p>
+                <ul className="space-y-1">
+                  <li>[x] Visible across Kenya</li>
+                  <li>[x] Shown to active buyers</li>
+                  <li>[x] Protected by verified profile signals</li>
+                </ul>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={uploading}
+                className="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 disabled:opacity-50 transition-all"
+              >
+                {uploading ? "Publishing listing..." : "Publish Listing - start receiving buyer inquiries"}
+              </button>
             </div>
           )}
 
@@ -1192,7 +1164,7 @@ const CreateListing: React.FC = () => {
                 Save draft
               </button>
             )}
-            {form.step < 5 && (
+            {form.step < 5 && form.step !== 2 && (
               <button
                 type="button"
                 onClick={handleNextStep}
