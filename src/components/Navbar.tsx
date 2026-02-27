@@ -15,7 +15,7 @@ const Navbar: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [listOpen, setListOpen] = useState(false);
   const listCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isGrowthHome = !user && location.pathname === "/";
+  const isGuestHome = !user && location.pathname === "/";
 
   const closeMobile = () => setMobileOpen(false);
   const scheduleListClose = () => {
@@ -31,28 +31,6 @@ const Navbar: React.FC = () => {
       listCloseTimer.current = null;
     }
   };
-
-  if (isGrowthHome) {
-    return (
-      <nav className="bg-white shadow-sm border-b border-[#A0452E]/20 sticky top-0 z-40">
-        <div className="h-1 w-full bg-[#A0452E]"></div>
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex justify-between items-center py-4">
-            <Link to="/" className="flex items-center gap-3">
-              <img src="/logo.svg" alt="Agrisoko" className="h-10 w-10" />
-              <span className="text-2xl font-extrabold text-gray-800 tracking-tight">Agrisoko</span>
-            </Link>
-            <Link
-              to="/login?mode=signup&next=/profile"
-              className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
-            >
-              Create Free Account - 10 seconds
-            </Link>
-          </div>
-        </div>
-      </nav>
-    );
-  }
 
   return (
     <>
@@ -230,8 +208,21 @@ const Navbar: React.FC = () => {
                 </div>
               ) : (
                 <div className="flex items-center gap-4">
-                  <Link to="/login" className="px-5 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 font-semibold transition min-h-[44px] flex items-center">
+                  <Link
+                    to="/login"
+                    className="px-4 py-2 rounded-lg hover:bg-gray-100 font-semibold transition min-h-[44px] flex items-center text-sm"
+                  >
                     Login
+                  </Link>
+                  <Link
+                    to="/login?mode=signup&next=/profile"
+                    className={`px-5 py-2 rounded-lg font-semibold transition min-h-[44px] flex items-center text-sm ${
+                      isGuestHome
+                        ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                        : "bg-gray-900 text-white hover:bg-gray-800"
+                    }`}
+                  >
+                    Create Free Account - 10 seconds
                   </Link>
                 </div>
               )}
@@ -387,6 +378,13 @@ const Navbar: React.FC = () => {
                 </>
               ) : (
                 <>
+                  <Link 
+                    to="/login?mode=signup&next=/profile" 
+                    onClick={closeMobile}
+                    className="px-3 py-3 min-h-[48px] flex items-center justify-center rounded-lg bg-emerald-600 text-white transition font-semibold hover:bg-emerald-700 mb-2"
+                  >
+                    Create Free Account - 10 seconds
+                  </Link>
                   <Link 
                     to="/login" 
                     onClick={closeMobile}
