@@ -23,50 +23,72 @@ const launchFeeDeadlineLabel = launchFeeDeadline.toLocaleDateString("en-KE", {
   year: "numeric",
 });
 
+const conversionPillars = [
+  {
+    title: "No middlemen",
+    copy: "Chat directly with buyers and keep full control of your profit.",
+  },
+  {
+    title: "Instant trust",
+    copy: "Verified badge helps buyers choose you faster.",
+  },
+  {
+    title: "Zero launch risk",
+    copy: `Listing remains KSh 0 until ${launchFeeDeadlineLabel}.`,
+  },
+];
+
 const tradeSteps = [
   {
     title: "Create account",
-    copy: "Sign up and complete your profile in minutes.",
+    copy: "Open your account and set up your profile.",
   },
   {
-    title: "Verify and list",
-    copy: "Submit verification and post one clear listing with location and pricing.",
+    title: "Verify profile",
+    copy: "Submit ID and selfie once to build buyer trust.",
   },
   {
-    title: "Get direct buyers",
-    copy: "Receive messages, negotiate directly, and close without broker layers.",
+    title: "Post first listing",
+    copy: "List your offer and start receiving direct inquiries.",
   },
+];
+
+const buyerDemandSignals = [
+  "Maize and beans suppliers",
+  "Poultry and livestock",
+  "Transport and tractor services",
+  "Agrovet inputs and farm supplies",
 ];
 
 const trustFeatures = [
   {
     title: "Verified traders",
-    copy: "ID and selfie verification for safer and more credible trade.",
+    copy: "ID and selfie verification to reduce fraud and improve confidence.",
     icon: ShieldCheck,
   },
   {
     title: "Direct buyer chat",
-    copy: "Real-time conversations help you close deals faster.",
+    copy: "Real-time messaging to negotiate and close quickly.",
     icon: MessageCircle,
   },
   {
-    title: "47 counties covered",
-    copy: "Supply and demand visibility across Kenya.",
-    icon: MapPin,
-  },
-  {
-    title: "Smart search filters",
+    title: "Smart discovery",
     copy: "Filter by county, category, and pricing expectations.",
     icon: Search,
   },
   {
-    title: "Launch fee waiver",
+    title: "County coverage",
+    copy: "Agrisoko supports trade across all 47 counties.",
+    icon: MapPin,
+  },
+  {
+    title: "Launch fee window",
     copy: `List at KSh 0 during the early window ending ${launchFeeDeadlineLabel}.`,
     icon: Clock3,
   },
   {
-    title: "Trusted visibility",
-    copy: "Boost and verification help serious sellers stand out.",
+    title: "Proof-led reputation",
+    copy: "Active listings and verified status strengthen your profile over time.",
     icon: BadgeCheck,
   },
 ];
@@ -115,22 +137,22 @@ const Home: React.FC = () => {
   const launchWindowLabel =
     daysLeft > 0
       ? `${daysLeft} day${daysLeft === 1 ? "" : "s"} left at KSh 0`
-      : "Launch fee window ending soon";
+      : "Launch fee window closing";
 
   const displayHeadline =
-    heroHeadline || "Sell your produce faster. Pay KSh 0 listing fees.";
+    heroHeadline || "Get your first direct buyers in your county - without brokers.";
   const displayDescription =
     heroDescription ||
-    "A Kenyan marketplace for farmers, traders, and agrovets. Verify once, list quickly, and get direct buyer chats without broker pressure.";
+    "Built in Kenya for Kenyan farmers, traders, agrovets, and service providers. Verify once, list fast, and win repeat buyers.";
   const displayAnnouncement =
     announcementText ||
-    `Listing remains KSh 0 until ${launchFeeDeadlineLabel}. Early verified sellers usually win repeat buyers first.`;
+    `Launch listing remains KSh 0 until ${launchFeeDeadlineLabel}. Secure your early seller position now.`;
 
   const primaryCtaTo = user ? "/create-listing" : "/login?next=/create-listing";
-  const primaryCtaLabel = user ? "List My First Item - Free" : "Get Verified & List Free";
+  const primaryCtaLabel = user ? "Post Your First Listing" : "Get Verified & List Free";
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    <main className="min-h-screen bg-slate-50 pb-24 text-slate-900">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700&family=Sora:wght@400;500;600;700&display=swap');
         .home-shell {
@@ -166,7 +188,6 @@ const Home: React.FC = () => {
                 {displayDescription}
               </p>
               <p className="mt-3 text-sm font-medium text-emerald-800">{displayAnnouncement}</p>
-              <p className="mt-2 text-sm font-medium text-slate-600">Built in Kenya for all 47 counties.</p>
 
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                 <Link
@@ -174,13 +195,13 @@ const Home: React.FC = () => {
                   className="inline-flex min-h-[46px] items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-300/40 transition hover:bg-emerald-700"
                 >
                   {primaryCtaLabel}
-                  <span className="ml-1 text-xs text-emerald-100">(quick setup)</span>
+                  <span className="ml-1 text-xs text-emerald-100">(takes ~3 mins)</span>
                 </Link>
                 <Link
-                  to="/browse"
+                  to="/request"
                   className="inline-flex min-h-[46px] items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-100"
                 >
-                  Browse Marketplace
+                  See Who&apos;s Buying in My County
                 </Link>
               </div>
             </div>
@@ -199,18 +220,102 @@ const Home: React.FC = () => {
             </span>
             <span className="inline-flex items-center gap-2">
               <BadgeCheck className="h-4 w-4 text-emerald-300" />
-              Verified profiles and direct chat
+              Verified profiles and direct buyer chat
             </span>
           </div>
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-14">
+          <div className="grid items-start gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+            <article className="rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-7 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">Founding seller advantage</p>
+              <h2 className="home-title mt-3 text-3xl text-slate-900 md:text-4xl">
+                Secure your county before the category gets crowded
+              </h2>
+              <ul className="mt-5 space-y-2 text-sm text-slate-700">
+                <li className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
+                  Appear earlier in buyer discovery
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
+                  Earn buyer trust with verification
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
+                  Build repeat customers before late entrants
+                </li>
+              </ul>
+              <Link
+                to={primaryCtaTo}
+                className="mt-6 inline-flex min-h-[44px] items-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
+              >
+                Secure My County Position
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </article>
+
+            <article className="rounded-3xl border border-amber-200 bg-amber-50 p-7 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-800">Urgency window</p>
+              <h3 className="mt-3 text-2xl font-semibold text-slate-900">
+                Launch listing is free until {launchFeeDeadlineLabel}
+              </h3>
+              <p className="mt-2 text-sm text-slate-700">
+                After launch, listing fees return. Start now to keep early position and trust momentum.
+              </p>
+              <Link
+                to={primaryCtaTo}
+                className="mt-6 inline-flex min-h-[44px] items-center rounded-xl border border-amber-300 bg-white px-5 py-2.5 text-sm font-semibold text-amber-900 transition hover:bg-amber-100"
+              >
+                Get Verified & List Free
+              </Link>
+            </article>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 pb-14">
+          <div className="mb-7">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">Why sellers convert</p>
+            <h2 className="home-title mt-2 text-3xl text-slate-900 md:text-4xl">Outcomes that move revenue</h2>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {conversionPillars.map((pillar) => (
+              <article key={pillar.title} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <h3 className="text-lg font-semibold text-slate-900">{pillar.title}</h3>
+                <p className="mt-2 text-sm text-slate-600">{pillar.copy}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="border-y border-slate-200 bg-white px-4 py-12">
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-7">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">Early market activity</p>
+              <h2 className="home-title mt-2 text-3xl text-slate-900 md:text-4xl">Momentum is already building</h2>
+            </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              <article className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                <p className="text-sm font-semibold text-slate-900">{liveListingCount.toLocaleString()} founding listings</p>
+                <p className="mt-1 text-sm text-slate-600">Early suppliers are already visible to buyers.</p>
+              </article>
+              <article className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                <p className="text-sm font-semibold text-slate-900">47 counties open</p>
+                <p className="mt-1 text-sm text-slate-600">Every county is available for trusted seller growth.</p>
+              </article>
+              <article className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                <p className="text-sm font-semibold text-slate-900">Direct negotiation model</p>
+                <p className="mt-1 text-sm text-slate-600">No broker layers between you and your buyer.</p>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 py-14">
           <div className="mb-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
-              How it works
-            </p>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">How it works</p>
             <h2 className="home-title mt-2 text-3xl text-slate-900 md:text-4xl">
-              Start in minutes and build trust faster
+              Create account, verify, list - then receive inquiries
             </h2>
           </div>
 
@@ -228,61 +333,40 @@ const Home: React.FC = () => {
         </section>
 
         <section className="mx-auto max-w-7xl px-4 pb-14">
-          <div className="mb-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
-              Why sellers convert
-            </p>
-          </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            <article className="rounded-2xl border border-slate-200 bg-white p-5">
-              <h3 className="text-lg font-semibold text-slate-900">No middlemen</h3>
-              <p className="mt-1 text-sm text-slate-600">
-                Chat directly with buyers and keep full control of your margin.
-              </p>
-            </article>
-            <article className="rounded-2xl border border-slate-200 bg-white p-5">
-              <h3 className="text-lg font-semibold text-slate-900">Instant trust</h3>
-              <p className="mt-1 text-sm text-slate-600">
-                Verified badge and clear profile details increase buyer confidence.
-              </p>
-            </article>
-            <article className="rounded-2xl border border-slate-200 bg-white p-5">
-              <h3 className="text-lg font-semibold text-slate-900">Zero launch risk</h3>
-              <p className="mt-1 text-sm text-slate-600">
-                Listing fee is KSh 0 during launch, so you can test demand safely.
-              </p>
-            </article>
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-4 pb-14">
           <div className="grid gap-6 md:grid-cols-2">
             <article className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
               <p className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-700">
-                I&apos;m buying
+                Buyer demand
               </p>
-              <h3 className="mt-3 text-2xl font-semibold text-slate-900">Find verified sellers fast</h3>
-              <p className="mt-2 text-sm text-slate-600">
-                Compare listings, message directly, and buy with confidence.
-              </p>
+              <h3 className="mt-3 text-2xl font-semibold text-slate-900">
+                Buyers are already searching for core categories
+              </h3>
+              <ul className="mt-4 space-y-2 text-sm text-slate-700">
+                {buyerDemandSignals.map((signal) => (
+                  <li key={signal} className="flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
+                    {signal}
+                  </li>
+                ))}
+              </ul>
               <Link
-                to="/browse"
+                to="/request"
                 className="mt-6 inline-flex min-h-[44px] items-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-100"
               >
-                Browse Listings
+                View Buy Requests
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </article>
 
-            <article className="rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-7 shadow-sm">
+            <article className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
               <p className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-emerald-800">
-                I&apos;m selling
+                Trust engine
               </p>
               <h3 className="mt-3 text-2xl font-semibold text-slate-900">
-                Become a trusted county supplier
+                Verified traders close deals faster
               </h3>
               <p className="mt-2 text-sm text-slate-600">
-                Verified sellers get stronger buyer confidence and faster replies.
+                Your public profile, verification status, and listing activity remove hesitation before price talks.
               </p>
               <Link
                 to={primaryCtaTo}
@@ -300,10 +384,10 @@ const Home: React.FC = () => {
             <details className="group rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <summary className="campaign-summary flex cursor-pointer list-none items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Campaign</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Founding seller reward pool</p>
                   <p className="text-lg font-semibold text-slate-900">Open raffle details</p>
                   <p className="text-sm text-slate-600">
-                    Keep browsing listings without interruption. Open when ready.
+                    Bonus incentive for qualified verified sellers. Core flow stays focused on listings.
                   </p>
                 </div>
                 <span className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-700">
@@ -321,7 +405,7 @@ const Home: React.FC = () => {
           <div className="mb-8">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">Why Agrisoko</p>
             <h2 className="home-title mt-2 text-3xl text-slate-900 md:text-4xl">
-              Built to convert trust into real transactions
+              A trusted Kenyan marketplace engineered for conversion
             </h2>
           </div>
 
@@ -339,16 +423,16 @@ const Home: React.FC = () => {
         <section className="mx-auto max-w-7xl px-4 pb-16 pt-2">
           <div className="rounded-3xl bg-gradient-to-r from-emerald-700 to-teal-700 p-8 text-white shadow-lg md:p-10">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-100">Final call</p>
-            <h2 className="home-title mt-3 text-3xl md:text-4xl">Lock in your early-seller advantage now</h2>
+            <h2 className="home-title mt-3 text-3xl md:text-4xl">Your county is still open. Lock your position now.</h2>
             <p className="mt-3 max-w-2xl text-sm text-emerald-100 md:text-base">
-              Create your account, verify once, and publish your first listing while launch fee remains KSh 0.
+              Create account, verify once, and post your first listing while launch fee remains KSh 0.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <Link
                 to={primaryCtaTo}
                 className="inline-flex min-h-[46px] items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50"
               >
-                Post My First Listing
+                Get Verified & List Free
               </Link>
               <Link
                 to="/browse"
