@@ -13,6 +13,7 @@ import {
 import { useAuth } from "../contexts/AuthContext";
 import { useProperties } from "../contexts/PropertyContext";
 import { usePageContent } from "../hooks/usePageContent";
+import { PAYMENTS_ENABLED } from "../config/featureFlags";
 import RaffleCampaign from "../components/RaffleCampaign";
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
@@ -29,7 +30,9 @@ const conversionPillars = [
   },
   {
     title: "Zero launch risk",
-    copy: `Listing remains KSh 0 for your first ${FREE_WINDOW_DAYS} days after signup.`,
+    copy: PAYMENTS_ENABLED
+      ? `Listing remains KSh 0 for your first ${FREE_WINDOW_DAYS} days after signup.`
+      : "Listings are currently KSh 0 platform-wide during launch.",
   },
 ];
 
@@ -78,7 +81,9 @@ const trustFeatures = [
   },
   {
     title: "Launch fee window",
-    copy: `List at KSh 0 for your first ${FREE_WINDOW_DAYS} days after signup.`,
+    copy: PAYMENTS_ENABLED
+      ? `List at KSh 0 for your first ${FREE_WINDOW_DAYS} days after signup.`
+      : "Listings are currently free platform-wide.",
     icon: Clock3,
   },
   {
@@ -138,7 +143,10 @@ const Home: React.FC = () => {
     freeWindowEndsAt === null
       ? FREE_WINDOW_DAYS
       : Math.max(0, Math.ceil((freeWindowEndsAt - Date.now()) / MILLISECONDS_IN_DAY));
-  const launchWindowLabel = user
+  const isGlobalFreeListing = !PAYMENTS_ENABLED;
+  const launchWindowLabel = isGlobalFreeListing
+    ? "Listings are currently free"
+    : user
     ? daysLeft > 0
       ? `${daysLeft} day${daysLeft === 1 ? "" : "s"} left at KSh 0`
       : "Free launch window ended"
@@ -156,21 +164,28 @@ const Home: React.FC = () => {
   const browseTo = user ? "/browse" : "/login?mode=signup&next=/browse";
   const demandCtaTo = user ? buyRequestsTo : primaryCtaTo;
   const demandCtaLabel = user ? "View Buy Requests" : signupCtaLabel;
-  const urgencyHeadline = user
+  const urgencyHeadline = isGlobalFreeListing
+    ? "Listings are currently free to post"
+    : user
     ? daysLeft > 0
       ? `Your free listing window has ${daysLeft} day${daysLeft === 1 ? "" : "s"} left`
       : "Your free listing window has ended"
     : `Free listing for your first ${FREE_WINDOW_DAYS} days after signup`;
-  const urgencyBody = user
+  const urgencyBody = isGlobalFreeListing
+    ? "There is no listing fee right now. Post now and build trust momentum while launch pricing is active."
+    : user
     ? daysLeft > 0
       ? "Use your active free window to post now and lock in trust early."
       : "You can still list and build trust momentum even after the initial free window."
-    : `Every new account gets a personal ${FREE_WINDOW_DAYS}-day KSh 0 listing window. No fake looping countdown.`;
-  const finalCallCopy =
-    user && daysLeft <= 0
-      ? "Your county is still open. Keep posting and stay visible to active buyers."
-      : "Create account, verify once, and post your first listing while your free 10-day window is active.";
-  const stickyWindowText = user
+    : `Every new account gets a personal ${FREE_WINDOW_DAYS}-day KSh 0 listing window.`;
+  const finalCallCopy = isGlobalFreeListing
+    ? "Create account, verify once, and post your first listing. Listing is currently free platform-wide."
+    : user && daysLeft <= 0
+    ? "Your county is still open. Keep posting and stay visible to active buyers."
+    : "Create account, verify once, and post your first listing while your free 10-day window is active.";
+  const stickyWindowText = isGlobalFreeListing
+    ? "Listing is currently free to post"
+    : user
     ? daysLeft > 0
       ? `Your free listing window: ${daysLeft} day${daysLeft === 1 ? "" : "s"} left`
       : "Your free listing window has ended"
