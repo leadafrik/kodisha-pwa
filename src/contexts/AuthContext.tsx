@@ -53,6 +53,12 @@ const normalizeVerification = (candidate: any) => {
   return normalized;
 };
 
+const toValidDate = (value: unknown): Date => {
+  if (!value) return new Date();
+  const parsed = value instanceof Date ? value : new Date(String(value));
+  return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+};
+
 // Map backend user -> frontend User type
 const mapBackendUserToFrontendUser = (apiUser: any): User => {
   const id = apiUser._id?.toString?.() || apiUser.id || "";
@@ -87,7 +93,7 @@ const mapBackendUserToFrontendUser = (apiUser: any): User => {
     verificationStatus,
     idPhoto: undefined,
     listings: [],
-    createdAt: new Date(),
+    createdAt: toValidDate(apiUser.createdAt),
     type,
     _id: apiUser._id,
     fullName: apiUser.fullName,

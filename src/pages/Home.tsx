@@ -16,12 +16,7 @@ import { usePageContent } from "../hooks/usePageContent";
 import RaffleCampaign from "../components/RaffleCampaign";
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
-const launchFeeDeadline = new Date("2026-03-08T23:59:59+03:00");
-const launchFeeDeadlineLabel = launchFeeDeadline.toLocaleDateString("en-KE", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
+const FREE_WINDOW_DAYS = 10;
 
 const conversionPillars = [
   {
@@ -34,7 +29,7 @@ const conversionPillars = [
   },
   {
     title: "Zero launch risk",
-    copy: `Listing remains KSh 0 until ${launchFeeDeadlineLabel}.`,
+    copy: `Listing remains KSh 0 for your first ${FREE_WINDOW_DAYS} days after signup.`,
   },
 ];
 
@@ -83,7 +78,7 @@ const trustFeatures = [
   },
   {
     title: "Launch fee window",
-    copy: `List at KSh 0 during the early window ending ${launchFeeDeadlineLabel}.`,
+    copy: `List at KSh 0 for your first ${FREE_WINDOW_DAYS} days after signup.`,
     icon: Clock3,
   },
   {
@@ -105,6 +100,12 @@ const isLiveStatus = (status: unknown) => {
     "inactive",
     "delisted",
   ].includes(normalized);
+};
+
+const toValidDate = (value: unknown): Date | null => {
+  if (!value) return null;
+  const parsed = value instanceof Date ? value : new Date(String(value));
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
 };
 
 const Home: React.FC = () => {
@@ -129,14 +130,19 @@ const Home: React.FC = () => {
     return liveProducts + liveServices + liveLand;
   }, [productListings, serviceListings, properties]);
 
-  const daysLeft = Math.max(
-    0,
-    Math.ceil((launchFeeDeadline.getTime() - Date.now()) / MILLISECONDS_IN_DAY)
-  );
-  const launchWindowLabel =
-    daysLeft > 0
+  const signupDate = toValidDate(user?.createdAt);
+  const freeWindowEndsAt = signupDate
+    ? signupDate.getTime() + FREE_WINDOW_DAYS * MILLISECONDS_IN_DAY
+    : null;
+  const daysLeft =
+    freeWindowEndsAt === null
+      ? FREE_WINDOW_DAYS
+      : Math.max(0, Math.ceil((freeWindowEndsAt - Date.now()) / MILLISECONDS_IN_DAY));
+  const launchWindowLabel = user
+    ? daysLeft > 0
       ? `${daysLeft} day${daysLeft === 1 ? "" : "s"} left at KSh 0`
-      : "Launch fee window closing";
+      : "Free launch window ended"
+    : `KSh 0 for your first ${FREE_WINDOW_DAYS} days`;
 
   const displayHeadline =
     heroHeadline || "Get direct buyers in your county - without brokers.";
@@ -150,6 +156,25 @@ const Home: React.FC = () => {
   const browseTo = user ? "/browse" : "/login?mode=signup&next=/browse";
   const demandCtaTo = user ? buyRequestsTo : primaryCtaTo;
   const demandCtaLabel = user ? "View Buy Requests" : signupCtaLabel;
+  const urgencyHeadline = user
+    ? daysLeft > 0
+      ? `Your free listing window has ${daysLeft} day${daysLeft === 1 ? "" : "s"} left`
+      : "Your free listing window has ended"
+    : `Free listing for your first ${FREE_WINDOW_DAYS} days after signup`;
+  const urgencyBody = user
+    ? daysLeft > 0
+      ? "Use your active free window to post now and lock in trust early."
+      : "You can still list and build trust momentum even after the initial free window."
+    : `Every new account gets a personal ${FREE_WINDOW_DAYS}-day KSh 0 listing window. No fake looping countdown.`;
+  const finalCallCopy =
+    user && daysLeft <= 0
+      ? "Your county is still open. Keep posting and stay visible to active buyers."
+      : "Create account, verify once, and post your first listing while your free 10-day window is active.";
+  const stickyWindowText = user
+    ? daysLeft > 0
+      ? `Your free listing window: ${daysLeft} day${daysLeft === 1 ? "" : "s"} left`
+      : "Your free listing window has ended"
+    : `Free listing for your first ${FREE_WINDOW_DAYS} days after signup`;
 
   return (
     <main className="min-h-screen bg-slate-50 pb-24 text-slate-900">
@@ -175,7 +200,7 @@ const Home: React.FC = () => {
             <div className="max-w-4xl">
               <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-amber-800">
                 <Sparkles className="h-3.5 w-3.5" />
-                Launch Fee Alert
+                Free Listing Window
                 <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] tracking-[0.12em]">
                   {launchWindowLabel}
                 </span>
@@ -251,10 +276,10 @@ const Home: React.FC = () => {
             <article className="rounded-3xl border border-amber-200 bg-amber-50 p-7 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-800">Urgency window</p>
               <h3 className="mt-3 text-2xl font-semibold text-slate-900">
-                Launch listing is free until {launchFeeDeadlineLabel}
+                {urgencyHeadline}
               </h3>
               <p className="mt-2 text-sm text-slate-700">
-                After launch, listing fees return. Start now to keep early position and trust momentum.
+                {urgencyBody}
               </p>
               <Link
                 to={primaryCtaTo}
@@ -429,7 +454,7 @@ const Home: React.FC = () => {
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-100">Final call</p>
             <h2 className="home-title mt-3 text-3xl md:text-4xl">Your county is still open. Lock your position now.</h2>
             <p className="mt-3 max-w-2xl text-sm text-emerald-100 md:text-base">
-              Create account, verify once, and post your first listing while launch fee remains KSh 0.
+              {finalCallCopy}
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <Link
@@ -452,7 +477,7 @@ const Home: React.FC = () => {
       <div className="fixed bottom-3 left-1/2 z-30 w-[calc(100%-1rem)] max-w-3xl -translate-x-1/2 rounded-2xl border border-emerald-300 bg-white/95 px-4 py-3 shadow-xl backdrop-blur">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm font-semibold text-slate-900">
-            Free listing ends soon: {daysLeft > 0 ? `${daysLeft} day${daysLeft === 1 ? "" : "s"} left` : "launch window closing"}
+            {stickyWindowText}
           </p>
           <Link
             to={primaryCtaTo}
