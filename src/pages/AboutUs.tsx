@@ -6,6 +6,11 @@ import { kenyaCounties } from '../data/kenyaCounties';
 const AboutUs: React.FC = () => {
   const { user } = useAuth();
 
+  const founderName = "Stephen Omukoko Okoth";
+  const founderWhatsapp = "254796389192";
+  const founderWhatsappDisplay = "0796 389 192";
+  const founderImage = "/images/stephen-omukoko-okoth.jpg";
+
   const countiesCount = kenyaCounties.length;
   const isFullyVerified =
     user?.verification?.status === "approved" || !!user?.verification?.idVerified;
@@ -71,6 +76,27 @@ const AboutUs: React.FC = () => {
           {JSON.stringify(
             {
               "@context": "https://schema.org",
+              "@type": "Person",
+              name: founderName,
+              jobTitle: "Founder, Agrisoko",
+              image: `https://www.agrisoko254.com${founderImage}`,
+              worksFor: {
+                "@type": "Organization",
+                name: "Agrisoko Limited",
+              },
+              address: {
+                "@type": "PostalAddress",
+                addressCountry: "KE",
+              },
+            },
+            null,
+            2
+          )}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(
+            {
+              "@context": "https://schema.org",
               "@type": "FAQPage",
               mainEntity: [
                 {
@@ -121,7 +147,7 @@ const AboutUs: React.FC = () => {
                   We help Kenyans trade directly, reduce broker costs, and build trust through verified profiles.
                 </p>
                 <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-                  Karibuni. Biashara bila middlemen — direct to farm, direct to buyer.
+                  Karibuni. Biashara bila middlemen - direct to farm, direct to buyer.
                 </div>
                 <div className="flex flex-wrap gap-3">
                   {!user && (
@@ -177,6 +203,58 @@ const AboutUs: React.FC = () => {
               <p className="text-slate-600 mt-3 leading-relaxed">
                 A platform where every farmer, buyer, agrovet, and service provider can trade with confidence, backed by verification and accountability.
               </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="max-w-6xl mx-auto px-4 py-12">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
+            <div className="grid gap-8 md:grid-cols-[0.8fr_1.2fr] items-start">
+              <div>
+                <img
+                  src={founderImage}
+                  alt={`${founderName} - Founder of Agrisoko`}
+                  className="w-full rounded-2xl object-cover shadow-sm"
+                  loading="lazy"
+                />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">
+                  Founder Story
+                </p>
+                <h2 className="about-title text-3xl text-slate-900 mt-3">
+                  From broker losses to a digital agriculture future
+                </h2>
+                <p className="text-slate-700 mt-4 leading-relaxed">
+                  {founderName} built Agrisoko after seeing the same painful pattern in Kenyan markets:
+                  farmers did the hardest work, but middlemen captured the biggest share and many families
+                  were left with unfair prices.
+                </p>
+                <p className="text-slate-700 mt-3 leading-relaxed">
+                  Agrisoko exists to change that system. By taking agriculture digital, verified farmers,
+                  buyers, agrovets, and service providers can discover each other faster, negotiate directly,
+                  and trade with clear accountability.
+                </p>
+                <p className="text-slate-700 mt-3 leading-relaxed">
+                  This is the long game: make Kenya fully ready for 21st-century agricultural commerce,
+                  where reputation is earned, prices are transparent, and every county can compete in one trusted market.
+                </p>
+                <div className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                  <p className="text-sm font-semibold text-emerald-900">
+                    "Your verified Agrisoko profile is your trading reputation."
+                  </p>
+                </div>
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <a
+                    href={`https://wa.me/${founderWhatsapp}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition"
+                  >
+                    WhatsApp {founderWhatsappDisplay}
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -293,13 +371,23 @@ const AboutUs: React.FC = () => {
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <p className="text-xs uppercase tracking-widest text-slate-500">Support</p>
               <h3 className="text-xl font-semibold text-slate-900 mt-2">We are here to help</h3>
-              <p className="text-sm text-slate-600 mt-3">Email or join the WhatsApp community to get quick assistance.</p>
+              <p className="text-sm text-slate-600 mt-3">
+                Email us, message us directly on WhatsApp, or join the WhatsApp community for fast support.
+              </p>
               <div className="mt-4 flex flex-col gap-2">
                 <a
                   href="mailto:info@leadafrik.com"
                   className="inline-flex justify-center items-center rounded-xl bg-slate-900 text-white px-4 py-2 text-sm font-semibold hover:bg-slate-800 transition"
                 >
                   Email Support
+                </a>
+                <a
+                  href={`https://wa.me/${founderWhatsapp}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex justify-center items-center rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 px-4 py-2 text-sm font-semibold hover:bg-emerald-100 transition"
+                >
+                  WhatsApp {founderWhatsappDisplay}
                 </a>
                 <a
                   href="https://chat.whatsapp.com/HzCaV5YVz86CjwajiOHR5i"
@@ -340,3 +428,4 @@ const AboutUs: React.FC = () => {
 };
 
 export default AboutUs;
+
