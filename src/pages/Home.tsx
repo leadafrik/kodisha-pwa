@@ -208,19 +208,19 @@ const Home: React.FC = () => {
           </div>
         </section>
 
-        <section className="border-b border-slate-200 bg-slate-900 px-4 py-4 text-white">
-          <div className="mx-auto grid max-w-7xl gap-3 text-sm font-medium sm:grid-cols-3">
-            <span className="inline-flex items-center gap-2">
-              <BadgeCheck className="h-4 w-4 text-emerald-300" />
-              {liveListingCount.toLocaleString()} founding listings live
+        <section className="border-b border-emerald-100 bg-gradient-to-r from-emerald-50 via-white to-emerald-50 px-4 py-4 text-slate-900">
+          <div className="mx-auto grid max-w-7xl gap-3 sm:grid-cols-3">
+            <span className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800">
+              <BadgeCheck className="h-4 w-4 shrink-0 text-emerald-600" />
+              <span>{liveListingCount.toLocaleString()} founding listings live</span>
             </span>
-            <span className="inline-flex items-center gap-2">
-              <BadgeCheck className="h-4 w-4 text-emerald-300" />
-              47 counties open for trade
+            <span className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800">
+              <BadgeCheck className="h-4 w-4 shrink-0 text-emerald-600" />
+              <span>47 counties open for trade</span>
             </span>
-            <span className="inline-flex items-center gap-2">
-              <BadgeCheck className="h-4 w-4 text-emerald-300" />
-              Verified profiles and direct buyer chat
+            <span className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800">
+              <BadgeCheck className="h-4 w-4 shrink-0 text-emerald-600" />
+              <span>Verified profiles and direct buyer chat</span>
             </span>
           </div>
         </section>
