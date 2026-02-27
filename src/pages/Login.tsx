@@ -2,22 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { kenyaCounties } from "../data/kenyaCounties";
 import GoogleLoginButton from "../components/GoogleLoginButtonV2";
 import FacebookLoginButton from "../components/FacebookLoginButtonV2";
 
 type Mode = "login" | "signup" | "otp-verify" | "forgot" | "otp-reset";
 type PasswordFieldKey = "login" | "signup" | "signupConfirm" | "resetNew" | "resetConfirm";
-
-const formatCountyName = (name: string) =>
-  name
-    .split(/([-\s])/)
-    .map((part) => {
-      if (part === "-" || part === " ") return part;
-      const lower = part.toLowerCase();
-      return lower.charAt(0).toUpperCase() + lower.slice(1);
-    })
-    .join("");
 
 const defaultPasswordVisibility: Record<PasswordFieldKey, boolean> = {
   login: false,
@@ -41,6 +30,17 @@ const Login: React.FC = () => {
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get("next") || "/profile";
   const requestedMode = searchParams.get("mode");
+  const inviteCodeFromQuery = (
+    searchParams.get("invite") ||
+    searchParams.get("ref") ||
+    searchParams.get("code") ||
+    ""
+  )
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
+  const countyFromQuery = searchParams.get("county")?.trim();
+  const defaultCounty = countyFromQuery && countyFromQuery.length >= 2 ? countyFromQuery : "Nairobi City";
+  const defaultUserType: "buyer" | "seller" = searchParams.get("role") === "seller" ? "seller" : "buyer";
 
   // UI State
   const [mode, setMode] = useState<Mode>("login");
@@ -65,10 +65,7 @@ const Login: React.FC = () => {
     name: "",
     emailOrPhone: "",
     password: "",
-    confirmPassword: "",
-    userType: "buyer" as "buyer" | "seller",
-    county: "",
-    inviteCode: "",
+    inviteCode: inviteCodeFromQuery,
   });
 
   // OTP State (email only for now)
@@ -152,16 +149,6 @@ const Login: React.FC = () => {
       return;
     }
 
-    if (signupData.password !== signupData.confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-
-    if (!signupData.county) {
-      setError("Please select a county.");
-      return;
-    }
-
     const input = signupData.emailOrPhone.trim();
     if (!input.includes("@")) {
       setError("Please enter a valid email address.");
@@ -170,14 +157,13 @@ const Login: React.FC = () => {
     const email = input.toLowerCase();
 
     try {
-      // Register user
       await register({
         name: signupData.name,
         email: email,
         phone: undefined,
         password: signupData.password,
-        type: signupData.userType,
-        county: signupData.county,
+        type: defaultUserType,
+        county: defaultCounty,
         inviteCode: signupData.inviteCode.trim() || undefined,
         legalConsents: {
           termsAccepted: true,
@@ -187,12 +173,31 @@ const Login: React.FC = () => {
         },
       });
 
-      // Registration successful; backend already sent email OTP
+      try {
+        await login(email, signupData.password);
+        navigate(redirectTo);
+        return;
+      } catch {
+        // Fallback to OTP verification if immediate login is unavailable.
+      }
+
       setOtpEmail(email);
-      setInfo("Verification code sent to your email. Check inbox and spam folder.");
+      setInfo("Account created. Enter the verification code from your email to continue.");
       setMode("otp-verify");
       startOtpTimer();
     } catch (err: any) {
+      const message = err?.message || "Signup failed. Please try again.";
+
+      if (/verification|otp|code|created/i.test(message)) {
+        try {
+          await login(email, signupData.password);
+          navigate(redirectTo);
+          return;
+        } catch {
+          // Keep original error if fallback login fails.
+        }
+      }
+
       setError(err?.message || "Signup failed. Please try again.");
     }
   };
@@ -402,23 +407,22 @@ const Login: React.FC = () => {
   );
 
   const renderSignup = () => (
-    <form onSubmit={handleSignupSubmit} className="space-y-3">
-      <div className="space-y-3 pb-2">
+    <form onSubmit={handleSignupSubmit} className="space-y-4">
+      <div className="space-y-2">
         <p className="text-center text-xs font-semibold text-gray-500 uppercase tracking-widest">
-          Sign up with
+          Fastest signup
         </p>
-        <div className="grid grid-cols-2 gap-3">
-          <GoogleLoginButton
-            onSuccess={() => navigate(redirectTo)}
-            onError={(error) => setError(error)}
-            className="text-sm"
-          />
-          <FacebookLoginButton
-            onSuccess={() => navigate(redirectTo)}
-            onError={(error) => setError(error)}
-            className="text-sm"
-          />
-        </div>
+        <GoogleLoginButton
+          onSuccess={() => navigate(redirectTo)}
+          onError={(error) => setError(error)}
+          className="text-sm w-full"
+        />
+        <p className="text-center text-xs text-gray-500">No forms. No password. Instant access.</p>
+        <FacebookLoginButton
+          onSuccess={() => navigate(redirectTo)}
+          onError={(error) => setError(error)}
+          className="text-sm w-full"
+        />
       </div>
 
       <div className="relative">
@@ -426,127 +430,65 @@ const Login: React.FC = () => {
           <div className="w-full border-t border-gray-200"></div>
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-white px-2 text-gray-500">Or create with email</span>
+          <span className="bg-white px-2 text-gray-500">Or use email (about 10 seconds)</span>
         </div>
       </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Full Name *</label>
-        <input
-          type="text"
-          value={signupData.name}
-          onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Your full name"
-        />
-      </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Email *</label>
-        <input
-          type="email"
-          value={signupData.emailOrPhone}
-          onChange={(e) => setSignupData({ ...signupData, emailOrPhone: e.target.value })}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="your.email@example.com"
-        />
-        <p className="text-xs text-gray-500 mt-1">We'll send account verification to this email.</p>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Password *</label>
-        <div className="relative">
+      <div className="grid gap-3 md:grid-cols-2">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Full name *</label>
           <input
-            type={visiblePasswords.signup ? "text" : "password"}
-            value={signupData.password}
-            onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Min 6 characters"
+            type="text"
+            value={signupData.name}
+            onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
+            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Your full name"
           />
-          <button
-            type="button"
-            className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
-            aria-label={visiblePasswords.signup ? "Hide password" : "Show password"}
-            onClick={() => togglePasswordVisibility("signup")}
-          >
-            {visiblePasswords.signup ? <EyeOff size={16} /> : <Eye size={16} />}
-          </button>
         </div>
-      </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Confirm Password *</label>
-        <div className="relative">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Email *</label>
           <input
-            type={visiblePasswords.signupConfirm ? "text" : "password"}
-            value={signupData.confirmPassword}
-            onChange={(e) => setSignupData({ ...signupData, confirmPassword: e.target.value })}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Confirm password"
+            type="email"
+            value={signupData.emailOrPhone}
+            onChange={(e) => setSignupData({ ...signupData, emailOrPhone: e.target.value })}
+            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="your.email@example.com"
           />
-          <button
-            type="button"
-            className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
-            aria-label={visiblePasswords.signupConfirm ? "Hide password" : "Show password"}
-            onClick={() => togglePasswordVisibility("signupConfirm")}
-          >
-            {visiblePasswords.signupConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
-          </button>
+        </div>
+
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700">Password *</label>
+          <div className="relative">
+            <input
+              type={visiblePasswords.signup ? "text" : "password"}
+              value={signupData.password}
+              onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Min 6 characters"
+            />
+            <button
+              type="button"
+              className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+              aria-label={visiblePasswords.signup ? "Hide password" : "Show password"}
+              onClick={() => togglePasswordVisibility("signup")}
+            >
+              {visiblePasswords.signup ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
         </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Role *</label>
-        <select
-          value={signupData.userType}
-          onChange={(e) => setSignupData({ ...signupData, userType: e.target.value as "buyer" | "seller" })}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="buyer">Buyer</option>
-          <option value="seller">Seller</option>
-        </select>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">County *</label>
-        <select
-          value={signupData.county}
-          onChange={(e) => setSignupData({ ...signupData, county: e.target.value })}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">Select county</option>
-          {kenyaCounties.map((county, idx) => (
-            <option key={idx} value={county.name}>
-              {formatCountyName(county.name)}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Invite Code (Optional)</label>
-        <input
-          type="text"
-          value={signupData.inviteCode}
-          onChange={(e) =>
-            setSignupData({
-              ...signupData,
-              inviteCode: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""),
-            })
-          }
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="AGR123ABC"
-        />
-        <p className="mt-1 text-xs text-gray-500">
-          If someone invited you, enter their code here.
-        </p>
-      </div>
+      <p className="text-xs text-gray-500">
+        Account first. Complete county and profile details inside your dashboard.
+      </p>
 
       <button
         type="submit"
         disabled={loading}
         className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-60"
       >
-        {loading ? "Creating account..." : "Sign Up with Email"}
+        {loading ? "Creating account..." : "Create Free Account"}
       </button>
 
       <button
@@ -715,7 +657,7 @@ const Login: React.FC = () => {
 
   const modeTitle =
     mode === "signup"
-      ? "Create your account"
+      ? "Create your free Agrisoko account in 10 seconds"
       : mode === "forgot"
         ? "Reset your password"
         : mode === "otp-verify"
@@ -726,7 +668,7 @@ const Login: React.FC = () => {
 
   const modeSubtitle =
     mode === "signup"
-      ? "Set up your Agrisoko profile and start trading."
+      ? "Start with your account now. You can complete your profile later."
       : mode === "forgot" || mode === "otp-reset"
         ? "Use your email address to regain secure access."
         : mode === "otp-verify"
