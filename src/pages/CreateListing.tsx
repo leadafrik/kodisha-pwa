@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
 import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from "../data/kenyaCounties";
 import { API_BASE_URL } from "../config/api";
 import { AlertCircle, CheckCircle2, MapPin, Tag, Calendar, Camera, FileText } from "lucide-react";
@@ -59,6 +60,7 @@ const DRAFT_STORAGE_KEY = "kodisha_listing_draft_v1";
 const CreateListing: React.FC = () => {
   const navigate = useNavigate();
   const { user, refreshUser } = useAuth();
+  const { isCompact } = useAdaptiveLayout();
   const [form, setForm] = useState<ListingFormData>({
     step: 1,
     listingType: null,
@@ -532,7 +534,9 @@ const CreateListing: React.FC = () => {
                           <p className={`text-sm font-semibold ${isActive ? "text-slate-900" : "text-slate-600"}`}>
                             {label}
                           </p>
-                          <p className="text-xs text-slate-500">Step {step} of 4</p>
+                          {!isCompact && (
+                            <p className="text-xs text-slate-500">Step {step} of 4</p>
+                          )}
                         </div>
                       </div>
                     );
@@ -550,7 +554,9 @@ const CreateListing: React.FC = () => {
         </section>
 
         <div className="max-w-5xl mx-auto px-4 pb-16">
-          <p className="mb-6 text-sm text-slate-500">Drafts save automatically on this device.</p>
+          <p className="mb-6 text-sm text-slate-500">
+            {isCompact ? "Drafts save automatically." : "Drafts save automatically on this device."}
+          </p>
 
           {showVerificationNudge && (
             <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 flex flex-wrap items-center gap-3">
@@ -1145,7 +1151,9 @@ const CreateListing: React.FC = () => {
           )}
 
           {/* Navigation Buttons */}
-          <div className="flex gap-4 mt-6">
+          <div
+            className={`mt-6 flex flex-col gap-3 sm:flex-row sm:gap-4 ${isCompact ? "sticky bottom-3 z-20 rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-xl backdrop-blur" : ""}`}
+          >
             {form.step > 2 && (
               <button
                 type="button"

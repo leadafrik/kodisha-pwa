@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
 import { AlertCircle, CheckCircle2, FileText, MapPin } from "lucide-react";
 import {
   kenyaCounties,
@@ -148,6 +149,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
   onCancel,
 }) => {
   const { user } = useAuth();
+  const { isCompact } = useAdaptiveLayout();
   const [step, setStep] = useState<Step>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -292,6 +294,15 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
       },
     ],
     [formData]
+  );
+
+  const hasMeaningfulDemandInput = Boolean(
+    formData.title.trim() ||
+      formData.description.trim() ||
+      formData.quantity.trim() ||
+      formData.budget.min.trim() ||
+      formData.budget.max.trim() ||
+      formData.location.county
   );
 
   const clearFeedback = () => {
@@ -634,6 +645,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
           </p>
         </div>
 
+        {(!isCompact || hasMeaningfulDemandInput) && (
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
           <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
             Demand quality
@@ -652,6 +664,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
             Better detail usually means faster responses.
           </p>
         </div>
+        )}
       </div>
 
       <div className="mb-6 grid gap-3 sm:grid-cols-4">
@@ -673,7 +686,9 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                 Step {item.id}
               </p>
               <p className="mt-1 font-semibold text-slate-900">{item.label}</p>
-              <p className="text-xs text-slate-500">{item.caption}</p>
+              {(!isCompact || isActive) && (
+                <p className="text-xs text-slate-500">{item.caption}</p>
+              )}
             </div>
           );
         })}
@@ -1168,7 +1183,11 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
           </div>
         )}
 
-        <div className="mt-2 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div
+          className={`mt-2 flex flex-col gap-3 md:flex-row md:items-center md:justify-between ${
+            isCompact ? "sticky bottom-3 z-20 rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-xl backdrop-blur" : ""
+          }`}
+        >
           <div className="flex gap-3">
             {onCancel && (
               <button

@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { kenyaCounties } from "../data/kenyaCounties";
 import GoogleLoginButton from "../components/GoogleLoginButtonV2";
 import FacebookLoginButton from "../components/FacebookLoginButtonV2";
+import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
 import { trackGoogleEvent, trackGooglePageView } from "../utils/cookieConsent";
 
 type Mode = "login" | "signup" | "otp-verify" | "forgot" | "otp-reset";
@@ -37,6 +38,7 @@ const Login: React.FC = () => {
     resetPasswordWithEmail,
     loading,
   } = useAuth();
+  const { isPhone, isCompact } = useAdaptiveLayout();
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -701,7 +703,9 @@ const Login: React.FC = () => {
 
   const modeTitle =
     mode === "signup"
-      ? "Create your free account"
+      ? isPhone
+        ? "Create account"
+        : "Create your free account"
       : mode === "forgot"
         ? "Reset your password"
         : mode === "otp-verify"
@@ -712,7 +716,9 @@ const Login: React.FC = () => {
 
   const modeSubtitle =
     mode === "signup"
-      ? "About 10 seconds."
+      ? isPhone
+        ? "About 10 seconds."
+        : "Create your account in about 10 seconds."
       : mode === "forgot" || mode === "otp-reset"
         ? "Use your email address to regain secure access."
         : mode === "otp-verify"
@@ -753,7 +759,7 @@ const Login: React.FC = () => {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xl backdrop-blur md:p-8">
+            <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-5 shadow-xl backdrop-blur sm:p-6 md:p-8">
               <div className="mb-6">
                 <h2 className="mt-2 text-2xl font-bold text-slate-900">{modeTitle}</h2>
                 <p className="mt-1 text-sm text-slate-600">{modeSubtitle}</p>
@@ -778,10 +784,12 @@ const Login: React.FC = () => {
               {mode === "otp-reset" && renderOtpReset()}
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-600">
-              <span className="rounded-full border border-slate-200 bg-white/80 px-3 py-1">Secure login</span>
-              <span className="rounded-full border border-slate-200 bg-white/80 px-3 py-1">Verified profiles</span>
-            </div>
+            {!isCompact && (
+              <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-600">
+                <span className="rounded-full border border-slate-200 bg-white/80 px-3 py-1">Secure login</span>
+                <span className="rounded-full border border-slate-200 bg-white/80 px-3 py-1">Verified profiles</span>
+              </div>
+            )}
           </section>
         </div>
       </div>
