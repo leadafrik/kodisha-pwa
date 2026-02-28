@@ -10,12 +10,19 @@ const AboutUs: React.FC = () => {
   const founderWhatsapp = "254796389192";
   const founderWhatsappDisplay = "0796 389 192";
   const founderImage = "/images/stephen-omukoko-okoth.jpg";
+  const founderLinkedIn = "https://www.linkedin.com/in/stephen-omukoko-okoth-a4a5b7188";
   const cooName = "Joseph Mugalla";
   const cooTitle = "Chief Operating Officer";
   const cooImage = "/images/joseph-mugalla.jpeg";
   const cooLinkedIn = "https://www.linkedin.com/in/joseph-mugalla-a387a1267";
   const cooSummary =
     "Joseph Mugalla is Agrisoko's Chief Operating Officer. He brings together operations, market research, agribusiness experience, and software delivery discipline to keep the platform practical, responsive, and execution-focused as it grows across Kenya.";
+  const chiefOfStaffName = "Valary Akong'ai";
+  const chiefOfStaffTitle = "Chief of Staff & Co-Founder";
+  const chiefOfStaffImage = "/images/valary-akongai.jpeg";
+  const chiefOfStaffLinkedIn = "https://www.linkedin.com/in/valary-akong-ai-93115735a";
+  const chiefOfStaffSummary =
+    "Akong'ai Valary Purity is a Meteorology graduate and Agrisoko's Chief of Staff and Co-Founder. She focuses on climate intelligence, environmental risk awareness, and resilient agribusiness systems that help keep agricultural trade practical, informed, and future-ready.";
   const organizationSameAs = [
     "https://wa.me/254796389192",
     "https://chat.whatsapp.com/HzCaV5YVz86CjwajiOHR5i",
@@ -99,6 +106,7 @@ const AboutUs: React.FC = () => {
               name: founderName,
               jobTitle: "Founder, Agrisoko",
               image: `https://www.agrisoko254.com${founderImage}`,
+              sameAs: [founderLinkedIn],
               worksFor: {
                 "@type": "Organization",
                 name: "Agrisoko Limited",
@@ -122,6 +130,29 @@ const AboutUs: React.FC = () => {
               image: `https://www.agrisoko254.com${cooImage}`,
               description: cooSummary,
               sameAs: [cooLinkedIn],
+              worksFor: {
+                "@type": "Organization",
+                name: "Agrisoko Limited",
+              },
+              address: {
+                "@type": "PostalAddress",
+                addressCountry: "KE",
+              },
+            },
+            null,
+            2
+          )}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(
+            {
+              "@context": "https://schema.org",
+              "@type": "Person",
+              name: chiefOfStaffName,
+              jobTitle: chiefOfStaffTitle,
+              image: `https://www.agrisoko254.com${chiefOfStaffImage}`,
+              description: chiefOfStaffSummary,
+              sameAs: [chiefOfStaffLinkedIn],
               worksFor: {
                 "@type": "Organization",
                 name: "Agrisoko Limited",
@@ -296,6 +327,14 @@ const AboutUs: React.FC = () => {
                   >
                     WhatsApp {founderWhatsappDisplay}
                   </a>
+                  <a
+                    href={founderLinkedIn}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                  >
+                    View LinkedIn Profile
+                  </a>
                 </div>
               </div>
             </div>
@@ -338,6 +377,54 @@ const AboutUs: React.FC = () => {
                 <div className="mt-5">
                   <a
                     href={cooLinkedIn}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                  >
+                    View LinkedIn Profile
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="max-w-6xl mx-auto px-4 py-12">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
+            <div className="grid gap-8 md:grid-cols-[0.8fr_1.2fr] items-start">
+              <div>
+                <img
+                  src={chiefOfStaffImage}
+                  alt={`${chiefOfStaffName} - ${chiefOfStaffTitle} at Agrisoko`}
+                  className="w-full rounded-2xl object-cover shadow-sm"
+                  loading="lazy"
+                />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">
+                  Leadership
+                </p>
+                <h2 className="about-title text-3xl text-slate-900 mt-3">
+                  {chiefOfStaffName}
+                </h2>
+                <p className="mt-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  {chiefOfStaffTitle}
+                </p>
+                <p className="text-slate-700 mt-4 leading-relaxed">
+                  {chiefOfStaffSummary}
+                </p>
+                <p className="text-slate-700 mt-3 leading-relaxed">
+                  She is focused on building data-informed, climate-resilient, and commercially viable systems that help farmers make better decisions, strengthen food security, and support sustainable agricultural growth across Kenya.
+                </p>
+                <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
+                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Climate Intelligence</span>
+                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Risk Assessment</span>
+                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Agribusiness</span>
+                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Sustainable Systems</span>
+                </div>
+                <div className="mt-5">
+                  <a
+                    href={chiefOfStaffLinkedIn}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
