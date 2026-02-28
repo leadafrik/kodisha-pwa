@@ -619,50 +619,49 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
   };
 
   return (
-    <div className="rounded-3xl border border-emerald-100/80 bg-white/95 p-6 shadow-xl shadow-emerald-100/40 backdrop-blur sm:p-8">
-      <div className="mb-8 grid gap-4 md:grid-cols-[1.2fr_0.8fr]">
-        <div>
+    <div className="rounded-3xl border border-emerald-100/80 bg-white/95 p-5 shadow-lg shadow-emerald-100/30 backdrop-blur sm:p-6">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="max-w-2xl">
           <div className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-emerald-700">
             Demand Studio
           </div>
-          <h2 className="mt-4 text-3xl font-bold text-slate-900">
+          <h2 className="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">
             Post demand that attracts serious sellers
           </h2>
-          <p className="mt-2 text-base text-slate-600">
+          <p className="mt-2 text-sm text-slate-600 sm:text-base">
             Share what you need and get matched offers quickly.
           </p>
         </div>
 
         {hasMeaningfulDemandInput && (
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
-              Response strength
-            </p>
-            <div className="mt-2 flex items-end justify-between">
-              <p className="text-3xl font-bold text-slate-900">{qualityScore}</p>
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:min-w-[220px]">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                  Response strength
+                </p>
+                <p className="mt-1 text-2xl font-bold text-slate-900">{qualityScore}</p>
+              </div>
               <p className="text-sm font-semibold text-emerald-700">{scoreToLabel(qualityScore)}</p>
             </div>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
+            <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200">
               <div
                 className="h-full bg-emerald-600 transition-all"
                 style={{ width: `${qualityScore}%` }}
               />
             </div>
-            <p className="mt-3 text-xs text-slate-500">
-              Better detail usually means faster responses.
-            </p>
           </div>
         )}
       </div>
 
-      <div className="mb-6 grid gap-3 sm:grid-cols-3">
+      <div className="mb-5 grid gap-2 sm:grid-cols-3">
         {STEPS.map((item) => {
           const isActive = step === item.id;
           const isDone = step > item.id;
           return (
             <div
               key={item.id}
-              className={`rounded-xl border p-3 transition ${
+              className={`rounded-2xl border px-3 py-3 transition ${
                 isActive
                   ? "border-emerald-300 bg-emerald-50"
                   : isDone
@@ -670,13 +669,19 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                   : "border-slate-200 bg-white"
               }`}
             >
-              <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
-                Step {item.id}
-              </p>
-              <p className="mt-1 font-semibold text-slate-900">{item.label}</p>
-              {(!isCompact || isActive) && (
-                <p className="text-xs text-slate-500">{item.caption}</p>
-              )}
+              <div className="flex items-center gap-3">
+                <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${
+                  isActive || isDone ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-600"
+                }`}>
+                  {item.id}
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">{item.label}</p>
+                  {(!isCompact || isActive) && (
+                    <p className="text-xs text-slate-500">{item.caption}</p>
+                  )}
+                </div>
+              </div>
             </div>
           );
         })}
@@ -725,13 +730,13 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
               <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
                 Quick templates
               </p>
-              <div className="mt-2 flex flex-wrap gap-2">
+              <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
                 {DEMAND_TEMPLATES.map((template) => (
                   <button
                     key={template.id}
                     type="button"
                     onClick={() => handleApplyTemplate(template)}
-                    className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-emerald-300 hover:bg-emerald-50"
+                    className="whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-emerald-300 hover:bg-emerald-50"
                   >
                     {template.label}
                   </button>
@@ -739,13 +744,13 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
               </div>
             </div>
 
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid gap-2 sm:grid-cols-3">
               {(["produce", "inputs", "service"] as RequestCategory[]).map((cat) => (
                 <button
                   key={cat}
                   type="button"
                   onClick={() => setTopLevelField("category", cat)}
-                  className={`rounded-xl border px-4 py-3 text-left transition ${
+                  className={`rounded-2xl border px-4 py-3 text-left transition ${
                     formData.category === cat
                       ? CATEGORY_STYLES[cat]
                       : "border-slate-200 bg-white text-slate-700 hover:border-emerald-300"
@@ -753,7 +758,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                 >
                   <p className="font-semibold capitalize">{cat}</p>
                   {(!isCompact || formData.category === cat) && (
-                    <p className="text-xs opacity-80">
+                    <p className="mt-0.5 text-xs opacity-80">
                       {cat === "produce"
                         ? "Crops, fruits, grains"
                         : cat === "inputs"
@@ -830,7 +835,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                     key={item.value}
                     type="button"
                     onClick={() => setTopLevelField("urgency", item.value)}
-                    className={`rounded-xl border px-4 py-3 text-left transition ${
+                    className={`rounded-2xl border px-4 py-3 text-left transition ${
                       formData.urgency === item.value
                         ? "border-emerald-300 bg-emerald-50 text-emerald-800"
                         : "border-slate-200 bg-white text-slate-700 hover:border-emerald-300"
@@ -875,7 +880,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-[1fr_180px_1fr]">
               <div>
                 <label className="mb-2 block text-sm font-semibold text-slate-800">
                   Quantity
@@ -915,12 +920,12 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                 </select>
               </div>
 
-              <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-3">
+              <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-3">
                 <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">
-                  Seller signal
+                  Better quotes
                 </p>
                 <p className="mt-1 text-sm text-emerald-800">
-                  Quantity and budget improve offer quality.
+                  Quantity helps suppliers reply faster.
                 </p>
               </div>
             </div>
@@ -1036,7 +1041,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-[1.4fr_0.6fr]">
+            <div className="grid gap-4 md:grid-cols-[1.25fr_0.75fr]">
               <div>
                 <label className="mb-2 block text-sm font-semibold text-slate-800">
                   Contact phone (optional)
@@ -1060,7 +1065,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                 </p>
               </div>
 
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
                   Response speed
                 </p>
@@ -1119,7 +1124,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
         )}
 
         <div
-          className={`mt-2 flex flex-col gap-3 md:flex-row md:items-center md:justify-between ${
+          className={`mt-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between ${
             isCompact ? "sticky bottom-3 z-20 rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-xl backdrop-blur" : ""
           }`}
         >

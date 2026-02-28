@@ -10,6 +10,12 @@ const AboutUs: React.FC = () => {
   const founderWhatsapp = "254796389192";
   const founderWhatsappDisplay = "0796 389 192";
   const founderImage = "/images/stephen-omukoko-okoth.jpg";
+  const cooName = "Joseph Mugalla";
+  const cooTitle = "Chief Operating Officer";
+  const cooImage = "/images/joseph-mugalla.jpeg";
+  const cooLinkedIn = "https://www.linkedin.com/in/joseph-mugalla-a387a1267";
+  const cooSummary =
+    "Joseph Mugalla is Agrisoko's Chief Operating Officer. He brings together operations, market research, agribusiness experience, and software delivery discipline to keep the platform practical, responsive, and execution-focused as it grows across Kenya.";
   const organizationSameAs = [
     "https://wa.me/254796389192",
     "https://chat.whatsapp.com/HzCaV5YVz86CjwajiOHR5i",
@@ -93,6 +99,29 @@ const AboutUs: React.FC = () => {
               name: founderName,
               jobTitle: "Founder, Agrisoko",
               image: `https://www.agrisoko254.com${founderImage}`,
+              worksFor: {
+                "@type": "Organization",
+                name: "Agrisoko Limited",
+              },
+              address: {
+                "@type": "PostalAddress",
+                addressCountry: "KE",
+              },
+            },
+            null,
+            2
+          )}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(
+            {
+              "@context": "https://schema.org",
+              "@type": "Person",
+              name: cooName,
+              jobTitle: cooTitle,
+              image: `https://www.agrisoko254.com${cooImage}`,
+              description: cooSummary,
+              sameAs: [cooLinkedIn],
               worksFor: {
                 "@type": "Organization",
                 name: "Agrisoko Limited",
@@ -266,6 +295,54 @@ const AboutUs: React.FC = () => {
                     className="inline-flex items-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition"
                   >
                     WhatsApp {founderWhatsappDisplay}
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="max-w-6xl mx-auto px-4 py-12">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
+            <div className="grid gap-8 md:grid-cols-[0.8fr_1.2fr] items-start">
+              <div>
+                <img
+                  src={cooImage}
+                  alt={`${cooName} - ${cooTitle} at Agrisoko`}
+                  className="w-full rounded-2xl object-cover shadow-sm"
+                  loading="lazy"
+                />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">
+                  Leadership
+                </p>
+                <h2 className="about-title text-3xl text-slate-900 mt-3">
+                  {cooName}
+                </h2>
+                <p className="mt-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  {cooTitle}
+                </p>
+                <p className="text-slate-700 mt-4 leading-relaxed">
+                  {cooSummary}
+                </p>
+                <p className="text-slate-700 mt-3 leading-relaxed">
+                  His background across social science, technology, and agribusiness helps Agrisoko stay grounded in real market behavior while building reliable systems for sellers, buyers, and service providers.
+                </p>
+                <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
+                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Operations</span>
+                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Market Research</span>
+                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Agribusiness</span>
+                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Software Delivery</span>
+                </div>
+                <div className="mt-5">
+                  <a
+                    href={cooLinkedIn}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                  >
+                    View LinkedIn Profile
                   </a>
                 </div>
               </div>
