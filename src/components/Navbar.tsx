@@ -72,13 +72,13 @@ const pathMatches = (pathname: string, key: string) => {
 const getNavLinkClass = (active: boolean, accent = false) => {
   if (accent) {
     return active
-      ? "inline-flex min-h-[44px] items-center rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white shadow-sm"
-      : "inline-flex min-h-[44px] items-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700";
+      ? "inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white shadow-sm"
+      : "inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700";
   }
 
   return active
-    ? "inline-flex min-h-[44px] items-center rounded-xl bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900"
-    : "inline-flex min-h-[44px] items-center rounded-xl px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900";
+    ? "inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-xl bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900"
+    : "inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-xl px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900";
 };
 
 const Navbar: React.FC = () => {
@@ -96,7 +96,7 @@ const Navbar: React.FC = () => {
     const items: NavItem[] = [
       { label: "Listings", to: "/browse" },
       { label: "Buy Requests", to: "/request" },
-      { label: "Sell", to: sellTarget, accent: true },
+      { label: "Sell", to: sellTarget },
     ];
 
     if (user) {
