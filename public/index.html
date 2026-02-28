@@ -52,11 +52,15 @@
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
+      "@id": "https://www.agrisoko254.com/#website",
       "name": "Agrisoko",
       "alternateName": "Agrisoko254",
       "url": "https://www.agrisoko254.com",
-      "description": "Kenya's agricultural marketplace for land, equipment, services, and supplies",
+      "description": "Kenya's agricultural marketplace for produce, livestock, inputs, and services across all 47 counties",
       "inLanguage": "en-KE",
+      "publisher": {
+        "@id": "https://www.agrisoko254.com/#organization"
+      },
       "potentialAction": {
         "@type": "SearchAction",
         "target": "https://www.agrisoko254.com/browse?search={search_term_string}",
@@ -69,10 +73,22 @@
     {
       "@context": "https://schema.org",
       "@type": "Organization",
+      "@id": "https://www.agrisoko254.com/#organization",
       "name": "Agrisoko Limited",
+      "alternateName": "Agrisoko",
       "url": "https://www.agrisoko254.com",
       "logo": "https://www.agrisoko254.com/logo512.png",
-      "sameAs": [],
+      "email": "info@leadafrik.com",
+      "telephone": "+254796389192",
+      "slogan": "Trusted agricultural marketplace across Kenya",
+      "sameAs": [
+        "https://wa.me/254796389192",
+        "https://chat.whatsapp.com/HzCaV5YVz86CjwajiOHR5i"
+      ],
+      "founder": {
+        "@type": "Person",
+        "name": "Stephen Omukoko Okoth"
+      },
       "contactPoint": {
         "@type": "ContactPoint",
         "email": "info@leadafrik.com",
@@ -93,13 +109,18 @@
       "@context": "https://schema.org",
       "@type": "WebPage",
       "name": "Agrisoko Kenya - Online Agricultural Marketplace",
+      "headline": "Agrisoko Kenya - Online Agricultural Marketplace",
       "url": "https://www.agrisoko254.com/",
       "description": "Buy and sell farm produce, livestock, farm inputs, and agricultural services across Kenya.",
       "inLanguage": "en-KE",
       "isPartOf": {
-        "@type": "WebSite",
-        "name": "Agrisoko",
-        "url": "https://www.agrisoko254.com/"
+        "@id": "https://www.agrisoko254.com/#website"
+      },
+      "about": {
+        "@id": "https://www.agrisoko254.com/#organization"
+      },
+      "publisher": {
+        "@id": "https://www.agrisoko254.com/#organization"
       }
     }
     </script>
@@ -125,33 +146,74 @@
 
         var origin = "https://www.agrisoko254.com";
         var rawPath = window.location.pathname || "/";
+        var aliasMap = {
+          "/listings": "/browse",
+          "/marketplace": "/browse",
+          "/find-services": "/browse",
+          "/terms": "/legal/terms",
+          "/privacy": "/legal/privacy",
+          "/contact": "/about",
+          "/help": "/about",
+          "/cookies": "/legal/privacy",
+          "/features": "/",
+          "/pricing": "/",
+          "/blog": "/",
+          "/careers": "/",
+          "/status": "/",
+          "/feedback": "/"
+        };
         var normalizedPath = rawPath.indexOf("/listing/") === 0
           ? rawPath.replace("/listing/", "/listings/")
-          : rawPath;
+          : (aliasMap[rawPath] || rawPath);
         var canonicalUrl = origin + (normalizedPath.charAt(0) === "/" ? normalizedPath : "/" + normalizedPath);
 
         var routeMeta = {
           "/": {
             title: "Agrisoko Kenya - Online Agricultural Marketplace",
-            description: "Buy and sell farm produce, livestock, farm inputs, and agricultural services across all 47 counties in Kenya."
+            description: "Buy and sell farm produce, livestock, farm inputs, and agricultural services across all 47 counties in Kenya.",
+            robots: "index, follow"
           },
           "/browse": {
             title: "Browse Listings | Agrisoko Kenya Agricultural Marketplace",
-            description: "Browse verified agricultural produce, services, land, and farm inputs across Kenya on Agrisoko."
+            description: "Browse verified agricultural produce, services, land, and farm inputs across Kenya on Agrisoko.",
+            robots: "index, follow"
           },
           "/about": {
             title: "About Agrisoko | Kenya Agricultural Marketplace",
-            description: "Learn how Agrisoko connects farmers, buyers, and agricultural service providers across Kenya."
+            description: "Learn how Agrisoko connects farmers, buyers, and agricultural service providers across Kenya.",
+            robots: "index, follow"
           },
           "/request": {
             title: "Buy Requests | Agrisoko Kenya",
-            description: "See active buy requests from verified buyers and connect directly on Agrisoko."
+            description: "See active buy requests from verified buyers and connect directly on Agrisoko.",
+            robots: "index, follow"
+          },
+          "/legal/terms": {
+            title: "Terms of Service | Agrisoko",
+            description: "Read the Agrisoko terms of service for Kenya's trusted agricultural marketplace.",
+            robots: "index, follow"
+          },
+          "/legal/privacy": {
+            title: "Privacy Policy | Agrisoko",
+            description: "Read the Agrisoko privacy policy and data protection commitments for Kenyan users.",
+            robots: "index, follow"
+          },
+          "/login": {
+            title: "Create Free Account | Agrisoko",
+            description: "Create your Agrisoko account and start browsing or listing in Kenya's agricultural marketplace.",
+            robots: "noindex, nofollow"
+          },
+          "/admin-login": {
+            title: "Admin Sign In | Agrisoko",
+            description: "Administrative access for Agrisoko.",
+            robots: "noindex, nofollow"
           }
         };
 
         var defaults = {
           title: "Agrisoko Kenya - Online Agricultural Marketplace",
-          description: "Agrisoko is Kenya's online agricultural marketplace. Buy and sell farm produce, livestock, farm inputs, and agricultural services across all 47 counties."
+          description: "Agrisoko is Kenya's online agricultural marketplace. Buy and sell farm produce, livestock, farm inputs, and agricultural services across all 47 counties.",
+          robots: "index, follow"
         };
 
         var meta = routeMeta[normalizedPath] || defaults;
@@ -166,6 +228,7 @@
         updateMetaByProperty("og:url", canonicalUrl);
         updateMetaByProperty("twitter:url", canonicalUrl);
         updateCanonical(canonicalUrl);
+        updateMetaByName("robots", meta.robots || defaults.robots);
 
         function updateMetaByName(name, content) {
           var element = document.querySelector('meta[name="' + name + '"]');

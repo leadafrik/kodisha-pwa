@@ -144,11 +144,11 @@ const Home: React.FC = () => {
     heroHeadline || "Get direct buyers in your county - without brokers.";
   const displayDescription =
     heroDescription || "Create your free account in 10 seconds. List later.";
-  const signupCtaLabel = isPhone ? "Create Account" : "Create Free Account";
+  const signupCtaLabel = isPhone ? "Sign Up" : "Sign Up Free";
   const primaryCtaTo = user ? "/profile" : "/login?mode=signup&next=/profile";
-  const primaryCtaLabel = user ? "Open My Dashboard" : signupCtaLabel;
+  const primaryCtaLabel = user ? "Open Dashboard" : signupCtaLabel;
   const buyRequestsTo = user ? "/request" : "/login?mode=signup&next=/request";
-  const browseTo = user ? "/browse" : "/login?mode=signup&next=/browse";
+  const browseTo = "/browse";
   const demandCtaTo = user ? buyRequestsTo : primaryCtaTo;
   const demandCtaLabel = user ? "View Buy Requests" : signupCtaLabel;
   const urgencyBody = isGlobalFreeListing
@@ -233,6 +233,12 @@ const Home: React.FC = () => {
                     className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-300/40 transition hover:bg-emerald-700 sm:w-auto"
                   >
                     {primaryCtaLabel}
+                  </Link>
+                  <Link
+                    to={browseTo}
+                    className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 sm:w-auto"
+                  >
+                    View Listings
                   </Link>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-semibold text-slate-700 sm:text-xs">
@@ -440,7 +446,7 @@ const Home: React.FC = () => {
                 to={browseTo}
                 className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl border border-white/80 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10 sm:w-auto"
               >
-                Browse Marketplace
+                View Listings
               </Link>
             </div>
           </div>

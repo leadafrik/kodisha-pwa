@@ -297,126 +297,121 @@ const BrowseListings: React.FC = () => {
             </div>
           )}
 
-          <div className="grid gap-4 lg:grid-cols-[1.3fr_0.7fr] items-stretch">
-            <div className="rounded-2xl border border-emerald-100 bg-white/90 p-5 md:p-6 shadow-md fade-up">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
-                Marketplace
-              </p>
-              <h1 className="mt-2 text-3xl md:text-4xl font-serif font-semibold text-slate-900 tracking-tight">
-                Browse and buy with confidence
-              </h1>
-              <p className="mt-3 text-slate-600 text-sm md:text-base leading-relaxed max-w-2xl">
-                Discover fresh produce, livestock, farm inputs, and professional agricultural services.
-                Connect with verified sellers across Kenya and compare listings in seconds.
-              </p>
-              <div className="mt-4 flex flex-wrap gap-3">
-                <Link
-                  to="/about"
-                  className="inline-flex items-center rounded-lg border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 transition"
-                >
-                  Learn about Agrisoko
-                </Link>
-                <Link
-                  to={user ? "/create-listing" : "/login?next=/create-listing"}
-                  className="inline-flex items-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 transition"
-                >
-                  Post a listing
-                </Link>
+          <div className="rounded-2xl border border-emerald-100 bg-white/90 p-4 md:p-5 shadow-md fade-up">
+            <div className="grid gap-4 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+                  Marketplace
+                </p>
+                <h1 className="mt-2 text-2xl md:text-3xl font-serif font-semibold text-slate-900 tracking-tight">
+                  Browse and buy with confidence
+                </h1>
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
+                  Discover produce, livestock, farm inputs, and agricultural services from verified sellers across Kenya.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <Link
+                    to="/about"
+                    className="inline-flex items-center rounded-lg border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 transition"
+                  >
+                    Learn about Agrisoko
+                  </Link>
+                  <Link
+                    to={user ? "/create-listing" : "/login?next=/create-listing"}
+                    className="inline-flex items-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 transition"
+                  >
+                    Post a listing
+                  </Link>
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold text-slate-500">
+                  <span className="text-emerald-700">Verified sellers</span>
+                  <span className="text-amber-700">Boosted listings first</span>
+                  <span>Direct contact</span>
+                </div>
               </div>
-              <div className="mt-5 flex flex-wrap gap-2 text-[11px] text-slate-500">
-                <span className="rounded-full bg-emerald-50 px-3 py-1 font-semibold text-emerald-700">
-                  Verified sellers
-                </span>
-                <span className="rounded-full bg-amber-50 px-3 py-1 font-semibold text-amber-700">
-                  Boosted listings first
-                </span>
-                <span className="rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-600">
-                  Direct contact
-                </span>
-              </div>
-            </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white/90 p-5 md:p-6 shadow-md fade-up">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                Market pulse
-              </p>
-              <div className="mt-4 grid grid-cols-3 gap-3">
-                <div className="rounded-xl bg-slate-50 px-3 py-3">
-                  <p className="text-xl font-semibold text-slate-900">
+              <div className="grid grid-cols-3 gap-2 lg:justify-self-end lg:min-w-[260px]">
+                <div className="rounded-xl bg-slate-50 px-3 py-2.5">
+                  <p className="text-lg font-semibold text-slate-900">
                     {loading ? "--" : stats.total.toLocaleString()}
                   </p>
                   <p className="text-[11px] text-slate-500">Listings</p>
                 </div>
-                <div className="rounded-xl bg-slate-50 px-3 py-3">
-                  <p className="text-xl font-semibold text-slate-900">
+                <div className="rounded-xl bg-slate-50 px-3 py-2.5">
+                  <p className="text-lg font-semibold text-slate-900">
                     {loading ? "--" : stats.verifiedCount.toLocaleString()}
                   </p>
                   <p className="text-[11px] text-slate-500">Verified</p>
                 </div>
-                <div className="rounded-xl bg-slate-50 px-3 py-3">
-                  <p className="text-xl font-semibold text-slate-900">
+                <div className="rounded-xl bg-slate-50 px-3 py-2.5">
+                  <p className="text-lg font-semibold text-slate-900">
                     {loading ? "--" : stats.boostedCount.toLocaleString()}
                   </p>
                   <p className="text-[11px] text-slate-500">Boosted</p>
                 </div>
               </div>
-              <div className="mt-4 rounded-xl bg-slate-50 px-3 py-3 text-xs text-slate-600">
-                Browse the latest inventory and contact sellers instantly. New listings are added daily.
-              </div>
             </div>
           </div>
 
-          <div className="fade-up sticky top-24 z-20 overflow-hidden rounded-3xl border-2 border-amber-300 bg-gradient-to-r from-amber-50 via-lime-50 to-emerald-50 p-4 md:p-5 shadow-[0_16px_36px_-24px_rgba(16,185,129,0.75)]">
-            <div className="pointer-events-none absolute -right-10 -top-12 h-36 w-36 rounded-full bg-amber-200/40 blur-3xl" />
-            <div className="pointer-events-none absolute -left-10 -bottom-10 h-36 w-36 rounded-full bg-emerald-200/40 blur-3xl" />
+          <div className="fade-up sticky top-24 z-20 overflow-hidden rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-50 via-lime-50 to-emerald-50 p-3 md:p-4 shadow-[0_14px_28px_-24px_rgba(16,185,129,0.75)]">
             <button
               type="button"
               onClick={() => setShowRaffle((prev) => !prev)}
-              className="relative flex w-full flex-col gap-4 text-left md:flex-row md:items-center md:justify-between"
+              className="relative flex w-full flex-col gap-3 text-left lg:flex-row lg:items-center lg:justify-between"
             >
-              <div>
-                <p className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-emerald-700">
+              <div className="min-w-0">
+                <p className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-emerald-700">
                   <Sparkles className="h-3.5 w-3.5" />
                   Campaign live
                 </p>
-                <p className="mt-2 text-lg font-extrabold text-slate-900 md:text-xl">
-                  {showRaffle ? "Hide raffle details" : "Open raffle details"}
-                </p>
-                <p className="mt-1 text-sm font-medium text-slate-700">
-                  Keep browsing listings without interruption. Open when ready.
-                </p>
-                {!showRaffle && (
-                  <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-700">
-                    <span className="rounded-full bg-white/90 px-2.5 py-1">KSh 20,000 top prize</span>
-                    <span className="rounded-full bg-white/90 px-2.5 py-1">3,000 listing target</span>
-                    <span className="rounded-full bg-white/90 px-2.5 py-1">Invite code rewards</span>
-                  </div>
-                )}
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <p className="text-base font-extrabold text-slate-900">
+                    {showRaffle ? "Hide raffle details" : "Open raffle details"}
+                  </p>
+                  <p className="text-sm text-slate-700">
+                    Keep browsing without interruption.
+                  </p>
+                </div>
               </div>
-              <span className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-bold uppercase tracking-[0.08em] text-white shadow-sm">
-                {showRaffle ? (
+              <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+                {!showRaffle && (
                   <>
-                    <ChevronUp className="mr-1 h-4 w-4" />
-                    Collapse
-                  </>
-                ) : (
-                  <>
-                    <ChevronDown className="mr-1 h-4 w-4" />
-                    Expand
+                    <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-700">
+                      KSh 20,000 top prize
+                    </span>
+                    <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-700">
+                      3,000 listing target
+                    </span>
+                    <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-700">
+                      Invite code rewards
+                    </span>
                   </>
                 )}
-              </span>
+                <span className="inline-flex min-h-[40px] items-center justify-center rounded-xl border border-slate-900 bg-slate-900 px-4 py-2 text-xs font-bold uppercase tracking-[0.08em] text-white shadow-sm">
+                  {showRaffle ? (
+                    <>
+                      <ChevronUp className="mr-1 h-4 w-4" />
+                      Collapse
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="mr-1 h-4 w-4" />
+                      Expand
+                    </>
+                  )}
+                </span>
+              </div>
             </button>
 
             {showRaffle && (
-              <div className="mt-4">
+              <div className="mt-3">
                 <RaffleCampaign />
               </div>
             )}
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 md:p-6 shadow-sm fade-up">
-            <div className="grid gap-4 md:grid-cols-[1.3fr_0.7fr] items-end">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 md:p-5 shadow-sm fade-up">
+            <div className="grid gap-3 md:grid-cols-[1.3fr_0.7fr] items-end">
               <div className="space-y-2">
                 <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
                   Search listings

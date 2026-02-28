@@ -10,6 +10,10 @@ const AboutUs: React.FC = () => {
   const founderWhatsapp = "254796389192";
   const founderWhatsappDisplay = "0796 389 192";
   const founderImage = "/images/stephen-omukoko-okoth.jpg";
+  const organizationSameAs = [
+    "https://wa.me/254796389192",
+    "https://chat.whatsapp.com/HzCaV5YVz86CjwajiOHR5i",
+  ];
 
   const countiesCount = kenyaCounties.length;
   const isFullyVerified =
@@ -50,9 +54,14 @@ const AboutUs: React.FC = () => {
             {
               "@context": "https://schema.org",
               "@type": "Organization",
+              "@id": "https://www.agrisoko254.com/#organization",
               name: "Agrisoko Limited",
+              alternateName: "Agrisoko",
               url: "https://www.agrisoko254.com",
               logo: "https://www.agrisoko254.com/logo512.png",
+              email: "info@leadafrik.com",
+              telephone: "+254796389192",
+              slogan: "Trusted agricultural marketplace across Kenya",
               contactPoint: {
                 "@type": "ContactPoint",
                 contactType: "Customer Service",
@@ -66,7 +75,11 @@ const AboutUs: React.FC = () => {
                 addressCountry: "KE",
                 addressLocality: "Kenya",
               },
-              sameAs: [],
+              sameAs: organizationSameAs,
+              founder: {
+                "@type": "Person",
+                name: founderName,
+              },
             },
             null,
             2
@@ -98,6 +111,7 @@ const AboutUs: React.FC = () => {
             {
               "@context": "https://schema.org",
               "@type": "FAQPage",
+              mainEntityOfPage: "https://www.agrisoko254.com/about",
               mainEntity: [
                 {
                   "@type": "Question",

@@ -57,19 +57,19 @@ const Footer: React.FC = () => {
           {/* Legal Links */}
           <div className="flex flex-wrap justify-center gap-5 text-sm">
             <Link
-              to="/terms"
+              to="/legal/terms"
               className="text-gray-600 hover:text-green-700 hover:underline transition"
             >
               Terms of Service
             </Link>
             <Link
-              to="/privacy"
+              to="/legal/privacy"
               className="text-gray-600 hover:text-green-700 hover:underline transition"
             >
               Privacy Policy
             </Link>
             <a
-              href="mailto:info@leadAfrik.com"
+              href="mailto:info@leadafrik.com"
               className="text-gray-600 hover:text-green-700 hover:underline transition"
             >
               Contact Support
@@ -103,12 +103,12 @@ const Footer: React.FC = () => {
         {/* Mobile-Optimized Secondary Info */}
         <div className="mt-5 pt-4 border-t border-gray-200 text-xs text-gray-500 text-center">
           <p>
-            Using Agrisoko means you agree to our <Link to="/terms" className="text-green-700 hover:underline">Terms</Link> and <Link to="/privacy" className="text-green-700 hover:underline">Privacy Policy</Link>.
+            Using Agrisoko means you agree to our <Link to="/legal/terms" className="text-green-700 hover:underline">Terms</Link> and <Link to="/legal/privacy" className="text-green-700 hover:underline">Privacy Policy</Link>.
           </p>
           <p className="mt-2">
             Data protection inquiries:{' '}
-            <a href="mailto:info@leadAfrik.com" className="text-green-700 hover:underline">
-              info@leadAfrik.com
+            <a href="mailto:info@leadafrik.com" className="text-green-700 hover:underline">
+              info@leadafrik.com
             </a>
           </p>
         </div>

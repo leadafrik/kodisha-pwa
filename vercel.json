@@ -1,0 +1,142 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "agrisoko254.com"
+        }
+      ],
+      "destination": "https://www.agrisoko254.com/$1",
+      "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "mamamboga254.com"
+        }
+      ],
+      "destination": "https://www.agrisoko254.com/$1",
+      "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.mamamboga254.com"
+        }
+      ],
+      "destination": "https://www.agrisoko254.com/$1",
+      "permanent": true
+    },
+    {
+      "source": "/listings",
+      "destination": "/browse",
+      "permanent": true
+    },
+    {
+      "source": "/marketplace",
+      "destination": "/browse",
+      "permanent": true
+    },
+    {
+      "source": "/find-services",
+      "destination": "/browse",
+      "permanent": true
+    },
+    {
+      "source": "/terms",
+      "destination": "/legal/terms",
+      "permanent": true
+    },
+    {
+      "source": "/privacy",
+      "destination": "/legal/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/cookies",
+      "destination": "/legal/privacy",
+      "permanent": true
+    },
+    {
+      "source": "/contact",
+      "destination": "/about",
+      "permanent": true
+    },
+    {
+      "source": "/help",
+      "destination": "/about",
+      "permanent": true
+    },
+    {
+      "source": "/features",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/pricing",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/blog",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/careers",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/status",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/feedback",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/listing/(.*)",
+      "destination": "/listings/$1",
+      "permanent": true
+    }
+  ],
+  "headers": [
+    {
+      "source": "/login",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/admin-login",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/admin/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    }
+  ]
+}
