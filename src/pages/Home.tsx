@@ -145,12 +145,11 @@ const Home: React.FC = () => {
   const displayDescription =
     heroDescription || "Create your free account in 10 seconds. List later.";
   const signupCtaLabel = isPhone ? "Sign Up" : "Sign Up Free";
-  const primaryCtaTo = user ? "/profile" : "/login?mode=signup&next=/profile";
+  const primaryCtaTo = user ? "/profile" : "/login?mode=signup&next=/browse";
   const primaryCtaLabel = user ? "Open Dashboard" : signupCtaLabel;
-  const buyRequestsTo = user ? "/request" : "/login?mode=signup&next=/request";
   const browseTo = "/browse";
-  const demandCtaTo = user ? buyRequestsTo : primaryCtaTo;
-  const demandCtaLabel = user ? "View Buy Requests" : signupCtaLabel;
+  const demandCtaTo = "/request";
+  const demandCtaLabel = "View Buy Requests";
   const urgencyBody = isGlobalFreeListing
     ? "No listing fee right now."
     : user
@@ -393,13 +392,6 @@ const Home: React.FC = () => {
                   </div>
                 ))}
               </div>
-              <Link
-                to={primaryCtaTo}
-                className="mt-6 inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 sm:w-auto"
-              >
-                {primaryCtaLabel}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
             </article>
           </div>
         </section>
@@ -453,19 +445,21 @@ const Home: React.FC = () => {
         </section>
       </div>
 
-      <div className="fixed bottom-3 left-1/2 z-30 w-[calc(100%-1rem)] max-w-3xl -translate-x-1/2 rounded-2xl border border-emerald-300 bg-white/95 px-3 py-3 shadow-xl backdrop-blur sm:px-4">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs font-semibold text-slate-900 sm:text-sm">
-            {stickyWindowText}
-          </p>
-          <Link
-            to={primaryCtaTo}
-            className="inline-flex min-h-[42px] w-full items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 sm:w-auto"
-          >
-            {primaryCtaLabel}
-          </Link>
+      {isPhone && (
+        <div className="fixed bottom-3 left-1/2 z-30 w-[calc(100%-1rem)] max-w-3xl -translate-x-1/2 rounded-2xl border border-emerald-300 bg-white/95 px-3 py-3 shadow-xl backdrop-blur sm:px-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs font-semibold text-slate-900 sm:text-sm">
+              {stickyWindowText}
+            </p>
+            <Link
+              to={primaryCtaTo}
+              className="inline-flex min-h-[42px] w-full items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 sm:w-auto"
+            >
+              {primaryCtaLabel}
+            </Link>
+          </div>
         </div>
-      </div>
+      )}
     </main>
   );
 };

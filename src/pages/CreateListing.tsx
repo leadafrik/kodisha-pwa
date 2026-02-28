@@ -111,6 +111,13 @@ const CreateListing: React.FC = () => {
   }, [user?.phone]);
 
   useEffect(() => {
+    if (user?.county && !form.county) {
+      setForm((prev) => ({ ...prev, county: user.county || "" }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.county]);
+
+  useEffect(() => {
     if (user?._id) {
       refreshUser();
     }
@@ -166,7 +173,6 @@ const CreateListing: React.FC = () => {
     if (!shouldSave) return;
     const draft = { ...form, images: [] };
     localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
-    setHasDraft(true);
   }, [form]);
 
   // Update verification status
@@ -466,13 +472,6 @@ const CreateListing: React.FC = () => {
     setNotice("Draft discarded.");
   };
 
-  const handleSaveDraft = () => {
-    const draft = { ...form, images: [] };
-    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
-    setHasDraft(true);
-    setNotice("Draft saved.");
-  };
-
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <style>{`
@@ -577,7 +576,7 @@ const CreateListing: React.FC = () => {
             <div className="mb-6 rounded-2xl border border-blue-200 bg-blue-50 p-4">
               <p className="text-blue-900 font-semibold">Verification submitted</p>
               <p className="text-blue-700 text-sm mt-1">
-                Your ID review is pending approval. You can keep drafting your listing and publish once verification is approved.
+                Your ID review is in progress. You can keep posting while the trust badge is being reviewed.
               </p>
             </div>
           )}
@@ -983,72 +982,47 @@ const CreateListing: React.FC = () => {
                 <FileText className="w-5 h-5" /> Review & Confirm
               </h2>
 
-              {/* Verification Status */}
-              <div className="mb-6 space-y-3">
-                <div className={`p-4 rounded-xl border ${
-                  idVerified
-                    ? "bg-emerald-50 border-emerald-200"
-                    : isVerificationPending
-                    ? "bg-amber-50 border-amber-200"
-                    : "bg-red-50 border-red-200"
-                }`}>
-                  <p className={`flex items-center gap-2 font-semibold ${
-                    idVerified
-                      ? "text-emerald-700"
-                      : isVerificationPending
-                      ? "text-amber-700"
-                      : "text-red-700"
-                  }`}>
-                    {idVerified ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-                    National ID verification
+              {idVerified && selfieVerified ? (
+                <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                  <p className="flex items-center gap-2 font-semibold text-emerald-700">
+                    <CheckCircle2 className="w-5 h-5" />
+                    Profile verified
                   </p>
-                  <p className={`text-sm mt-1 ${
-                    idVerified
-                      ? "text-emerald-600"
-                      : isVerificationPending
-                      ? "text-amber-600"
-                      : "text-red-600"
-                  }`}>
-                    {idVerified
-                      ? "Verified"
-                      : isVerificationPending
-                      ? "Submitted - pending approval"
-                      : "Required - please upload ID"}
+                  <p className="mt-1 text-sm text-emerald-700">
+                    Your trust badge is active. This listing can go live immediately after you publish.
                   </p>
                 </div>
+              ) : (
+                <div className="mb-6 space-y-3">
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                    <p className="flex items-center gap-2 font-semibold text-amber-700">
+                      {idVerified ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+                      National ID verification
+                    </p>
+                    <p className="text-sm mt-1 text-amber-700">
+                      {idVerified
+                        ? "Verified"
+                        : isVerificationPending
+                        ? "Submitted - pending approval"
+                        : "Not verified yet - add ID to build trust faster"}
+                    </p>
+                  </div>
 
-                <div className={`p-4 rounded-xl border ${
-                  selfieVerified
-                    ? "bg-emerald-50 border-emerald-200"
-                    : isVerificationPending
-                    ? "bg-amber-50 border-amber-200"
-                    : "bg-red-50 border-red-200"
-                }`}>
-                  <p className={`flex items-center gap-2 font-semibold ${
-                    selfieVerified
-                      ? "text-emerald-700"
-                      : isVerificationPending
-                      ? "text-amber-700"
-                      : "text-red-700"
-                  }`}>
-                    {selfieVerified ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-                    Selfie verification
-                  </p>
-                  <p className={`text-sm mt-1 ${
-                    selfieVerified
-                      ? "text-emerald-600"
-                      : isVerificationPending
-                      ? "text-amber-600"
-                      : "text-red-600"
-                  }`}>
-                    {selfieVerified
-                      ? "Verified"
-                      : isVerificationPending
-                      ? "Submitted - pending approval"
-                      : "Required - please upload selfie"}
-                  </p>
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                    <p className="flex items-center gap-2 font-semibold text-amber-700">
+                      {selfieVerified ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+                      Selfie verification
+                    </p>
+                    <p className="text-sm mt-1 text-amber-700">
+                      {selfieVerified
+                        ? "Verified"
+                        : isVerificationPending
+                        ? "Submitted - pending approval"
+                        : "Not verified yet - add a selfie to increase buyer trust"}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {showVerificationNudge && (
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
@@ -1161,15 +1135,6 @@ const CreateListing: React.FC = () => {
                 className="flex-1 border border-slate-300 text-slate-700 font-semibold py-3 rounded-xl hover:bg-slate-50"
               >
                 Previous
-              </button>
-            )}
-            {form.step < 5 && (
-              <button
-                type="button"
-                onClick={handleSaveDraft}
-                className="flex-1 border border-slate-300 text-slate-700 font-semibold py-3 rounded-xl hover:bg-slate-50"
-              >
-                Save draft
               </button>
             )}
             {form.step < 5 && form.step !== 2 && (

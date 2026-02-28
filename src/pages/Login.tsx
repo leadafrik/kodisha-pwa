@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { kenyaCounties } from "../data/kenyaCounties";
 import GoogleLoginButton from "../components/GoogleLoginButtonV2";
 import FacebookLoginButton from "../components/FacebookLoginButtonV2";
 import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
@@ -10,16 +9,6 @@ import { trackGoogleEvent, trackGooglePageView } from "../utils/cookieConsent";
 
 type Mode = "login" | "signup" | "otp-verify" | "forgot" | "otp-reset";
 type PasswordFieldKey = "login" | "signup" | "signupConfirm" | "resetNew" | "resetConfirm";
-
-const formatCountyName = (name: string) =>
-  name
-    .split(/([-\s])/)
-    .map((part) => {
-      if (part === "-" || part === " ") return part;
-      const lower = part.toLowerCase();
-      return lower.charAt(0).toUpperCase() + lower.slice(1);
-    })
-    .join("");
 
 const defaultPasswordVisibility: Record<PasswordFieldKey, boolean> = {
   login: false,
@@ -42,7 +31,6 @@ const Login: React.FC = () => {
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get("next") || "/profile";
   const requestedMode = searchParams.get("mode");
   const inviteCodeFromQuery = (
     searchParams.get("invite") ||
@@ -52,7 +40,6 @@ const Login: React.FC = () => {
   )
     .toUpperCase()
     .replace(/[^A-Z0-9]/g, "");
-  const countyFromQuery = searchParams.get("county")?.trim() || "";
   const defaultUserType: "buyer" | "seller" = searchParams.get("role") === "seller" ? "seller" : "buyer";
 
   // UI State
@@ -78,7 +65,6 @@ const Login: React.FC = () => {
     name: "",
     emailOrPhone: "",
     password: "",
-    county: countyFromQuery,
     inviteCode: inviteCodeFromQuery,
   });
 
@@ -95,6 +81,9 @@ const Login: React.FC = () => {
     newPassword: "",
     confirmPassword: "",
   });
+  const redirectTo =
+    searchParams.get("next") ||
+    (mode === "signup" || mode === "otp-verify" ? "/browse" : "/profile");
 
   // OTP Timer
   useEffect(() => {
@@ -175,11 +164,6 @@ const Login: React.FC = () => {
       return;
     }
 
-    if (!signupData.county) {
-      setError("Please select your county.");
-      return;
-    }
-
     const input = signupData.emailOrPhone.trim();
     if (!input.includes("@")) {
       setError("Please enter a valid email address.");
@@ -194,7 +178,6 @@ const Login: React.FC = () => {
         phone: undefined,
         password: signupData.password,
         type: defaultUserType,
-        county: signupData.county,
         inviteCode: signupData.inviteCode.trim() || undefined,
         legalConsents: {
           termsAccepted: true,
@@ -511,23 +494,11 @@ const Login: React.FC = () => {
             </button>
           </div>
         </div>
-
-        <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700">County *</label>
-          <select
-            value={signupData.county}
-            onChange={(e) => setSignupData({ ...signupData, county: e.target.value })}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select county</option>
-            {kenyaCounties.map((county, idx) => (
-              <option key={idx} value={county.name}>
-                {formatCountyName(county.name)}
-              </option>
-            ))}
-          </select>
-        </div>
       </div>
+
+      <p className="text-xs text-gray-500">
+        You can add your county after signup.
+      </p>
 
       <button
         type="submit"

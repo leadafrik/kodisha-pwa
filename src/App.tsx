@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { PropertyProvider } from './contexts/PropertyContext';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { VerificationProvider } from './contexts/VerificationContext';
 import { NotificationsProvider } from './contexts/NotificationsContext';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -56,6 +56,16 @@ const LoadingFallback = () => (
   </div>
 );
 
+const MOBILE_NAV_PADDING_ROUTES = new Set([
+  '/',
+  '/browse',
+  '/request',
+  '/about',
+  '/profile',
+  '/messages',
+  '/favorites',
+]);
+
 function App() {
   return (
     <ErrorBoundary>
@@ -64,122 +74,10 @@ function App() {
           <PropertyProvider>
             <VerificationProvider>
               <Router>
-                <div className="min-h-screen bg-gray-50 flex flex-col">
-                  <Navbar />
-                <div className="flex-1 py-4">
-                  <Suspense fallback={<LoadingFallback />}>
-                    <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route
-                      path="/create-listing"
-                      element={
-                        <ProtectedRoute>
-                          <CreateListing />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route path="/browse" element={<BrowseListings />} />
-                    <Route path="/listings" element={<Navigate to="/browse" replace />} />
-                    <Route path="/marketplace" element={<Navigate to="/browse" replace />} />
-                    <Route path="/find-services" element={<BrowseListings />} />
-                    <Route path="/request" element={<BrowseBuyerRequestsPage />} />
-                    <Route 
-                      path="/request/new" 
-                      element={
-                        <ProtectedRoute>
-                          <PostBuyRequest />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
-                      path="/request/:id" 
-                      element={
-                        <ProtectedRoute>
-                          <BuyerRequestDetails />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route path="/about" element={<AboutUs />} />
-                    <Route path="/contact" element={<AboutUs />} />
-                    <Route path="/help" element={<AboutUs />} />
-                    <Route path="/features" element={<Home />} />
-                    <Route path="/pricing" element={<Home />} />
-                    <Route path="/blog" element={<Home />} />
-                    <Route path="/careers" element={<Home />} />
-                    <Route path="/cookies" element={<PrivacyPolicy />} />
-                    <Route path="/status" element={<Home />} />
-                    <Route path="/feedback" element={<Home />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/admin-login" element={<AdminLogin />} />
-                    <Route path="/admin/login" element={<AdminLogin />} />
-                    <Route
-                      path="/profile"
-                      element={
-                        <ProtectedRoute>
-                          <Profile />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route path="/backend-test" element={<BackendTest />} />
-                    <Route 
-                      path="/payment-test" 
-                      element={
-                        <ProtectedRoute>
-                          <PaymentTestPanel />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route path="/verify-phone" element={<PhoneVerification />} />
-                    <Route path="/verify" element={<VerificationWizard />} />
-                    <Route 
-                      path="/verify-id" 
-                      element={
-                        <ProtectedRoute>
-                          <IDVerificationUpload />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route path="/listing/:id" element={<ListingDetails />} />
-                    <Route path="/listings/:id" element={<ListingDetails />} />
-                    <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
-                    <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
-                    <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-                    <Route path="/admin/listings-approval" element={<ProtectedRoute><AdminListingsApproval /></ProtectedRoute>} />
-                    <Route path="/admin/id-verification" element={<ProtectedRoute><AdminIDVerification /></ProtectedRoute>} />
-                    <Route
-                      path="/admin/moderation/*"
-                      element={
-                        <ProtectedRoute>
-                          <Moderation />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route path="/admin/reports" element={<ProtectedRoute><AdminReports /></ProtectedRoute>} />
-                    <Route path="/admin/profile-verification" element={<ProtectedRoute><AdminIDVerification /></ProtectedRoute>} />
-                    <Route path="/admin/users" element={<ProtectedRoute><AdminUserManagement /></ProtectedRoute>} />
-                    <Route path="/admin/reports-management" element={<ProtectedRoute><AdminReportsManagement /></ProtectedRoute>} />
-                    <Route path="/admin/content-editor" element={<ProtectedRoute><AdminContentEditor /></ProtectedRoute>} />
-                    <Route path="/admin/listing-management" element={<ProtectedRoute><ListingManagement /></ProtectedRoute>} />
-                    <Route path="/admin/analytics" element={<ProtectedRoute><AnalyticsReports /></ProtectedRoute>} />
-                    <Route path="/legal/terms" element={<TermsOfService />} />
-                    <Route path="/legal/privacy" element={<PrivacyPolicy />} />
-                    <Route path="/terms" element={<TermsOfService />} />
-                    <Route path="/privacy" element={<PrivacyPolicy />} />
-                    <Route path="/notifications" element={<Navigate to="/profile" replace />} />
-                    <Route path="/profile/notifications" element={<Navigate to="/profile" replace />} />
-                    <Route path="/error" element={<ServerError />} />
-                    <Route path="/offline" element={<Offline />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                  </Suspense>
-                </div>
-                              <Footer />
-                              <WhatsAppFloatingButton />
-                              <CookieConsentBanner />
-              </div>
-            </Router>
-          </VerificationProvider>
-        </PropertyProvider>
+                <AppShell />
+              </Router>
+            </VerificationProvider>
+          </PropertyProvider>
         </NotificationsProvider>
       </AuthProvider>
     </ErrorBoundary>
@@ -187,3 +85,125 @@ function App() {
 }
 
 export default App;
+
+const AppShell = () => {
+  const { user } = useAuth();
+  const location = useLocation();
+  const shouldPadForMobileNav = !!user && MOBILE_NAV_PADDING_ROUTES.has(location.pathname);
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Navbar />
+      <div className={`flex-1 py-4 ${shouldPadForMobileNav ? "pb-24 lg:pb-4" : ""}`}>
+        <Suspense fallback={<LoadingFallback />}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route
+              path="/create-listing"
+              element={
+                <ProtectedRoute>
+                  <CreateListing />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/browse" element={<BrowseListings />} />
+            <Route path="/listings" element={<Navigate to="/browse" replace />} />
+            <Route path="/marketplace" element={<Navigate to="/browse" replace />} />
+            <Route path="/find-services" element={<BrowseListings />} />
+            <Route path="/request" element={<BrowseBuyerRequestsPage />} />
+            <Route
+              path="/request/new"
+              element={
+                <ProtectedRoute>
+                  <PostBuyRequest />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/request/:id"
+              element={
+                <ProtectedRoute>
+                  <BuyerRequestDetails />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/about" element={<AboutUs />} />
+            <Route path="/contact" element={<AboutUs />} />
+            <Route path="/help" element={<AboutUs />} />
+            <Route path="/features" element={<Home />} />
+            <Route path="/pricing" element={<Home />} />
+            <Route path="/blog" element={<Home />} />
+            <Route path="/careers" element={<Home />} />
+            <Route path="/cookies" element={<PrivacyPolicy />} />
+            <Route path="/status" element={<Home />} />
+            <Route path="/feedback" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/admin-login" element={<AdminLogin />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/backend-test" element={<BackendTest />} />
+            <Route
+              path="/payment-test"
+              element={
+                <ProtectedRoute>
+                  <PaymentTestPanel />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/verify-phone" element={<PhoneVerification />} />
+            <Route path="/verify" element={<VerificationWizard />} />
+            <Route
+              path="/verify-id"
+              element={
+                <ProtectedRoute>
+                  <IDVerificationUpload />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/listing/:id" element={<ListingDetails />} />
+            <Route path="/listings/:id" element={<ListingDetails />} />
+            <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
+            <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin/listings-approval" element={<ProtectedRoute><AdminListingsApproval /></ProtectedRoute>} />
+            <Route path="/admin/id-verification" element={<ProtectedRoute><AdminIDVerification /></ProtectedRoute>} />
+            <Route
+              path="/admin/moderation/*"
+              element={
+                <ProtectedRoute>
+                  <Moderation />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/admin/reports" element={<ProtectedRoute><AdminReports /></ProtectedRoute>} />
+            <Route path="/admin/profile-verification" element={<ProtectedRoute><AdminIDVerification /></ProtectedRoute>} />
+            <Route path="/admin/users" element={<ProtectedRoute><AdminUserManagement /></ProtectedRoute>} />
+            <Route path="/admin/reports-management" element={<ProtectedRoute><AdminReportsManagement /></ProtectedRoute>} />
+            <Route path="/admin/content-editor" element={<ProtectedRoute><AdminContentEditor /></ProtectedRoute>} />
+            <Route path="/admin/listing-management" element={<ProtectedRoute><ListingManagement /></ProtectedRoute>} />
+            <Route path="/admin/analytics" element={<ProtectedRoute><AnalyticsReports /></ProtectedRoute>} />
+            <Route path="/legal/terms" element={<TermsOfService />} />
+            <Route path="/legal/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/notifications" element={<Navigate to="/profile" replace />} />
+            <Route path="/profile/notifications" element={<Navigate to="/profile" replace />} />
+            <Route path="/error" element={<ServerError />} />
+            <Route path="/offline" element={<Offline />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+      </div>
+      <Footer />
+      <WhatsAppFloatingButton />
+      <CookieConsentBanner />
+    </div>
+  );
+};

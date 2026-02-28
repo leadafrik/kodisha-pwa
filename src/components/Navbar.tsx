@@ -1,414 +1,380 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import {
+  CirclePlus,
+  ClipboardList,
+  LayoutGrid,
+  MessageSquare,
+  User,
+  Info,
+  Menu,
+  X,
+  LogOut,
+  Heart,
+  Shield,
+  type LucideIcon,
+} from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import NotificationCenter from "./NotificationCenter";
 
-const Chevron: React.FC = () => (
-  <svg className="w-3 h-3" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M2 2.5L6 6L10 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
+type NavItem = {
+  label: string;
+  to: string;
+  icon?: LucideIcon;
+  accent?: boolean;
+};
+
+const TOP_LEVEL_MOBILE_ROUTES = new Set([
+  "/",
+  "/browse",
+  "/request",
+  "/about",
+  "/profile",
+  "/messages",
+  "/favorites",
+]);
+
+const pathMatches = (pathname: string, key: string) => {
+  if (key === "/browse") {
+    return (
+      pathname === "/browse" ||
+      pathname === "/listings" ||
+      pathname === "/marketplace" ||
+      pathname === "/find-services" ||
+      pathname.startsWith("/listing/") ||
+      pathname.startsWith("/listings/")
+    );
+  }
+
+  if (key === "/request") {
+    return pathname === "/request" || pathname.startsWith("/request/");
+  }
+
+  if (key === "/profile") {
+    return (
+      pathname === "/profile" ||
+      pathname === "/favorites" ||
+      pathname === "/notifications" ||
+      pathname === "/profile/notifications" ||
+      pathname === "/verify-phone" ||
+      pathname === "/verify" ||
+      pathname === "/verify-id"
+    );
+  }
+
+  if (key === "/about") {
+    return pathname === "/about" || pathname === "/contact" || pathname === "/help";
+  }
+
+  return pathname === key;
+};
+
+const getNavLinkClass = (active: boolean, accent = false) => {
+  if (accent) {
+    return active
+      ? "inline-flex min-h-[44px] items-center rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white shadow-sm"
+      : "inline-flex min-h-[44px] items-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700";
+  }
+
+  return active
+    ? "inline-flex min-h-[44px] items-center rounded-xl bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900"
+    : "inline-flex min-h-[44px] items-center rounded-xl px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900";
+};
 
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const accountMenuRef = useRef<HTMLDivElement | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [listOpen, setListOpen] = useState(false);
-  const listCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isGuestHome = !user && location.pathname === "/";
+  const [accountOpen, setAccountOpen] = useState(false);
 
-  const closeMobile = () => setMobileOpen(false);
-  const scheduleListClose = () => {
-    if (listCloseTimer.current) {
-      clearTimeout(listCloseTimer.current);
-    }
-    listCloseTimer.current = setTimeout(() => setListOpen(false), 180);
-  };
+  const isAdmin = user?.role === "admin" || user?.type === "admin";
+  const sellTarget = user ? "/create-listing" : "/login?mode=signup&next=/create-listing";
+  const signupTarget = "/login?mode=signup&next=/browse";
 
-  const cancelListClose = () => {
-    if (listCloseTimer.current) {
-      clearTimeout(listCloseTimer.current);
-      listCloseTimer.current = null;
+  const desktopNavItems = useMemo<NavItem[]>(() => {
+    const items: NavItem[] = [
+      { label: "Listings", to: "/browse" },
+      { label: "Buy Requests", to: "/request" },
+      { label: "Sell", to: sellTarget, accent: true },
+    ];
+
+    if (user) {
+      items.push({ label: "Messages", to: "/messages" });
     }
-  };
+
+    items.push({ label: "About", to: "/about" });
+    return items;
+  }, [sellTarget, user]);
+
+  const mobileBottomItems = useMemo<NavItem[]>(() => {
+    if (!user) return [];
+    return [
+      { label: "Listings", to: "/browse", icon: LayoutGrid },
+      { label: "Requests", to: "/request", icon: ClipboardList },
+      { label: "Sell", to: "/create-listing", icon: CirclePlus },
+      { label: "Messages", to: "/messages", icon: MessageSquare },
+      { label: "Account", to: "/profile", icon: User },
+    ];
+  }, [user]);
+
+  const showMobileBottomNav =
+    !!user && TOP_LEVEL_MOBILE_ROUTES.has(location.pathname) && !mobileOpen;
+
+  useEffect(() => {
+    setMobileOpen(false);
+    setAccountOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!accountOpen) return undefined;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        accountMenuRef.current &&
+        event.target instanceof Node &&
+        !accountMenuRef.current.contains(event.target)
+      ) {
+        setAccountOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [accountOpen]);
+
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    }
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [mobileOpen]);
 
   return (
     <>
-      {/* GLOBAL NAVBAR */}
-      <nav className="bg-white shadow-sm border-b border-[#A0452E]/20 sticky top-0 z-40">
-        <div className="h-1 w-full bg-[#A0452E]"></div>
-
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex justify-between items-center py-4">
-            {/* LOGO */}
+      <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
+        <div className="h-1 w-full bg-[#A0452E]" />
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="flex items-center justify-between py-4">
             <Link to="/" className="flex items-center gap-3">
               <img src="/logo.svg" alt="Agrisoko" className="h-10 w-10" />
-              <span className="text-2xl font-extrabold text-gray-800 tracking-tight">Agrisoko</span>
+              <span className="text-2xl font-extrabold tracking-tight text-slate-900">Agrisoko</span>
             </Link>
 
-            {/* DESKTOP NAV */}
-            <div className="hidden lg:flex items-center gap-10 font-semibold text-gray-700">
-              {/* Browse Toggle - Easy navigation between Listings and Buy Requests */}
-              <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
-                <Link 
-                  to="/browse" 
-                  className="px-4 py-2 rounded-md transition font-semibold text-sm hover:bg-white"
-                >
-                  Listings
-                </Link>
-                <Link 
-                  to="/request" 
-                  className="px-4 py-2 rounded-md transition font-semibold text-sm hover:bg-white"
-                >
-                  Buy Requests
-                </Link>
-              </div>
+            <div className="hidden lg:flex lg:items-center lg:gap-2">
+              {desktopNavItems.map((item) => {
+                const active = pathMatches(location.pathname, item.to);
+                return (
+                  <Link key={item.label} to={item.to} className={getNavLinkClass(active, item.accent)}>
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
 
-              <Link 
-                to="/about" 
-                className="px-4 py-2 rounded-lg hover:bg-gray-100 transition text-gray-700 font-semibold text-sm min-h-[44px] flex items-center"
-              >
-                About
-              </Link>
-
-              <div
-                className="relative"
-                onMouseEnter={() => {
-                  cancelListClose();
-                  setListOpen(true);
-                }}
-                onMouseLeave={scheduleListClose}
-              >
-                <button
-                  type="button"
-                  onClick={() => setListOpen((prev) => !prev)}
-                  className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition font-semibold flex items-center gap-2 min-h-[44px]"
-                >
-                  + List <Chevron />
-                </button>
-                <div
-                  className={`absolute ${listOpen ? "block" : "hidden"} bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 z-50`}
-                  onMouseEnter={cancelListClose}
-                  onMouseLeave={scheduleListClose}
-                >
-                  {user ? (
-                    <>
-                      <Link
-                        to="/create-listing"
-                        className="block px-4 py-3 hover:bg-green-50 border-b"
-                        onClick={() => setListOpen(false)}
-                      >
-                        <div className="font-semibold text-green-700">List for sale</div>
-                        <p className="text-sm text-gray-600">Products, livestock, inputs, services</p>
-                      </Link>
-                      <hr className="my-2" />
-                      <Link
-                        to="/request/new"
-                        className="block px-4 py-3 hover:bg-blue-50"
-                        onClick={() => setListOpen(false)}
-                      >
-                        <div className="font-semibold text-blue-700">Post demand</div>
-                        <p className="text-sm text-gray-600">Looking to buy something?</p>
-                      </Link>
-                    </>
-                  ) : (
-                    <>
-                      <Link
-                        to="/login?next=/create-listing"
-                        className="block px-4 py-3 hover:bg-green-50 border-b"
-                        onClick={() => setListOpen(false)}
-                      >
-                        <div className="font-semibold text-green-700">List for sale</div>
-                        <p className="text-sm text-gray-600">Products, livestock, inputs, services</p>
-                      </Link>
-                      <hr className="my-2" />
-                      <Link
-                        to="/login?next=/request/new"
-                        className="block px-4 py-3 hover:bg-blue-50"
-                        onClick={() => setListOpen(false)}
-                      >
-                        <div className="font-semibold text-blue-700">Post demand</div>
-                        <p className="text-sm text-gray-600">Looking to buy something?</p>
-                      </Link>
-                    </>
-                  )}
-                </div>
-              </div>
-
+            <div className="hidden lg:flex lg:items-center lg:gap-3">
               {user ? (
-                <div className="flex items-center gap-6">
-                  {/* NOTIFICATION CENTER */}
+                <>
                   <NotificationCenter />
-
-                  {/* USER DROPDOWN */}
-                  <div className="group relative">
-                    <button className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition flex items-center gap-2 font-semibold text-gray-800">
-                      <span className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden">
+                  <div ref={accountMenuRef} className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setAccountOpen((prev) => !prev)}
+                      className={getNavLinkClass(pathMatches(location.pathname, "/profile"))}
+                      aria-expanded={accountOpen}
+                      aria-haspopup="menu"
+                    >
+                      <span className="mr-2 inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-slate-200">
                         {user.profilePicture ? (
-                          <img src={user.profilePicture} alt={user.name} className="w-full h-full object-cover" />
+                          <img src={user.profilePicture} alt={user.name} className="h-full w-full object-cover" />
                         ) : (
-                          <span className="font-semibold text-white">{user.name ? user.name[0].toUpperCase() : "U"}</span>
+                          <span className="font-semibold text-slate-700">
+                            {user.name ? user.name[0].toUpperCase() : "U"}
+                          </span>
                         )}
                       </span>
-                      {user.name ? user.name.split(" ")[0] : "Profile"}
-                      <Chevron />
+                      Account
                     </button>
 
-                    <div className="absolute hidden group-hover:block bg-white shadow-lg border border-gray-200 rounded-xl w-56 mt-2 right-0 z-50">
-                      <div className="px-4 py-3 border-b bg-gray-50">
-                        <div className="font-semibold truncate">{user.name || "User"}</div>
-                        <div className="text-sm text-gray-600 truncate">{user.email}</div>
+                    {accountOpen && (
+                      <div className="absolute right-0 mt-2 w-64 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+                        <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
+                          <p className="truncate text-sm font-semibold text-slate-900">{user.name || "User"}</p>
+                          <p className="truncate text-xs text-slate-500">{user.email}</p>
+                        </div>
+                        <Link to="/profile" className="block px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                          Account
+                        </Link>
+                        <Link to="/favorites" className="block border-t border-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                          Saved Listings
+                        </Link>
+                        {isAdmin && (
+                          <Link to="/admin" className="block border-t border-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                            Admin Console
+                          </Link>
+                        )}
+                        <button
+                          type="button"
+                          onClick={logout}
+                          className="flex w-full items-center gap-2 border-t border-slate-100 px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Logout
+                        </button>
                       </div>
-
-                      <Link to="/profile" className="block px-4 py-3 hover:bg-gray-50 border-b">
-                        <div className="font-semibold">Dashboard</div>
-                      </Link>
-                      <Link to="/messages" className="block px-4 py-3 hover:bg-gray-50 border-b">
-                        <div className="font-semibold">Messages</div>
-                      </Link>
-                      <Link to="/favorites" className="block px-4 py-3 hover:bg-gray-50 border-b">
-                        <div className="font-semibold">Saved Listings</div>
-                      </Link>
-
-                      {user.role === 'admin' || user.type === 'admin' ? (
-                        <>
-                          <Link to="/admin/listings-approval" className="block px-4 py-3 hover:bg-gray-50 border-b">
-                            <div className="font-semibold">Listing Approvals</div>
-                          </Link>
-                          <Link to="/admin/listing-management" className="block px-4 py-3 hover:bg-gray-50 border-b">
-                            <div className="font-semibold">Listing Management</div>
-                          </Link>
-                          <Link to="/admin/id-verification" className="block px-4 py-3 hover:bg-gray-50 border-b">
-                            <div className="font-semibold">ID Verification</div>
-                          </Link>
-                          <Link to="/admin/reports" className="block px-4 py-3 hover:bg-gray-50 border-b">
-                            <div className="font-semibold">User Reports</div>
-                          </Link>
-                          <Link to="/admin/profile-verification" className="block px-4 py-3 hover:bg-gray-50 border-b">
-                            <div className="font-semibold">Profile Verification</div>
-                          </Link>
-                          <Link to="/admin/analytics" className="block px-4 py-3 hover:bg-gray-50 border-b">
-                            <div className="font-semibold">Analytics</div>
-                          </Link>
-                        </>
-                      ) : null}
-
-                      <div className="border-b">
-                        <Link to="/create-listing" className="block px-4 py-2 hover:bg-gray-50 text-sm">Create Listing</Link>
-                      </div>
-
-                      <button
-                        onClick={logout}
-                        className="w-full text-left px-4 py-3 hover:bg-red-50 text-red-600 font-semibold"
-                      >
-                        Logout
-                      </button>
-                    </div>
+                    )}
                   </div>
-                </div>
+                </>
               ) : (
-                <div className="flex items-center gap-4">
-                  <Link
-                    to="/login"
-                    className="px-4 py-2 rounded-lg hover:bg-gray-100 font-semibold transition min-h-[44px] flex items-center text-sm"
-                  >
+                <>
+                  <Link to="/login" className={getNavLinkClass(pathMatches(location.pathname, "/login"))}>
                     Login
                   </Link>
-                  <Link
-                    to="/login?mode=signup&next=/profile"
-                    className={`px-5 py-2 rounded-lg font-semibold transition min-h-[44px] flex items-center text-sm ${
-                      isGuestHome
-                        ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                        : "bg-gray-900 text-white hover:bg-gray-800"
-                    }`}
-                  >
+                  <Link to={signupTarget} className={getNavLinkClass(false, true)}>
                     Create Free Account
                   </Link>
-                </div>
+                </>
               )}
             </div>
 
-            {/* MOBILE MENU ICON */}
-            <button 
-              className="lg:hidden flex flex-col gap-1 p-3 -mr-3 min-h-[48px] min-w-[48px] items-center justify-center"
+            <button
+              type="button"
+              className="inline-flex min-h-[48px] min-w-[48px] items-center justify-center rounded-xl border border-slate-200 text-slate-900 transition hover:bg-slate-50 lg:hidden"
               onClick={() => setMobileOpen(true)}
               aria-label="Open menu"
               aria-expanded={mobileOpen}
-              aria-haspopup="menu"
             >
-              <span className="w-6 h-0.5 bg-gray-900"></span>
-              <span className="w-6 h-0.5 bg-gray-900"></span>
-              <span className="w-6 h-0.5 bg-gray-900"></span>
+              <Menu className="h-6 w-6" />
             </button>
           </div>
         </div>
       </nav>
 
-      {/* MOBILE MENU */}
       {mobileOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50" onClick={closeMobile}>
+        <div className="fixed inset-0 z-50 bg-slate-900/45 lg:hidden" onClick={() => setMobileOpen(false)}>
           <div
-            className="absolute top-0 left-0 h-full w-72 bg-white shadow-xl p-6"
-            onClick={(e) => e.stopPropagation()}
+            className="absolute left-0 top-0 h-full w-80 max-w-[88vw] overflow-y-auto bg-white p-5 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
           >
-            <div className="flex justify-between items-center mb-8">
-              <span className="text-xl font-bold">Menu</span>
-              <button onClick={closeMobile} aria-label="Close menu" className="text-2xl leading-none">
-                ×
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">Menu</p>
+                <p className="mt-1 text-lg font-bold text-slate-900">Agrisoko</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMobileOpen(false)}
+                aria-label="Close menu"
+                className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border border-slate-200 text-slate-900"
+              >
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="flex flex-col gap-1 text-lg font-medium">
-              {/* Browse Toggle for Mobile */}
-              <div className="flex flex-col gap-1 bg-gray-100 rounded-lg p-2">
-                <Link 
-                  to="/browse" 
-                  onClick={closeMobile} 
-                  className="px-3 py-3 rounded hover:bg-white transition font-semibold min-h-[48px] flex items-center"
-                >
-                  Browse Listings
+            <div className="space-y-2">
+              {desktopNavItems.map((item) => {
+                const Icon =
+                  item.label === "Listings"
+                    ? LayoutGrid
+                    : item.label === "Buy Requests"
+                    ? ClipboardList
+                    : item.label === "Sell"
+                    ? CirclePlus
+                    : item.label === "Messages"
+                    ? MessageSquare
+                    : Info;
+                const active = pathMatches(location.pathname, item.to);
+
+                return (
+                  <Link
+                    key={item.label}
+                    to={item.to}
+                    className={`flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                      item.accent
+                        ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                        : active
+                        ? "bg-slate-100 text-slate-900"
+                        : "text-slate-700 hover:bg-slate-50"
+                    }`}
+                  >
+                    <Icon className="h-5 w-5" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+
+            <div className="my-6 border-t border-slate-200" />
+
+            {user ? (
+              <div className="space-y-2">
+                <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                  <p className="truncate text-sm font-semibold text-slate-900">{user.name || "User"}</p>
+                  <p className="truncate text-xs text-slate-500">{user.email}</p>
+                </div>
+                <Link to="/profile" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                  <User className="h-5 w-5" />
+                  Account
                 </Link>
-                <Link 
-                  to="/request" 
-                  onClick={closeMobile} 
-                  className="px-3 py-3 rounded hover:bg-white transition font-semibold min-h-[48px] flex items-center"
+                <Link to="/favorites" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                  <Heart className="h-5 w-5" />
+                  Saved Listings
+                </Link>
+                {isAdmin && (
+                  <Link to="/admin" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                    <Shield className="h-5 w-5" />
+                    Admin Console
+                  </Link>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    logout();
+                    setMobileOpen(false);
+                  }}
+                  className="flex min-h-[52px] w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
                 >
-                  Browse Buy Requests
+                  <LogOut className="h-5 w-5" />
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Link to={signupTarget} className="flex min-h-[52px] items-center justify-center rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700">
+                  Create Free Account
+                </Link>
+                <Link to="/login" className="flex min-h-[52px] items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                  Login
                 </Link>
               </div>
-              <Link 
-                to="/about" 
-                onClick={closeMobile} 
-                className="px-3 py-3 font-semibold min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
-              >
-                About Agrisoko
-              </Link>
-              <hr />
+            )}
+          </div>
+        </div>
+      )}
 
-              {user ? (
-                <>
-                  <Link 
-                    to="/profile" 
-                    onClick={closeMobile}
-                    className="px-3 py-3 min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
-                  >
-                    Dashboard
-                  </Link>
-                  <Link 
-                    to="/messages" 
-                    onClick={closeMobile}
-                    className="px-3 py-3 min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
-                  >
-                    Messages
-                  </Link>
-                  <Link 
-                    to="/favorites" 
-                    onClick={closeMobile}
-                    className="px-3 py-3 min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
-                  >
-                    Saved Listings
-                  </Link>
-                  {user.role === 'admin' || user.type === 'admin' ? (
-                    <>
-                      <div className="text-sm text-gray-600 font-semibold mt-2 mb-1">Admin</div>
-                      <Link 
-                        to="/admin/listings-approval" 
-                        onClick={closeMobile}
-                        className="px-3 py-3 text-base min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
-                      >
-                        Listing Approvals
-                      </Link>
-                      <Link 
-                        to="/admin/listing-management" 
-                        onClick={closeMobile}
-                        className="px-3 py-3 text-base min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
-                      >
-                        Listing Management
-                      </Link>
-                      <Link 
-                        to="/admin/id-verification" 
-                        onClick={closeMobile}
-                        className="px-3 py-3 text-base min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
-                      >
-                        ID Verification
-                      </Link>
-                      <Link 
-                        to="/admin/reports" 
-                        onClick={closeMobile}
-                        className="px-3 py-3 text-base min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
-                      >
-                        User Reports
-                      </Link>
-                      <Link 
-                        to="/admin/profile-verification" 
-                        onClick={closeMobile}
-                        className="px-3 py-3 text-base min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
-                      >
-                        Profile Verification
-                      </Link>
-                      <Link 
-                        to="/admin/analytics" 
-                        onClick={closeMobile}
-                        className="px-3 py-3 text-base min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
-                      >
-                        Analytics
-                      </Link>
-                    </>
-                  ) : null}
-                  <Link 
-                    to="/create-listing" 
-                    onClick={closeMobile}
-                    className="px-3 py-3 min-h-[48px] flex items-center rounded hover:bg-green-50 transition font-semibold text-green-600 mt-2"
-                  >
-                    List for sale
-                  </Link>
-                  <Link 
-                    to="/request/new" 
-                    onClick={closeMobile}
-                    className="px-3 py-3 min-h-[48px] flex items-center rounded hover:bg-green-50 transition font-semibold text-green-600"
-                  >
-                    Post demand
-                  </Link>
-                  <button
-                    onClick={() => { logout(); closeMobile(); }}
-                    className="text-left px-3 py-3 text-red-600 font-semibold mt-4 min-h-[48px] flex items-center rounded hover:bg-red-50 transition"
-                  >
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link 
-                    to="/login?mode=signup&next=/profile" 
-                    onClick={closeMobile}
-                    className="px-3 py-3 min-h-[48px] flex items-center justify-center rounded-lg bg-emerald-600 text-white transition font-semibold hover:bg-emerald-700 mb-2"
-                  >
-                    Create Free Account
-                  </Link>
-                  <Link 
-                    to="/login" 
-                    onClick={closeMobile}
-                    className="px-3 py-3 min-h-[48px] flex items-center rounded hover:bg-gray-100 transition"
-                  >
-                    Login
-                  </Link>
-                  <Link 
-                    to="/login?next=/create-listing" 
-                    onClick={closeMobile}
-                    className="px-3 py-3 min-h-[48px] flex items-center rounded hover:bg-green-50 transition font-semibold text-green-600 mt-2"
-                  >
-                    List for sale
-                  </Link>
-                  <Link 
-                    to="/login?next=/request/new" 
-                    onClick={closeMobile}
-                    className="px-3 py-3 min-h-[48px] flex items-center rounded hover:bg-green-50 transition font-semibold text-green-600"
-                  >
-                    Post demand
-                  </Link>
-                </>
-              )}
-            </div>
+      {showMobileBottomNav && (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 shadow-[0_-12px_28px_-24px_rgba(15,23,42,0.5)] backdrop-blur lg:hidden">
+          <div className="mx-auto grid max-w-md grid-cols-5 px-2 py-2">
+            {mobileBottomItems.map((item) => {
+              const Icon = item.icon || LayoutGrid;
+              const active = pathMatches(location.pathname, item.to);
+              return (
+                <Link
+                  key={item.label}
+                  to={item.to}
+                  className={`flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-xl px-1 text-[11px] font-semibold transition ${
+                    active ? "text-emerald-700" : "text-slate-500"
+                  }`}
+                >
+                  <Icon className={`h-5 w-5 ${active ? "text-emerald-700" : "text-slate-400"}`} />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
           </div>
         </div>
       )}

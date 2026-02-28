@@ -270,7 +270,7 @@ export interface UserFormData {
   email?: string;
   password: string;
   type: "buyer" | "seller" | "service_provider";
-  county: string;
+  county?: string;
   constituency?: string;
   ward?: string;
   inviteCode?: string;

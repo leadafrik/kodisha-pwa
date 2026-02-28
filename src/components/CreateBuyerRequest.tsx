@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
-import { AlertCircle, CheckCircle2, FileText, MapPin } from "lucide-react";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 import {
   kenyaCounties,
   getConstituenciesByCounty,
@@ -11,11 +11,11 @@ import { API_BASE_URL } from "../config/api";
 import { validatePhone } from "../utils/formValidation";
 
 const UNITS = ["kg", "tonnes", "bags", "units", "liters", "crates"];
-const DRAFT_STORAGE_KEY = "kodisha_buyer_request_draft_v2";
+const DRAFT_STORAGE_KEY = "kodisha_buyer_request_draft_v3";
 
 type RequestCategory = "produce" | "inputs" | "service";
 type UrgencyLevel = "low" | "medium" | "high";
-type Step = 1 | 2 | 3 | 4;
+type Step = 1 | 2 | 3;
 
 interface BuyerRequestFormData {
   title: string;
@@ -113,8 +113,7 @@ const DEMAND_TEMPLATES: DemandTemplate[] = [
 const STEPS: Array<{ id: Step; label: string; caption: string }> = [
   { id: 1, label: "Demand", caption: "What you need" },
   { id: 2, label: "Specs", caption: "Quantity and budget" },
-  { id: 3, label: "Location", caption: "Where and contact" },
-  { id: 4, label: "Review", caption: "Confirm and post" },
+  { id: 3, label: "Post", caption: "Location and contact" },
 ];
 
 const CATEGORY_STYLES: Record<RequestCategory, string> = {
@@ -137,11 +136,31 @@ const getDefaultFormData = (county?: string, phone?: string): BuyerRequestFormDa
   images: [],
 });
 
+const hasMeaningfulDraft = (raw: string | null) => {
+  if (!raw) return false;
+  try {
+    const parsed = JSON.parse(raw) as { formData?: Partial<BuyerRequestFormData> };
+    const draft = parsed.formData;
+    return Boolean(
+      draft?.title ||
+        draft?.description ||
+        draft?.productType ||
+        draft?.quantity ||
+        draft?.budget?.min ||
+        draft?.budget?.max ||
+        draft?.location?.county ||
+        draft?.contactPhone
+    );
+  } catch {
+    return false;
+  }
+};
+
 const scoreToLabel = (score: number) => {
   if (score >= 85) return "Outstanding";
   if (score >= 65) return "Strong";
   if (score >= 45) return "Good";
-  return "Needs more detail";
+  return "Building";
 };
 
 export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
@@ -162,7 +181,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
 
   useEffect(() => {
     const draft = localStorage.getItem(DRAFT_STORAGE_KEY);
-    setHasDraft(!!draft);
+    setHasDraft(hasMeaningfulDraft(draft));
   }, []);
 
   useEffect(() => {
@@ -207,7 +226,6 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
 
     if (!shouldSave) {
       localStorage.removeItem(DRAFT_STORAGE_KEY);
-      setHasDraft(false);
       return;
     }
 
@@ -218,7 +236,6 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
         formData,
       })
     );
-    setHasDraft(true);
   }, [formData, step]);
 
   const constituencies = useMemo(
@@ -276,26 +293,6 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
     return Math.min(score, 100);
   }, [formData]);
 
-  const reviewChecks = useMemo(
-    () => [
-      { label: "Clear demand title", complete: formData.title.trim().length >= 10 },
-      { label: "Detailed description", complete: formData.description.trim().length >= 80 },
-      { label: "Location selected", complete: !!formData.location.county },
-      {
-        label: "Contact number valid",
-        complete: !!formData.contactPhone.trim() && validatePhone(formData.contactPhone).isValid,
-      },
-      {
-        label: "Quantity or budget shared",
-        complete:
-          !!formData.quantity.trim() ||
-          !!formData.budget.min.trim() ||
-          !!formData.budget.max.trim(),
-      },
-    ],
-    [formData]
-  );
-
   const hasMeaningfulDemandInput = Boolean(
     formData.title.trim() ||
       formData.description.trim() ||
@@ -314,6 +311,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
     key: K,
     value: BuyerRequestFormData[K]
   ) => {
+    if (hasDraft) setHasDraft(false);
     setFormData((prev) => ({ ...prev, [key]: value }));
     clearFeedback();
   };
@@ -322,6 +320,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
     key: keyof BuyerRequestFormData["location"],
     value: string
   ) => {
+    if (hasDraft) setHasDraft(false);
     setFormData((prev) => {
       if (key === "county") {
         return {
@@ -345,6 +344,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
 
   const setBudgetField = (key: "min" | "max", value: string) => {
     if (!/^\d*$/.test(value)) return;
+    if (hasDraft) setHasDraft(false);
     setFormData((prev) => ({
       ...prev,
       budget: { ...prev.budget, [key]: value },
@@ -366,8 +366,8 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
     if (targetStep === 2) {
       if (!formData.description.trim()) {
         nextErrors.description = "Describe exactly what you need.";
-      } else if (formData.description.trim().length < 30) {
-        nextErrors.description = "Description should be at least 30 characters.";
+      } else if (formData.description.trim().length < 15) {
+        nextErrors.description = "Add a bit more detail so sellers can quote accurately.";
       }
 
       if (formData.quantity.trim()) {
@@ -450,7 +450,8 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
         max: template.budgetMax || "",
       },
     }));
-    setNotice(`Template "${template.label}" applied. Customize before posting.`);
+    setStep(2);
+    setNotice(`Template "${template.label}" applied.`);
     setError("");
     setFieldErrors({});
   };
@@ -500,7 +501,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
       }));
       const nextStep =
         typeof parsed.step === "number"
-          ? (Math.min(Math.max(parsed.step, 1), 4) as Step)
+          ? (Math.min(Math.max(parsed.step, 1), 3) as Step)
           : 1;
       setStep(nextStep);
       setNotice("Draft restored.");
@@ -520,22 +521,9 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
     setError("");
   };
 
-  const handleSaveDraft = () => {
-    localStorage.setItem(
-      DRAFT_STORAGE_KEY,
-      JSON.stringify({
-        step,
-        formData,
-      })
-    );
-    setHasDraft(true);
-    setNotice("Draft saved.");
-    setError("");
-  };
-
   const handleNextStep = () => {
     if (!validateCurrentStep()) return;
-    setStep((prev) => (prev < 4 ? ((prev + 1) as Step) : 4));
+    setStep((prev) => (prev < 3 ? ((prev + 1) as Step) : 3));
     setFieldErrors({});
     clearFeedback();
   };
@@ -645,29 +633,29 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
           </p>
         </div>
 
-        {(!isCompact || hasMeaningfulDemandInput) && (
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
-            Demand quality
-          </p>
-          <div className="mt-2 flex items-end justify-between">
-            <p className="text-3xl font-bold text-slate-900">{qualityScore}</p>
-            <p className="text-sm font-semibold text-emerald-700">{scoreToLabel(qualityScore)}</p>
+        {hasMeaningfulDemandInput && (
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+              Response strength
+            </p>
+            <div className="mt-2 flex items-end justify-between">
+              <p className="text-3xl font-bold text-slate-900">{qualityScore}</p>
+              <p className="text-sm font-semibold text-emerald-700">{scoreToLabel(qualityScore)}</p>
+            </div>
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
+              <div
+                className="h-full bg-emerald-600 transition-all"
+                style={{ width: `${qualityScore}%` }}
+              />
+            </div>
+            <p className="mt-3 text-xs text-slate-500">
+              Better detail usually means faster responses.
+            </p>
           </div>
-          <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
-            <div
-              className="h-full bg-emerald-600 transition-all"
-              style={{ width: `${qualityScore}%` }}
-            />
-          </div>
-          <p className="mt-3 text-xs text-slate-500">
-            Better detail usually means faster responses.
-          </p>
-        </div>
         )}
       </div>
 
-      <div className="mb-6 grid gap-3 sm:grid-cols-4">
+      <div className="mb-6 grid gap-3 sm:grid-cols-3">
         {STEPS.map((item) => {
           const isActive = step === item.id;
           const isDone = step > item.id;
@@ -730,7 +718,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={step === 3 ? handleSubmit : (e) => e.preventDefault()} className="space-y-5">
         {step === 1 && (
           <div className="space-y-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div>
@@ -764,13 +752,15 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                   }`}
                 >
                   <p className="font-semibold capitalize">{cat}</p>
-                  <p className="text-xs opacity-80">
-                    {cat === "produce"
-                      ? "Crops, fruits, grains"
-                      : cat === "inputs"
-                      ? "Seeds, fertilizer, equipment"
-                      : "Transport, labor, consulting"}
-                  </p>
+                  {(!isCompact || formData.category === cat) && (
+                    <p className="text-xs opacity-80">
+                      {cat === "produce"
+                        ? "Crops, fruits, grains"
+                        : cat === "inputs"
+                        ? "Seeds, fertilizer, equipment"
+                        : "Transport, labor, consulting"}
+                    </p>
+                  )}
                 </button>
               ))}
             </div>
@@ -1086,54 +1076,31 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                 </p>
               </div>
             </div>
-          </div>
-        )}
 
-        {step === 4 && (
-          <div className="space-y-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-              <FileText className="mt-0.5 h-5 w-5 text-emerald-700" />
-              <div>
-                <p className="font-semibold text-emerald-900">Review before posting</p>
-                <p className="text-sm text-emerald-800">
-                  Your demand will be visible for up to 30 days.
-                </p>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <div className="mb-3 flex flex-wrap items-center gap-2">
                 <span
                   className={`rounded-full border px-3 py-1 text-xs font-semibold ${CATEGORY_STYLES[formData.category]}`}
                 >
                   {formData.category}
                 </span>
-                <span className="rounded-full bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-700">
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-700">
                   {formData.urgency} priority
                 </span>
               </div>
-              <h3 className="text-xl font-bold text-slate-900">{formData.title || "Untitled demand"}</h3>
-              <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700">
-                {formData.description || "No description added yet."}
+              <h3 className="text-base font-bold text-slate-900">
+                {formData.title || "Untitled demand"}
+              </h3>
+              <p className="mt-2 text-sm text-slate-600">
+                {formData.description || "Add a short description so sellers know what to quote."}
               </p>
-
-              <div className="mt-4 grid gap-3 md:grid-cols-2">
-                <div className="rounded-xl border border-slate-200 bg-white p-3">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
-                    Product / service
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-slate-900">
-                    {formData.productType || "Not specified"}
-                  </p>
-                </div>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <div className="rounded-xl border border-slate-200 bg-white p-3">
                   <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
                     Quantity
                   </p>
                   <p className="mt-1 text-sm font-semibold text-slate-900">
-                    {formData.quantity
-                      ? `${formData.quantity} ${formData.unit}`
-                      : "Not specified"}
+                    {formData.quantity ? `${formData.quantity} ${formData.unit}` : "Not specified"}
                   </p>
                 </div>
                 <div className="rounded-xl border border-slate-200 bg-white p-3">
@@ -1146,38 +1113,6 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                       : "Negotiable"}
                   </p>
                 </div>
-                <div className="rounded-xl border border-slate-200 bg-white p-3">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
-                    Location
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-slate-900">
-                    {[formData.location.ward, formData.location.constituency, formData.location.county]
-                      .filter(Boolean)
-                      .join(", ") || "No location selected"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-white p-4">
-              <div className="mb-2 flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-slate-500" />
-                <p className="text-sm font-semibold text-slate-800">Readiness checklist</p>
-              </div>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {reviewChecks.map((item) => (
-                  <div
-                    key={item.label}
-                    className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${
-                      item.complete
-                        ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                        : "border-slate-200 bg-slate-50 text-slate-600"
-                    }`}
-                  >
-                    <CheckCircle2 className="h-4 w-4" />
-                    <span>{item.label}</span>
-                  </div>
-                ))}
               </div>
             </div>
           </div>
@@ -1210,17 +1145,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            {step < 4 && (
-              <button
-                type="button"
-                onClick={handleSaveDraft}
-                className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-              >
-                Save draft
-              </button>
-            )}
-
-            {step < 4 ? (
+            {step < 3 ? (
               <button
                 type="button"
                 onClick={handleNextStep}
