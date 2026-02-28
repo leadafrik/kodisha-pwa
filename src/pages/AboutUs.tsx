@@ -18,11 +18,11 @@ const AboutUs: React.FC = () => {
   const cooSummary =
     "Joseph Mugalla is Agrisoko's Chief Operating Officer. He brings together operations, market research, agribusiness experience, and software delivery discipline to keep the platform practical, responsive, and execution-focused as it grows across Kenya.";
   const chiefOfStaffName = "Valary Akong'ai";
-  const chiefOfStaffTitle = "Chief of Staff & Co-Founder";
+  const chiefOfStaffTitle = "Chief of Staff";
   const chiefOfStaffImage = "/images/valary-akongai.jpeg";
   const chiefOfStaffLinkedIn = "https://www.linkedin.com/in/valary-akong-ai-93115735a";
   const chiefOfStaffSummary =
-    "Akong'ai Valary Purity is a Meteorology graduate and Agrisoko's Chief of Staff and Co-Founder. She focuses on climate intelligence, environmental risk awareness, and resilient agribusiness systems that help keep agricultural trade practical, informed, and future-ready.";
+    "Akong'ai Valary Purity is a Meteorology graduate and Agrisoko's Chief of Staff. She focuses on climate intelligence, environmental risk awareness, and resilient agribusiness systems that help keep agricultural trade practical, informed, and future-ready.";
   const organizationSameAs = [
     "https://wa.me/254796389192",
     "https://chat.whatsapp.com/HzCaV5YVz86CjwajiOHR5i",
