@@ -186,6 +186,124 @@ const normalizeHeaders = (headers?: HeadersInit): Record<string, string> => {
   return headers as Record<string, string>;
 };
 
+const CSRF_HEADER_NAME = "X-CSRF-Token";
+const CSRF_TOKEN_URL = `${API_BASE_URL}/auth/csrf-token`;
+const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+let csrfTokenCache: string | null = null;
+let csrfTokenInFlight: Promise<string | null> | null = null;
+
+const isFormDataBody = (body: BodyInit | null | undefined): body is FormData => {
+  return typeof FormData !== "undefined" && body instanceof FormData;
+};
+
+const shouldDefaultJsonContentType = (
+  body: BodyInit | null | undefined,
+  headers: Record<string, string>
+): boolean => {
+  if (!body || isFormDataBody(body)) {
+    return false;
+  }
+
+  return !Object.keys(headers).some(
+    (key) => key.toLowerCase() === "content-type"
+  );
+};
+
+const shouldAttachCsrfToken = (url: string, options: RequestInit): boolean => {
+  const method = (options.method || "GET").toUpperCase();
+  return MUTATING_METHODS.has(method) && url.startsWith(API_BASE_URL);
+};
+
+const fetchCsrfToken = async (forceRefresh = false): Promise<string | null> => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  if (!forceRefresh && csrfTokenCache) {
+    return csrfTokenCache;
+  }
+
+  if (!forceRefresh && csrfTokenInFlight) {
+    return csrfTokenInFlight;
+  }
+
+  csrfTokenInFlight = fetch(CSRF_TOKEN_URL, {
+    method: "GET",
+    credentials: "include",
+    headers: {
+      Accept: "application/json",
+    },
+  })
+    .then(async (response) => {
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data?.csrfToken) {
+        throw new Error(data?.message || "Failed to get CSRF token.");
+      }
+
+      csrfTokenCache = data.csrfToken;
+      return csrfTokenCache;
+    })
+    .finally(() => {
+      csrfTokenInFlight = null;
+    });
+
+  return csrfTokenInFlight;
+};
+
+const parseResponseData = async (response: Response): Promise<any> => {
+  const contentType = response.headers.get("content-type") || "";
+
+  if (contentType.includes("application/json")) {
+    return response.json().catch(() => ({}));
+  }
+
+  const text = await response.text().catch(() => "");
+  return text ? { message: text } : {};
+};
+
+const executeApiRequest = async (
+  url: string,
+  options: RequestInit,
+  headers: Record<string, string>
+): Promise<{ response: Response; data: any }> => {
+  const runRequest = async (
+    retryOnCsrfFailure: boolean
+  ): Promise<{ response: Response; data: any }> => {
+    const requestHeaders = { ...headers };
+
+    if (shouldAttachCsrfToken(url, options)) {
+      const csrfToken = await fetchCsrfToken(!csrfTokenCache && retryOnCsrfFailure);
+      if (csrfToken) {
+        requestHeaders[CSRF_HEADER_NAME] = csrfToken;
+      }
+    }
+
+    const response = await fetch(url, {
+      ...options,
+      headers: requestHeaders,
+      credentials: options.credentials ?? "include",
+    });
+
+    const data = await parseResponseData(response);
+
+    if (
+      !response.ok &&
+      retryOnCsrfFailure &&
+      response.status === 403 &&
+      data?.code &&
+      String(data.code).startsWith("CSRF_")
+    ) {
+      csrfTokenCache = null;
+      await fetchCsrfToken(true);
+      return runRequest(false);
+    }
+
+    return { response, data };
+  };
+
+  return runRequest(true);
+};
+
 const shouldSkipRefresh = (url: string): boolean =>
   url.includes("/auth/login") ||
   url.includes("/auth/register") ||
@@ -208,14 +326,15 @@ export const refreshAccessToken = async (): Promise<string | null> => {
   if (!refreshToken) return null;
 
   refreshRequest = (async () => {
-    const response = await fetch(API_ENDPOINTS.auth.refreshToken, {
+    const { response, data } = await executeApiRequest(
+      API_ENDPOINTS.auth.refreshToken,
+      {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
       body: JSON.stringify({ refreshToken }),
-    });
+      },
+      { "Content-Type": "application/json" }
+    );
 
-    const data = await response.json().catch(() => ({}));
     if (!response.ok) {
       clearAuthSession();
       return null;
@@ -279,27 +398,23 @@ const apiRequestInternal = async (
         ? { Authorization: `Bearer ${token}` }
         : {};
 
-    const isFormDataBody =
-      typeof FormData !== "undefined" && options.body instanceof FormData;
-
     const headers: Record<string, string> = {
       ...authHeader,
       ...baseHeaders,
     };
-    if (!isFormDataBody && !headers["Content-Type"]) {
+    if (shouldDefaultJsonContentType(options.body, headers)) {
       headers["Content-Type"] = "application/json";
     }
 
-    const response = await fetch(url, {
-      headers,
-      credentials: options.credentials ?? "include",
-      ...options,
-    });
-
-    const data = await response.json().catch(() => ({}));
+    const { response, data } = await executeApiRequest(url, options, headers);
 
     if (!response.ok) {
-      if (response.status === 401 || response.status === 403) {
+      const isCsrfError =
+        response.status === 403 &&
+        data?.code &&
+        String(data.code).startsWith("CSRF_");
+
+      if (response.status === 401 || (response.status === 403 && !isCsrfError)) {
         const isAdminSession =
           typeof window !== "undefined" &&
           !!localStorage.getItem("kodisha_admin_token");
@@ -363,55 +478,34 @@ export const adminApiRequest = async (
     }
 
     const bearer = `Bearer ${token}`;
+    const baseHeaders = normalizeHeaders(options.headers);
     const headers: Record<string, string> = {
       Authorization: bearer,
-      ...(options.headers as Record<string, string> | undefined),
+      ...baseHeaders,
     };
 
-    // Only set Content-Type for requests that carry a JSON body to avoid unnecessary CORS preflights on GETs
-    const isFormDataBody =
-      typeof FormData !== "undefined" && options.body instanceof FormData;
-    if (options.body && !headers["Content-Type"] && !isFormDataBody) {
+    if (shouldDefaultJsonContentType(options.body, headers)) {
       headers["Content-Type"] = "application/json";
     }
 
     // Convert relative path to absolute URL if needed
     const absoluteUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
-    
-    console.log(`[adminApiRequest] Calling: ${absoluteUrl}`);
-    console.log(`[adminApiRequest] Token present: ${!!token}, Token length: ${token?.length}`);
-
-    const response = await fetch(absoluteUrl, {
-      headers,
-      mode: "cors",
-      credentials: options.credentials ?? "include",
-      ...options,
-    });
-
-    console.log(`[adminApiRequest] Response status: ${response.status}`);
-    console.log(`[adminApiRequest] Response content-type: ${response.headers.get('content-type')}`);
-
-    let data: any = null;
-    const responseText = await response.text();
-    console.log(`[adminApiRequest] Response text length: ${responseText?.length || 0}, Content: ${responseText?.substring(0, 200) || 'EMPTY'}`);
-    
-    try {
-      if (responseText) {
-        data = JSON.parse(responseText);
-      }
-    } catch (parseError) {
-      console.error(`[adminApiRequest] JSON parse error:`, parseError);
-      // If response was ok but not JSON, that's a problem
-      if (response.ok && responseText) {
-        console.error(`[adminApiRequest] Response was OK (${response.status}) but not valid JSON`);
-      }
-    }
-
-    console.log(`[adminApiRequest] Parsed response data:`, data);
+    const { response, data } = await executeApiRequest(
+      absoluteUrl,
+      {
+        ...options,
+        mode: "cors",
+      },
+      headers
+    );
 
     if (!response.ok) {
-      if (response.status === 401 || response.status === 403) {
-        console.log(`[adminApiRequest] Auth error (${response.status}), clearing tokens`);
+      const isCsrfError =
+        response.status === 403 &&
+        data?.code &&
+        String(data.code).startsWith("CSRF_");
+
+      if (response.status === 401 || (response.status === 403 && !isCsrfError)) {
         clearAuthSession();
         if (typeof window !== "undefined" && !window.location.pathname.includes("/login")) {
           window.location.href = "/login";
@@ -431,7 +525,9 @@ export const adminApiRequest = async (
     return data;
   } catch (error: any) {
     // Log errors in development
-    console.error('[adminApiRequest] Error:', { url, error: error.message });
+    if (process.env.NODE_ENV === "development") {
+      console.error('[adminApiRequest] Error:', { url, error: error.message });
+    }
     throw error;
   }
 };
