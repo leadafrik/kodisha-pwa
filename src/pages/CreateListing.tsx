@@ -4,6 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
 import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from "../data/kenyaCounties";
 import { API_BASE_URL, ensureValidAccessToken } from "../config/api";
+import { PAYMENTS_ENABLED } from "../config/featureFlags";
 import { AlertCircle, CheckCircle2, MapPin, Tag, Calendar, Camera, FileText } from "lucide-react";
 import { ErrorAlert } from "../components/ui";
 
@@ -232,6 +233,7 @@ const CreateListing: React.FC = () => {
     const price = Number(form.price) || 0;
     return Math.max(price * 0.005, 49);
   }, [form.price]);
+  const isFreeLaunch = !PAYMENTS_ENABLED;
 
   const recommendedUnit = form.category
     ? RECOMMENDED_UNIT_BY_CATEGORY[form.category]
@@ -386,7 +388,7 @@ const CreateListing: React.FC = () => {
       formData.append("contact", form.contact.trim());
       formData.append("subscriptionActive", form.subscribed ? "true" : "false");
       formData.append("premiumBadge", form.premiumBadge ? "true" : "false");
-      formData.append("premiumBadgePrice", form.premiumBadge ? "199" : "0");
+      formData.append("premiumBadgePrice", form.premiumBadge && !isFreeLaunch ? "199" : "0");
 
       form.images.forEach((img) => formData.append("images", img));
 
@@ -820,11 +822,9 @@ const CreateListing: React.FC = () => {
                       onChange={(e) => setForm((prev) => ({ ...prev, price: e.target.value }))}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     />
-                    {commission > 0 && (
-                      <p className="text-xs text-gray-600 mt-1">
-                        Commission: KSh {commission.toFixed(0)}
-                      </p>
-                    )}
+                    <p className="text-xs text-gray-600 mt-1">
+                      {isFreeLaunch ? "Commission: Free for now" : `Commission: KSh ${commission.toFixed(0)}`}
+                    </p>
                   </div>
 
                   {form.category !== "inputs" && (
@@ -1103,8 +1103,12 @@ const CreateListing: React.FC = () => {
                     className="w-5 h-5 text-green-600"
                   />
                   <div>
-                    <p className="font-semibold text-gray-900">Premium Badge (KSh 199)</p>
-                    <p className="text-sm text-gray-600">Get a premium badge to stand out</p>
+                    <p className="font-semibold text-gray-900">
+                      Premium Badge {isFreeLaunch ? "(Free for now)" : "(KSh 199)"}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Get a premium badge to stand out{isFreeLaunch ? " - free for now." : "."}
+                    </p>
                   </div>
                 </label>
               </div>
