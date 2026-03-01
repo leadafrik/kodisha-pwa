@@ -8,7 +8,19 @@ import React, {
   ReactNode,
 } from "react";
 import { User, AuthContextType, UserFormData } from "../types/property";
-import { API_ENDPOINTS, apiRequest } from "../config/api";
+import {
+  API_ENDPOINTS,
+  apiRequest,
+  refreshAccessToken,
+} from "../config/api";
+import {
+  clearAuthSession,
+  getStoredAccessToken,
+  getStoredAccessTokenExpiry,
+  getStoredRefreshToken,
+  isAccessTokenExpiringSoon,
+  storeAuthSession,
+} from "../utils/authSession";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -147,6 +159,27 @@ const hasCompleteIdVerification = (candidate: any) =>
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isBootstrapping, setIsBootstrapping] = useState(true);
+
+  const persistUser: (apiUser: any) => User = useCallback((apiUser: any) => {
+    const mappedUser = mapBackendUserToFrontendUser(apiUser);
+    setUser(mappedUser);
+    localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
+    return mappedUser;
+  }, []);
+
+  const persistSession: (response: any) => boolean = useCallback((response: any) => {
+    const token = response?.accessToken || response?.token;
+    if (!token) return false;
+
+    storeAuthSession({
+      token,
+      refreshToken: response?.refreshToken,
+      expiresIn: response?.expiresIn,
+    });
+
+    return true;
+  }, []);
 
   const login = async (identifier: string, password: string) => {
     setLoading(true);
@@ -168,12 +201,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error(res.message || "Login failed");
       }
 
-      const mappedUser = mapBackendUserToFrontendUser(res.user);
-      setUser(mappedUser);
-      localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
-
-      if (res.token) {
-        localStorage.setItem("kodisha_token", res.token);
+      persistUser(res.user);
+      if (persistSession(res)) {
         await refreshUser();
       }
     } catch (error) {
@@ -201,12 +230,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error(res.message || "Facebook login failed");
       }
 
-      const mappedUser = mapBackendUserToFrontendUser(res.user);
-      setUser(mappedUser);
-      localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
-
-      if (res.token) {
-        localStorage.setItem("kodisha_token", res.token);
+      persistUser(res.user);
+      if (persistSession(res)) {
         await refreshUser();
       }
     } catch (error) {
@@ -234,12 +259,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error(res.message || "Google login failed");
       }
 
-      const mappedUser = mapBackendUserToFrontendUser(res.user);
-      setUser(mappedUser);
-      localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
-
-      if (res.token) {
-        localStorage.setItem("kodisha_token", res.token);
+      persistUser(res.user);
+      if (persistSession(res)) {
         await refreshUser();
       }
     } catch (error) {
@@ -276,11 +297,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       if (res.user) {
-        const mappedUser = mapBackendUserToFrontendUser(res.user);
-        setUser(mappedUser);
-        localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
-        if (res.token) {
-          localStorage.setItem("kodisha_token", res.token);
+        const mappedUser = persistUser(res.user);
+        if (persistSession(res)) {
           await refreshUser();
         }
         return mappedUser;
@@ -320,14 +338,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         method: "POST",
         body: JSON.stringify({ email, code }),
       });
-      if (!res.success || !res.user || !res.token) {
+      if (!res.success || !res.user || !(res.accessToken || res.token)) {
         throw new Error(res.message || "Invalid code.");
       }
 
-      const mappedUser = mapBackendUserToFrontendUser(res.user);
-      setUser(mappedUser);
-      localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
-      localStorage.setItem("kodisha_token", res.token);
+      persistUser(res.user);
+      persistSession(res);
       await refreshUser();
     } catch (error) {
       console.error("Email OTP verify error:", error);
@@ -362,14 +378,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         method: "POST",
         body: JSON.stringify({ phone, code }),
       });
-      if (!res.success || !res.user || !res.token) {
+      if (!res.success || !res.user || !(res.accessToken || res.token)) {
         throw new Error(res.message || "Invalid code.");
       }
 
-      const mappedUser = mapBackendUserToFrontendUser(res.user);
-      setUser(mappedUser);
-      localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
-      localStorage.setItem("kodisha_token", res.token);
+      persistUser(res.user);
+      persistSession(res);
       await refreshUser();
     } catch (error) {
       console.error("SMS OTP verify error:", error);
@@ -395,14 +409,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         body: JSON.stringify({ email, code, newPassword }),
       });
 
-      if (!res.success || !res.user || !res.token) {
+      if (!res.success || !res.user || !(res.accessToken || res.token)) {
         throw new Error(res.message || "Password reset failed.");
       }
 
-      const mappedUser = mapBackendUserToFrontendUser(res.user);
-      setUser(mappedUser);
-      localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
-      localStorage.setItem("kodisha_token", res.token);
+      persistUser(res.user);
+      persistSession(res);
       await refreshUser();
     } catch (error) {
       console.error("Password reset error:", error);
@@ -413,25 +425,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = () => {
+    void fetch(API_ENDPOINTS.auth.logout, {
+      method: "POST",
+      credentials: "include",
+    }).catch(() => undefined);
     setUser(null);
-    localStorage.removeItem("kodisha_user");
-    localStorage.removeItem("kodisha_token");
+    clearAuthSession();
   };
 
   const refreshUser = useCallback(async () => {
     try {
       const res: any = await apiRequest(API_ENDPOINTS.auth.me);
       if (res.success && res.user) {
-        const mappedUser = mapBackendUserToFrontendUser(res.user);
-        setUser(mappedUser);
-        localStorage.setItem("kodisha_user", JSON.stringify(mappedUser));
-        return mappedUser;
+        return persistUser(res.user);
       }
     } catch (err) {
       console.error("Failed to refresh user:", err);
     }
     return null;
-  }, []);
+  }, [persistUser]);
 
   const updateProfile = (userData: Partial<User>) => {
     if (user) {
@@ -442,48 +454,80 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    try {
-      const savedUser = localStorage.getItem("kodisha_user");
-      if (savedUser) {
-        const parsed = JSON.parse(savedUser);
-        const normalized = normalizeStoredUser(parsed);
-        setUser(normalized);
-        localStorage.setItem("kodisha_user", JSON.stringify(normalized));
-      }
-    } catch (e) {
-      console.error("Failed to load saved user", e);
-    }
-  }, []);
+    let active = true;
 
-  useEffect(() => {
-    const token =
-      localStorage.getItem("kodisha_token") ||
-      localStorage.getItem("kodisha_admin_token") ||
-      localStorage.getItem("token");
-    if (token) {
-      refreshUser();
-    }
+    const bootstrapSession = async () => {
+      try {
+        const savedUser = localStorage.getItem("kodisha_user");
+        if (savedUser) {
+          const parsed = JSON.parse(savedUser);
+          const normalized = normalizeStoredUser(parsed);
+          setUser(normalized);
+          localStorage.setItem("kodisha_user", JSON.stringify(normalized));
+        }
+      } catch (e) {
+        console.error("Failed to load saved user", e);
+      }
+
+      try {
+        const refreshToken = getStoredRefreshToken();
+        const accessToken = getStoredAccessToken();
+
+        if (refreshToken && (!accessToken || isAccessTokenExpiringSoon(0))) {
+          await refreshAccessToken();
+        }
+
+        if (getStoredAccessToken()) {
+          await refreshUser();
+        }
+      } finally {
+        if (active) {
+          setIsBootstrapping(false);
+        }
+      }
+    };
+
+    bootstrapSession();
+
+    return () => {
+      active = false;
+    };
   }, [refreshUser]);
 
   useEffect(() => {
-    const token =
-      localStorage.getItem("kodisha_token") ||
-      localStorage.getItem("kodisha_admin_token") ||
-      localStorage.getItem("token");
+    const token = getStoredAccessToken();
+    const refreshToken = getStoredRefreshToken();
     if (!token || !user) return;
 
-    const refreshOnFocus = () => {
+    const refreshOnFocus = async () => {
+      if (refreshToken && isAccessTokenExpiringSoon(2 * 60 * 1000)) {
+        await refreshAccessToken();
+      }
       refreshUser();
     };
 
-    const refreshOnVisible = () => {
+    const refreshOnVisible = async () => {
       if (document.visibilityState === "visible") {
+        if (refreshToken && isAccessTokenExpiringSoon(2 * 60 * 1000)) {
+          await refreshAccessToken();
+        }
         refreshUser();
       }
     };
 
     window.addEventListener("focus", refreshOnFocus);
     document.addEventListener("visibilitychange", refreshOnVisible);
+
+    const accessTokenExpiry = getStoredAccessTokenExpiry();
+    const refreshTimeout =
+      refreshToken && accessTokenExpiry
+        ? window.setTimeout(async () => {
+            const nextToken = await refreshAccessToken();
+            if (nextToken && document.visibilityState === "visible") {
+              refreshUser();
+            }
+          }, Math.max(accessTokenExpiry - Date.now() - 60 * 1000, 15 * 1000))
+        : null;
 
     const shouldPoll = !hasCompleteIdVerification(user);
     const intervalId = shouldPoll
@@ -497,6 +541,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => {
       window.removeEventListener("focus", refreshOnFocus);
       document.removeEventListener("visibilitychange", refreshOnVisible);
+      if (refreshTimeout !== null) {
+        window.clearTimeout(refreshTimeout);
+      }
       if (intervalId !== null) {
         window.clearInterval(intervalId);
       }
@@ -525,7 +572,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         updateProfile,
         refreshUser,
         register,
-        loading,
+        loading: loading || isBootstrapping,
       }}
     >
       {children}

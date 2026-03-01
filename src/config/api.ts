@@ -1,5 +1,12 @@
 // Environment-aware API configuration
 // Use environment variables for different environments (dev/staging/production)
+import {
+  clearAuthSession,
+  getStoredAccessToken,
+  isAccessTokenExpiringSoon,
+  getStoredRefreshToken,
+  storeAuthSession,
+} from "../utils/authSession";
 
 /**
  * Get the API base URL based on environment
@@ -55,6 +62,8 @@ export const API_ENDPOINTS = {
     smsOtpVerify: `${API_BASE_URL}/auth/verify-sms-otp`,
     passwordReset: `${API_BASE_URL}/auth/password/reset`,
     me: `${API_BASE_URL}/auth/me`,
+    refreshToken: `${API_BASE_URL}/auth/refresh-token`,
+    logout: `${API_BASE_URL}/auth/logout`,
     verifyPhone: `${API_BASE_URL}/auth/verify-phone`,
     resendVerification: `${API_BASE_URL}/auth/resend-verification`,
     registerAdmin: `${API_BASE_URL}/auth/register-admin`,
@@ -166,25 +175,103 @@ export const API_ENDPOINTS = {
   },
 };
 
-export const apiRequest = async (url: string, options: RequestInit = {}) => {
-  try {
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("kodisha_token") ||
-          localStorage.getItem("kodisha_admin_token") ||
-          localStorage.getItem("token")
-        : null;
+const normalizeHeaders = (headers?: HeadersInit): Record<string, string> => {
+  if (!headers) return {};
+  if (headers instanceof Headers) {
+    return Object.fromEntries(headers.entries());
+  }
+  if (Array.isArray(headers)) {
+    return Object.fromEntries(headers);
+  }
+  return headers as Record<string, string>;
+};
 
-    const normalizeHeaders = (headers?: HeadersInit): Record<string, string> => {
-      if (!headers) return {};
-      if (headers instanceof Headers) {
-        return Object.fromEntries(headers.entries());
-      }
-      if (Array.isArray(headers)) {
-        return Object.fromEntries(headers);
-      }
-      return headers as Record<string, string>;
-    };
+const shouldSkipRefresh = (url: string): boolean =>
+  url.includes("/auth/login") ||
+  url.includes("/auth/register") ||
+  url.includes("/auth/facebook/login") ||
+  url.includes("/auth/google/login") ||
+  url.includes("/auth/refresh-token") ||
+  url.includes("/auth/logout") ||
+  url.includes("/request-email-otp") ||
+  url.includes("/verify-email-otp") ||
+  url.includes("/request-sms-otp") ||
+  url.includes("/verify-sms-otp");
+
+let refreshRequest: Promise<string | null> | null = null;
+
+export const refreshAccessToken = async (): Promise<string | null> => {
+  if (typeof window === "undefined") return null;
+  if (refreshRequest) return refreshRequest;
+
+  const refreshToken = getStoredRefreshToken();
+  if (!refreshToken) return null;
+
+  refreshRequest = (async () => {
+    const response = await fetch(API_ENDPOINTS.auth.refreshToken, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      clearAuthSession();
+      return null;
+    }
+
+    const accessToken = data.accessToken || data.token;
+    if (!accessToken) {
+      clearAuthSession();
+      return null;
+    }
+
+    storeAuthSession({
+      token: accessToken,
+      refreshToken: data.refreshToken || refreshToken,
+      expiresIn: data.expiresIn,
+    });
+
+    return accessToken;
+  })();
+
+  try {
+    return await refreshRequest;
+  } finally {
+    refreshRequest = null;
+  }
+};
+
+export const ensureValidAccessToken = async (): Promise<string | null> => {
+  if (typeof window === "undefined") return null;
+
+  const adminToken = localStorage.getItem("kodisha_admin_token");
+  if (adminToken) {
+    return adminToken;
+  }
+
+  const accessToken = getStoredAccessToken();
+  const refreshToken = getStoredRefreshToken();
+
+  if (!accessToken && refreshToken) {
+    return refreshAccessToken();
+  }
+
+  if (accessToken && refreshToken && isAccessTokenExpiringSoon()) {
+    return (await refreshAccessToken()) || accessToken;
+  }
+
+  return accessToken;
+};
+
+const apiRequestInternal = async (
+  url: string,
+  options: RequestInit = {},
+  allowRefresh = true
+): Promise<any> => {
+  try {
+    const token = typeof window !== "undefined" ? getStoredAccessToken() : null;
 
     const baseHeaders = normalizeHeaders(options.headers);
     const authHeader: Record<string, string> =
@@ -192,11 +279,16 @@ export const apiRequest = async (url: string, options: RequestInit = {}) => {
         ? { Authorization: `Bearer ${token}` }
         : {};
 
+    const isFormDataBody =
+      typeof FormData !== "undefined" && options.body instanceof FormData;
+
     const headers: Record<string, string> = {
-      "Content-Type": "application/json",
       ...authHeader,
       ...baseHeaders,
     };
+    if (!isFormDataBody && !headers["Content-Type"]) {
+      headers["Content-Type"] = "application/json";
+    }
 
     const response = await fetch(url, {
       headers,
@@ -208,11 +300,29 @@ export const apiRequest = async (url: string, options: RequestInit = {}) => {
 
     if (!response.ok) {
       if (response.status === 401 || response.status === 403) {
+        const isAdminSession =
+          typeof window !== "undefined" &&
+          !!localStorage.getItem("kodisha_admin_token");
+
+        if (allowRefresh && !isAdminSession && !shouldSkipRefresh(url)) {
+          const nextToken = await refreshAccessToken();
+          if (nextToken) {
+            return apiRequestInternal(
+              url,
+              {
+                ...options,
+                headers: {
+                  ...baseHeaders,
+                  Authorization: `Bearer ${nextToken}`,
+                },
+              },
+              false
+            );
+          }
+        }
+
         if (typeof window !== "undefined") {
-          localStorage.removeItem("kodisha_token");
-          localStorage.removeItem("kodisha_admin_token");
-          localStorage.removeItem("token");
-          localStorage.removeItem("kodisha_user");
+          clearAuthSession();
           if (!window.location.pathname.includes("/login")) {
             window.location.href = "/login";
           }
@@ -235,6 +345,9 @@ export const apiRequest = async (url: string, options: RequestInit = {}) => {
   }
 };
 
+export const apiRequest = async (url: string, options: RequestInit = {}) =>
+  apiRequestInternal(url, options, true);
+
 export const adminApiRequest = async (
   url: string,
   options: RequestInit = {}
@@ -256,7 +369,9 @@ export const adminApiRequest = async (
     };
 
     // Only set Content-Type for requests that carry a JSON body to avoid unnecessary CORS preflights on GETs
-    if (options.body && !headers["Content-Type"]) {
+    const isFormDataBody =
+      typeof FormData !== "undefined" && options.body instanceof FormData;
+    if (options.body && !headers["Content-Type"] && !isFormDataBody) {
       headers["Content-Type"] = "application/json";
     }
 
@@ -297,9 +412,7 @@ export const adminApiRequest = async (
     if (!response.ok) {
       if (response.status === 401 || response.status === 403) {
         console.log(`[adminApiRequest] Auth error (${response.status}), clearing tokens`);
-        localStorage.removeItem("kodisha_admin_token");
-        localStorage.removeItem("kodisha_token");
-        localStorage.removeItem("token");
+        clearAuthSession();
         if (typeof window !== "undefined" && !window.location.pathname.includes("/login")) {
           window.location.href = "/login";
         }

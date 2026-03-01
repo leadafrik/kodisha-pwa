@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiRequest, API_ENDPOINTS } from "../config/api";
+import { storeAuthSession } from "../utils/authSession";
 
 const PhoneVerification: React.FC = () => {
   const [phone, setPhone] = useState("");
@@ -45,8 +46,16 @@ const PhoneVerification: React.FC = () => {
       });
 
       if (res.success) {
-        localStorage.setItem("kodisha_token", res.data.token);
-        localStorage.setItem("kodisha_user", JSON.stringify(res.data));
+        if (res.data?.token || res.data?.accessToken) {
+          storeAuthSession({
+            token: res.data?.token || res.data?.accessToken,
+            refreshToken: res.data?.refreshToken,
+            expiresIn: res.data?.expiresIn,
+          });
+        }
+        if (res.data?.user) {
+          localStorage.setItem("kodisha_user", JSON.stringify(res.data.user));
+        }
         alert("Phone verified successfully.");
         navigate("/profile");
       } else {

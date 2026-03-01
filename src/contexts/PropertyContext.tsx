@@ -9,7 +9,7 @@ import {
   LandListing,
   ServiceListing,
 } from "../types/property";
-import { API_ENDPOINTS } from "../config/api";
+import { API_ENDPOINTS, ensureValidAccessToken } from "../config/api";
 
 type ServiceType = "equipment" | "agrovet" | "professional_services";
 type ProductListing = any;
@@ -221,7 +221,7 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
   const addProperty = async (formData: FormData) => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("kodisha_token");
+      const token = await ensureValidAccessToken();
 
       if (!token) {
         alert("You must be logged in to list property.");
@@ -258,7 +258,7 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
     setLoading(true);
     try {
       const type = (formData.get("type") as string) || "equipment";
-      const token = localStorage.getItem("kodisha_token");
+      const token = await ensureValidAccessToken();
 
       if (!token) {
         alert("You must be logged in and verified to list a service or agrovet.");
@@ -297,7 +297,7 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
   const addProduct = async (formData: FormData) => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("kodisha_token");
+      const token = await ensureValidAccessToken();
       if (!token) {
         alert("You must be logged in to list a product.");
         throw new Error("No auth token");

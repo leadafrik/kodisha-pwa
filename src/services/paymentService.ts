@@ -1,4 +1,4 @@
-import { API_ENDPOINTS } from "../config/api";
+import { API_ENDPOINTS, apiRequest, ensureValidAccessToken } from "../config/api";
 
 export type PaymentRequestPayload = {
   targetType: "land" | "service" | "agrovet";
@@ -13,25 +13,18 @@ export type PaymentRequestPayload = {
 export const requestStkPayment = async (
   payload: PaymentRequestPayload
 ) => {
-  const token = localStorage.getItem("kodisha_token");
+  const token = await ensureValidAccessToken();
   if (!token) {
     throw new Error("You must be logged in to complete MPesa payments.");
   }
 
-  const response = await fetch(API_ENDPOINTS.payments.initiateStk, {
+  const data = await apiRequest(API_ENDPOINTS.payments.initiateStk, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(payload),
   });
-
-  const data = await response.json();
-  if (!response.ok) {
-    const message = data?.message || "Failed to initiate MPesa payment.";
-    throw new Error(message);
-  }
 
   // If backend indicates a simulated/stubbed MPesa response (dev sandbox), notify user
   const mpesaSimulated = data?.simulated || data?.mpesa?.simulated;

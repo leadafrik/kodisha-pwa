@@ -1,24 +1,22 @@
 /**
  * Auth utilities for token management and authentication helpers
  */
+import {
+  clearAuthSession,
+  getStoredAccessToken,
+  storeAuthSession,
+} from "./authSession";
 
 export const getAuthToken = (): string | null => {
-  return localStorage.getItem('kodisha_token') || localStorage.getItem('kodisha_admin_token');
+  return getStoredAccessToken();
 };
 
 export const setAuthToken = (token: string, isAdmin = false): void => {
-  if (isAdmin) {
-    localStorage.setItem('kodisha_admin_token', token);
-    localStorage.removeItem('kodisha_token');
-  } else {
-    localStorage.setItem('kodisha_token', token);
-    localStorage.removeItem('kodisha_admin_token');
-  }
+  storeAuthSession({ token, isAdmin });
 };
 
 export const clearAuthToken = (): void => {
-  localStorage.removeItem('kodisha_token');
-  localStorage.removeItem('kodisha_admin_token');
+  clearAuthSession();
 };
 
 export const isUserAdmin = (): boolean => {

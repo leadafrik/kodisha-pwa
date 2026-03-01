@@ -13,7 +13,6 @@ import { useProperties } from "../contexts/PropertyContext";
 import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
 import { usePageContent } from "../hooks/usePageContent";
 import { PAYMENTS_ENABLED } from "../config/featureFlags";
-import RaffleCampaign from "../components/RaffleCampaign";
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
 const FREE_WINDOW_DAYS = 10;
@@ -21,17 +20,17 @@ const FREE_WINDOW_DAYS = 10;
 const conversionPillars = [
   {
     title: "No middlemen",
-    copy: "Chat directly with buyers and keep full control of your profit.",
+    copy: "Talk directly to buyers.",
   },
   {
     title: "Instant trust",
-    copy: "Verified badge helps buyers choose you faster.",
+    copy: "Verification helps buyers choose faster.",
   },
   {
     title: "Zero launch risk",
     copy: PAYMENTS_ENABLED
       ? `Listing remains KSh 0 for your first ${FREE_WINDOW_DAYS} days after signup.`
-      : "Listings are currently KSh 0 platform-wide during launch.",
+      : "Listings are KSh 0 during launch.",
   },
 ];
 
@@ -160,17 +159,13 @@ const Home: React.FC = () => {
   const heroFocusItems = [
     {
       title: isGlobalFreeListing ? "Free to list" : "Launch window",
-      copy: isGlobalFreeListing ? "No listing fee right now." : urgencyBody,
-    },
-    {
-      title: "Early position",
-      copy: "47 counties are open for early reputation.",
-    },
-    {
-      title: "Trust later",
-      copy: "Start now. Verify when ready.",
-    },
-  ].slice(0, isPhone ? 2 : 3);
+    copy: isGlobalFreeListing ? "No listing fee right now." : urgencyBody,
+  },
+  {
+    title: "Start now",
+    copy: "Create your account now. Verify when ready.",
+  },
+  ];
   const finalCallCopy = isGlobalFreeListing
     ? "Create your account and post your first listing. Listing is free right now."
     : user && daysLeft <= 0
@@ -197,9 +192,6 @@ const Home: React.FC = () => {
         }
         .home-title {
           font-family: "Fraunces", "Georgia", serif;
-        }
-        .campaign-summary::-webkit-details-marker {
-          display: none;
         }
       `}</style>
 
@@ -281,10 +273,10 @@ const Home: React.FC = () => {
           <div className="mb-7">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
-                Why Agrisoko
+                Why join
               </p>
               <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl md:text-4xl">
-                Why people sign up
+                Clear value
               </h2>
             </div>
           </div>
@@ -322,10 +314,10 @@ const Home: React.FC = () => {
         <section className="mx-auto max-w-7xl px-4 pb-10 sm:pb-14">
           <div className="mb-8">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
-              Market proof
+              Live market
             </p>
             <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl md:text-4xl">
-              Buyers are active.
+              Buyers are searching.
             </h2>
           </div>
 
@@ -378,10 +370,10 @@ const Home: React.FC = () => {
 
             <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
               <p className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-emerald-800">
-                Trade safely on Agrisoko
+                Trust
               </p>
               <h3 className="mt-3 text-xl font-semibold text-slate-900 sm:text-2xl">
-                Trust built into every profile
+                Trust built in
               </h3>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 {trustFeatures.map((feature) => (
@@ -396,34 +388,9 @@ const Home: React.FC = () => {
           </div>
         </section>
 
-        <section className="border-y border-slate-200 bg-white px-4 py-8 sm:py-10">
-          <div className="mx-auto max-w-7xl">
-            <details className="group rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <summary className="campaign-summary flex cursor-pointer list-none items-center justify-between gap-3">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Founding seller reward pool</p>
-                  <p className="text-lg font-semibold text-slate-900">Open raffle details</p>
-                  {!isPhone && (
-                    <p className="text-sm text-slate-600">
-                    Bonus reward for qualified sellers.
-                    </p>
-                  )}
-                </div>
-                <span className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-700">
-                  View
-                </span>
-              </summary>
-              <div className="mt-4">
-                <RaffleCampaign />
-              </div>
-            </details>
-          </div>
-        </section>
-
         <section className="mx-auto max-w-7xl px-4 pb-14 pt-6 sm:pb-16 sm:pt-8">
           <div className="rounded-3xl bg-gradient-to-r from-emerald-700 to-teal-700 p-5 text-white shadow-lg sm:p-8 md:p-10">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-100">Final call</p>
-            <h2 className="home-title mt-3 text-2xl sm:text-3xl md:text-4xl">Ready to start?</h2>
+            <h2 className="home-title text-2xl sm:text-3xl md:text-4xl">Ready to start?</h2>
             <p className="mt-3 max-w-2xl text-sm text-emerald-100 md:text-base">
               {finalCallCopy}
             </p>

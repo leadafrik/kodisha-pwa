@@ -7,7 +7,7 @@ import {
   getConstituenciesByCounty,
   getWardsByConstituency,
 } from "../data/kenyaCounties";
-import { API_BASE_URL } from "../config/api";
+import { API_BASE_URL, ensureValidAccessToken } from "../config/api";
 import { validatePhone } from "../utils/formValidation";
 
 const UNITS = ["kg", "tonnes", "bags", "units", "liters", "crates"];
@@ -550,7 +550,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
         return;
       }
 
-      const token = localStorage.getItem("kodisha_token");
+      const token = await ensureValidAccessToken();
       if (!token) {
         setError("Session expired. Please log in again.");
         return;

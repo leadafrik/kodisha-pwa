@@ -1,9 +1,4 @@
-import { API_ENDPOINTS } from '../config/api';
-import { getAuthToken } from '../utils/auth';
-
-const getMessageAuthToken = (): string | null => {
-  return getAuthToken() || localStorage.getItem('token');
-};
+import { API_ENDPOINTS, apiRequest, ensureValidAccessToken } from '../config/api';
 
 export interface Message {
   _id: string;
@@ -34,15 +29,14 @@ export const sendMessage = async (
   body: string,
   listingId?: string
 ): Promise<Message> => {
-  const token = getMessageAuthToken();
+  const token = await ensureValidAccessToken();
   if (!token) {
     throw new Error('Authentication required');
   }
 
-  const response = await fetch(API_ENDPOINTS.messages.send, {
+  return apiRequest(API_ENDPOINTS.messages.send, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
@@ -51,38 +45,23 @@ export const sendMessage = async (
       listingId: listingId || undefined,
     }),
   });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to send message');
-  }
-
-  return response.json();
 };
 
 /**
  * Get all message threads (latest message per contact)
  */
 export const getMessageThreads = async (): Promise<MessageThread[]> => {
-  const token = getMessageAuthToken();
+  const token = await ensureValidAccessToken();
   if (!token) {
     throw new Error('Authentication required');
   }
 
-  const response = await fetch(API_ENDPOINTS.messages.threads, {
+  const data = await apiRequest(API_ENDPOINTS.messages.threads, {
     method: 'GET',
     headers: {
-      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
   });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to fetch message threads');
-  }
-
-  const data = await response.json();
   return data.data || [];
 };
 
@@ -90,25 +69,17 @@ export const getMessageThreads = async (): Promise<MessageThread[]> => {
  * Get full conversation with a specific user
  */
 export const getConversation = async (userId: string): Promise<Message[]> => {
-  const token = getMessageAuthToken();
+  const token = await ensureValidAccessToken();
   if (!token) {
     throw new Error('Authentication required');
   }
 
-  const response = await fetch(API_ENDPOINTS.messages.withUser(userId), {
+  const data = await apiRequest(API_ENDPOINTS.messages.withUser(userId), {
     method: 'GET',
     headers: {
-      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
   });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to fetch conversation');
-  }
-
-  const data = await response.json();
   return data.data || [];
 };
 
@@ -116,23 +87,17 @@ export const getConversation = async (userId: string): Promise<Message[]> => {
  * Mark all messages from a user as read
  */
 export const markMessagesAsRead = async (userId: string): Promise<void> => {
-  const token = getMessageAuthToken();
+  const token = await ensureValidAccessToken();
   if (!token) {
     throw new Error('Authentication required');
   }
 
-  const response = await fetch(API_ENDPOINTS.messages.markRead(userId), {
+  await apiRequest(API_ENDPOINTS.messages.markRead(userId), {
     method: 'PATCH',
     headers: {
-      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
   });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to mark messages as read');
-  }
 };
 
 export const messageService = {

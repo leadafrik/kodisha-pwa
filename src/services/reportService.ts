@@ -1,4 +1,9 @@
-import { API_ENDPOINTS, adminApiRequest, apiRequest } from '../config/api';
+import {
+  API_ENDPOINTS,
+  adminApiRequest,
+  apiRequest,
+  ensureValidAccessToken,
+} from '../config/api';
 
 export interface Report {
   _id: string;
@@ -19,11 +24,6 @@ export interface ReportSubmissionResult {
   message?: string;
   flagsCount?: number;
 }
-
-const getUserToken = () =>
-  localStorage.getItem('kodisha_token') ||
-  localStorage.getItem('kodisha_admin_token') ||
-  localStorage.getItem('token');
 
 const getAdminToken = () =>
   localStorage.getItem('kodisha_admin_token') ||
@@ -64,7 +64,8 @@ export const submitReport = async (
   listingType?: string,
   severity?: 'low' | 'medium' | 'high'
 ): Promise<ReportSubmissionResult> => {
-  if (!getUserToken()) {
+  const token = await ensureValidAccessToken();
+  if (!token) {
     throw new Error('Authentication required');
   }
 
@@ -73,6 +74,9 @@ export const submitReport = async (
 
   const data = await apiRequest(API_ENDPOINTS.reports.submit(sellerId), {
     method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
     body: JSON.stringify({
       reason,
       description: (description || '').trim() || undefined,

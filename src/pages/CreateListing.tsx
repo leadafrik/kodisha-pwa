@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
 import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from "../data/kenyaCounties";
-import { API_BASE_URL } from "../config/api";
+import { API_BASE_URL, ensureValidAccessToken } from "../config/api";
 import { AlertCircle, CheckCircle2, MapPin, Tag, Calendar, Camera, FileText } from "lucide-react";
 import { ErrorAlert } from "../components/ui";
 
@@ -390,7 +390,12 @@ const CreateListing: React.FC = () => {
 
       form.images.forEach((img) => formData.append("images", img));
 
-      const token = localStorage.getItem("kodisha_token");
+      const token = await ensureValidAccessToken();
+      if (!token) {
+        setError("Session expired. Please log in again.");
+        setUploading(false);
+        return;
+      }
       const response = await fetch(`${API_BASE_URL}/products`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },

@@ -1,8 +1,4 @@
-import { API_ENDPOINTS } from '../config/api';
-
-const getAuthToken = (): string | null => {
-  return localStorage.getItem('kodisha_token');
-};
+import { API_ENDPOINTS, apiRequest, ensureValidAccessToken } from '../config/api';
 
 export interface Favorite {
   listingId: string;
@@ -15,25 +11,17 @@ export interface Favorite {
  * Get all user's saved/favorite listings
  */
 export const getFavorites = async (): Promise<Favorite[]> => {
-  const token = getAuthToken();
+  const token = await ensureValidAccessToken();
   if (!token) {
     throw new Error('Authentication required');
   }
 
-  const response = await fetch(API_ENDPOINTS.favorites.list, {
+  const data = await apiRequest(API_ENDPOINTS.favorites.list, {
     method: 'GET',
     headers: {
-      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
   });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to fetch favorites');
-  }
-
-  const data = await response.json();
   return data.data || [];
 };
 
@@ -44,15 +32,14 @@ export const toggleFavorite = async (
   listingId: string,
   listingType: 'land' | 'product' | 'equipment' | 'service' | 'agrovet'
 ): Promise<{ action: 'added' | 'removed' }> => {
-  const token = getAuthToken();
+  const token = await ensureValidAccessToken();
   if (!token) {
     throw new Error('Authentication required');
   }
 
-  const response = await fetch(API_ENDPOINTS.favorites.toggle, {
+  const data = await apiRequest(API_ENDPOINTS.favorites.toggle, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
@@ -60,13 +47,6 @@ export const toggleFavorite = async (
       listingType,
     }),
   });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to toggle favorite');
-  }
-
-  const data = await response.json();
   return {
     action: data.action || 'removed',
   };

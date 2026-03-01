@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useProperties } from "../contexts/PropertyContext";
 import { useAuth } from "../contexts/AuthContext";
 import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from "../data/kenyaCounties";
-import { API_BASE_URL } from "../config/api";
+import { API_BASE_URL, ensureValidAccessToken } from "../config/api";
 
 type ProductCategory = "produce" | "livestock" | "inputs";
 
@@ -95,7 +95,7 @@ const ListProduct: React.FC<ListProductProps> = ({ initialCategory = "produce" }
   const selfieNeeded = !selfieVerified;
 
   const uploadVerificationDoc = async (type: string, file: File) => {
-    const token = localStorage.getItem('kodisha_token');
+    const token = await ensureValidAccessToken();
     const userId = (user as any)?._id || (user as any)?.id;
     if (!token) {
       throw new Error('You must be logged in to upload verification documents.');

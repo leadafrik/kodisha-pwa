@@ -4,7 +4,7 @@ import { useProperties } from "../contexts/PropertyContext";
 import { kenyaCounties } from "../data/kenyaCounties";
 import { ServiceListing } from "../types/property";
 import { useAuth } from "../contexts/AuthContext";
-import { API_ENDPOINTS } from "../config/api";
+import { API_ENDPOINTS, ensureValidAccessToken } from "../config/api";
 import { handleImageError } from "../utils/imageFallback";
 
 type ServiceType = "equipment" | "agrovet" | "professional_services";
@@ -245,7 +245,7 @@ const FindServices: React.FC = () => {
     if (!body || !body.trim()) return;
 
     try {
-      const token = localStorage.getItem("kodisha_token");
+      const token = await ensureValidAccessToken();
       if (!token) {
         alert("Please log in to message the provider.");
         return;

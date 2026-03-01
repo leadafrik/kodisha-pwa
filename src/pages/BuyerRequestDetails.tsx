@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { API_BASE_URL } from '../config/api';
+import { API_BASE_URL, ensureValidAccessToken } from '../config/api';
 import * as Sentry from '@sentry/react';
 import { handleImageError } from "../utils/imageFallback";
 
@@ -81,9 +81,7 @@ const BuyerRequestDetails: React.FC = () => {
   const initialRequest = (location.state as any)?.request;
 
   // Helper: Get auth token
-  const getAuthToken = (): string | null => {
-    return localStorage.getItem("kodisha_token") || localStorage.getItem("kodisha_admin_token");
-  };
+  const getAuthToken = async (): Promise<string | null> => ensureValidAccessToken();
 
   useEffect(() => {
     const fetchRequest = async () => {
@@ -104,12 +102,11 @@ const BuyerRequestDetails: React.FC = () => {
           return;
         }
 
+        const token = await getAuthToken();
         const response = await fetch(
           `${API_BASE_URL}/buyer-requests/${id}`,
           {
-            headers: {
-              'Authorization': `Bearer ${getAuthToken()}`,
-            }
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {},
           }
         );
 
@@ -157,6 +154,10 @@ const BuyerRequestDetails: React.FC = () => {
 
     try {
       setSubmitting(true);
+      const token = await getAuthToken();
+      if (!token) {
+        throw new Error('Please log in again to respond.');
+      }
 
       const response = await fetch(
         `${API_BASE_URL}/buyer-requests/${request._id}/respond`,
@@ -164,7 +165,7 @@ const BuyerRequestDetails: React.FC = () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getAuthToken()}`,
+            'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify({
             message: replyMessage.trim(),
@@ -185,12 +186,11 @@ const BuyerRequestDetails: React.FC = () => {
       }, 3000);
 
       // Refresh the request to show the new response
+      const refreshedToken = await getAuthToken();
       const refreshResponse = await fetch(
         `${API_BASE_URL}/buyer-requests/${request._id}`,
         {
-          headers: {
-            'Authorization': `Bearer ${getAuthToken()}`,
-          }
+          headers: refreshedToken ? { 'Authorization': `Bearer ${refreshedToken}` } : {}
         }
       );
 
@@ -212,13 +212,17 @@ const BuyerRequestDetails: React.FC = () => {
 
     setMarkingFulfilled(true);
     try {
+      const token = await getAuthToken();
+      if (!token) {
+        throw new Error('Please log in again to update this request.');
+      }
       const response = await fetch(
         `${API_BASE_URL}/buyer-requests/${request._id}/mark-fulfilled`,
         {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getAuthToken()}`,
+            'Authorization': `Bearer ${token}`,
           },
         }
       );

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Star } from 'lucide-react';
-import { API_BASE_URL } from '../config/api';
-import { getAuthToken } from '../utils/auth';
+import { API_BASE_URL, ensureValidAccessToken } from '../config/api';
 
 interface SubmitRatingProps {
   ratedUserId: string;
@@ -38,7 +37,7 @@ const SubmitRating: React.FC<SubmitRatingProps> = ({
     setLoading(true);
 
     try {
-      const token = getAuthToken() || localStorage.getItem('token');
+      const token = await ensureValidAccessToken();
       if (!token) {
         throw new Error('Authentication required');
       }

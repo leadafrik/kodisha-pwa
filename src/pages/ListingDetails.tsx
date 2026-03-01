@@ -3,16 +3,17 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import GoogleMapsLoader from "../components/GoogleMapsLoader";
 import ListingMap from "../components/ListingMap";
 import ReportModal from "../components/ReportModal";
-import { API_ENDPOINTS, API_BASE_URL, adminApiRequest } from "../config/api";
+import {
+  API_ENDPOINTS,
+  API_BASE_URL,
+  adminApiRequest,
+  ensureValidAccessToken,
+} from "../config/api";
 import { io, Socket } from "socket.io-client";
 import { favoritesService } from "../services/favoritesService";
 import { handleImageError } from "../utils/imageFallback";
+import { getAuthToken } from "../utils/auth";
 import { Star } from "lucide-react";
-
-// Helper: Get auth token (user or admin)
-const getAuthToken = (): string | null => {
-  return localStorage.getItem("kodisha_token") || localStorage.getItem("kodisha_admin_token");
-};
 
 // Helper: Check if user is admin by checking role in stored user data
 const isUserAdmin = (): boolean => {
@@ -359,7 +360,7 @@ const ListingDetails: React.FC = () => {
 
   const fetchMessages = async (ownerId: string) => {
     try {
-      const token = getAuthToken();
+      const token = await ensureValidAccessToken();
       if (!token) return; // chat only for logged in users
 
       // Fetch messages with this listing's owner
@@ -388,8 +389,8 @@ const ListingDetails: React.FC = () => {
     }
   };
 
-  const setupSocket = (ownerId: string) => {
-    const token = getAuthToken();
+  const setupSocket = async (ownerId: string) => {
+    const token = await ensureValidAccessToken();
     if (!token) return;
 
     if (socketRef.current) {
@@ -452,7 +453,7 @@ const ListingDetails: React.FC = () => {
     if (!newMessage.trim() || !listing?.owner?._id) return;
     setSending(true);
     try {
-      const token = getAuthToken();
+      const token = await ensureValidAccessToken();
       if (!token) {
         alert("Please log in to chat with the seller.");
         return;
@@ -515,7 +516,7 @@ const ListingDetails: React.FC = () => {
     if (listing?.owner?._id) {
       fetchMessages(listing.owner._id);
       fetchUserRatings(listing.owner._id);
-      setupSocket(listing.owner._id);
+      void setupSocket(listing.owner._id);
     }
     return () => {
       if (socketRef.current) {
@@ -601,7 +602,7 @@ const ListingDetails: React.FC = () => {
     setMarkingSold(true);
     setSoldMessage("");
     try {
-      const token = getAuthToken();
+      const token = await ensureValidAccessToken();
       if (!token) { window.location.href = '/login'; return; }
       const markEndpoint = listingType === 'product'
         ? API_ENDPOINTS.services.products.markSold(listing._id)
@@ -625,7 +626,7 @@ const ListingDetails: React.FC = () => {
     if (!listing?.owner?._id || ratingScore === 0) return;
     setSubmittingRating(true);
     try {
-      const token = getAuthToken();
+      const token = await ensureValidAccessToken();
       if (!token) { window.location.href = '/login'; return; }
       const res = await fetch(API_ENDPOINTS.ratings.submit, {
         method: 'POST',

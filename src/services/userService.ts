@@ -1,8 +1,4 @@
-import { API_ENDPOINTS } from '../config/api';
-
-const getAuthToken = (): string | null => {
-  return localStorage.getItem('kodisha_token');
-};
+import { API_ENDPOINTS, apiRequest, ensureValidAccessToken } from '../config/api';
 
 export interface UserProfile {
   _id: string;
@@ -45,7 +41,7 @@ export const getUserProfile = async (userId: string): Promise<UserProfile> => {
 export const uploadProfilePicture = async (
   file: File
 ): Promise<{ profilePicture: string }> => {
-  const token = getAuthToken();
+  const token = await ensureValidAccessToken();
   if (!token) {
     throw new Error('Authentication required');
   }
@@ -53,20 +49,13 @@ export const uploadProfilePicture = async (
   const formData = new FormData();
   formData.append('profilePicture', file);
 
-  const response = await fetch(API_ENDPOINTS.users.uploadProfilePicture, {
+  const data = await apiRequest(API_ENDPOINTS.users.uploadProfilePicture, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
     },
     body: formData,
   });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to upload profile picture');
-  }
-
-  const data = await response.json();
   return {
     profilePicture: data.profilePicture,
   };
@@ -76,23 +65,17 @@ export const uploadProfilePicture = async (
  * Delete profile picture
  */
 export const deleteProfilePicture = async (): Promise<void> => {
-  const token = getAuthToken();
+  const token = await ensureValidAccessToken();
   if (!token) {
     throw new Error('Authentication required');
   }
 
-  const response = await fetch(API_ENDPOINTS.users.deleteProfilePicture, {
+  await apiRequest(API_ENDPOINTS.users.deleteProfilePicture, {
     method: 'DELETE',
     headers: {
-      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
   });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to delete profile picture');
-  }
 };
 
 /**
@@ -102,26 +85,17 @@ export const scheduleAccountDeletion = async (): Promise<{
   message: string;
   scheduledDeletionAt: string;
 }> => {
-  const token = getAuthToken();
+  const token = await ensureValidAccessToken();
   if (!token) {
     throw new Error('Authentication required');
   }
 
-  const response = await fetch(API_ENDPOINTS.users.deleteAccount, {
+  return apiRequest(API_ENDPOINTS.users.deleteAccount, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
   });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to schedule account deletion');
-  }
-
-  const data = await response.json();
-  return data;
 };
 
 /**
@@ -131,26 +105,17 @@ export const reactivateAccount = async (): Promise<{
   message: string;
   reactivatedAt: string;
 }> => {
-  const token = getAuthToken();
+  const token = await ensureValidAccessToken();
   if (!token) {
     throw new Error('Authentication required');
   }
 
-  const response = await fetch(API_ENDPOINTS.users.reactivateAccount, {
+  return apiRequest(API_ENDPOINTS.users.reactivateAccount, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
   });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to reactivate account');
-  }
-
-  const data = await response.json();
-  return data;
 };
 
 export const userService = {

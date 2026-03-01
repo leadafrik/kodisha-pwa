@@ -5,7 +5,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useProperties } from "../contexts/PropertyContext";
 import ProfilePictureUpload from "../components/ProfilePictureUpload";
 import { scheduleAccountDeletion } from "../services/userService";
-import { API_ENDPOINTS } from "../config/api";
+import { API_ENDPOINTS, ensureValidAccessToken } from "../config/api";
 
 type ListingsTab = "land" | "services" | "agrovets" | "products";
 
@@ -274,7 +274,7 @@ const Profile: React.FC = () => {
         return;
       }
 
-      const token = localStorage.getItem("kodisha_token");
+      const token = await ensureValidAccessToken();
       if (!token) {
         setProductEditError("Please log in again to edit this listing.");
         return;
@@ -334,7 +334,7 @@ const Profile: React.FC = () => {
       );
       if (!shouldProceed) return;
 
-      const token = localStorage.getItem("kodisha_token");
+      const token = await ensureValidAccessToken();
       if (!token) {
         window.alert("Please log in again to relist.");
         return;

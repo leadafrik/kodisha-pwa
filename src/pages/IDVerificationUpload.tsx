@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { API_BASE_URL } from "../config/api";
+import { API_BASE_URL, ensureValidAccessToken } from "../config/api";
 import { Upload, CheckCircle, AlertCircle, Shield } from "lucide-react";
 import { handleImageError } from "../utils/imageFallback";
 
@@ -55,17 +55,10 @@ const IDVerificationUpload: React.FC = () => {
     }
   };
 
-  const getAuthHeaders = (): Record<string, string> => {
-    if (typeof window === "undefined") return {};
-    const token =
-      localStorage.getItem("kodisha_token") || localStorage.getItem("token");
+  const getAuthHeaders = useCallback(async (): Promise<Record<string, string>> => {
+    const token = await ensureValidAccessToken();
     return token ? { Authorization: `Bearer ${token}` } : {};
-  };
-
-  const getAuthToken = () => {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem("kodisha_token") || localStorage.getItem("token");
-  };
+  }, []);
 
   const handleAuthExpired = useCallback(() => {
     setError("Session expired. Please sign in again.");
@@ -77,14 +70,14 @@ const IDVerificationUpload: React.FC = () => {
     if (!user) {
       return;
     }
-    const token = getAuthToken();
+    const token = await ensureValidAccessToken();
     if (!token) {
       handleAuthExpired();
       return;
     }
     try {
       const response = await fetch(`${API_BASE_URL}/verification/id/status`, {
-        headers: getAuthHeaders(),
+        headers: await getAuthHeaders(),
         credentials: "include",
       });
       if (response.status === 401) {
@@ -117,7 +110,7 @@ const IDVerificationUpload: React.FC = () => {
     } catch {
       setLatestVerification(null);
     }
-  }, [handleAuthExpired, updateProfile, user]);
+  }, [getAuthHeaders, handleAuthExpired, updateProfile, user]);
 
   useEffect(() => {
     if (!user) {
@@ -158,7 +151,7 @@ const IDVerificationUpload: React.FC = () => {
       return;
     }
 
-    const token = getAuthToken();
+    const token = await ensureValidAccessToken();
     if (!token) {
       handleAuthExpired();
       return;
@@ -178,7 +171,7 @@ const IDVerificationUpload: React.FC = () => {
         `${API_BASE_URL}/verification/id/submit-documents`,
         {
           method: "POST",
-          headers: getAuthHeaders(),
+          headers: await getAuthHeaders(),
           credentials: "include",
           body: formData,
         }

@@ -1,4 +1,5 @@
 import axios, { AxiosError } from 'axios';
+import { clearAuthSession } from './authSession';
 
 export interface ApiError {
   message: string;
@@ -40,7 +41,7 @@ export const handleApiError = (error: any): ApiError => {
       };
     case 401:
       // Unauthorized - clear auth and optionally redirect (skip navigation in test environment to avoid jsdom warnings)
-      localStorage.removeItem('token');
+      clearAuthSession();
       if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'test') {
         window.location.href = '/login';
       }

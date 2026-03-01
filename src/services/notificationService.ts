@@ -4,7 +4,7 @@
  * Includes support for monthly reminder notifications
  */
 
-import { apiRequest } from '../config/api';
+import { apiRequest, ensureValidAccessToken } from '../config/api';
 
 export interface Notification {
   id: string;
@@ -79,7 +79,10 @@ export const updateNotificationPreferences = async (
   preferences: Partial<NotificationPreferences>
 ): Promise<NotificationPreferences> => {
   try {
-    const token = localStorage.getItem('kodisha_token') || localStorage.getItem('token');
+    const token = await ensureValidAccessToken();
+    if (!token) {
+      throw new Error('Authentication required');
+    }
     const response = await apiRequest(
       `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/users/${userId}/notification-preferences`,
       {
@@ -113,7 +116,10 @@ export const getNotifications = async (
   offset: number = 0
 ): Promise<Notification[]> => {
   try {
-    const token = localStorage.getItem('kodisha_token') || localStorage.getItem('token');
+    const token = await ensureValidAccessToken();
+    if (!token) {
+      throw new Error('Authentication required');
+    }
     const response = await apiRequest(
       `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/users/${userId}/notifications?limit=${limit}&offset=${offset}`,
       {
@@ -148,7 +154,10 @@ export const markNotificationAsRead = async (
   notificationId: string
 ): Promise<void> => {
   try {
-    const token = localStorage.getItem('kodisha_token') || localStorage.getItem('token');
+    const token = await ensureValidAccessToken();
+    if (!token) {
+      throw new Error('Authentication required');
+    }
     await apiRequest(
       `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/users/${userId}/notifications/${notificationId}/read`,
       {
@@ -170,7 +179,10 @@ export const markNotificationAsRead = async (
  */
 export const triggerMonthlyReminder = async (userId: string): Promise<void> => {
   try {
-    const token = localStorage.getItem('kodisha_token') || localStorage.getItem('token');
+    const token = await ensureValidAccessToken();
+    if (!token) {
+      throw new Error('Authentication required');
+    }
     await apiRequest(
       `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/users/${userId}/notifications/monthly-reminder`,
       {
@@ -195,7 +207,10 @@ export const subscribeToPushNotifications = async (
   subscription: PushSubscription
 ): Promise<void> => {
   try {
-    const token = localStorage.getItem('kodisha_token') || localStorage.getItem('token');
+    const token = await ensureValidAccessToken();
+    if (!token) {
+      throw new Error('Authentication required');
+    }
     await apiRequest(
       `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/users/${userId}/push-subscription`,
       {
