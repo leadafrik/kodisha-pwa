@@ -55,5 +55,16 @@ registerServiceWorker({
   },
   onUpdate: (registration) => {
     console.log('Service Worker updated:', registration);
+    if (registration.waiting) {
+      let isRefreshing = false;
+
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (isRefreshing) return;
+        isRefreshing = true;
+        window.location.reload();
+      });
+
+      registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+    }
   }
 });

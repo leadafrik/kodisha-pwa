@@ -17,7 +17,44 @@ export function register(config?: Config) {
     navigator.serviceWorker
       .register('/service-worker.js')
       .then(reg => {
-        if (config?.onSuccess) config.onSuccess(reg);
+        if (reg.waiting && config?.onUpdate) {
+          config.onUpdate(reg);
+        }
+
+        reg.addEventListener('updatefound', () => {
+          const installingWorker = reg.installing;
+
+          if (!installingWorker) {
+            return;
+          }
+
+          installingWorker.addEventListener('statechange', () => {
+            if (installingWorker.state !== 'installed') {
+              return;
+            }
+
+            if (navigator.serviceWorker.controller) {
+              if (config?.onUpdate) config.onUpdate(reg);
+            } else {
+              if (config?.onSuccess) config.onSuccess(reg);
+            }
+          });
+        });
+
+        const triggerUpdateCheck = () => {
+          reg.update().catch(() => {
+            /* silent */
+          });
+        };
+
+        window.addEventListener('focus', triggerUpdateCheck);
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') {
+            triggerUpdateCheck();
+          }
+        });
+
+        triggerUpdateCheck();
       })
       .catch(() => {
         /* silent */

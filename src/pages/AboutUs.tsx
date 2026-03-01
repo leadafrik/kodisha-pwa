@@ -26,6 +26,7 @@ const AboutUs: React.FC = () => {
   const cmoName = "Stanley Bwire";
   const cmoTitle = "Chief Marketing Officer";
   const cmoImage = "/images/stanley-bwire.jpeg";
+  const cmoLinkedIn = "https://www.linkedin.com/in/stanley-bwire";
   const cmoSummary =
     "Stanley Bwire is Agrisoko's Chief Marketing Officer. As a sales and marketing executive specializing in digital marketing and media production, he combines graphic design, market research, and product advertising to connect Agrisoko with the right audience through clear, data-driven campaigns.";
   const organizationSameAs = [
@@ -180,6 +181,7 @@ const AboutUs: React.FC = () => {
               jobTitle: cmoTitle,
               image: `https://www.agrisoko254.com${cmoImage}`,
               description: cmoSummary,
+              sameAs: [cmoLinkedIn],
               worksFor: {
                 "@type": "Organization",
                 name: "Agrisoko Limited",
@@ -496,6 +498,16 @@ const AboutUs: React.FC = () => {
                   <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Media Production</span>
                   <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Market Research</span>
                   <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Product Advertising</span>
+                </div>
+                <div className="mt-5">
+                  <a
+                    href={cmoLinkedIn}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                  >
+                    View LinkedIn Profile
+                  </a>
                 </div>
               </div>
             </div>
