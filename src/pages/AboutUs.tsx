@@ -23,6 +23,11 @@ const AboutUs: React.FC = () => {
   const chiefOfStaffLinkedIn = "https://www.linkedin.com/in/valary-akong-ai-93115735a";
   const chiefOfStaffSummary =
     "Akong'ai Valary Purity is a Meteorology graduate and Agrisoko's Chief of Staff. She focuses on climate intelligence, environmental risk awareness, and resilient agribusiness systems that help keep agricultural trade practical, informed, and future-ready.";
+  const cmoName = "Stanley Bwire";
+  const cmoTitle = "Chief Marketing Officer";
+  const cmoImage = "/images/stanley-bwire.jpeg";
+  const cmoSummary =
+    "Stanley Bwire is Agrisoko's Chief Marketing Officer. As a sales and marketing executive specializing in digital marketing and media production, he combines graphic design, market research, and product advertising to connect Agrisoko with the right audience through clear, data-driven campaigns.";
   const organizationSameAs = [
     "https://wa.me/254796389192",
     "https://chat.whatsapp.com/HzCaV5YVz86CjwajiOHR5i",
@@ -153,6 +158,28 @@ const AboutUs: React.FC = () => {
               image: `https://www.agrisoko254.com${chiefOfStaffImage}`,
               description: chiefOfStaffSummary,
               sameAs: [chiefOfStaffLinkedIn],
+              worksFor: {
+                "@type": "Organization",
+                name: "Agrisoko Limited",
+              },
+              address: {
+                "@type": "PostalAddress",
+                addressCountry: "KE",
+              },
+            },
+            null,
+            2
+          )}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(
+            {
+              "@context": "https://schema.org",
+              "@type": "Person",
+              name: cmoName,
+              jobTitle: cmoTitle,
+              image: `https://www.agrisoko254.com${cmoImage}`,
+              description: cmoSummary,
               worksFor: {
                 "@type": "Organization",
                 name: "Agrisoko Limited",
@@ -431,6 +458,44 @@ const AboutUs: React.FC = () => {
                   >
                     View LinkedIn Profile
                   </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="max-w-6xl mx-auto px-4 py-12">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
+            <div className="grid gap-8 md:grid-cols-[0.8fr_1.2fr] items-start">
+              <div>
+                <img
+                  src={cmoImage}
+                  alt={`${cmoName} - ${cmoTitle} at Agrisoko`}
+                  className="w-full rounded-2xl object-cover shadow-sm"
+                  loading="lazy"
+                />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">
+                  Leadership
+                </p>
+                <h2 className="about-title text-3xl text-slate-900 mt-3">
+                  {cmoName}
+                </h2>
+                <p className="mt-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  {cmoTitle}
+                </p>
+                <p className="text-slate-700 mt-4 leading-relaxed">
+                  {cmoSummary}
+                </p>
+                <p className="text-slate-700 mt-3 leading-relaxed">
+                  His work focuses on making Agrisoko visible, credible, and relevant in the market through strong brand communication, practical media execution, and marketing that is tied to real user behavior.
+                </p>
+                <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
+                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Digital Marketing</span>
+                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Media Production</span>
+                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Market Research</span>
+                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Product Advertising</span>
                 </div>
               </div>
             </div>
