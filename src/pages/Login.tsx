@@ -6,6 +6,7 @@ import GoogleLoginButton from "../components/GoogleLoginButtonV2";
 import FacebookLoginButton from "../components/FacebookLoginButtonV2";
 import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
 import { trackGoogleEvent, trackGooglePageView } from "../utils/cookieConsent";
+import { LegalConsents } from "../types/property";
 
 type Mode = "login" | "signup" | "otp-verify" | "forgot" | "otp-reset";
 type PasswordFieldKey = "login" | "signup" | "signupConfirm" | "resetNew" | "resetConfirm";
@@ -16,6 +17,13 @@ const defaultPasswordVisibility: Record<PasswordFieldKey, boolean> = {
   signupConfirm: false,
   resetNew: false,
   resetConfirm: false,
+};
+
+const defaultSignupConsents: LegalConsents = {
+  termsAccepted: false,
+  privacyAccepted: false,
+  marketingConsent: false,
+  dataProcessingConsent: false,
 };
 
 const Login: React.FC = () => {
@@ -67,6 +75,9 @@ const Login: React.FC = () => {
     password: "",
     inviteCode: inviteCodeFromQuery,
   });
+  const [signupConsents, setSignupConsents] = useState<LegalConsents>(
+    defaultSignupConsents
+  );
 
   // OTP State (email only for now)
   const [otpCode, setOtpCode] = useState("");
@@ -84,6 +95,10 @@ const Login: React.FC = () => {
   const redirectTo =
     searchParams.get("next") ||
     (mode === "signup" || mode === "otp-verify" ? "/browse" : "/profile");
+  const requiredSignupConsentsAccepted =
+    signupConsents.termsAccepted &&
+    signupConsents.privacyAccepted &&
+    signupConsents.dataProcessingConsent;
 
   // OTP Timer
   useEffect(() => {
@@ -159,8 +174,20 @@ const Login: React.FC = () => {
       return;
     }
 
-    if (!signupData.password || signupData.password.length < 6) {
-      setError("Password must be at least 6 characters.");
+    const signupPassword = signupData.password || "";
+    const passwordIsStrongEnough =
+      signupPassword.length >= 8 &&
+      /[A-Z]/.test(signupPassword) &&
+      /[a-z]/.test(signupPassword) &&
+      /[0-9]/.test(signupPassword);
+
+    if (!passwordIsStrongEnough) {
+      setError("Use at least 8 characters with an uppercase letter, lowercase letter, and number.");
+      return;
+    }
+
+    if (!requiredSignupConsentsAccepted) {
+      setError("Accept the Terms, Privacy Policy, and Data Processing Consent to continue.");
       return;
     }
 
@@ -179,12 +206,7 @@ const Login: React.FC = () => {
         password: signupData.password,
         type: defaultUserType,
         inviteCode: signupData.inviteCode.trim() || undefined,
-        legalConsents: {
-          termsAccepted: true,
-          privacyAccepted: true,
-          marketingConsent: false,
-          dataProcessingConsent: true,
-        },
+        legalConsents: signupConsents,
       });
       trackGoogleEvent("sign_up", { method: "email" });
 
@@ -424,7 +446,12 @@ const Login: React.FC = () => {
         <p className="text-center text-xs font-semibold text-gray-500 uppercase tracking-widest">
           Fastest signup
         </p>
+        <p className="text-center text-xs text-gray-500">
+          Accept the consent boxes below to continue with social or email signup.
+        </p>
         <GoogleLoginButton
+          disabled={!requiredSignupConsentsAccepted}
+          legalConsents={signupConsents}
           onSuccess={() => {
             trackGoogleEvent("sign_up", { method: "google" });
             navigate(redirectTo);
@@ -433,6 +460,8 @@ const Login: React.FC = () => {
           className="text-sm w-full"
         />
         <FacebookLoginButton
+          disabled={!requiredSignupConsentsAccepted}
+          legalConsents={signupConsents}
           onSuccess={() => {
             trackGoogleEvent("sign_up", { method: "facebook" });
             navigate(redirectTo);
@@ -482,7 +511,7 @@ const Login: React.FC = () => {
               value={signupData.password}
               onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Min 6 characters"
+              placeholder="Use 8+ characters"
             />
             <button
               type="button"
@@ -500,9 +529,74 @@ const Login: React.FC = () => {
         You can add your county after signup.
       </p>
 
+      <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <label className="flex items-start gap-3 text-sm text-slate-700">
+          <input
+            type="checkbox"
+            checked={signupConsents.termsAccepted}
+            onChange={(e) =>
+              setSignupConsents((prev) => ({
+                ...prev,
+                termsAccepted: e.target.checked,
+              }))
+            }
+            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+          />
+          <span>
+            I agree to the <a href="/legal/terms" className="font-semibold text-blue-600 hover:underline">Terms of Service</a>.
+          </span>
+        </label>
+        <label className="flex items-start gap-3 text-sm text-slate-700">
+          <input
+            type="checkbox"
+            checked={signupConsents.privacyAccepted}
+            onChange={(e) =>
+              setSignupConsents((prev) => ({
+                ...prev,
+                privacyAccepted: e.target.checked,
+              }))
+            }
+            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+          />
+          <span>
+            I have read the <a href="/legal/privacy" className="font-semibold text-blue-600 hover:underline">Privacy Policy</a>.
+          </span>
+        </label>
+        <label className="flex items-start gap-3 text-sm text-slate-700">
+          <input
+            type="checkbox"
+            checked={signupConsents.dataProcessingConsent}
+            onChange={(e) =>
+              setSignupConsents((prev) => ({
+                ...prev,
+                dataProcessingConsent: e.target.checked,
+              }))
+            }
+            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+          />
+          <span>
+            I consent to Agrisoko processing my account and verification data to operate the marketplace and verify trust signals.
+          </span>
+        </label>
+        <label className="flex items-start gap-3 text-sm text-slate-600">
+          <input
+            type="checkbox"
+            checked={signupConsents.marketingConsent}
+            onChange={(e) =>
+              setSignupConsents((prev) => ({
+                ...prev,
+                marketingConsent: e.target.checked,
+              }))
+            }
+            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+          />
+          <span>Send me product updates and marketing messages.</span>
+        </label>
+      </div>
+
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || !requiredSignupConsentsAccepted}
         className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-60"
       >
         {loading ? "Creating account..." : "Create Free Account"}

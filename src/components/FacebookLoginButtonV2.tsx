@@ -2,11 +2,14 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { facebookAuth } from '../services/facebookAuthV2';
 import { API_ENDPOINTS } from '../config/api';
+import { LegalConsents } from '../types/property';
 
 interface FacebookLoginButtonProps {
   onSuccess?: () => void;
   onError?: (error: string) => void;
   className?: string;
+  disabled?: boolean;
+  legalConsents?: LegalConsents;
 }
 
 /**
@@ -17,6 +20,8 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
   onSuccess,
   onError,
   className = '',
+  disabled = false,
+  legalConsents,
 }) => {
   const { loginWithFacebook } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -121,7 +126,7 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
       }
 
       // Send to backend for verification and account creation
-      await loginWithFacebook(accessToken, user.id, user.email, user.name);
+      await loginWithFacebook(accessToken, user.id, user.email, user.name, legalConsents);
 
       // Success - trigger callback
       if (onSuccess) {
@@ -151,7 +156,7 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
     <button
       type="button"
       onClick={handleClick}
-      disabled={isLoading || !isInitialized}
+      disabled={disabled || isLoading || !isInitialized}
       aria-label="Sign in with Facebook"
       className={`
         inline-flex items-center justify-center gap-2

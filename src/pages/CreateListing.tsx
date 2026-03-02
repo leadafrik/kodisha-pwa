@@ -566,9 +566,14 @@ const CreateListing: React.FC = () => {
 
           {showVerificationNudge && (
             <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 flex flex-wrap items-center gap-3">
-              <p className="text-amber-900 font-semibold flex-1">
-                Verification is optional for now, but verified profiles build trust and go live faster.
-              </p>
+              <div className="flex-1">
+                <p className="text-amber-900 font-semibold">
+                  Verification is optional for now, but it helps buyers trust your profile faster.
+                </p>
+                <p className="mt-1 text-sm text-amber-800">
+                  Verification is optional. If you choose to upload your ID, Agrisoko handles that data in line with Kenya&apos;s Data Protection Act, 2019 and deletes the uploaded images promptly after admin review.
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() => navigate(verifyIdPath)}
@@ -1033,7 +1038,7 @@ const CreateListing: React.FC = () => {
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
                   <p className="text-amber-800 font-semibold mb-2">Publish now, verify to rank higher</p>
                   <p className="text-amber-700 text-sm mb-4">
-                    Your listing can still be submitted. Verification helps future listings go live faster and builds buyer trust.
+                    Your listing can still be submitted now. If you choose to verify, Agrisoko uses your ID only for identity review, deletes the uploaded images promptly after admin review, and keeps only the verification outcome needed to strengthen trust.
                   </p>
                   <button
                     type="button"

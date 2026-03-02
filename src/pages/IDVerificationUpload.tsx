@@ -188,7 +188,9 @@ const IDVerificationUpload: React.FC = () => {
         throw new Error(data.message || "Upload failed");
       }
 
-      setSuccess("Documents submitted successfully! Admin review typically takes 1-2 business days.");
+      setSuccess(
+        "Documents submitted successfully. Admin review typically takes 1-2 business days, after which the uploaded images are deleted and only the verification outcome is retained."
+      );
       await loadLatestStatus();
       setStep("submitted");
       setIdFrontFile(null);
@@ -214,8 +216,11 @@ const IDVerificationUpload: React.FC = () => {
           </div>
           <h1 className="text-3xl md:text-4xl font-bold mb-3">Identity Verification</h1>
           <p className="text-emerald-100 max-w-2xl">
-            Submit your ID front, ID back, and selfie with ID to display a verified badge, earn
+            Verification is optional, but it helps your profile display a verified badge, earn
             higher visibility, and build trust with buyers and sellers.
+          </p>
+          <p className="mt-3 max-w-2xl text-sm text-emerald-100/90">
+            If you choose to upload your ID, Agrisoko handles that data in line with Kenya&apos;s Data Protection Act, 2019 and deletes the images promptly after admin review.
           </p>
         </div>
 
@@ -305,7 +310,7 @@ const IDVerificationUpload: React.FC = () => {
                 <div className="text-sm text-amber-800">
                   <p className="font-semibold">Privacy and security</p>
                   <p>
-                    Documents are encrypted and reviewed only by our admin team. We never share or sell your data.
+                    Documents are reviewed only for identity checks, handled in line with Kenya&apos;s Data Protection Act, 2019, and deleted promptly after admin review. We retain only the verification outcome and any review notes needed for trust and moderation records.
                   </p>
                 </div>
               </div>

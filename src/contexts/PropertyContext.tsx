@@ -124,34 +124,12 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    refreshProperties();
     refreshServices();
     refreshProducts();
   }, []);
 
   const refreshProperties = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(API_ENDPOINTS.properties.getAll);
-      if (!response.ok) {
-        console.warn("Properties fetch failed:", response.status);
-        setError("Unable to load land listings right now.");
-        setProperties([]);
-        return;
-      }
-      const data = await response.json();
-      const listings = Array.isArray(data.data) ? data.data : 
-                      Array.isArray(data.listings) ? data.listings : [];
-      setProperties(listings);
-      console.log("Listings loaded:", listings.length);
-    } catch (error) {
-      console.error("Error loading properties:", error);
-      setError("Unable to load land listings right now.");
-      setProperties([]);
-    } finally {
-      setLoading(false);
-    }
+    setProperties([]);
   };
 
   const refreshServices = async () => {
@@ -219,39 +197,10 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
   };
 
   const addProperty = async (formData: FormData) => {
-    setLoading(true);
-    try {
-      const token = await ensureValidAccessToken();
-
-      if (!token) {
-        alert("You must be logged in to list property.");
-        throw new Error("No auth token");
-      }
-
-      const response = await fetch(API_ENDPOINTS.properties.create, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        alert(`Upload failed: ${result.message || "Unknown error"}`);
-        throw new Error(result.message || "Failed");
-      }
-
-      await refreshProperties();
-      return result;
-    } catch (error) {
-      console.error("addProperty error:", error);
-      alert("Failed to upload property. Please try again.");
-      throw error;
-    } finally {
-      setLoading(false);
-    }
+    void formData;
+    const message = "Land listings are no longer supported on Agrisoko.";
+    alert(message);
+    throw new Error(message);
   };
 
   const addService = async (formData: FormData) => {
@@ -323,10 +272,8 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
   };
 
   const getPropertiesByCounty = (county: string) => {
-    if (!county) return properties;
-    return properties.filter(
-      (p) => p.location?.county?.toLowerCase() === county.toLowerCase()
-    );
+    void county;
+    return [];
   };
 
   const getServicesByType = (type: ServiceType, county?: string) => {

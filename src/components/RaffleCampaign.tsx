@@ -40,7 +40,7 @@ const isVisibleStatus = (status: any) => {
 
 const RaffleCampaign: React.FC = () => {
   const { user } = useAuth();
-  const { properties, productListings, serviceListings } = useProperties();
+  const { productListings, serviceListings } = useProperties();
   const campaignActive = isRaffleCampaignActive();
 
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
@@ -66,12 +66,8 @@ const RaffleCampaign: React.FC = () => {
       return true;
     }).length;
 
-    const liveLand = (properties || []).filter((l: any) =>
-      isVisibleStatus(l?.publishStatus || l?.status)
-    ).length;
-
-    return liveProducts + liveServices + liveLand;
-  }, [productListings, properties, serviceListings]);
+    return liveProducts + liveServices;
+  }, [productListings, serviceListings]);
 
   const userHasListing = useMemo(() => {
     if (!userId) return false;
@@ -79,8 +75,8 @@ const RaffleCampaign: React.FC = () => {
     if (inProducts) return true;
     const inServices = (serviceListings || []).some((item: any) => getOwnerId(item) === userId);
     if (inServices) return true;
-    return (properties || []).some((item: any) => getOwnerId(item) === userId);
-  }, [productListings, properties, serviceListings, userId]);
+    return false;
+  }, [productListings, serviceListings, userId]);
 
   const percent = Math.min(
     100,

@@ -561,11 +561,11 @@ const AboutUs: React.FC = () => {
                   <div className="h-12 w-12 rounded-2xl bg-sky-100 text-sky-700 flex items-center justify-center font-bold">SV</div>
                   <h3 className="text-xl font-semibold text-slate-900">Services</h3>
                 </div>
-                <p className="text-sm text-slate-600 mt-3">Tractors, transport, land prep, and agribusiness services across Kenya.</p>
+                <p className="text-sm text-slate-600 mt-3">Tractors, transport, farm operations, and agribusiness services across Kenya.</p>
                 <ul className="mt-4 space-y-2 text-sm text-slate-600">
                   <li>- Equipment rental</li>
                   <li>- Transport and logistics</li>
-                  <li>- Land preparation</li>
+                  <li>- Farm operations support</li>
                 </ul>
               </div>
             </div>

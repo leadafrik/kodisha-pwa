@@ -102,7 +102,7 @@ const toValidDate = (value: unknown): Date | null => {
 const Home: React.FC = () => {
   const { user } = useAuth();
   const { isPhone, isTouch, prefersReducedMotion } = useAdaptiveLayout();
-  const { properties, productListings, serviceListings } = useProperties();
+  const { productListings, serviceListings } = useProperties();
 
   const { content: heroHeadline } = usePageContent("home.hero.headline");
   const { content: heroDescription } = usePageContent("home.hero.description");
@@ -116,11 +116,8 @@ const Home: React.FC = () => {
       if (item?.isDeleted === true || item?.deletedAt) return false;
       return true;
     }).length;
-    const liveLand = (properties || []).filter((item: any) =>
-      isLiveStatus(item?.publishStatus || item?.status)
-    ).length;
-    return liveProducts + liveServices + liveLand;
-  }, [productListings, serviceListings, properties]);
+    return liveProducts + liveServices;
+  }, [productListings, serviceListings]);
 
   const signupDate = toValidDate(user?.createdAt);
   const freeWindowEndsAt = signupDate

@@ -2,11 +2,14 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { googleAuth } from "../services/googleAuthV2";
 import { API_ENDPOINTS } from "../config/api";
+import { LegalConsents } from "../types/property";
 
 interface GoogleLoginButtonProps {
   onSuccess?: () => void;
   onError?: (error: string) => void;
   className?: string;
+  disabled?: boolean;
+  legalConsents?: LegalConsents;
 }
 
 /**
@@ -17,6 +20,8 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
   onSuccess,
   onError,
   className = "",
+  disabled = false,
+  legalConsents,
 }) => {
   const { loginWithGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -121,7 +126,7 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
       }
 
       // Send to backend for verification and account creation
-      await loginWithGoogle(idToken, user.id, user.email, user.name);
+      await loginWithGoogle(idToken, user.id, user.email, user.name, legalConsents);
 
       // Success - trigger callback
       if (onSuccess) {
@@ -151,7 +156,7 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
     <button
       type="button"
       onClick={handleClick}
-      disabled={isLoading || !isInitialized}
+      disabled={disabled || isLoading || !isInitialized}
       aria-label="Sign in with Google"
       className={`
         inline-flex items-center justify-center gap-2

@@ -255,13 +255,32 @@ export interface AuthContextType {
   requestSmsOtp: (phone: string) => Promise<void>;
   verifySmsOtp: (phone: string, code: string) => Promise<void>;
   resetPasswordWithEmail: (params: { email: string; code: string; newPassword: string }) => Promise<void>;
-  loginWithFacebook: (accessToken: string, fbUserId: string, email: string, name: string) => Promise<void>;
-  loginWithGoogle: (idToken: string, googleUserId: string, email: string, name: string) => Promise<void>;
+  loginWithFacebook: (
+    accessToken: string,
+    fbUserId: string,
+    email: string,
+    name: string,
+    legalConsents?: LegalConsents
+  ) => Promise<void>;
+  loginWithGoogle: (
+    idToken: string,
+    googleUserId: string,
+    email: string,
+    name: string,
+    legalConsents?: LegalConsents
+  ) => Promise<void>;
   logout: () => void;
   updateProfile: (userData: Partial<User>) => void;
   register: (userData: UserFormData) => Promise<User | null>;
   refreshUser: () => Promise<User | null>;
   loading: boolean;
+}
+
+export interface LegalConsents {
+  termsAccepted: boolean;
+  privacyAccepted: boolean;
+  marketingConsent: boolean;
+  dataProcessingConsent: boolean;
 }
 
 export interface UserFormData {
@@ -274,12 +293,7 @@ export interface UserFormData {
   constituency?: string;
   ward?: string;
   inviteCode?: string;
-  legalConsents?: {
-    termsAccepted: boolean;
-    privacyAccepted: boolean;
-    marketingConsent: boolean;
-    dataProcessingConsent: boolean;
-  };
+  legalConsents?: LegalConsents;
 }
 
 // ===============================

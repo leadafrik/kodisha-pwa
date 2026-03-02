@@ -8,12 +8,12 @@ const TermsOfService: React.FC = () => {
 
   useEffect(() => {
     fetch('/legal/TERMS_OF_SERVICE.md')
-      .then(res => res.text())
-      .then(text => {
+      .then((res) => res.text())
+      .then((text) => {
         setContent(text);
         setLoading(false);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error('Failed to load Terms of Service:', err);
         setLoading(false);
       });
@@ -23,7 +23,7 @@ const TermsOfService: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-b-green-600 mx-auto" />
           <p className="mt-4 text-gray-600">Loading Terms of Service...</p>
         </div>
       </div>
@@ -34,7 +34,6 @@ const TermsOfService: React.FC = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          {/* Header */}
           <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-8 py-6">
             <button
               onClick={() => navigate(-1)}
@@ -46,29 +45,27 @@ const TermsOfService: React.FC = () => {
               Back
             </button>
             <h1 className="text-3xl font-bold text-white">Terms of Service</h1>
-            <p className="text-green-50 mt-2">Kodisha Limited - Agricultural Marketplace Platform</p>
+            <p className="text-green-50 mt-2">Rules for using the Agrisoko marketplace</p>
           </div>
 
-          {/* Content */}
           <div className="px-8 py-8">
             <div className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-strong:text-gray-900 prose-li:text-gray-700">
               <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">{content}</pre>
             </div>
           </div>
 
-          {/* Footer */}
           <div className="bg-gray-50 px-8 py-6 border-t">
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-sm text-yellow-800">
-                <strong>Legal Notice:</strong> This is a draft template and should be reviewed and finalized by qualified legal counsel licensed to practice in Kenya before implementation.
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <p className="text-sm text-green-800">
+                <strong>Marketplace note:</strong> Agrisoko provides the platform, trust tools, and moderation controls, but users remain responsible for their own trade decisions, due diligence, and transaction terms.
               </p>
             </div>
             <div className="mt-4 flex flex-wrap gap-4 text-sm">
-              <a href="mailto:legal@kodisha.co.ke" className="text-green-600 hover:text-green-700 font-semibold">
-                📧 legal@kodisha.co.ke
+              <a href="mailto:info@leadafrik.com" className="text-green-600 hover:text-green-700 font-semibold">
+                info@leadafrik.com
               </a>
-              <a href="mailto:support@kodisha.co.ke" className="text-green-600 hover:text-green-700 font-semibold">
-                💬 support@kodisha.co.ke
+              <a href="https://www.agrisoko254.com" className="text-green-600 hover:text-green-700 font-semibold">
+                agrisoko254.com
               </a>
             </div>
           </div>

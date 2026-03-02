@@ -7,7 +7,7 @@ import ProfilePictureUpload from "../components/ProfilePictureUpload";
 import { scheduleAccountDeletion } from "../services/userService";
 import { API_ENDPOINTS, ensureValidAccessToken } from "../config/api";
 
-type ListingsTab = "land" | "services" | "agrovets" | "products";
+type ListingsTab = "services" | "agrovets" | "products";
 
 const ADMIN_ROLES = new Set(["admin", "super_admin", "moderator"]);
 
@@ -93,7 +93,7 @@ const EMPTY_PRODUCT_EDIT_FORM: ProductEditForm = {
 
 const Profile: React.FC = () => {
   const { user, logout, updateProfile, refreshUser } = useAuth();
-  const { properties, serviceListings, productListings, loading, refreshProducts } = useProperties();
+  const { serviceListings, productListings, loading, refreshProducts } = useProperties();
   const navigate = useNavigate();
 
   const [userProfilePicture, setUserProfilePicture] = useState<string | undefined>(user?.profilePicture);
@@ -115,10 +115,6 @@ const Profile: React.FC = () => {
     refreshUser();
   }, [refreshUser]);
 
-  const safeProperties = useMemo(
-    () => (Array.isArray(properties) ? properties : []),
-    [properties]
-  );
   const safeServiceListings = useMemo(
     () => (Array.isArray(serviceListings) ? serviceListings : []),
     [serviceListings]
@@ -167,17 +163,6 @@ const Profile: React.FC = () => {
     },
     [ownerIds, ownerEmail, ownerPhone, ownerNames]
   );
-
-  const userProperties = useMemo(() => {
-    return safeProperties.filter((property: any) =>
-      matchesCurrentUser(
-        property?.owner?._id || property?.ownerId || property?.userId,
-        property?.owner?.email || property?.email,
-        property?.owner?.phone || property?.contact,
-        property?.listedBy
-      )
-    );
-  }, [safeProperties, matchesCurrentUser]);
 
   const ownedServiceListings = useMemo(() => {
     return safeServiceListings.filter((service: any) =>
@@ -436,13 +421,6 @@ const Profile: React.FC = () => {
     ListingsTab,
     { label: string; items: any[]; emptyMessage: string; emptyCta: string; emptyLink: string }
   > = {
-    land: {
-      label: "Land",
-      items: userProperties,
-      emptyMessage: "No land listings yet.",
-      emptyCta: "List land",
-      emptyLink: "/create-listing",
-    },
     services: {
       label: "Services",
       items: userServices,
@@ -513,11 +491,7 @@ const Profile: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
-              <p className="text-2xl font-bold text-emerald-700">{userProperties.length}</p>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Land listings</p>
-            </div>
+          <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
               <p className="text-2xl font-bold text-emerald-700">{userServices.length}</p>
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Services</p>

@@ -6,16 +6,15 @@ import { API_BASE_URL } from "../config/api";
  * Simple, mobile-friendly verification wizard.
  * Steps:
  * 1. Identity (ID front, ID back, selfie)
- * 2. Land documents (title deed, land search / chief letter)
- * 3. Business documents (business permit, certificates, store / equipment photos)
- * 4. Review status
+ * 2. Business documents (business permit, certificates, store / equipment photos)
+ * 3. Review status
  *
  * This talks directly to the backend verification endpoints:
  *  - GET  /api/verification/status/:userId
  *  - POST /api/verification/upload/:type  (FormData: userId + file)
  */
 
-type WizardStepKey = "identity" | "land" | "business" | "review";
+type WizardStepKey = "identity" | "business" | "review";
 
 interface StepConfig {
   key: WizardStepKey;
@@ -28,12 +27,6 @@ const allStepConfigs: StepConfig[] = [
     key: "identity",
     label: "Identity",
     description: "Upload your national ID and a selfie to prove it is really you.",
-  },
-  {
-    key: "land",
-    label: "Land documents",
-    description:
-      "If you plan to SELL land, upload your title deed and either a land search report or chief's letter. Optional for rent/lease listings.",
   },
   {
     key: "business",
@@ -75,21 +68,17 @@ const VerificationWizard: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Use the normalized frontend `type` only to avoid enum mismatches
-  const isLandOwner = user?.type === "seller";
   const isServiceProvider = user?.type === "service_provider";
 
   const steps: StepConfig[] = useMemo(() => {
     const list: StepConfig[] = [];
     list.push(allStepConfigs.find((s) => s.key === "identity")!);
-    if (isLandOwner) {
-      list.push(allStepConfigs.find((s) => s.key === "land")!);
-    }
     if (isServiceProvider) {
       list.push(allStepConfigs.find((s) => s.key === "business")!);
     }
     list.push(allStepConfigs.find((s) => s.key === "review")!);
     return list;
-  }, [isLandOwner, isServiceProvider]);
+  }, [isServiceProvider]);
 
   useEffect(() => {
     if (currentIndex > steps.length - 1) {
@@ -193,7 +182,7 @@ const VerificationWizard: React.FC = () => {
       <div className="space-y-6">
         <p className="text-sm text-gray-600">
           Please upload clear photos of your Kenyan national ID (front and back)
-          and a selfie matching your ID. This helps keep Kodisha safe for
+          and a selfie matching your ID. This helps keep Agrisoko safe for
           everyone.
         </p>
 
@@ -220,61 +209,6 @@ const VerificationWizard: React.FC = () => {
           onFileSelected={(file) => uploadDocument("selfie", file)}
           loading={loading}
         />
-      </div>
-    );
-  };
-
-  const renderLandStep = () => {
-    const docs = status?.documents || [];
-    const hasTitleDeed = docs.some((d) => d.type === "land_title");
-    const hasLandSearch = docs.some((d) => d.description === "land_search");
-    const hasChiefLetter = docs.some((d) => d.description === "chief_letter");
-
-    return (
-      <div className="space-y-6">
-        <p className="text-sm text-gray-600 mb-2">
-          <strong className="font-semibold">For selling land:</strong> title
-          deed is required, plus either a land search report or a stamped
-          chief&apos;s letter.
-        </p>
-        <p className="text-xs text-gray-500">
-          If you are only renting or leasing land, these documents are
-          optional but increase your trust score and visibility.
-        </p>
-
-        <UploadRow
-          label="Title Deed (required for selling)"
-          hint="Clear photo/scan of the title deed."
-          uploaded={hasTitleDeed}
-          onFileSelected={(file) => uploadDocument("title-deed", file)}
-          loading={loading}
-        />
-
-        <UploadRow
-          label="Land Search Report"
-          hint="Recent land search from the Ministry of Lands / eCitizen."
-          uploaded={hasLandSearch}
-          onFileSelected={(file) => uploadDocument("land-search", file)}
-          loading={loading}
-        />
-
-        <UploadRow
-          label="Chief's Letter"
-          hint="Stamped letter from the chief confirming land ownership (especially for rural areas)."
-          uploaded={hasChiefLetter}
-          onFileSelected={(file) => uploadDocument("chief-letter", file)}
-          loading={loading}
-        />
-
-        {isLandOwner && (
-          <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 text-xs rounded-lg p-3">
-            <p className="font-semibold mb-1">Important for land sellers</p>
-            <p>
-              Your land-for-sale listings will only go live after these
-              ownership documents have been reviewed and approved.
-            </p>
-          </div>
-        )}
       </div>
     );
   };
@@ -307,7 +241,7 @@ const VerificationWizard: React.FC = () => {
 
         <UploadRow
           label="Professional / Service Certificate"
-          hint="Optional: e.g. agronomist, vet, surveyor certificate."
+          hint="Optional: e.g. agronomist, vet, or technical service certificate."
           uploaded={hasCertificate}
           onFileSelected={(file) => uploadDocument("service-certificate", file)}
           loading={loading}
@@ -348,11 +282,9 @@ const VerificationWizard: React.FC = () => {
     const phoneVerified = !!v?.phoneVerified;
     const idVerified = !!v?.idVerified;
     const selfieVerified = !!v?.selfieVerified;
-    const ownershipVerified = !!v?.ownershipVerified;
     const businessVerified = !!v?.businessVerified;
     const level = v?.verificationLevel ?? "basic";
     const trustScore = v?.trustScore ?? 0;
-    const showLandStatus = isLandOwner || ownershipVerified;
     const showBusinessStatus = isServiceProvider || businessVerified;
 
     return (
@@ -385,13 +317,6 @@ const VerificationWizard: React.FC = () => {
             label="ID + Selfie verified"
             ok={idVerified && selfieVerified}
           />
-          {showLandStatus && (
-            <StatusRow
-              label="Land ownership documents"
-              ok={ownershipVerified}
-              note="Required for selling land"
-            />
-          )}
           {showBusinessStatus && (
             <StatusRow
               label="Business / service verification"
@@ -440,7 +365,7 @@ const VerificationWizard: React.FC = () => {
           Account verification
         </h1>
         <p className="text-sm text-gray-600 mb-4">
-          Help us keep Kodisha safe and trustworthy by completing the
+          Help us keep Agrisoko safe and trustworthy by completing the
           verification steps below.
         </p>
         <p className="text-[11px] text-gray-500 mb-4">
@@ -514,7 +439,6 @@ const VerificationWizard: React.FC = () => {
           )}
 
           {currentStep.key === "identity" && renderIdentityStep()}
-          {currentStep.key === "land" && renderLandStep()}
           {currentStep.key === "business" && renderBusinessStep()}
           {currentStep.key === "review" && renderReviewStep()}
         </div>
