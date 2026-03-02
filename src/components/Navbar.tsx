@@ -210,7 +210,7 @@ const Navbar: React.FC = () => {
         <div className="mx-auto max-w-7xl px-4">
           <div className="flex items-center justify-between py-4">
             <Link to="/" className="flex items-center gap-3">
-              <img src="/logo.svg" alt="Agrisoko" className="h-10 w-10" />
+              <img src="/logo192.png" alt="Agrisoko" className="h-10 w-10" />
               <span className="text-2xl font-extrabold tracking-tight text-slate-900">Agrisoko</span>
             </Link>
 

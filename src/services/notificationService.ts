@@ -264,8 +264,8 @@ export const showNotification = (
 
   if (Notification.permission === 'granted') {
     new Notification(title, {
-      icon: '/logo.svg',
-      badge: '/logo.svg',
+      icon: '/logo192.png',
+      badge: '/favicon.png',
       ...options,
     });
   }

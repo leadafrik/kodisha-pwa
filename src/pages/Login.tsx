@@ -799,7 +799,7 @@ const Login: React.FC = () => {
         <div className="mx-auto grid w-full max-w-6xl items-stretch gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10">
           <aside className="hidden lg:flex flex-col justify-between rounded-3xl border border-emerald-200/70 bg-gradient-to-br from-emerald-600 via-emerald-700 to-emerald-800 p-10 text-white shadow-2xl">
             <div>
-              <img src="/logo.svg" alt="" aria-hidden="true" className="h-12 w-12 rounded-xl bg-white/10 p-1" />
+              <img src="/logo192.png" alt="" aria-hidden="true" className="h-12 w-12 rounded-xl bg-white/10 p-1" />
               <h1 className="mt-5 text-4xl font-bold leading-tight">Agrisoko</h1>
               <p className="mt-2 text-sm text-emerald-100">
                 Trusted agricultural marketplace across Kenya.
@@ -816,7 +816,7 @@ const Login: React.FC = () => {
           <section className="w-full max-w-md mx-auto lg:max-w-none">
             <div className="mb-4 rounded-2xl border border-emerald-100 bg-white/90 p-4 backdrop-blur lg:hidden">
               <div className="flex items-center gap-3">
-                <img src="/logo.svg" alt="" aria-hidden="true" className="h-10 w-10 rounded-xl bg-emerald-50 p-1" />
+                <img src="/logo192.png" alt="" aria-hidden="true" className="h-10 w-10 rounded-xl bg-emerald-50 p-1" />
                 <div>
                   <p className="text-sm font-semibold text-slate-900">Agrisoko</p>
                   <p className="text-xs text-slate-600">Trusted agricultural marketplace across Kenya.</p>

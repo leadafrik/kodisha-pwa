@@ -451,7 +451,11 @@ const Messages: React.FC = () => {
     <div className="mx-auto flex h-full min-h-0 max-w-6xl flex-col bg-white">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-0 flex-1 overflow-hidden">
         {/* Threads List */}
-        <div className="hidden md:flex md:flex-col bg-white border-r border-gray-200">
+        <div
+          className={`bg-white border-r border-gray-200 ${
+            selectedUserId ? 'hidden md:flex md:flex-col' : 'flex flex-col'
+          }`}
+        >
           <div className="p-4 border-b border-gray-200">
             <h2 className="text-xl font-bold text-gray-900">Messages</h2>
           </div>
@@ -536,7 +540,11 @@ const Messages: React.FC = () => {
         </div>
 
         {/* Chat Area */}
-        <div className="md:col-span-2 flex flex-col bg-white">
+        <div
+          className={`bg-white md:col-span-2 md:flex md:flex-col ${
+            selectedUserId ? 'flex flex-col' : 'hidden md:flex md:flex-col'
+          }`}
+        >
           {!selectedUserId ? (
             <div className="flex-1 flex items-center justify-center bg-gray-50">
               <div className="text-center px-4">
