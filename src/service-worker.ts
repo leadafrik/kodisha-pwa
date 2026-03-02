@@ -12,7 +12,7 @@ import { clientsClaim } from 'workbox-core';
 import { ExpirationPlugin } from 'workbox-expiration';
 import { precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
-import { StaleWhileRevalidate } from 'workbox-strategies';
+import { NetworkOnly, StaleWhileRevalidate } from 'workbox-strategies';
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -67,6 +67,26 @@ registerRoute(
       new ExpirationPlugin({ maxEntries: 50 }),
     ],
   })
+);
+
+// Always fetch live API data instead of serving a cached response.
+const apiOrigin = (() => {
+  const envUrl = process.env.REACT_APP_API_URL;
+  if (envUrl) {
+    try {
+      return new URL(envUrl).origin;
+    } catch {
+      return 'https://kodisha-backend-vjr9.onrender.com';
+    }
+  }
+  return 'https://kodisha-backend-vjr9.onrender.com';
+})();
+
+registerRoute(
+  ({ url }) =>
+    url.pathname.startsWith('/api/') ||
+    url.origin === apiOrigin,
+  new NetworkOnly()
 );
 
 // This allows the web app to trigger skipWaiting via

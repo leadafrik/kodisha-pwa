@@ -281,6 +281,9 @@ const executeApiRequest = async (
     const response = await fetch(url, {
       ...options,
       headers: requestHeaders,
+      cache:
+        options.cache ??
+        (url.startsWith(API_BASE_URL) ? "no-store" : "default"),
       credentials: options.credentials ?? "include",
     });
 

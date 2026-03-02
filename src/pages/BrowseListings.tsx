@@ -4,6 +4,7 @@ import { useProperties } from "../contexts/PropertyContext";
 import { useAuth } from "../contexts/AuthContext";
 import { kenyaCounties } from "../data/kenyaCounties";
 import { handleImageError } from "../utils/imageFallback";
+import { getOptimizedImageUrl } from "../utils/imageOptimization";
 import { Search, Filter, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 import RaffleCampaign from "../components/RaffleCampaign";
 
@@ -655,7 +656,11 @@ const BrowseListings: React.FC = () => {
                 <div className="relative h-52 sm:h-56 bg-slate-100">
                   {card.image ? (
                     <img
-                      src={card.image}
+                      src={getOptimizedImageUrl(card.image, {
+                        width: 720,
+                        height: 540,
+                        fit: "fill",
+                      })}
                       alt={card.title}
                       onError={handleImageError}
                       className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"

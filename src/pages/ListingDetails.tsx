@@ -1,7 +1,5 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { Suspense, lazy, useEffect, useRef, useState, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import GoogleMapsLoader from "../components/GoogleMapsLoader";
-import ListingMap from "../components/ListingMap";
 import ReportModal from "../components/ReportModal";
 import {
   API_ENDPOINTS,
@@ -12,8 +10,12 @@ import {
 import { io, Socket } from "socket.io-client";
 import { favoritesService } from "../services/favoritesService";
 import { handleImageError } from "../utils/imageFallback";
+import { getOptimizedImageUrl } from "../utils/imageOptimization";
 import { getAuthToken } from "../utils/auth";
 import { Star } from "lucide-react";
+
+const GoogleMapsLoader = lazy(() => import("../components/GoogleMapsLoader"));
+const ListingMap = lazy(() => import("../components/ListingMap"));
 
 // Helper: Check if user is admin by checking role in stored user data
 const isUserAdmin = (): boolean => {
@@ -385,8 +387,14 @@ const ListingDetails: React.FC = () => {
   const [ratingReview, setRatingReview] = useState("");
   const [submittingRating, setSubmittingRating] = useState(false);
   const [userRatings, setUserRatings] = useState<any>(null);
+  const [showMap, setShowMap] = useState(false);
+  const [chatReady, setChatReady] = useState(false);
+  const [chatLoading, setChatLoading] = useState(false);
+  const [ratingsLoaded, setRatingsLoaded] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const chatSectionRef = useRef<HTMLDivElement | null>(null);
+  const messageInputRef = useRef<HTMLTextAreaElement | null>(null);
 
   const applyListingState = useCallback(
     async (rawListing: any) => {
@@ -427,6 +435,17 @@ const ListingDetails: React.FC = () => {
     },
     []
   );
+
+  const openChatPanel = useCallback(() => {
+    setChatReady(true);
+    window.setTimeout(() => {
+      chatSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+      messageInputRef.current?.focus();
+    }, 120);
+  }, []);
 
   const fetchListing = useCallback(async () => {
     setLoading(true);
@@ -490,6 +509,7 @@ const ListingDetails: React.FC = () => {
   }, []);
 
   const fetchMessages = async (ownerId: string) => {
+    setChatLoading(true);
     try {
       const token = await ensureValidAccessToken();
       if (!token) return; // chat only for logged in users
@@ -497,6 +517,7 @@ const ListingDetails: React.FC = () => {
       // Fetch messages with this listing's owner
       // API_ENDPOINTS.messages.withUser(ownerId) returns messages between current user and ownerId
       const res = await fetch(API_ENDPOINTS.messages.withUser(ownerId), {
+        cache: "no-store",
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -505,18 +526,24 @@ const ListingDetails: React.FC = () => {
       }
     } catch (err) {
       console.error("Error loading messages:", err);
+    } finally {
+      setChatLoading(false);
     }
   };
 
   const fetchUserRatings = async (ownerId: string) => {
     try {
-      const res = await fetch(API_ENDPOINTS.ratings.getUserRatings(ownerId));
+      const res = await fetch(API_ENDPOINTS.ratings.getUserRatings(ownerId), {
+        cache: "no-store",
+      });
       const data = await res.json();
       if (data.success) {
         setUserRatings(data.data);
       }
     } catch (err) {
       console.error('Error loading ratings:', err);
+    } finally {
+      setRatingsLoaded(true);
     }
   };
 
@@ -644,11 +671,29 @@ const ListingDetails: React.FC = () => {
   }, [fetchListing]);
 
   useEffect(() => {
-    if (listing?.owner?._id) {
-      fetchMessages(listing.owner._id);
-      fetchUserRatings(listing.owner._id);
+    setRatingsLoaded(false);
+    setUserRatings(null);
+    setChatReady(false);
+    setMessages([]);
+    setTyping(false);
+  }, [id]);
+
+  useEffect(() => {
+    if (!listing?.owner?._id || ratingsLoaded) return;
+
+    const timer = window.setTimeout(() => {
+      void fetchUserRatings(listing.owner._id);
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [listing?.owner?._id, ratingsLoaded]);
+
+  useEffect(() => {
+    if (listing?.owner?._id && chatReady) {
+      void fetchMessages(listing.owner._id);
       void setupSocket(listing.owner._id);
     }
+
     return () => {
       if (socketRef.current) {
         socketRef.current.disconnect();
@@ -658,7 +703,7 @@ const ListingDetails: React.FC = () => {
         clearTimeout(typingTimeoutRef.current);
       }
     };
-  }, [listing?.owner?._id]);
+  }, [chatReady, listing?.owner?._id]);
 
   useEffect(() => {
     if (!listing || !id) return;
@@ -814,7 +859,11 @@ const ListingDetails: React.FC = () => {
             <div className="mb-6">
               <div className="rounded-lg overflow-hidden bg-gray-100 mb-3">
                 <img
-                  src={mainImage || listing.images[0]}
+                  src={getOptimizedImageUrl(mainImage || listing.images[0], {
+                    width: 1600,
+                    height: 1200,
+                    fit: "limit",
+                  })}
                   alt="Listing main"
                   className="w-full h-96 object-cover"
                   onError={handleImageError}
@@ -828,9 +877,13 @@ const ListingDetails: React.FC = () => {
                     className={`h-20 rounded overflow-hidden border-2 transition ${
                       mainImage === img ? 'border-green-600' : 'border-gray-200 hover:border-gray-400'
                     }`}
-                  >
-                    <img 
-                      src={img} 
+                    >
+                      <img 
+                      src={getOptimizedImageUrl(img, {
+                        width: 240,
+                        height: 240,
+                        fit: "fill",
+                      })} 
                       alt={`Thumbnail ${i + 1}`} 
                       className="w-full h-full object-cover"
                       onError={handleImageError}
@@ -854,8 +907,7 @@ const ListingDetails: React.FC = () => {
                 if (!getAuthToken()) {
                   window.location.href = `/login?next=/listings/${id}`;
                 } else {
-                  const el = document.querySelector('textarea');
-                  if (el) (el as HTMLElement).focus();
+                  openChatPanel();
                 }
               }}
               className="px-5 py-2 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition"
@@ -938,8 +990,27 @@ const ListingDetails: React.FC = () => {
 
             {!coords || !coords.lat || !coords.lng ? (
               <p className="text-gray-500 text-sm">No map location was provided for this listing.</p>
+            ) : !showMap ? (
+              <div className="rounded-lg border border-gray-200 bg-white p-4">
+                <p className="text-sm text-gray-600">
+                  Load the map only when you need directions.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowMap(true)}
+                  className="mt-3 inline-flex items-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
+                >
+                  Load map
+                </button>
+              </div>
             ) : (
-              <>
+              <Suspense
+                fallback={
+                  <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-600">
+                    Loading map...
+                  </div>
+                }
+              >
                 <GoogleMapsLoader>
                   <div className="rounded-lg overflow-hidden shadow-md border">
                     <ListingMap lat={coords.lat} lng={coords.lng} />
@@ -958,7 +1029,7 @@ const ListingDetails: React.FC = () => {
                 >
                   Open in Google Maps
                 </a>
-              </>
+              </Suspense>
             )}
           </div>
         </div>
@@ -971,7 +1042,11 @@ const ListingDetails: React.FC = () => {
               <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-lg font-bold text-gray-700 overflow-hidden">
                 {owner.profilePicture ? (
                   <img
-                    src={owner.profilePicture}
+                    src={getOptimizedImageUrl(owner.profilePicture, {
+                      width: 160,
+                      height: 160,
+                      fit: "fill",
+                    })}
                     alt={owner.fullName || owner.name}
                     onError={handleImageError}
                     className="w-full h-full object-cover"
@@ -1026,7 +1101,12 @@ const ListingDetails: React.FC = () => {
                 )}
                 <button
                   type="button"
-                  onClick={() => setShowReviewsModal(true)}
+                  onClick={() => {
+                    if (!ratingsLoaded && listing?.owner?._id) {
+                      void fetchUserRatings(listing.owner._id);
+                    }
+                    setShowReviewsModal(true);
+                  }}
                   className="mt-1 text-xs font-semibold text-yellow-700 underline decoration-dotted hover:text-yellow-800"
                 >
                   Read reviews
@@ -1049,8 +1129,11 @@ const ListingDetails: React.FC = () => {
               )}
               <button
                 onClick={() => {
-                  const el = document.querySelector('textarea');
-                  if (el) (el as HTMLElement).focus();
+                  if (!getAuthToken()) {
+                    window.location.href = `/login?next=/listings/${id}`;
+                    return;
+                  }
+                  openChatPanel();
                 }}
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-50"
               >
@@ -1090,54 +1173,81 @@ const ListingDetails: React.FC = () => {
               {owner.isVerified ? 'ID & phone verified' : 'Unverified seller'}
             </p>
           </div>
-
           {/* Chat section - improved UI and microcopy */}
-          <div className="bg-white p-4 rounded-lg border">
+          <div ref={chatSectionRef} className="bg-white p-4 rounded-lg border">
             <h3 className="font-semibold mb-3">Message the Seller</h3>
 
-            <div className="max-h-64 overflow-y-auto border rounded-lg p-3 mb-3 bg-gray-50">
-              {messages.length === 0 ? (
-                <p className="text-gray-500 text-center text-xs py-4">
-                  No messages yet. Ask about availability, pricing, or arrange a viewing.
+            {!chatReady ? (
+              <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4">
+                <p className="text-sm text-gray-600">
+                  Open the conversation only when you are ready to message.
                 </p>
-              ) : (
-                messages.map((msg, idx) => (
-                  <div key={idx} className={`rounded p-2 mb-2 ${msg.from === owner._id ? 'bg-white border' : 'bg-green-50'}`}>
-                    <p className="text-xs text-gray-600 font-semibold mb-1">
-                      {msg.from === owner._id ? 'Seller' : 'You'} {msg.read && msg.from === owner._id ? '✓✓' : ''}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!getAuthToken()) {
+                      window.location.href = `/login?next=/listings/${id}`;
+                      return;
+                    }
+                    openChatPanel();
+                  }}
+                  className="mt-3 inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                >
+                  Open chat
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="max-h-64 overflow-y-auto border rounded-lg p-3 mb-3 bg-gray-50">
+                  {chatLoading ? (
+                    <p className="text-gray-500 text-center text-xs py-4">
+                      Loading conversation...
                     </p>
-                    <p className="text-gray-800 text-sm">{msg.body}</p>
-                    <p className="text-[10px] text-gray-500 mt-1">
-                      {msg.createdAt ? new Date(msg.createdAt).toLocaleString() : ''}
+                  ) : messages.length === 0 ? (
+                    <p className="text-gray-500 text-center text-xs py-4">
+                      No messages yet. Ask about availability, pricing, or arrange a viewing.
                     </p>
-                  </div>
-                ))
-              )}
-              {typing && <p className="text-xs text-gray-500 italic">Seller is typing…</p>}
-            </div>
+                  ) : (
+                    messages.map((msg, idx) => (
+                      <div key={idx} className={`rounded p-2 mb-2 ${msg.from === owner._id ? 'bg-white border' : 'bg-green-50'}`}>
+                        <p className="text-xs text-gray-600 font-semibold mb-1">
+                          {msg.from === owner._id ? 'Seller' : 'You'} {msg.read && msg.from === owner._id ? '??????' : ''}
+                        </p>
+                        <p className="text-gray-800 text-sm">{msg.body}</p>
+                        <p className="text-[10px] text-gray-500 mt-1">
+                          {msg.createdAt ? new Date(msg.createdAt).toLocaleString() : ''}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                  {typing && <p className="text-xs text-gray-500 italic">Seller is typing???</p>}
+                </div>
 
-            <textarea
-              value={newMessage}
-              onChange={(e) => {
-                setNewMessage(e.target.value);
-                sendTyping();
-              }}
-              className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
-              placeholder="Type your message..."
-              rows={3}
-            />
+                <textarea
+                  ref={messageInputRef}
+                  value={newMessage}
+                  onChange={(e) => {
+                    setNewMessage(e.target.value);
+                    sendTyping();
+                  }}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
+                  placeholder="Type your message..."
+                  rows={3}
+                />
 
-            <button
-              onClick={sendMessage}
-              disabled={sending || !newMessage.trim()}
-              className="w-full mt-2 bg-blue-600 text-white rounded-lg py-2 text-sm font-semibold hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition"
-            >
-              {sending ? 'Sending...' : 'Send Message'}
-            </button>
+                <button
+                  onClick={sendMessage}
+                  disabled={sending || !newMessage.trim()}
+                  className="w-full mt-2 bg-blue-600 text-white rounded-lg py-2 text-sm font-semibold hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition"
+                >
+                  {sending ? 'Sending...' : 'Send Message'}
+                </button>
 
-            <p className="text-xs text-gray-500 mt-2 text-center">
-              {getAuthToken() ? 'Messages are private and secure.' : 'Log in to send and receive messages.'}
-            </p>
+                <p className="text-xs text-gray-500 mt-2 text-center">
+                  {getAuthToken() ? 'Messages are private and secure.' : 'Log in to send and receive messages.'}
+                </p>
+              </>
+            )}
           </div>
         </div>
       </div>
