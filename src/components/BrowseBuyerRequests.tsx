@@ -311,24 +311,30 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 fade-rise">
-              <div className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm">
-                <p className="text-xs text-slate-500 uppercase tracking-wider">Active requests</p>
-                <p className="text-2xl font-semibold text-slate-900">{pagination.total}</p>
-                <p className="text-xs text-slate-500">Nationwide</p>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm">
-                <p className="text-xs text-slate-500 uppercase tracking-wider">Urgent this week</p>
-                <p className="text-2xl font-semibold text-slate-900">
-                  {requests.filter((req) => req.urgency === "high").length}
-                </p>
-                <p className="text-xs text-slate-500">High priority</p>
-              </div>
-              <div className="hidden sm:block rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm sm:col-span-2">
-                <p className="text-xs text-slate-500 uppercase tracking-wider">Your filter focus</p>
-                <p className="text-sm text-slate-700">
-                  {activeFilters.length ? activeFilters.join(" - ") : "All requests"}
-                </p>
+            <div className="fade-rise rounded-2xl border border-slate-200 bg-white/90 p-3 shadow-sm">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                <div className="rounded-xl bg-slate-50 px-3 py-2">
+                  <p className="text-[11px] uppercase tracking-wider text-slate-500">Active</p>
+                  <div className="mt-1 flex items-baseline gap-2">
+                    <p className="text-lg font-semibold text-slate-900">{pagination.total}</p>
+                    <p className="text-[11px] text-slate-500">Nationwide</p>
+                  </div>
+                </div>
+                <div className="rounded-xl bg-slate-50 px-3 py-2">
+                  <p className="text-[11px] uppercase tracking-wider text-slate-500">Urgent</p>
+                  <div className="mt-1 flex items-baseline gap-2">
+                    <p className="text-lg font-semibold text-slate-900">
+                      {requests.filter((req) => req.urgency === "high").length}
+                    </p>
+                    <p className="text-[11px] text-slate-500">High priority</p>
+                  </div>
+                </div>
+                <div className="col-span-2 rounded-xl bg-slate-50 px-3 py-2 sm:col-span-1">
+                  <p className="text-[11px] uppercase tracking-wider text-slate-500">Focus</p>
+                  <p className="mt-1 truncate text-sm font-medium text-slate-700">
+                    {activeFilters.length ? activeFilters.join(" - ") : "All requests"}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -394,10 +400,14 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
               </select>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-              <p className="text-xs uppercase tracking-widest text-slate-500">Showing</p>
-              <p className="text-lg font-semibold text-slate-900">{requests.length} on this page</p>
-              <p className="text-xs text-slate-500">{pagination.total} total active</p>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 md:block">
+              <div className="flex items-center justify-between gap-3 md:block">
+                <p className="text-xs uppercase tracking-widest text-slate-500">Showing</p>
+                <p className="text-sm font-semibold text-slate-900 md:mt-1 md:text-lg">
+                  {requests.length} on this page
+                </p>
+              </div>
+              <p className="mt-1 text-xs text-slate-500">{pagination.total} total active</p>
             </div>
           </div>
 

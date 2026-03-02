@@ -348,7 +348,11 @@ const BrowseListings: React.FC = () => {
                     Learn about Agrisoko
                   </Link>
                   <Link
-                    to={user ? "/create-listing" : "/login?next=/create-listing"}
+                    to={
+                      user
+                        ? "/create-listing?compact=1"
+                        : `/login?next=${encodeURIComponent("/create-listing?compact=1")}`
+                    }
                     className="inline-flex items-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 transition"
                   >
                     Post a listing
@@ -656,7 +660,11 @@ const BrowseListings: React.FC = () => {
                 Browse all listings
               </button>
               <Link
-                to={user ? "/create-listing" : "/login?next=/create-listing"}
+                to={
+                  user
+                    ? "/create-listing?compact=1"
+                    : `/login?next=${encodeURIComponent("/create-listing?compact=1")}`
+                }
                 className="inline-flex min-h-[44px] items-center justify-center px-6 py-3 rounded-lg border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition"
               >
                 {user ? "Post a listing" : "Sign in to post"}
@@ -810,7 +818,11 @@ const BrowseListings: React.FC = () => {
                 View buy requests
               </Link>
               <Link
-                to={user ? "/create-listing" : "/login?next=/create-listing"}
+                to={
+                  user
+                    ? "/create-listing?compact=1"
+                    : `/login?next=${encodeURIComponent("/create-listing?compact=1")}`
+                }
                 className="inline-flex justify-center items-center rounded-xl border border-slate-300 px-6 py-3 text-slate-700 font-semibold hover:bg-white transition"
               >
                 Post your products

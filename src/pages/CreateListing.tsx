@@ -137,7 +137,9 @@ const CreateListing: React.FC = () => {
     }
     return null;
   }, [searchParams]);
+  const compactEntryMode = searchParams.get("compact") === "1";
   const hasPresetCategory = !!requestedCategory;
+  const useCompactCategoryStep = hasPresetCategory || compactEntryMode;
 
   // Pre-fill contact
   useEffect(() => {
@@ -685,9 +687,13 @@ const CreateListing: React.FC = () => {
                 </button>
               </div>
               <h2 className="text-xl font-bold text-gray-900 mb-4">
-                {hasPresetCategory ? "Confirm your category" : "What are you listing?"}
+                {hasPresetCategory
+                  ? "Confirm your category"
+                  : useCompactCategoryStep
+                  ? "Choose category and subcategory"
+                  : "What are you listing?"}
               </h2>
-              {hasPresetCategory ? (
+              {useCompactCategoryStep ? (
                 <div className="mb-6 rounded-xl border border-slate-200 bg-slate-50 p-4">
                   <div className="grid gap-4 md:grid-cols-2">
                     <div>
@@ -771,7 +777,7 @@ const CreateListing: React.FC = () => {
                 </div>
               )}
 
-              {form.category && !hasPresetCategory && (
+              {form.category && !useCompactCategoryStep && (
                 <div>
                   <h3 className="font-bold text-gray-900 mb-4">Select a subcategory</h3>
                   <select
