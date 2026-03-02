@@ -13,7 +13,7 @@ import { validatePhone } from "../utils/formValidation";
 const UNITS = ["kg", "tonnes", "bags", "units", "liters", "crates"];
 const DRAFT_STORAGE_KEY = "kodisha_buyer_request_draft_v3";
 
-type RequestCategory = "produce" | "inputs" | "service";
+type RequestCategory = "produce" | "livestock" | "inputs" | "service";
 type UrgencyLevel = "low" | "medium" | "high";
 type Step = 1 | 2 | 3;
 
@@ -83,6 +83,20 @@ const DEMAND_TEMPLATES: DemandTemplate[] = [
     budgetMax: "230000",
   },
   {
+    id: "livestock",
+    label: "Livestock",
+    category: "livestock",
+    title: "Need healthy dairy cows",
+    productType: "Dairy cows",
+    description:
+      "Looking for healthy dairy cows with clear age, breed, and health records. Share location and current condition.",
+    quantity: "5",
+    unit: "units",
+    urgency: "medium",
+    budgetMin: "250000",
+    budgetMax: "450000",
+  },
+  {
     id: "fertilizer",
     label: "Farm Inputs",
     category: "inputs",
@@ -118,9 +132,48 @@ const STEPS: Array<{ id: Step; label: string; caption: string }> = [
 
 const CATEGORY_STYLES: Record<RequestCategory, string> = {
   produce: "border-orange-200 bg-orange-50 text-orange-800",
+  livestock: "border-amber-200 bg-amber-50 text-amber-800",
   inputs: "border-sky-200 bg-sky-50 text-sky-800",
   service: "border-emerald-200 bg-emerald-50 text-emerald-800",
 };
+
+const CATEGORY_OPTIONS: Array<{
+  value: RequestCategory;
+  label: string;
+  hint: string;
+  typePlaceholder: string;
+}> = [
+  {
+    value: "produce",
+    label: "Produce",
+    hint: "Crops, fruits, grains",
+    typePlaceholder: "e.g., Grade 1 potatoes, fresh onions, maize",
+  },
+  {
+    value: "livestock",
+    label: "Livestock",
+    hint: "Cattle, poultry, goats, pigs",
+    typePlaceholder: "e.g., Dairy cows, kienyeji chicken, breeding goats",
+  },
+  {
+    value: "inputs",
+    label: "Inputs",
+    hint: "Seeds, fertilizer, equipment",
+    typePlaceholder: "e.g., NPK fertilizer, certified maize seeds, sprayer",
+  },
+  {
+    value: "service",
+    label: "Service",
+    hint: "Transport, labor, consulting",
+    typePlaceholder: "e.g., 5-ton truck transport, soil testing, land prep",
+  },
+];
+
+const URGENCY_OPTIONS: Array<{ value: UrgencyLevel; label: string; desc: string }> = [
+  { value: "low", label: "Low", desc: "Can wait" },
+  { value: "medium", label: "Medium", desc: "Within a week" },
+  { value: "high", label: "High", desc: "Urgent" },
+];
 
 const getDefaultFormData = (county?: string, phone?: string): BuyerRequestFormData => ({
   title: "",
@@ -264,6 +317,8 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
     const categoryLabel =
       formData.category === "produce"
         ? "produce"
+        : formData.category === "livestock"
+        ? "livestock"
         : formData.category === "inputs"
         ? "farm inputs"
         : "agricultural service";
@@ -301,6 +356,9 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
       formData.budget.max.trim() ||
       formData.location.county
   );
+
+  const selectedCategoryMeta =
+    CATEGORY_OPTIONS.find((option) => option.value === formData.category) || CATEGORY_OPTIONS[0];
 
   const clearFeedback = () => {
     setError("");
@@ -471,6 +529,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
       const restoredCategory = restoredFormData.category;
       const restoredUrgency = restoredFormData.urgency;
       const nextCategory: RequestCategory =
+        restoredCategory === "livestock" ||
         restoredCategory === "inputs" ||
         restoredCategory === "service" ||
         restoredCategory === "produce"
@@ -744,30 +803,48 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
               </div>
             </div>
 
-            <div className="grid gap-2 sm:grid-cols-3">
-              {(["produce", "inputs", "service"] as RequestCategory[]).map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => setTopLevelField("category", cat)}
-                  className={`rounded-2xl border px-4 py-3 text-left transition ${
-                    formData.category === cat
-                      ? CATEGORY_STYLES[cat]
-                      : "border-slate-200 bg-white text-slate-700 hover:border-emerald-300"
-                  }`}
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-800">
+                  Category
+                </label>
+                <select
+                  value={formData.category}
+                  onChange={(e) =>
+                    setTopLevelField("category", e.target.value as RequestCategory)
+                  }
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-200"
                 >
-                  <p className="font-semibold capitalize">{cat}</p>
-                  {(!isCompact || formData.category === cat) && (
-                    <p className="mt-0.5 text-xs opacity-80">
-                      {cat === "produce"
-                        ? "Crops, fruits, grains"
-                        : cat === "inputs"
-                        ? "Seeds, fertilizer, equipment"
-                        : "Transport, labor, consulting"}
-                    </p>
-                  )}
-                </button>
-              ))}
+                  {CATEGORY_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-slate-500">{selectedCategoryMeta.hint}</p>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-800">
+                  Urgency
+                </label>
+                <select
+                  value={formData.urgency}
+                  onChange={(e) =>
+                    setTopLevelField("urgency", e.target.value as UrgencyLevel)
+                  }
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-200"
+                >
+                  {URGENCY_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label} - {option.desc}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-slate-500">
+                  Set expectations clearly so suppliers know how fast to respond.
+                </p>
+              </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -812,39 +889,12 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                   name="productType"
                   value={formData.productType}
                   onChange={(e) => setTopLevelField("productType", e.target.value)}
-                  placeholder="e.g., Grade 1 potatoes, 5-ton truck transport"
+                  placeholder={selectedCategoryMeta.typePlaceholder}
                   className="w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-200"
                 />
                 <p className="mt-1 text-xs text-slate-500">
                   Short and specific is best.
                 </p>
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-800">
-                Urgency
-              </label>
-              <div className="grid gap-2 sm:grid-cols-3">
-                {([
-                  { value: "low", label: "Low", desc: "Can wait" },
-                  { value: "medium", label: "Medium", desc: "Within a week" },
-                  { value: "high", label: "High", desc: "Urgent" },
-                ] as Array<{ value: UrgencyLevel; label: string; desc: string }>).map((item) => (
-                  <button
-                    key={item.value}
-                    type="button"
-                    onClick={() => setTopLevelField("urgency", item.value)}
-                    className={`rounded-2xl border px-4 py-3 text-left transition ${
-                      formData.urgency === item.value
-                        ? "border-emerald-300 bg-emerald-50 text-emerald-800"
-                        : "border-slate-200 bg-white text-slate-700 hover:border-emerald-300"
-                    }`}
-                  >
-                    <p className="font-semibold">{item.label}</p>
-                    <p className="text-xs opacity-80">{item.desc}</p>
-                  </button>
-                ))}
               </div>
             </div>
           </div>

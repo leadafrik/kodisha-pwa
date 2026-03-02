@@ -9,7 +9,7 @@ interface BuyerRequest {
   _id: string;
   title: string;
   description: string;
-  category: "produce" | "service" | "inputs";
+  category: "produce" | "livestock" | "service" | "inputs";
   productType?: string;
   budget?: { min: number; max: number; currency: string };
   quantity?: number;
@@ -54,12 +54,14 @@ const URGENCY_LABELS: Record<string, string> = {
 
 const CATEGORY_LABELS: Record<string, string> = {
   produce: "Produce",
+  livestock: "Livestock",
   inputs: "Farm Inputs",
   service: "Services",
 };
 
 const CATEGORY_PILL_STYLES: Record<string, string> = {
   produce: "bg-orange-100 text-orange-800",
+  livestock: "bg-amber-100 text-amber-800",
   inputs: "bg-sky-100 text-sky-800",
   service: "bg-emerald-100 text-emerald-800",
 };
@@ -349,6 +351,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
               >
                 <option value="">All Categories</option>
                 <option value="produce">Produce</option>
+                <option value="livestock">Livestock</option>
                 <option value="inputs">Farm Inputs</option>
                 <option value="service">Services</option>
               </select>

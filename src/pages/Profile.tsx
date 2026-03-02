@@ -916,9 +916,9 @@ const Profile: React.FC = () => {
           )}
 
           <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h3 className="text-lg font-bold text-slate-900">Account Settings</h3>
+            <h3 className="text-lg font-bold text-slate-900">Account</h3>
             <p className="mt-2 text-sm text-slate-600">
-              Deleting your account permanently removes profile data, listings, and messages after the grace period.
+              Manage your personal data and account access.
             </p>
             {deleteError && (
               <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
@@ -927,7 +927,9 @@ const Profile: React.FC = () => {
             )}
             <button
               onClick={async () => {
-                const confirmDelete = window.confirm("Delete your account? This action cannot be undone.");
+                const confirmDelete = window.confirm(
+                  "Delete your account? Your profile, listings, and messages will be scheduled for permanent deletion after the grace period."
+                );
                 if (!confirmDelete) return;
 
                 setDeletingAccount(true);
@@ -935,7 +937,7 @@ const Profile: React.FC = () => {
                 try {
                   await scheduleAccountDeletion();
                   window.alert(
-                    "Your account is scheduled for deletion. You can reactivate within 30 days by contacting support."
+                    "Your account is scheduled for deletion. You can reactivate during the grace period by contacting support."
                   );
                   logout();
                   navigate("/login");

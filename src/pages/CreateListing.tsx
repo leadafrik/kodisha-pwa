@@ -57,6 +57,7 @@ const CATEGORY_DESCRIPTIONS = {
 };
 
 const CATEGORY_OPTIONS: ListingCategory[] = ["produce", "livestock", "inputs", "service"];
+const LISTING_PROGRESS_LABELS = ["Category", "Location", "Details", "Verify"] as const;
 
 const DESCRIPTION_HINTS: Record<ListingCategory, { helper: string; placeholder: string }> = {
   produce: {
@@ -287,6 +288,9 @@ const CreateListing: React.FC = () => {
   const recommendedUnit = form.category
     ? RECOMMENDED_UNIT_BY_CATEGORY[form.category]
     : null;
+  const progressStep = Math.max(1, Math.min(4, form.step - 1));
+  const progressPercent = Math.round((progressStep / 4) * 100);
+  const currentProgressLabel = LISTING_PROGRESS_LABELS[progressStep - 1];
   const descriptionCopy = form.category
     ? DESCRIPTION_HINTS[form.category]
     : {
@@ -572,52 +576,23 @@ const CreateListing: React.FC = () => {
 
               <div className="rounded-3xl border border-slate-200 bg-white/90 p-4 shadow-sm fade-rise">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs uppercase tracking-widest text-slate-500">Progress</p>
-                  <p className="text-xs font-semibold text-slate-600">
-                    Step {Math.max(1, Math.min(4, form.step - 1))} of 4
-                  </p>
+                  <div>
+                    <p className="text-xs uppercase tracking-widest text-slate-500">Progress</p>
+                    <p className="mt-1 text-sm font-semibold text-slate-900">
+                      {currentProgressLabel}
+                    </p>
+                  </div>
+                  <p className="text-sm font-semibold text-emerald-700">{progressPercent}%</p>
                 </div>
-                <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  {(["Category", "Location", "Details", "Verify"] as const).map((label, idx) => {
-                    const step = idx + 1;
-                    const progressStep = Math.max(1, Math.min(4, form.step - 1));
-                    const isActive = progressStep === step;
-                    const isDone = progressStep > step;
-                    return (
-                      <div
-                        key={label}
-                        className={`flex items-center gap-2 rounded-2xl border px-3 py-2 ${
-                          isActive
-                            ? "border-emerald-200 bg-emerald-50"
-                            : isDone
-                            ? "border-emerald-100 bg-emerald-50/60"
-                            : "border-slate-200 bg-white"
-                        }`}
-                      >
-                        <div
-                          className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-semibold border ${
-                            isActive
-                              ? "border-emerald-600 bg-emerald-600 text-white"
-                              : isDone
-                              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                              : "border-slate-200 bg-white text-slate-500"
-                          }`}
-                        >
-                          {isDone ? <CheckCircle2 className="h-4 w-4" /> : step}
-                        </div>
-                        <p className={`text-sm font-semibold ${isActive ? "text-slate-900" : "text-slate-600"}`}>
-                          {label}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="mt-3 h-2 rounded-full bg-slate-100 overflow-hidden">
+                <div className="mt-3 h-2.5 rounded-full bg-slate-100 overflow-hidden">
                   <div
                     className="h-full bg-emerald-600 transition-all"
-                    style={{ width: `${(Math.max(1, Math.min(4, form.step - 1)) / 4) * 100}%` }}
+                    style={{ width: `${progressPercent}%` }}
                   />
                 </div>
+                <p className="mt-2 text-xs text-slate-500">
+                  Step {progressStep} of 4
+                </p>
               </div>
             </div>
           </div>

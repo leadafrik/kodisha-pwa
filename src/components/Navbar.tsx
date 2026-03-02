@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   CirclePlus,
   ChevronDown,
@@ -95,12 +95,14 @@ const getNavLinkClass = (active: boolean, accent = false) => {
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const desktopNavRef = useRef<HTMLDivElement | null>(null);
   const accountMenuRef = useRef<HTMLDivElement | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [openNavMenu, setOpenNavMenu] = useState<NavDropdownKey | null>(null);
   const [mobileExpandedMenu, setMobileExpandedMenu] = useState<NavDropdownKey | null>(null);
+  const [mobileSellSheetOpen, setMobileSellSheetOpen] = useState(false);
 
   const isAdmin = user?.role === "admin" || user?.type === "admin";
   const signupTarget = getSignupTarget("/browse");
@@ -168,6 +170,7 @@ const Navbar: React.FC = () => {
     setAccountOpen(false);
     setOpenNavMenu(null);
     setMobileExpandedMenu(null);
+    setMobileSellSheetOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -544,11 +547,64 @@ const Navbar: React.FC = () => {
       )}
 
       {showMobileBottomNav && (
+        <>
+          {mobileSellSheetOpen && (
+            <div className="fixed inset-0 z-40 bg-slate-900/35 lg:hidden" onClick={() => setMobileSellSheetOpen(false)} />
+          )}
+          {mobileSellSheetOpen && (
+            <div className="fixed inset-x-0 bottom-20 z-50 mx-auto w-[calc(100%-1rem)] max-w-md rounded-3xl border border-slate-200 bg-white p-4 shadow-2xl lg:hidden">
+              <div className="mb-3 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Sell</p>
+                  <p className="text-sm font-semibold text-slate-900">Choose what you are listing</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMobileSellSheetOpen(false)}
+                  className="inline-flex min-h-[40px] min-w-[40px] items-center justify-center rounded-xl border border-slate-200 text-slate-700"
+                  aria-label="Close sell options"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="grid gap-2">
+                {sellMenuItems.map((item) => (
+                  <button
+                    key={item.to}
+                    type="button"
+                    onClick={() => {
+                      setMobileSellSheetOpen(false);
+                      navigate(item.to);
+                    }}
+                    className="flex min-h-[48px] items-center rounded-2xl border border-slate-200 px-4 py-3 text-left text-sm font-semibold text-slate-800 transition hover:border-emerald-300 hover:bg-emerald-50"
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 shadow-[0_-12px_28px_-24px_rgba(15,23,42,0.5)] backdrop-blur lg:hidden">
           <div className="mx-auto grid max-w-md grid-cols-5 px-2 py-2">
             {mobileBottomItems.map((item) => {
               const Icon = item.icon || LayoutGrid;
-              const active = pathMatches(location.pathname, item.to);
+              const isSell = item.label === "Sell";
+              const active = isSell ? mobileSellSheetOpen : pathMatches(location.pathname, item.to);
+              if (isSell) {
+                return (
+                  <button
+                    key={item.label}
+                    type="button"
+                    onClick={() => setMobileSellSheetOpen((prev) => !prev)}
+                    className={`flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-xl px-1 text-[11px] font-semibold transition ${
+                      active ? "text-emerald-700" : "text-slate-500"
+                    }`}
+                  >
+                    <Icon className={`h-5 w-5 ${active ? "text-emerald-700" : "text-slate-400"}`} />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              }
               return (
                 <Link
                   key={item.label}
@@ -564,6 +620,7 @@ const Navbar: React.FC = () => {
             })}
           </div>
         </div>
+        </>
       )}
     </>
   );
