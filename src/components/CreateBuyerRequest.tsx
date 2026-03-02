@@ -713,37 +713,57 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
         )}
       </div>
 
-      <div className="mb-5 grid gap-2 sm:grid-cols-3">
-        {STEPS.map((item) => {
-          const isActive = step === item.id;
-          const isDone = step > item.id;
-          return (
-            <div
-              key={item.id}
-              className={`rounded-2xl border px-3 py-3 transition ${
-                isActive
-                  ? "border-emerald-300 bg-emerald-50"
-                  : isDone
-                  ? "border-emerald-200 bg-emerald-50/60"
-                  : "border-slate-200 bg-white"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${
-                  isActive || isDone ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-600"
-                }`}>
+      <div className="mb-5 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+              Step {step} of {STEPS.length}
+            </p>
+            <p className="truncate text-sm font-semibold text-slate-900 sm:text-base">
+              {STEPS[step - 1].label} - {STEPS[step - 1].caption}
+            </p>
+          </div>
+          <p className="shrink-0 text-sm font-bold text-emerald-700">
+            {Math.round((step / STEPS.length) * 100)}%
+          </p>
+        </div>
+
+        <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
+          <div
+            className="h-full bg-emerald-600 transition-all"
+            style={{ width: `${(step / STEPS.length) * 100}%` }}
+          />
+        </div>
+
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+          {STEPS.map((item) => {
+            const isActive = step === item.id;
+            const isDone = step > item.id;
+            return (
+              <div
+                key={item.id}
+                className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold ${
+                  isActive
+                    ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                    : isDone
+                    ? "border-emerald-200 bg-emerald-50/60 text-emerald-700"
+                    : "border-slate-200 bg-slate-50 text-slate-600"
+                }`}
+              >
+                <span
+                  className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] ${
+                    isActive || isDone
+                      ? "bg-emerald-600 text-white"
+                      : "bg-white text-slate-600"
+                  }`}
+                >
                   {item.id}
                 </span>
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">{item.label}</p>
-                  {(!isCompact || isActive) && (
-                    <p className="text-xs text-slate-500">{item.caption}</p>
-                  )}
-                </div>
+                <span>{item.label}</span>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {hasDraft && (
