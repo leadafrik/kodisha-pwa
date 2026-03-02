@@ -56,15 +56,19 @@ const LoadingFallback = () => (
   </div>
 );
 
-const MOBILE_NAV_PADDING_ROUTES = new Set([
-  '/',
-  '/browse',
-  '/request',
-  '/about',
-  '/profile',
-  '/messages',
-  '/favorites',
-]);
+const shouldPadForMobileNav = (pathname: string, signedIn: boolean) => {
+  if (!signedIn) return false;
+
+  return (
+    pathname === '/' ||
+    pathname === '/about' ||
+    pathname === '/profile' ||
+    pathname === '/messages' ||
+    pathname === '/favorites' ||
+    pathname === '/request' ||
+    pathname.startsWith('/browse')
+  );
+};
 
 function App() {
   return (
@@ -89,12 +93,11 @@ export default App;
 const AppShell = () => {
   const { user } = useAuth();
   const location = useLocation();
-  const shouldPadForMobileNav = !!user && MOBILE_NAV_PADDING_ROUTES.has(location.pathname);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
-      <div className={`flex-1 py-4 ${shouldPadForMobileNav ? "pb-24 lg:pb-4" : ""}`}>
+      <div className={`flex-1 py-4 ${shouldPadForMobileNav(location.pathname, !!user) ? "pb-24 lg:pb-4" : ""}`}>
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -107,9 +110,10 @@ const AppShell = () => {
               }
             />
             <Route path="/browse" element={<BrowseListings />} />
+            <Route path="/browse/:category" element={<BrowseListings />} />
             <Route path="/listings" element={<Navigate to="/browse" replace />} />
             <Route path="/marketplace" element={<Navigate to="/browse" replace />} />
-            <Route path="/find-services" element={<BrowseListings />} />
+            <Route path="/find-services" element={<Navigate to="/browse/services" replace />} />
             <Route path="/request" element={<BrowseBuyerRequestsPage />} />
             <Route
               path="/request/new"

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
 import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from "../data/kenyaCounties";
@@ -56,10 +56,30 @@ const CATEGORY_DESCRIPTIONS = {
   service: "Agricultural services including equipment rental, consulting, and labor",
 };
 
+const DESCRIPTION_HINTS: Record<ListingCategory, { helper: string; placeholder: string }> = {
+  produce: {
+    helper: "Mention quality, variety, harvest stage, packaging, or freshness so buyers know what to expect.",
+    placeholder: "Describe your produce clearly - variety, quality, freshness, packaging, and any delivery details.",
+  },
+  livestock: {
+    helper: "Mention breed, age, health, feeding, and quantity to help serious buyers decide faster.",
+    placeholder: "Describe your livestock - breed, age, health status, weight, and any key selling details.",
+  },
+  inputs: {
+    helper: "List some of your key inputs, brands, pack sizes, or supplies so farmers can quickly see what you stock.",
+    placeholder: "List some of your inputs - seeds, fertilizer, chemicals, feeds, tools, brands, or pack sizes.",
+  },
+  service: {
+    helper: "Explain the service, coverage area, turnaround time, and what a customer should expect when they contact you.",
+    placeholder: "Describe the service you offer, where you operate, and what customers can expect from you.",
+  },
+};
+
 const DRAFT_STORAGE_KEY = "kodisha_listing_draft_v1";
 
 const CreateListing: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, refreshUser } = useAuth();
   const { isCompact } = useAdaptiveLayout();
   const [form, setForm] = useState<ListingFormData>({
@@ -102,6 +122,18 @@ const CreateListing: React.FC = () => {
   const isUnverifiedSeller = !idVerified || !selfieVerified;
   const showVerificationNudge = isUnverifiedSeller && !isVerificationPending;
   const verifyIdPath = "/verify-id?next=%2Fcreate-listing";
+  const requestedCategory = useMemo(() => {
+    const categoryParam = searchParams.get("category");
+    if (
+      categoryParam === "produce" ||
+      categoryParam === "livestock" ||
+      categoryParam === "inputs" ||
+      categoryParam === "service"
+    ) {
+      return categoryParam as ListingCategory;
+    }
+    return null;
+  }, [searchParams]);
 
   // Pre-fill contact
   useEffect(() => {
@@ -129,6 +161,20 @@ const CreateListing: React.FC = () => {
       setForm((prev) => ({ ...prev, listingType: "sell", step: 2 }));
     }
   }, [form.step, form.listingType]);
+
+  useEffect(() => {
+    if (!requestedCategory) return;
+
+    setForm((prev) => {
+      if (prev.category === requestedCategory) return prev;
+      return {
+        ...prev,
+        category: requestedCategory,
+        subcategory: null,
+        step: Math.max(prev.step, 2),
+      };
+    });
+  }, [requestedCategory]);
 
   const hasMeaningfulDraft = (raw: string | null) => {
     if (!raw) return false;
@@ -238,6 +284,12 @@ const CreateListing: React.FC = () => {
   const recommendedUnit = form.category
     ? RECOMMENDED_UNIT_BY_CATEGORY[form.category]
     : null;
+  const descriptionCopy = form.category
+    ? DESCRIPTION_HINTS[form.category]
+    : {
+        helper: "Add the details a buyer needs to trust the listing quickly.",
+        placeholder: "Describe what you are listing clearly and practically.",
+      };
 
   const trustSignals = useMemo(
     () => [
@@ -816,8 +868,9 @@ const CreateListing: React.FC = () => {
                 {/* Description */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-2">Description *</label>
+                  <p className="mb-2 text-xs text-gray-600">{descriptionCopy.helper}</p>
                   <textarea
-                    placeholder="Describe your product in detail - quality, condition, features, etc."
+                    placeholder={descriptionCopy.placeholder}
                     value={form.description}
                     onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
                     rows={5}

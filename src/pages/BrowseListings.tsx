@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useProperties } from "../contexts/PropertyContext";
 import { useAuth } from "../contexts/AuthContext";
 import { kenyaCounties } from "../data/kenyaCounties";
@@ -65,6 +65,22 @@ const formatPhoneForUri = (contact: string): string => {
 
 const highValueCategories: Category[] = ["livestock", "inputs", "service"];
 
+const ROUTE_CATEGORY_MAP: Record<string, Category> = {
+  all: "all",
+  produce: "produce",
+  livestock: "livestock",
+  inputs: "inputs",
+  agrovets: "inputs",
+  services: "service",
+  service: "service",
+};
+
+const normalizeRouteCategory = (value?: string): Category =>
+  (value && ROUTE_CATEGORY_MAP[value.toLowerCase()]) || "all";
+
+const getBrowsePathForCategory = (category: Category) =>
+  category === "all" ? "/browse" : `/browse/${category === "service" ? "services" : category}`;
+
 const formatLastActive = (value?: string | Date) => {
   if (!value) return "Active recently";
   const date = new Date(value);
@@ -100,10 +116,12 @@ const isServiceVisible = (service: any) => {
 };
 
 const BrowseListings: React.FC = () => {
+  const navigate = useNavigate();
+  const { category: categoryParam } = useParams<{ category?: string }>();
   const { serviceListings, productListings, loading } = useProperties();
   const { user } = useAuth();
 
-  const [category, setCategory] = useState<Category>("all");
+  const category = useMemo(() => normalizeRouteCategory(categoryParam), [categoryParam]);
   const [serviceSub, setServiceSub] = useState<ServiceSubType>("all");
   const [county, setCounty] = useState<string>("");
   const [search, setSearch] = useState<string>("");
@@ -112,6 +130,18 @@ const BrowseListings: React.FC = () => {
   const [showRaffle, setShowRaffle] = useState(false);
   const isHighValueCategory =
     category !== "all" && highValueCategories.includes(category);
+
+  useEffect(() => {
+    if (categoryParam && normalizeRouteCategory(categoryParam) === "all" && categoryParam.toLowerCase() !== "all") {
+      navigate("/browse", { replace: true });
+    }
+  }, [categoryParam, navigate]);
+
+  useEffect(() => {
+    if (category !== "service" && serviceSub !== "all") {
+      setServiceSub("all");
+    }
+  }, [category, serviceSub]);
 
   useEffect(() => {
     if (verifiedOnlyManual) return;
@@ -253,7 +283,7 @@ const BrowseListings: React.FC = () => {
     { id: "all", label: "All" },
     { id: "produce", label: "Produce" },
     { id: "livestock", label: "Livestock" },
-    { id: "inputs", label: "Farm Inputs" },
+    { id: "inputs", label: "Inputs" },
     { id: "service", label: "Services" },
   ];
 
@@ -484,7 +514,7 @@ const BrowseListings: React.FC = () => {
                     key={pill.id}
                     type="button"
                     onClick={() => {
-                      setCategory(pill.id);
+                      navigate(getBrowsePathForCategory(pill.id));
                       setServiceSub("all");
                       setVerifiedOnlyManual(false);
                     }}
@@ -542,7 +572,7 @@ const BrowseListings: React.FC = () => {
                   onClick={() => {
                     setCounty("");
                     setSearch("");
-                    setCategory("all");
+                    navigate("/browse");
                     setServiceSub("all");
                     setVerifiedOnly(false);
                     setVerifiedOnlyManual(false);
@@ -614,7 +644,7 @@ const BrowseListings: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <button
                 onClick={() => {
-                  setCategory("all");
+                  navigate("/browse");
                   setServiceSub("all");
                   setCounty("");
                   setSearch("");

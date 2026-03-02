@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   CirclePlus,
+  ChevronDown,
   ClipboardList,
   LayoutGrid,
   MessageSquare,
@@ -24,20 +25,27 @@ type NavItem = {
   accent?: boolean;
 };
 
-const TOP_LEVEL_MOBILE_ROUTES = new Set([
-  "/",
-  "/browse",
-  "/request",
-  "/about",
-  "/profile",
-  "/messages",
-  "/favorites",
-]);
+type NavDropdownItem = {
+  label: string;
+  to: string;
+};
+
+type NavDropdownKey = "browse" | "sell";
+
+const shouldShowTopLevelMobileNav = (pathname: string) =>
+  pathname === "/" ||
+  pathname === "/about" ||
+  pathname === "/profile" ||
+  pathname === "/messages" ||
+  pathname === "/favorites" ||
+  pathname === "/request" ||
+  pathname.startsWith("/browse");
 
 const pathMatches = (pathname: string, key: string) => {
   if (key === "/browse") {
     return (
       pathname === "/browse" ||
+      pathname.startsWith("/browse/") ||
       pathname === "/listings" ||
       pathname === "/marketplace" ||
       pathname === "/find-services" ||
@@ -69,6 +77,9 @@ const pathMatches = (pathname: string, key: string) => {
   return pathname === key;
 };
 
+const getSignupTarget = (nextPath: string) =>
+  `/login?mode=signup&next=${encodeURIComponent(nextPath)}`;
+
 const getNavLinkClass = (active: boolean, accent = false) => {
   if (accent) {
     return active
@@ -84,19 +95,50 @@ const getNavLinkClass = (active: boolean, accent = false) => {
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const desktopNavRef = useRef<HTMLDivElement | null>(null);
   const accountMenuRef = useRef<HTMLDivElement | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [openNavMenu, setOpenNavMenu] = useState<NavDropdownKey | null>(null);
+  const [mobileExpandedMenu, setMobileExpandedMenu] = useState<NavDropdownKey | null>(null);
 
   const isAdmin = user?.role === "admin" || user?.type === "admin";
-  const sellTarget = user ? "/create-listing" : "/login?mode=signup&next=/create-listing";
-  const signupTarget = "/login?mode=signup&next=/browse";
+  const signupTarget = getSignupTarget("/browse");
+  const browseMenuItems = useMemo<NavDropdownItem[]>(
+    () => [
+      { label: "All Listings", to: "/browse" },
+      { label: "Produce", to: "/browse/produce" },
+      { label: "Livestock", to: "/browse/livestock" },
+      { label: "Inputs", to: "/browse/inputs" },
+      { label: "Services", to: "/browse/services" },
+    ],
+    []
+  );
+  const sellMenuItems = useMemo<NavDropdownItem[]>(
+    () => [
+      {
+        label: "List Produce",
+        to: user ? "/create-listing?category=produce" : getSignupTarget("/create-listing?category=produce"),
+      },
+      {
+        label: "List Livestock",
+        to: user ? "/create-listing?category=livestock" : getSignupTarget("/create-listing?category=livestock"),
+      },
+      {
+        label: "List Inputs",
+        to: user ? "/create-listing?category=inputs" : getSignupTarget("/create-listing?category=inputs"),
+      },
+      {
+        label: "List Service",
+        to: user ? "/create-listing?category=service" : getSignupTarget("/create-listing?category=service"),
+      },
+    ],
+    [user]
+  );
 
   const desktopNavItems = useMemo<NavItem[]>(() => {
     const items: NavItem[] = [
-      { label: "Listings", to: "/browse" },
       { label: "Buy Requests", to: "/request" },
-      { label: "Sell", to: sellTarget },
     ];
 
     if (user) {
@@ -105,7 +147,7 @@ const Navbar: React.FC = () => {
 
     items.push({ label: "About", to: "/about" });
     return items;
-  }, [sellTarget, user]);
+  }, [user]);
 
   const mobileBottomItems = useMemo<NavItem[]>(() => {
     if (!user) return [];
@@ -119,23 +161,27 @@ const Navbar: React.FC = () => {
   }, [user]);
 
   const showMobileBottomNav =
-    !!user && TOP_LEVEL_MOBILE_ROUTES.has(location.pathname) && !mobileOpen;
+    !!user && shouldShowTopLevelMobileNav(location.pathname) && !mobileOpen;
 
   useEffect(() => {
     setMobileOpen(false);
     setAccountOpen(false);
+    setOpenNavMenu(null);
+    setMobileExpandedMenu(null);
   }, [location.pathname]);
 
   useEffect(() => {
     if (!accountOpen) return undefined;
 
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        accountMenuRef.current &&
-        event.target instanceof Node &&
-        !accountMenuRef.current.contains(event.target)
-      ) {
+      if (!(event.target instanceof Node)) return;
+
+      if (accountMenuRef.current && !accountMenuRef.current.contains(event.target)) {
         setAccountOpen(false);
+      }
+
+      if (desktopNavRef.current && !desktopNavRef.current.contains(event.target)) {
+        setOpenNavMenu(null);
       }
     };
 
@@ -165,8 +211,38 @@ const Navbar: React.FC = () => {
               <span className="text-2xl font-extrabold tracking-tight text-slate-900">Agrisoko</span>
             </Link>
 
-            <div className="hidden lg:flex lg:items-center lg:gap-2">
-              {desktopNavItems.map((item) => {
+            <div ref={desktopNavRef} className="hidden lg:flex lg:items-center lg:gap-2">
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setOpenNavMenu((prev) => (prev === "browse" ? null : "browse"))}
+                  className={getNavLinkClass(pathMatches(location.pathname, "/browse"))}
+                  aria-expanded={openNavMenu === "browse"}
+                  aria-haspopup="menu"
+                >
+                  <span>Listings</span>
+                  <ChevronDown className={`ml-2 h-4 w-4 transition ${openNavMenu === "browse" ? "rotate-180" : ""}`} />
+                </button>
+                {openNavMenu === "browse" && (
+                  <div className="absolute left-0 mt-2 w-60 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+                    {browseMenuItems.map((item, index) => (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        className={`block px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 ${
+                          index > 0 ? "border-t border-slate-100" : ""
+                        }`}
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {desktopNavItems
+                .filter((item) => item.label === "Buy Requests")
+                .map((item) => {
                 const active = pathMatches(location.pathname, item.to);
                 return (
                   <Link key={item.label} to={item.to} className={getNavLinkClass(active, item.accent)}>
@@ -174,6 +250,45 @@ const Navbar: React.FC = () => {
                   </Link>
                 );
               })}
+
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setOpenNavMenu((prev) => (prev === "sell" ? null : "sell"))}
+                  className={getNavLinkClass(pathMatches(location.pathname, "/create-listing"))}
+                  aria-expanded={openNavMenu === "sell"}
+                  aria-haspopup="menu"
+                >
+                  <span>Sell</span>
+                  <ChevronDown className={`ml-2 h-4 w-4 transition ${openNavMenu === "sell" ? "rotate-180" : ""}`} />
+                </button>
+                {openNavMenu === "sell" && (
+                  <div className="absolute left-0 mt-2 w-64 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+                    {sellMenuItems.map((item, index) => (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        className={`block px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 ${
+                          index > 0 ? "border-t border-slate-100" : ""
+                        }`}
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {desktopNavItems
+                .filter((item) => item.label !== "Buy Requests")
+                .map((item) => {
+                  const active = pathMatches(location.pathname, item.to);
+                  return (
+                    <Link key={item.label} to={item.to} className={getNavLinkClass(active, item.accent)}>
+                      {item.label}
+                    </Link>
+                  );
+                })}
             </div>
 
             <div className="hidden lg:flex lg:items-center lg:gap-3">
@@ -276,14 +391,41 @@ const Navbar: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              {desktopNavItems.map((item) => {
+              <div className="rounded-2xl border border-slate-200 bg-slate-50/70">
+                <button
+                  type="button"
+                  onClick={() => setMobileExpandedMenu((prev) => (prev === "browse" ? null : "browse"))}
+                  className={`flex min-h-[52px] w-full items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                    pathMatches(location.pathname, "/browse") ? "bg-slate-100 text-slate-900" : "text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  <span className="flex items-center gap-3">
+                    <LayoutGrid className="h-5 w-5" />
+                    Listings
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition ${mobileExpandedMenu === "browse" ? "rotate-180" : ""}`} />
+                </button>
+                {mobileExpandedMenu === "browse" && (
+                  <div className="border-t border-slate-200 px-3 py-2">
+                    {browseMenuItems.map((item) => (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        className="block rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {desktopNavItems
+                .filter((item) => item.label === "Buy Requests")
+                .map((item) => {
                 const Icon =
-                  item.label === "Listings"
-                    ? LayoutGrid
-                    : item.label === "Buy Requests"
+                  item.label === "Buy Requests"
                     ? ClipboardList
-                    : item.label === "Sell"
-                    ? CirclePlus
                     : item.label === "Messages"
                     ? MessageSquare
                     : Info;
@@ -294,11 +436,7 @@ const Navbar: React.FC = () => {
                     key={item.label}
                     to={item.to}
                     className={`flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-                      item.accent
-                        ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                        : active
-                        ? "bg-slate-100 text-slate-900"
-                        : "text-slate-700 hover:bg-slate-50"
+                      active ? "bg-slate-100 text-slate-900" : "text-slate-700 hover:bg-slate-50"
                     }`}
                   >
                     <Icon className="h-5 w-5" />
@@ -306,6 +444,55 @@ const Navbar: React.FC = () => {
                   </Link>
                 );
               })}
+
+              <div className="rounded-2xl border border-slate-200 bg-slate-50/70">
+                <button
+                  type="button"
+                  onClick={() => setMobileExpandedMenu((prev) => (prev === "sell" ? null : "sell"))}
+                  className={`flex min-h-[52px] w-full items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                    pathMatches(location.pathname, "/create-listing") ? "bg-slate-100 text-slate-900" : "text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  <span className="flex items-center gap-3">
+                    <CirclePlus className="h-5 w-5" />
+                    Sell
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition ${mobileExpandedMenu === "sell" ? "rotate-180" : ""}`} />
+                </button>
+                {mobileExpandedMenu === "sell" && (
+                  <div className="border-t border-slate-200 px-3 py-2">
+                    {sellMenuItems.map((item) => (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        className="block rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {desktopNavItems
+                .filter((item) => item.label !== "Buy Requests")
+                .map((item) => {
+                  const Icon = item.label === "Messages" ? MessageSquare : Info;
+                  const active = pathMatches(location.pathname, item.to);
+
+                  return (
+                    <Link
+                      key={item.label}
+                      to={item.to}
+                      className={`flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                        active ? "bg-slate-100 text-slate-900" : "text-slate-700 hover:bg-slate-50"
+                      }`}
+                    >
+                      <Icon className="h-5 w-5" />
+                      {item.label}
+                    </Link>
+                  );
+                })}
             </div>
 
             <div className="my-6 border-t border-slate-200" />
