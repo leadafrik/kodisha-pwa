@@ -68,6 +68,61 @@ interface SellerReview {
   };
 }
 
+type ResolvedListingType =
+  | "land"
+  | "product"
+  | "equipment"
+  | "service"
+  | "agrovet"
+  | null;
+
+const normalizeListingType = (listing: any): ResolvedListingType => {
+  const candidates = [
+    listing?.listingType,
+    listing?.category,
+    listing?.serviceType,
+    listing?.type,
+  ];
+
+  for (const candidate of candidates) {
+    const value = String(candidate || "").trim().toLowerCase();
+    if (!value) continue;
+    if (value === "land") return "land";
+    if (value === "product") return "product";
+    if (value === "equipment") return "equipment";
+    if (value === "agrovet" || value === "agrovets") return "agrovet";
+    if (
+      value === "service" ||
+      value === "services" ||
+      value === "professional" ||
+      value === "professional_services"
+    ) {
+      return "service";
+    }
+  }
+
+  return null;
+};
+
+const normalizeListingForView = (listing: any) => {
+  if (!listing) return listing;
+
+  const location = listing.location || {};
+
+  return {
+    ...listing,
+    title: listing.title || listing.name,
+    name: listing.name || listing.title,
+    listingType: normalizeListingType(listing),
+    location: {
+      ...location,
+      county: location.county || location.region || "",
+      constituency: location.constituency || location.subRegion || "",
+      ward: location.ward || "",
+    },
+  };
+};
+
 // Type-specific detail section components
 const LandDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
   <div className="bg-gray-100 p-4 rounded-lg mb-6">
@@ -170,14 +225,14 @@ const renderDetailsSection = (listingType: string | null, listing: any) => {
       return <LandDetailsSection listing={listing} />;
     case 'equipment':
       return <EquipmentDetailsSection listing={listing} />;
-    case 'professional':
+    case 'service':
       return <ProfessionalDetailsSection listing={listing} />;
     case 'agrovet':
       return <AgrovetDetailsSection listing={listing} />;
     case 'product':
       return <ProductDetailsSection listing={listing} />;
     default:
-      return <LandDetailsSection listing={listing} />;
+      return null;
   }
 };
 
@@ -304,7 +359,7 @@ const ListingDetails: React.FC = () => {
         setLoading(false);
         return;
       }
-      const res = await fetch(API_ENDPOINTS.properties.getById(id as string));
+      const res = await fetch(`${API_BASE_URL}/unified-listings/${id}`);
       if (!res.ok) {
         console.error('Listing fetch failed with status:', res.status);
         setListing(null);
@@ -313,25 +368,36 @@ const ListingDetails: React.FC = () => {
       }
       const data = await res.json();
       if (data.success && data.data) {
-        setListing(data.data);
-        setListingType(data.data.listingType || "land");
+        const normalizedListing = normalizeListingForView(data.data);
+        const resolvedListingType = normalizeListingType(normalizedListing);
+
+        setListing(normalizedListing);
+        setListingType(resolvedListingType);
         // After setting listing, check if saved
         const token = getAuthToken();
         if (token) {
           try {
             const favorites = await favoritesService.getFavorites();
-            const listingIdStr = data.data._id.toString?.() || String(data.data._id);
+            const listingIdStr =
+              normalizedListing._id.toString?.() || String(normalizedListing._id);
             const isSaved = favorites.some((f: any) => {
               const favIdStr = f.listingId.toString?.() || String(f.listingId);
-              return favIdStr === listingIdStr && f.listingType === (data.data.listingType || 'land');
+              return (
+                favIdStr === listingIdStr &&
+                !!resolvedListingType &&
+                f.listingType === resolvedListingType
+              );
             });
             setSaved(isSaved);
           } catch (e) {
             // Silently handle favorite check failures
           }
         }
-        if (Array.isArray(data.data.images) && data.data.images.length > 0) {
-          setMainImage(data.data.images[0]);
+        if (
+          Array.isArray(normalizedListing.images) &&
+          normalizedListing.images.length > 0
+        ) {
+          setMainImage(normalizedListing.images[0]);
         }
       } else {
         console.error('Listing fetch failed:', data);
@@ -594,6 +660,7 @@ const ListingDetails: React.FC = () => {
   let currentUserId: string | null = null;
   try { if (currentUserRaw) currentUserId = JSON.parse(currentUserRaw)?._id; } catch {}
   const canMarkSold = !!listing && (isAdmin || (currentUserId && listing.owner && listing.owner._id === currentUserId));
+  const supportsMarkSold = listingType === 'product';
 
   const hoursUntilHide = listing?.sold && listing?.soldAt ? Math.max(0, 48 - ((Date.now() - new Date(listing.soldAt).getTime()) / (1000*60*60))) : null;
 
@@ -759,7 +826,10 @@ const ListingDetails: React.FC = () => {
                     return;
                   }
                   const listingIdToSend = listing._id.toString?.() || String(listing._id);
-                  const listingTypeToSend = (listing.listingType || listingType || 'land') as 'land' | 'product' | 'equipment' | 'service' | 'agrovet';
+                  const listingTypeToSend = normalizeListingType(listing);
+                  if (!listingTypeToSend) {
+                    return;
+                  }
                   
                   const result = await favoritesService.toggleFavorite(listingIdToSend, listingTypeToSend);
                   setSaved(result.action === 'added');
@@ -771,7 +841,7 @@ const ListingDetails: React.FC = () => {
             >
               {saved ? 'Saved' : 'Save'}
             </button>
-            {canMarkSold && !listing.sold && (
+            {canMarkSold && supportsMarkSold && !listing.sold && (
               <button
                 onClick={handleMarkSold}
                 disabled={markingSold}
