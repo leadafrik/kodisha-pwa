@@ -56,6 +56,8 @@ const CATEGORY_DESCRIPTIONS = {
   service: "Agricultural services including equipment rental, consulting, and labor",
 };
 
+const CATEGORY_OPTIONS: ListingCategory[] = ["produce", "livestock", "inputs", "service"];
+
 const DESCRIPTION_HINTS: Record<ListingCategory, { helper: string; placeholder: string }> = {
   produce: {
     helper: "Mention quality, variety, harvest stage, packaging, or freshness so buyers know what to expect.",
@@ -134,6 +136,7 @@ const CreateListing: React.FC = () => {
     }
     return null;
   }, [searchParams]);
+  const hasPresetCategory = !!requestedCategory;
 
   // Pre-fill contact
   useEffect(() => {
@@ -706,32 +709,94 @@ const CreateListing: React.FC = () => {
                   Post a buy request
                 </button>
               </div>
-              <h2 className="text-xl font-bold text-gray-900 mb-6">What are you listing?</h2>
-              <div className="space-y-4 mb-8">
-                {(["produce", "livestock", "inputs", "service"] as const).map((cat) => (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => {
-                      setForm((prev) => ({ ...prev, category: cat, subcategory: null }));
-                      setError("");
-                      setNotice("");
-                    }}
-                    className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
-                      form.category === cat
-                        ? "border-green-600 bg-green-50"
-                        : "border-gray-200 hover:border-green-300"
-                    }`}
-                  >
-                    <p className="font-bold text-gray-900">
-                      {cat.charAt(0).toUpperCase() + cat.slice(1)}
+              <h2 className="text-xl font-bold text-gray-900 mb-4">
+                {hasPresetCategory ? "Confirm your category" : "What are you listing?"}
+              </h2>
+              {hasPresetCategory ? (
+                <div className="mb-6 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <label className="mb-2 block text-sm font-semibold text-gray-900">Category</label>
+                      <select
+                        value={form.category ?? ""}
+                        onChange={(e) => {
+                          const value = (e.target.value || null) as ListingCategory | null;
+                          setForm((prev) => ({
+                            ...prev,
+                            category: value,
+                            subcategory: null,
+                          }));
+                          setError("");
+                          setNotice("");
+                        }}
+                        className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-green-500"
+                      >
+                        <option value="">Select a category...</option>
+                        {CATEGORY_OPTIONS.map((cat) => (
+                          <option key={cat} value={cat}>
+                            {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-semibold text-gray-900">Subcategory</label>
+                      <select
+                        value={form.subcategory ?? ""}
+                        onChange={(e) => {
+                          const value = (e.target.value || null) as ListingFormData["subcategory"];
+                          setForm((prev) => ({
+                            ...prev,
+                            subcategory: value,
+                            step: value ? Math.max(prev.step, 3) : prev.step,
+                          }));
+                          setError("");
+                          setNotice("");
+                        }}
+                        className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-green-500"
+                      >
+                        <option value="">Select a subcategory...</option>
+                        {subcategoryOptions.map((sub) => (
+                          <option key={sub} value={sub}>
+                            {sub}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  {form.category && (
+                    <p className="mt-3 text-sm text-gray-600">
+                      {CATEGORY_DESCRIPTIONS[form.category]}
                     </p>
-                    <p className="text-sm text-gray-600 mt-1">{CATEGORY_DESCRIPTIONS[cat]}</p>
-                  </button>
-                ))}
-              </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4 mb-8">
+                  {CATEGORY_OPTIONS.map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => {
+                        setForm((prev) => ({ ...prev, category: cat, subcategory: null }));
+                        setError("");
+                        setNotice("");
+                      }}
+                      className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
+                        form.category === cat
+                          ? "border-green-600 bg-green-50"
+                          : "border-gray-200 hover:border-green-300"
+                      }`}
+                    >
+                      <p className="font-bold text-gray-900">
+                        {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                      </p>
+                      <p className="text-sm text-gray-600 mt-1">{CATEGORY_DESCRIPTIONS[cat]}</p>
+                    </button>
+                  ))}
+                </div>
+              )}
 
-              {form.category && (
+              {form.category && !hasPresetCategory && (
                 <div>
                   <h3 className="font-bold text-gray-900 mb-4">Select a subcategory</h3>
                   <select
