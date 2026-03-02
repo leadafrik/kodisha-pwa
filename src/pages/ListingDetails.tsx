@@ -123,6 +123,42 @@ const normalizeListingForView = (listing: any) => {
   };
 };
 
+const fetchPublicCollection = async (url: string): Promise<any[]> => {
+  const response = await fetch(url, { cache: "no-store" });
+  if (!response.ok) return [];
+
+  const payload = await response.json().catch(() => ({}));
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.data?.services)) return payload.data.services;
+  return [];
+};
+
+const fetchLegacyListingFallback = async (id: string) => {
+  const sources: Array<{ url: string; listingType: ResolvedListingType }> = [
+    { url: API_ENDPOINTS.services.products.list, listingType: "product" },
+    { url: API_ENDPOINTS.services.equipment.list, listingType: "equipment" },
+    { url: API_ENDPOINTS.services.professional.list, listingType: "service" },
+    { url: API_ENDPOINTS.services.agrovets.list, listingType: "agrovet" },
+  ];
+
+  for (const source of sources) {
+    const items = await fetchPublicCollection(source.url);
+    const match = items.find((item: any) => {
+      const candidateId = item?._id?.toString?.() || item?.id?.toString?.() || String(item?._id || item?.id || "");
+      return candidateId === id;
+    });
+
+    if (match) {
+      return normalizeListingForView({
+        ...match,
+        listingType: source.listingType,
+      });
+    }
+  }
+
+  return null;
+};
+
 // Type-specific detail section components
 const LandDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
   <div className="bg-gray-100 p-4 rounded-lg mb-6">
@@ -352,6 +388,46 @@ const ListingDetails: React.FC = () => {
   const socketRef = useRef<Socket | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const applyListingState = useCallback(
+    async (rawListing: any) => {
+      const normalizedListing = normalizeListingForView(rawListing);
+      const resolvedListingType = normalizeListingType(normalizedListing);
+
+      setListing(normalizedListing);
+      setListingType(resolvedListingType);
+
+      const token = getAuthToken();
+      if (token) {
+        try {
+          const favorites = await favoritesService.getFavorites();
+          const listingIdStr =
+            normalizedListing._id.toString?.() || String(normalizedListing._id);
+          const isSaved = favorites.some((f: any) => {
+            const favIdStr = f.listingId.toString?.() || String(f.listingId);
+            return (
+              favIdStr === listingIdStr &&
+              !!resolvedListingType &&
+              f.listingType === resolvedListingType
+            );
+          });
+          setSaved(isSaved);
+        } catch {
+          // Ignore favorites lookup failures on detail load.
+        }
+      }
+
+      if (
+        Array.isArray(normalizedListing.images) &&
+        normalizedListing.images.length > 0
+      ) {
+        setMainImage(normalizedListing.images[0]);
+      } else {
+        setMainImage(null);
+      }
+    },
+    []
+  );
+
   const fetchListing = useCallback(async () => {
     setLoading(true);
     try {
@@ -359,57 +435,46 @@ const ListingDetails: React.FC = () => {
         setLoading(false);
         return;
       }
-      const res = await fetch(`${API_BASE_URL}/unified-listings/${id}`);
+      const res = await fetch(`${API_BASE_URL}/unified-listings/${id}`, {
+        cache: "no-store",
+      });
       if (!res.ok) {
         console.error('Listing fetch failed with status:', res.status);
+        const fallbackListing = await fetchLegacyListingFallback(id as string);
+        if (fallbackListing) {
+          await applyListingState(fallbackListing);
+          return;
+        }
         setListing(null);
         setLoading(false);
         return;
       }
       const data = await res.json();
       if (data.success && data.data) {
-        const normalizedListing = normalizeListingForView(data.data);
-        const resolvedListingType = normalizeListingType(normalizedListing);
-
-        setListing(normalizedListing);
-        setListingType(resolvedListingType);
-        // After setting listing, check if saved
-        const token = getAuthToken();
-        if (token) {
-          try {
-            const favorites = await favoritesService.getFavorites();
-            const listingIdStr =
-              normalizedListing._id.toString?.() || String(normalizedListing._id);
-            const isSaved = favorites.some((f: any) => {
-              const favIdStr = f.listingId.toString?.() || String(f.listingId);
-              return (
-                favIdStr === listingIdStr &&
-                !!resolvedListingType &&
-                f.listingType === resolvedListingType
-              );
-            });
-            setSaved(isSaved);
-          } catch (e) {
-            // Silently handle favorite check failures
-          }
-        }
-        if (
-          Array.isArray(normalizedListing.images) &&
-          normalizedListing.images.length > 0
-        ) {
-          setMainImage(normalizedListing.images[0]);
-        }
+        await applyListingState(data.data);
       } else {
         console.error('Listing fetch failed:', data);
+        const fallbackListing = await fetchLegacyListingFallback(id as string);
+        if (fallbackListing) {
+          await applyListingState(fallbackListing);
+          return;
+        }
         setListing(null);
       }
     } catch (err) {
       console.error("Error fetching listing:", err);
-      setListing(null);
+      const fallbackListing = id
+        ? await fetchLegacyListingFallback(id as string).catch(() => null)
+        : null;
+      if (fallbackListing) {
+        await applyListingState(fallbackListing);
+      } else {
+        setListing(null);
+      }
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [applyListingState, id]);
 
   // Check if user is admin on mount and when storage changes
   useEffect(() => {
