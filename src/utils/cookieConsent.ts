@@ -1,5 +1,8 @@
 export const COOKIE_CONSENT_KEY = "agrisoko_cookie_consent";
 export const GOOGLE_ADS_TAG_ID = "AW-17766894151";
+export const GOOGLE_ANALYTICS_TAG_ID = "G-HP4LZ027BY";
+
+const GOOGLE_TAG_IDS = [GOOGLE_ADS_TAG_ID, GOOGLE_ANALYTICS_TAG_ID] as const;
 
 export type CookieConsentValue = "accepted" | "rejected";
 
@@ -9,12 +12,12 @@ declare global {
   interface Window {
     dataLayer?: unknown[];
     gtag?: GtagFunction;
-    __agrisokoAdsInitialized?: boolean;
+    __agrisokoGoogleTagsInitialized?: boolean;
   }
 }
 
 const getTagScriptSrc = () =>
-  `https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_TAG_ID}`;
+  `https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ANALYTICS_TAG_ID}`;
 
 const ensureGtagStub = () => {
   if (!window.dataLayer) {
@@ -52,11 +55,13 @@ export const enableGoogleAdsTracking = () => {
   ensureGtagStub();
   ensureGoogleTagScript();
 
-  if (window.__agrisokoAdsInitialized) return;
+  if (window.__agrisokoGoogleTagsInitialized) return;
 
   window.gtag?.("js", new Date());
-  window.gtag?.("config", GOOGLE_ADS_TAG_ID);
-  window.__agrisokoAdsInitialized = true;
+  GOOGLE_TAG_IDS.forEach((tagId) => {
+    window.gtag?.("config", tagId);
+  });
+  window.__agrisokoGoogleTagsInitialized = true;
 };
 
 const hasTrackingConsent = () => getCookieConsent() === "accepted";
@@ -77,7 +82,6 @@ export const trackGooglePageView = ({
   if (typeof window === "undefined" || !ensureTrackingReady()) return;
 
   window.gtag?.("event", "page_view", {
-    send_to: GOOGLE_ADS_TAG_ID,
     page_path: pagePath,
     page_title: pageTitle || document.title,
     page_location: window.location.href,
@@ -91,7 +95,6 @@ export const trackGoogleEvent = (
   if (typeof window === "undefined" || !ensureTrackingReady()) return;
 
   window.gtag?.("event", eventName, {
-    send_to: GOOGLE_ADS_TAG_ID,
     ...params,
   });
 };

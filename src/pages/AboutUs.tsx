@@ -29,6 +29,11 @@ const AboutUs: React.FC = () => {
   const cmoLinkedIn = "https://www.linkedin.com/in/stanley-bwire";
   const cmoSummary =
     "Stanley Bwire is Agrisoko's Chief Marketing Officer. As a sales and marketing executive specializing in digital marketing and media production, he combines graphic design, market research, and product advertising to connect Agrisoko with the right audience through clear, data-driven campaigns.";
+  const fieldOpsLeadName = "Irene Njoki";
+  const fieldOpsLeadTitle = "Field Operations Lead";
+  const fieldOpsLeadImage = "/images/irene-njoki.jpeg";
+  const fieldOpsLeadSummary =
+    "Irene Njoki is Agrisoko's Field Operations Lead. With experience in animal health, small-scale farming, and direct relationships with sellers on the ground, she helps keep the platform connected to real farmer needs, trusted supply networks, and day-to-day field realities across Kenya.";
   const organizationSameAs = [
     "https://wa.me/254796389192",
     "https://chat.whatsapp.com/HzCaV5YVz86CjwajiOHR5i",
@@ -113,6 +118,28 @@ const AboutUs: React.FC = () => {
               jobTitle: "Founder, Agrisoko",
               image: `https://www.agrisoko254.com${founderImage}`,
               sameAs: [founderLinkedIn],
+              worksFor: {
+                "@type": "Organization",
+                name: "Agrisoko Limited",
+              },
+              address: {
+                "@type": "PostalAddress",
+                addressCountry: "KE",
+              },
+            },
+            null,
+            2
+          )}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(
+            {
+              "@context": "https://schema.org",
+              "@type": "Person",
+              name: fieldOpsLeadName,
+              jobTitle: fieldOpsLeadTitle,
+              image: `https://www.agrisoko254.com${fieldOpsLeadImage}`,
+              description: fieldOpsLeadSummary,
               worksFor: {
                 "@type": "Organization",
                 name: "Agrisoko Limited",
@@ -508,6 +535,44 @@ const AboutUs: React.FC = () => {
                   >
                     View LinkedIn Profile
                   </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="max-w-6xl mx-auto px-4 py-12">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
+            <div className="grid gap-8 md:grid-cols-[0.8fr_1.2fr] items-start">
+              <div>
+                <img
+                  src={fieldOpsLeadImage}
+                  alt={`${fieldOpsLeadName} - ${fieldOpsLeadTitle} at Agrisoko`}
+                  className="w-full rounded-2xl object-cover shadow-sm"
+                  loading="lazy"
+                />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">
+                  Leadership
+                </p>
+                <h2 className="about-title text-3xl text-slate-900 mt-3">
+                  {fieldOpsLeadName}
+                </h2>
+                <p className="mt-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  {fieldOpsLeadTitle}
+                </p>
+                <p className="text-slate-700 mt-4 leading-relaxed">
+                  {fieldOpsLeadSummary}
+                </p>
+                <p className="text-slate-700 mt-3 leading-relaxed">
+                  Her work helps Agrisoko stay grounded in real agricultural relationships. With exposure to animal health and practical farming, she brings field-level insight that strengthens seller outreach, farmer trust, and on-the-ground market relevance.
+                </p>
+                <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
+                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Field Operations</span>
+                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Animal Health</span>
+                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Farmer Network</span>
+                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">Seller Relations</span>
                 </div>
               </div>
             </div>
