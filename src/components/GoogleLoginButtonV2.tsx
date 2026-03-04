@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { googleAuth } from "../services/googleAuthV2";
 import { API_ENDPOINTS } from "../config/api";
@@ -8,6 +8,7 @@ interface GoogleLoginButtonProps {
   onSuccess?: () => void;
   onError?: (error: string) => void;
   onBlocked?: (reason: string) => void;
+  startSignal?: number;
   className?: string;
   disabled?: boolean;
   legalConsents?: LegalConsents;
@@ -22,6 +23,7 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
   onSuccess,
   onError,
   onBlocked,
+  startSignal = 0,
   className = "",
   disabled = false,
   legalConsents,
@@ -31,6 +33,7 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const lastAutoStartRef = useRef(0);
 
   const getGoogleClientId = useCallback(() => {
     const fromEnv = process.env.REACT_APP_GOOGLE_CLIENT_ID;
@@ -109,7 +112,7 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
     initGoogle();
   }, [resolveGoogleClientId]);
 
-  const handleClick = async () => {
+  const handleClick = useCallback(async () => {
     if (disabled) {
       return;
     }
@@ -158,7 +161,29 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [
+    blockedReason,
+    disabled,
+    isInitialized,
+    legalConsents,
+    loginWithGoogle,
+    onBlocked,
+    onError,
+    onSuccess,
+    resolveGoogleClientId,
+  ]);
+
+  useEffect(() => {
+    if (!startSignal || startSignal === lastAutoStartRef.current) {
+      return;
+    }
+    if (disabled || blockedReason || isLoading || !isInitialized) {
+      return;
+    }
+
+    lastAutoStartRef.current = startSignal;
+    void handleClick();
+  }, [blockedReason, disabled, handleClick, isInitialized, isLoading, startSignal]);
 
   if (error && !isInitialized) {
     // Silent fail - show nothing if not initialized

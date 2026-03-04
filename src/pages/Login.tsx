@@ -10,6 +10,7 @@ import { LegalConsents } from "../types/property";
 
 type Mode = "login" | "signup" | "otp-verify" | "forgot" | "otp-reset";
 type PasswordFieldKey = "login" | "signup" | "signupConfirm" | "resetNew" | "resetConfirm";
+type SocialProvider = "google" | "facebook";
 
 const defaultPasswordVisibility: Record<PasswordFieldKey, boolean> = {
   login: false,
@@ -79,6 +80,12 @@ const Login: React.FC = () => {
     defaultSignupConsents
   );
   const signupConsentRef = useRef<HTMLDivElement | null>(null);
+  const [pendingSocialProvider, setPendingSocialProvider] = useState<SocialProvider | null>(null);
+  const [showSignupConsentModal, setShowSignupConsentModal] = useState(false);
+  const [socialStartSignals, setSocialStartSignals] = useState({
+    google: 0,
+    facebook: 0,
+  });
 
   // OTP State (email only for now)
   const [otpCode, setOtpCode] = useState("");
@@ -109,6 +116,40 @@ const Login: React.FC = () => {
       block: "center",
     });
   };
+
+  const queueSocialSignup = (provider: SocialProvider, message: string) => {
+    setPendingSocialProvider(provider);
+    setShowSignupConsentModal(true);
+    promptConsentBeforeSocialSignup(message);
+  };
+
+  const dismissSocialConsentModal = () => {
+    setPendingSocialProvider(null);
+    setShowSignupConsentModal(false);
+  };
+
+  useEffect(() => {
+    if (!pendingSocialProvider || !requiredSignupConsentsAccepted) return;
+
+    setInfo(
+      pendingSocialProvider === "google"
+        ? "Continuing with Google..."
+        : "Continuing with Facebook..."
+    );
+    setSocialStartSignals((prev) => ({
+      ...prev,
+      [pendingSocialProvider]: prev[pendingSocialProvider] + 1,
+    }));
+    setShowSignupConsentModal(false);
+    setPendingSocialProvider(null);
+  }, [pendingSocialProvider, requiredSignupConsentsAccepted]);
+
+  useEffect(() => {
+    if (mode !== "signup") {
+      setPendingSocialProvider(null);
+      setShowSignupConsentModal(false);
+    }
+  }, [mode]);
 
   // OTP Timer
   useEffect(() => {
@@ -451,6 +492,7 @@ const Login: React.FC = () => {
   );
 
   const renderSignup = () => (
+    <>
     <form onSubmit={handleSignupSubmit} className="space-y-4">
       <div className="space-y-2">
         <p className="text-center text-xs font-semibold text-gray-500 uppercase tracking-widest">
@@ -461,7 +503,7 @@ const Login: React.FC = () => {
         </p>
         {!requiredSignupConsentsAccepted && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
-            Social signup opens after you tick the required consent boxes below.
+            Social signup opens your consent checklist and continues automatically once the required boxes are ticked.
           </div>
         )}
         <GoogleLoginButton
@@ -471,8 +513,13 @@ const Login: React.FC = () => {
             navigate(redirectTo);
           }}
           onError={(error) => setError(error)}
-          onBlocked={promptConsentBeforeSocialSignup}
-          blockedReason="Tick the 3 required consent boxes below to continue with Google signup."
+          onBlocked={(message) => queueSocialSignup("google", message)}
+          blockedReason={
+            requiredSignupConsentsAccepted
+              ? undefined
+              : "Tick the 3 required consent boxes below. Google signup will continue automatically."
+          }
+          startSignal={socialStartSignals.google}
           className="text-sm w-full"
         />
         <FacebookLoginButton
@@ -482,8 +529,13 @@ const Login: React.FC = () => {
             navigate(redirectTo);
           }}
           onError={(error) => setError(error)}
-          onBlocked={promptConsentBeforeSocialSignup}
-          blockedReason="Tick the 3 required consent boxes below to continue with Facebook signup."
+          onBlocked={(message) => queueSocialSignup("facebook", message)}
+          blockedReason={
+            requiredSignupConsentsAccepted
+              ? undefined
+              : "Tick the 3 required consent boxes below. Facebook signup will continue automatically."
+          }
+          startSignal={socialStartSignals.facebook}
           className="text-sm w-full"
         />
       </div>
@@ -633,6 +685,112 @@ const Login: React.FC = () => {
         Already have account? Sign in
       </button>
     </form>
+    {showSignupConsentModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div
+          className="absolute inset-0 bg-slate-900/45"
+          onClick={dismissSocialConsentModal}
+        />
+        <div className="relative z-10 w-full max-w-md rounded-3xl bg-white p-5 shadow-2xl">
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+              Complete once
+            </p>
+            <h3 className="text-xl font-semibold text-slate-900">
+              Finish the required consent boxes
+            </h3>
+            <p className="text-sm text-slate-600">
+              Tick the required boxes once.{" "}
+              {pendingSocialProvider === "facebook" ? "Facebook" : "Google"} signup will continue automatically.
+            </p>
+          </div>
+
+          <div className="mt-4 space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <label className="flex items-start gap-3 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                checked={signupConsents.termsAccepted}
+                onChange={(e) =>
+                  setSignupConsents((prev) => ({
+                    ...prev,
+                    termsAccepted: e.target.checked,
+                  }))
+                }
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span>
+                I agree to the{" "}
+                <a href="/legal/terms" className="font-semibold text-blue-600 hover:underline">
+                  Terms of Service
+                </a>
+                .
+              </span>
+            </label>
+            <label className="flex items-start gap-3 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                checked={signupConsents.privacyAccepted}
+                onChange={(e) =>
+                  setSignupConsents((prev) => ({
+                    ...prev,
+                    privacyAccepted: e.target.checked,
+                  }))
+                }
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span>
+                I have read the{" "}
+                <a href="/legal/privacy" className="font-semibold text-blue-600 hover:underline">
+                  Privacy Policy
+                </a>
+                .
+              </span>
+            </label>
+            <label className="flex items-start gap-3 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                checked={signupConsents.dataProcessingConsent}
+                onChange={(e) =>
+                  setSignupConsents((prev) => ({
+                    ...prev,
+                    dataProcessingConsent: e.target.checked,
+                  }))
+                }
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span>
+                I consent to Agrisoko processing my account and verification data to operate the marketplace and verify trust signals.
+              </span>
+            </label>
+            <label className="flex items-start gap-3 text-sm text-slate-600">
+              <input
+                type="checkbox"
+                checked={signupConsents.marketingConsent}
+                onChange={(e) =>
+                  setSignupConsents((prev) => ({
+                    ...prev,
+                    marketingConsent: e.target.checked,
+                  }))
+                }
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span>Send me product updates and marketing messages.</span>
+            </label>
+          </div>
+
+          <div className="mt-4 flex justify-end">
+            <button
+              type="button"
+              onClick={dismissSocialConsentModal}
+              className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 
   const renderOtpVerify = () => (

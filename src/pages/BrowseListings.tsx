@@ -445,7 +445,7 @@ const BrowseListings: React.FC = () => {
                     }
                     className="inline-flex items-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 transition"
                   >
-                    Post a listing
+                    List now
                   </Link>
                 </div>
                 <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold text-slate-500">
@@ -752,7 +752,7 @@ const BrowseListings: React.FC = () => {
                 }
                 className="inline-flex min-h-[44px] items-center justify-center px-6 py-3 rounded-lg border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition"
               >
-                {user ? "Post a listing" : "Sign in to post"}
+                {user ? "List now" : "Sign in to list"}
               </Link>
             </div>
           </div>
