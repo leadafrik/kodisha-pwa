@@ -138,8 +138,9 @@ const Home: React.FC = () => {
 
   const displayHeadline =
     heroHeadline || "Get direct buyers in your county - without brokers.";
-  const displayDescription =
-    heroDescription || "Create your free account in 10 seconds. List later.";
+  const displayDescription = user
+    ? "Open your dashboard, post a listing, or browse live demand across Kenya."
+    : heroDescription || "Create your free account in 10 seconds. List later.";
   const signupCtaLabel = isPhone ? "Sign Up" : "Sign Up Free";
   const primaryCtaTo = user ? "/profile" : "/login?mode=signup&next=/browse";
   const primaryCtaLabel = user ? "Open Dashboard" : signupCtaLabel;
@@ -156,12 +157,14 @@ const Home: React.FC = () => {
   const heroFocusItems = [
     {
       title: isGlobalFreeListing ? "Free to list" : "Launch window",
-    copy: isGlobalFreeListing ? "No listing fee right now." : urgencyBody,
-  },
-  {
-    title: "Start now",
-    copy: "Create your account now. Verify when ready.",
-  },
+      copy: isGlobalFreeListing ? "No listing fee right now." : urgencyBody,
+    },
+    {
+      title: user ? "You are ready" : "Start now",
+      copy: user
+        ? "Open your dashboard, verify when ready, and publish your first listing."
+        : "Create your account now. Verify when ready.",
+    },
   ];
   const finalCallCopy = isGlobalFreeListing
     ? "Create your account and post your first listing. Listing is free right now."
