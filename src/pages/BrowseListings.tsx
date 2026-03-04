@@ -21,6 +21,7 @@ type UnifiedCard = {
   county: string;
   locationLabel: string;
   priceLabel?: string;
+  priceValue?: number;
   sizeLabel?: string;
   typeLabel: string;
   verified: boolean;
@@ -51,6 +52,31 @@ const getScore = (item: UnifiedCard) => {
   const verified = item.verified ? 2 : 0;
   const paid = item.paid ? 1 : 0;
   return boost + paid + verified;
+};
+
+type SortOption = "recommended" | "newest" | "verified" | "price_low" | "price_high";
+
+const getRecencyScore = (date?: Date) => {
+  if (!date) return 0;
+  const ageHours = (Date.now() - date.getTime()) / (1000 * 60 * 60);
+  if (ageHours <= 24) return 3;
+  if (ageHours <= 72) return 2;
+  if (ageHours <= 168) return 1;
+  return 0;
+};
+
+const getTopPickScore = (item: UnifiedCard, searchTerm: string) => {
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const title = item.title.toLowerCase();
+  const description = item.description.toLowerCase();
+  const location = item.locationLabel.toLowerCase();
+  const exactTitleMatch = normalizedSearch && title.includes(normalizedSearch) ? 3 : 0;
+  const textMatch =
+    normalizedSearch && !exactTitleMatch && `${description} ${location}`.includes(normalizedSearch)
+      ? 1
+      : 0;
+
+  return getScore(item) * 3 + getRecencyScore(item.createdAt) + exactTitleMatch + textMatch;
 };
 
 /**
@@ -128,6 +154,7 @@ const BrowseListings: React.FC = () => {
   const [search, setSearch] = useState<string>("");
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [verifiedOnlyManual, setVerifiedOnlyManual] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>("recommended");
   const [showRaffle, setShowRaffle] = useState(false);
   const isHighValueCategory =
     category !== "all" && highValueCategories.includes(category);
@@ -181,6 +208,7 @@ const BrowseListings: React.FC = () => {
           county: p.location?.county || "",
           locationLabel: buildLocation(p.location || {}),
           priceLabel: formatPrice(p.price),
+          priceValue: typeof p.price === "number" ? p.price : undefined,
           typeLabel,
           verified: verifiedFlag,
           paid: !!paidFlag,
@@ -222,6 +250,7 @@ const BrowseListings: React.FC = () => {
           description: s.description,
           county: s.location?.county || "",
           locationLabel,
+          priceValue: typeof s.price === "number" ? s.price : undefined,
           typeLabel: s.type === "equipment"
             ? "Equipment Hire"
             : "Professional Service",
@@ -245,7 +274,7 @@ const BrowseListings: React.FC = () => {
 
   const filtered = useMemo(() => {
     const searchTerm = search.trim().toLowerCase();
-    return cards
+    const nextCards = cards
       .filter((card) => {
         if (category !== "all" && card.category !== category) return false;
         if (
@@ -262,15 +291,46 @@ const BrowseListings: React.FC = () => {
           if (!haystack.includes(searchTerm)) return false;
         }
         return true;
-      })
-      .sort((a, b) => {
-        const scoreDiff = getScore(b) - getScore(a);
-        if (scoreDiff !== 0) return scoreDiff;
+      });
+
+    return nextCards.sort((a, b) => {
+      if (sortBy === "verified") {
+        const verifiedDiff = Number(b.verified) - Number(a.verified);
+        if (verifiedDiff !== 0) return verifiedDiff;
+      }
+
+      if (sortBy === "price_low") {
+        const aPrice = typeof a.priceValue === "number" ? a.priceValue : Number.POSITIVE_INFINITY;
+        const bPrice = typeof b.priceValue === "number" ? b.priceValue : Number.POSITIVE_INFINITY;
+        if (aPrice !== bPrice) return aPrice - bPrice;
+      }
+
+      if (sortBy === "price_high") {
+        const aPrice = typeof a.priceValue === "number" ? a.priceValue : Number.NEGATIVE_INFINITY;
+        const bPrice = typeof b.priceValue === "number" ? b.priceValue : Number.NEGATIVE_INFINITY;
+        if (aPrice !== bPrice) return bPrice - aPrice;
+      }
+
+      if (sortBy === "newest") {
         const timeA = a.createdAt ? a.createdAt.getTime() : 0;
         const timeB = b.createdAt ? b.createdAt.getTime() : 0;
         return timeB - timeA;
-      });
-  }, [cards, category, serviceSub, county, search, verifiedOnly]);
+      }
+
+      const scoreDiff = getTopPickScore(b, searchTerm) - getTopPickScore(a, searchTerm);
+      if (scoreDiff !== 0) return scoreDiff;
+      const timeA = a.createdAt ? a.createdAt.getTime() : 0;
+      const timeB = b.createdAt ? b.createdAt.getTime() : 0;
+      return timeB - timeA;
+    });
+  }, [cards, category, serviceSub, county, search, sortBy, verifiedOnly]);
+
+  const topPicks = useMemo(() => {
+    const searchTerm = search.trim().toLowerCase();
+    return [...filtered]
+      .sort((a, b) => getTopPickScore(b, searchTerm) - getTopPickScore(a, searchTerm))
+      .slice(0, 4);
+  }, [filtered, search]);
 
   const stats = useMemo(() => {
     const total = cards.length;
@@ -593,12 +653,30 @@ const BrowseListings: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 fade-up">
-            <span className="font-semibold text-slate-900">
-              {filtered.length} listing{filtered.length === 1 ? "" : "s"} found
-            </span>
-            <span className="text-xs text-slate-500">
-              Sorted by boost, verification, and recency
-            </span>
+            <div>
+              <span className="font-semibold text-slate-900">
+                {filtered.length} listing{filtered.length === 1 ? "" : "s"} found
+              </span>
+              <p className="mt-1 text-xs text-slate-500">
+                Top picks prioritize trust, visibility, and recency.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                Sort
+              </label>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+              >
+                <option value="recommended">Top picks</option>
+                <option value="newest">Newest</option>
+                <option value="verified">Verified first</option>
+                <option value="price_low">Price: low to high</option>
+                <option value="price_high">Price: high to low</option>
+              </select>
+            </div>
           </div>
         </div>
       </section>
@@ -674,6 +752,67 @@ const BrowseListings: React.FC = () => {
               </Link>
             </div>
           </div>
+        )}
+
+        {!loading && topPicks.length > 0 && (
+          <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
+                  Top picks
+                </p>
+                <h2 className="mt-1 text-xl font-semibold text-slate-900">
+                  Best matching listings right now
+                </h2>
+              </div>
+              <p className="text-sm text-slate-500">
+                Ranked by trust, visibility, and freshness.
+              </p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {topPicks.map((card) => (
+                <Link
+                  key={`top-pick-${card.id}`}
+                  to={user ? `/listings/${card.id}` : "/login"}
+                  className="overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:shadow-md"
+                >
+                  <div className="h-36 overflow-hidden bg-slate-100">
+                    {card.image ? (
+                      <img
+                        src={getOptimizedImageUrl(card.image, {
+                          width: 560,
+                          height: 360,
+                          fit: "fill",
+                        })}
+                        alt={card.title}
+                        onError={handleImageError}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-sm font-medium text-slate-400">
+                        No image available
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-2 p-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
+                        {card.typeLabel}
+                      </span>
+                      {card.priceLabel && (
+                        <span className="text-xs font-semibold text-emerald-700">{card.priceLabel}</span>
+                      )}
+                    </div>
+                    <h3 className="line-clamp-2 text-sm font-semibold text-slate-900">{card.title}</h3>
+                    {card.ownerId && card.ownerName && (
+                      <p className="text-xs font-semibold text-emerald-700">By {card.ownerName}</p>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
         )}
 
         {!loading && (
