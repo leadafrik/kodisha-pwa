@@ -17,6 +17,7 @@ type UnifiedCard = {
   subCategory?: string;
   title: string;
   description: string;
+  ownerName?: string;
   county: string;
   locationLabel: string;
   priceLabel?: string;
@@ -188,6 +189,7 @@ const BrowseListings: React.FC = () => {
           createdAt: p.createdAt ? new Date(p.createdAt) : undefined,
           image: p.images?.[0],
           ownerId: p.owner?._id || p.ownerId || p.owner,
+          ownerName: p.owner?.fullName || p.owner?.name || p.ownerName,
           contact: p.contact || p.owner?.phone || p.owner?.email,
           ownerResponseTime,
           ownerLastActive: ownerLastActive ? formatLastActive(ownerLastActive) : undefined,
@@ -229,6 +231,7 @@ const BrowseListings: React.FC = () => {
           createdAt: s.createdAt ? new Date(s.createdAt) : undefined,
           image: firstServiceImage,
           ownerId: s.owner?._id || s.ownerId || s.owner,
+          ownerName: s.owner?.fullName || s.owner?.name || s.ownerName,
           contact: s.contact || s.owner?.phone || s.owner?.email,
           ownerResponseTime,
           ownerLastActive: ownerLastActive ? formatLastActive(ownerLastActive) : undefined,
@@ -752,6 +755,14 @@ const BrowseListings: React.FC = () => {
                   </p>
 
                   <div className="pt-2 border-t border-slate-100">
+                    {card.ownerId && card.ownerName && (
+                      <Link
+                        to={`/sellers/${card.ownerId}`}
+                        className="inline-flex items-center text-xs font-semibold text-emerald-700 hover:text-emerald-800"
+                      >
+                        By {card.ownerName}
+                      </Link>
+                    )}
                     <p className="text-xs text-slate-500 font-medium">
                       Location: {card.locationLabel || "Location pending"}
                     </p>

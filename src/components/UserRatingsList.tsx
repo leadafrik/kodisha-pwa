@@ -19,9 +19,14 @@ interface Rating {
 interface UserRatingsListProps {
   userId: string;
   maxReviews?: number;
+  verified?: boolean;
 }
 
-const UserRatingsList: React.FC<UserRatingsListProps> = ({ userId, maxReviews = 5 }) => {
+const UserRatingsList: React.FC<UserRatingsListProps> = ({
+  userId,
+  maxReviews = 5,
+  verified = false,
+}) => {
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [aggregate, setAggregate] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -61,7 +66,7 @@ const UserRatingsList: React.FC<UserRatingsListProps> = ({ userId, maxReviews = 
       {aggregate && (
         <div className="bg-gradient-to-br from-green-50 to-white p-6 rounded-lg border border-green-200">
           <h3 className="text-lg font-bold text-gray-900 mb-3">Seller Ratings</h3>
-          <UserRatingBadge rating={aggregate} showCount={true} size="lg" verified={true} />
+          <UserRatingBadge rating={aggregate} showCount={true} size="lg" verified={verified} />
           
           {/* Category Breakdown */}
           {aggregate.breakdown && (
@@ -122,9 +127,9 @@ const UserRatingsList: React.FC<UserRatingsListProps> = ({ userId, maxReviews = 
           ))}
 
           {ratings.length > maxReviews && (
-            <button className="w-full py-2 text-center text-green-600 font-semibold hover:text-green-700">
-              View all {ratings.length} reviews
-            </button>
+            <p className="w-full py-2 text-center text-sm font-semibold text-slate-500">
+              Showing {maxReviews} of {ratings.length} reviews
+            </p>
           )}
         </div>
       ) : (

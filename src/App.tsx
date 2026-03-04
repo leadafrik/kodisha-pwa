@@ -45,6 +45,7 @@ const IDVerificationUpload = lazy(() => import('./pages/IDVerificationUpload'));
 const AdminIDVerification = lazy(() => import('./pages/AdminIDVerification'));
 const AdminContentEditor = lazy(() => import('./pages/admin/AdminContentEditor'));
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
+const SellerProfile = lazy(() => import('./pages/SellerProfile'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -66,7 +67,9 @@ const shouldPadForMobileNav = (pathname: string, signedIn: boolean) => {
     pathname === '/messages' ||
     pathname === '/favorites' ||
     pathname === '/request' ||
-    pathname.startsWith('/browse')
+    pathname.startsWith('/browse') ||
+    pathname.startsWith('/seller/') ||
+    pathname.startsWith('/sellers/')
   );
 };
 
@@ -173,6 +176,8 @@ const AppShell = () => {
             />
             <Route path="/listing/:id" element={<ListingDetails />} />
             <Route path="/listings/:id" element={<ListingDetails />} />
+            <Route path="/seller/:userId" element={<SellerProfile />} />
+            <Route path="/sellers/:userId" element={<SellerProfile />} />
             <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
             <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />

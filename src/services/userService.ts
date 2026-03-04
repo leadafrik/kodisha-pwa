@@ -3,7 +3,7 @@ import { API_ENDPOINTS, apiRequest, ensureValidAccessToken } from '../config/api
 export interface UserProfile {
   _id: string;
   fullName: string;
-  phone: string;
+  phone?: string;
   email?: string;
   profilePicture?: string;
   county?: string;
@@ -13,6 +13,7 @@ export interface UserProfile {
   userType: string;
   verification: any;
   ratings: any;
+  isVerified?: boolean;
 }
 
 /**
