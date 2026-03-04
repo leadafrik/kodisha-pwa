@@ -512,6 +512,12 @@ const Profile: React.FC = () => {
                 <h2 className="text-lg font-bold text-slate-900">Quick Actions</h2>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
                   <Link
+                    to="/browse"
+                    className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                  >
+                    Browse listings
+                  </Link>
+                  <Link
                     to="/create-listing?compact=1"
                     className="rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
                   >
