@@ -102,8 +102,6 @@ const getTopPickScore = (item: UnifiedCard, searchTerm: string) => {
   return getScore(item) * 3 + getRecencyScore(item.createdAt) + exactTitleMatch + textMatch;
 };
 
-const highValueCategories: Category[] = ["livestock", "inputs", "service"];
-
 const ROUTE_CATEGORY_MAP: Record<string, Category> = {
   all: "all",
   produce: "produce",
@@ -165,13 +163,10 @@ const BrowseListings: React.FC = () => {
   const [county, setCounty] = useState<string>("");
   const [search, setSearch] = useState<string>("");
   const [verifiedOnly, setVerifiedOnly] = useState(false);
-  const [verifiedOnlyManual, setVerifiedOnlyManual] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("recommended");
   const [showRaffle, setShowRaffle] = useState(false);
   const [trendingItems, setTrendingItems] = useState<TrendingCard[]>([]);
   const [trendingLoading, setTrendingLoading] = useState(false);
-  const isHighValueCategory =
-    category !== "all" && highValueCategories.includes(category);
 
   useEffect(() => {
     if (categoryParam && normalizeRouteCategory(categoryParam) === "all" && categoryParam.toLowerCase() !== "all") {
@@ -184,11 +179,6 @@ const BrowseListings: React.FC = () => {
       setServiceSub("all");
     }
   }, [category, serviceSub]);
-
-  useEffect(() => {
-    if (verifiedOnlyManual) return;
-    setVerifiedOnly(isHighValueCategory);
-  }, [isHighValueCategory, verifiedOnlyManual]);
 
   useEffect(() => {
     let cancelled = false;
@@ -620,7 +610,6 @@ const BrowseListings: React.FC = () => {
                     onClick={() => {
                       navigate(getBrowsePathForCategory(pill.id));
                       setServiceSub("all");
-                      setVerifiedOnlyManual(false);
                     }}
                     className={`rounded-full px-4 py-2 text-sm font-semibold border transition ${
                       active
@@ -640,30 +629,10 @@ const BrowseListings: React.FC = () => {
                   type="checkbox"
                   className="h-4 w-4 accent-emerald-600"
                   checked={verifiedOnly}
-                  onChange={() => {
-                    setVerifiedOnly((prev) => !prev);
-                    setVerifiedOnlyManual(true);
-                  }}
+                  onChange={() => setVerifiedOnly((prev) => !prev)}
                 />
                 Verified only
               </label>
-              {!verifiedOnlyManual && isHighValueCategory && (
-                <span className="text-xs text-emerald-600 font-semibold">
-                  Recommended for this category
-                </span>
-              )}
-              {verifiedOnlyManual && isHighValueCategory && !verifiedOnly && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setVerifiedOnly(true);
-                    setVerifiedOnlyManual(false);
-                  }}
-                  className="text-xs font-semibold text-emerald-700 hover:text-emerald-800"
-                >
-                  Use recommended
-                </button>
-              )}
             </div>
 
             {hasActiveFilters && (
@@ -679,7 +648,6 @@ const BrowseListings: React.FC = () => {
                     navigate("/browse");
                     setServiceSub("all");
                     setVerifiedOnly(false);
-                    setVerifiedOnlyManual(false);
                   }}
                   className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition"
                 >
@@ -771,7 +739,6 @@ const BrowseListings: React.FC = () => {
                   setCounty("");
                   setSearch("");
                   setVerifiedOnly(false);
-                  setVerifiedOnlyManual(false);
                 }}
                 className="inline-flex min-h-[44px] items-center justify-center px-6 py-3 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition shadow-sm"
               >
