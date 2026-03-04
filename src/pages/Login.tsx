@@ -111,10 +111,6 @@ const Login: React.FC = () => {
   const promptConsentBeforeSocialSignup = (message: string) => {
     setError(null);
     setInfo(message);
-    signupConsentRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-    });
   };
 
   const queueSocialSignup = (provider: SocialProvider, message: string) => {
@@ -128,7 +124,7 @@ const Login: React.FC = () => {
     setShowSignupConsentModal(false);
   };
 
-  useEffect(() => {
+  const continuePendingSocialSignup = () => {
     if (!pendingSocialProvider || !requiredSignupConsentsAccepted) return;
 
     setInfo(
@@ -142,7 +138,7 @@ const Login: React.FC = () => {
     }));
     setShowSignupConsentModal(false);
     setPendingSocialProvider(null);
-  }, [pendingSocialProvider, requiredSignupConsentsAccepted]);
+  };
 
   useEffect(() => {
     if (mode !== "signup") {
@@ -499,11 +495,11 @@ const Login: React.FC = () => {
           Fastest signup
         </p>
         <p className="text-center text-xs text-gray-500">
-          Tick the 3 consent boxes once, then continue with Google, Facebook, or email.
+          Tap Google, Facebook, or email. Required consent is captured in one step.
         </p>
         {!requiredSignupConsentsAccepted && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
-            Social signup opens your consent checklist and continues automatically once the required boxes are ticked.
+            Social signup opens a consent checklist first so users do not hit a dead end.
           </div>
         )}
         <GoogleLoginButton
@@ -700,8 +696,8 @@ const Login: React.FC = () => {
               Finish the required consent boxes
             </h3>
             <p className="text-sm text-slate-600">
-              Tick the required boxes once.{" "}
-              {pendingSocialProvider === "facebook" ? "Facebook" : "Google"} signup will continue automatically.
+              Tick the required boxes, optionally choose marketing updates, then continue with{" "}
+              {pendingSocialProvider === "facebook" ? "Facebook" : "Google"}.
             </p>
           </div>
 
@@ -778,13 +774,21 @@ const Login: React.FC = () => {
             </label>
           </div>
 
-          <div className="mt-4 flex justify-end">
+          <div className="mt-4 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <button
               type="button"
               onClick={dismissSocialConsentModal}
               className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
             >
               Close
+            </button>
+            <button
+              type="button"
+              onClick={continuePendingSocialSignup}
+              disabled={!requiredSignupConsentsAccepted}
+              className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+            >
+              {pendingSocialProvider === "facebook" ? "Continue with Facebook" : "Continue with Google"}
             </button>
           </div>
         </div>
