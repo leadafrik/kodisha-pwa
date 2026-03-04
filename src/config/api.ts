@@ -104,6 +104,14 @@ export const API_ENDPOINTS = {
   },
   unifiedListings: {
     countActive: `${API_BASE_URL}/unified-listings/count/active`,
+    trending: (category?: string, limit = 8) => {
+      const params = new URLSearchParams();
+      if (category && category !== "all") {
+        params.set("category", category);
+      }
+      params.set("limit", String(limit));
+      return `${API_BASE_URL}/unified-listings/trending?${params.toString()}`;
+    },
   },
   raffle: {
     me: `${API_BASE_URL}/raffle/me`,

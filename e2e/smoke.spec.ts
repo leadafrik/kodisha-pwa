@@ -21,6 +21,11 @@ test.describe('Smoke Test: Public conversion paths', () => {
 
     await page.goto('/request');
     await expect(page).toHaveURL(/\/request/);
+    const requestDetailsLinks = page.getByRole('link', { name: /view details/i });
+    if ((await requestDetailsLinks.count()) > 0) {
+      await requestDetailsLinks.first().click();
+      await expect(page).toHaveURL(/\/request\/.+/);
+    }
 
     await page.goto('/login?mode=signup&next=/browse');
     await expect(page).toHaveURL(/mode=signup/);

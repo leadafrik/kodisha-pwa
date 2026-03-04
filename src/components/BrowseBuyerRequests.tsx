@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { MapPin, TrendingUp, AlertCircle, Loader, Plus } from "lucide-react";
+import { MapPin, TrendingUp, AlertCircle, Loader, Plus, Clock3 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { API_BASE_URL } from "../config/api";
 import { kenyaCounties } from "../data/kenyaCounties";
@@ -35,6 +35,8 @@ interface BuyerRequestCache {
   pagination: { pages: number; total: number; page: number };
   savedAt: string;
 }
+
+type SortOption = "recommended" | "newest" | "urgent" | "budget_high";
 
 // Use all 47 Kenyan counties from data source
 const COUNTIES = ["All Counties", ...kenyaCounties.map(c => c.name)];
@@ -80,6 +82,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
     county: "All Counties",
     urgency: "",
   });
+  const [sortBy, setSortBy] = useState<SortOption>("recommended");
 
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ pages: 1, total: 0, page: 1 });
@@ -249,6 +252,62 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
     activeFilters.push(`Urgency: ${URGENCY_LABELS[filters.urgency] || filters.urgency}`);
   }
 
+  const getBudgetScore = (request: BuyerRequest) => {
+    const max = typeof request.budget?.max === "number" ? request.budget.max : 0;
+    const min = typeof request.budget?.min === "number" ? request.budget.min : 0;
+    return Math.max(max, min);
+  };
+
+  const getUrgencyScore = (request: BuyerRequest) => {
+    if (request.urgency === "high") return 3;
+    if (request.urgency === "medium") return 2;
+    return 1;
+  };
+
+  const getRecencyScore = (request: BuyerRequest) => {
+    const createdAt = new Date(request.createdAt).getTime();
+    if (!Number.isFinite(createdAt)) return 0;
+    const ageHours = (Date.now() - createdAt) / (1000 * 60 * 60);
+    if (ageHours <= 24) return 4;
+    if (ageHours <= 72) return 3;
+    if (ageHours <= 24 * 7) return 2;
+    return 1;
+  };
+
+  const getRequestScore = (request: BuyerRequest) => {
+    const urgencyScore = getUrgencyScore(request) * 4;
+    const budgetScore = Math.min(getBudgetScore(request), 500000) / 100000;
+    const detailScore =
+      (request.productType ? 1 : 0) +
+      (request.quantity ? 1 : 0) +
+      (request.location?.constituency ? 0.5 : 0);
+    return urgencyScore + budgetScore + getRecencyScore(request) + detailScore;
+  };
+
+  const sortedRequests = [...requests].sort((a, b) => {
+    if (sortBy === "newest") {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    }
+
+    if (sortBy === "urgent") {
+      const urgencyDiff = getUrgencyScore(b) - getUrgencyScore(a);
+      if (urgencyDiff !== 0) return urgencyDiff;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    }
+
+    if (sortBy === "budget_high") {
+      const budgetDiff = getBudgetScore(b) - getBudgetScore(a);
+      if (budgetDiff !== 0) return budgetDiff;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    }
+
+    const scoreDiff = getRequestScore(b) - getRequestScore(a);
+    if (scoreDiff !== 0) return scoreDiff;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+
+  const topRequests = sortedRequests.slice(0, 4);
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <style>{`
@@ -281,6 +340,27 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
         <div className="absolute -bottom-16 right-0 h-72 w-72 rounded-full bg-amber-200/40 blur-3xl" />
 
         <div className="max-w-6xl mx-auto px-4 pt-10 md:pt-12 pb-8">
+          {!user && (
+            <div className="mb-6 rounded-2xl border border-emerald-200 bg-white/90 px-4 py-3 shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">
+                    Sign in to reply and contact buyers
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    Buy request details stay public. Sign in only when you want to respond.
+                  </p>
+                </div>
+                <Link
+                  to="/login"
+                  className="inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition"
+                >
+                  Sign In
+                </Link>
+              </div>
+            </div>
+          )}
+
           <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] items-center">
             <div className="space-y-4 fade-rise">
               <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">
@@ -342,8 +422,8 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
       </div>
 
       <div className="max-w-6xl mx-auto px-4 pb-16">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm -mt-6 relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm -mt-6 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
             <div>
               <label className="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">
                 Category
@@ -397,6 +477,22 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">
+                Sort
+              </label>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+              >
+                <option value="recommended">Top picks</option>
+                <option value="newest">Newest</option>
+                <option value="urgent">Urgent first</option>
+                <option value="budget_high">Highest budget</option>
               </select>
             </div>
 
@@ -477,8 +573,70 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
           </div>
         ) : (
           <>
+            {topRequests.length > 0 && (
+              <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
+                      Top requests
+                    </p>
+                    <h2 className="mt-1 text-xl font-semibold text-slate-900">
+                      Best demand opportunities right now
+                    </h2>
+                  </div>
+                  <p className="text-sm text-slate-500">
+                    Ranked by urgency, detail, budget, and freshness.
+                  </p>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                  {topRequests.map((request) => (
+                    <Link
+                      key={`top-request-${request._id}`}
+                      to={`/request/${request._id}`}
+                      state={{ request }}
+                      className="rounded-2xl border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-md"
+                    >
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${CATEGORY_PILL_STYLES[request.category]}`}>
+                          {CATEGORY_LABELS[request.category]}
+                        </span>
+                        <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${URGENCY_COLORS[request.urgency]}`}>
+                          {URGENCY_LABELS[request.urgency]}
+                        </span>
+                      </div>
+
+                      <h3 className="mt-3 line-clamp-2 text-sm font-semibold text-slate-900">
+                        {request.title}
+                      </h3>
+                      <p className="mt-1 line-clamp-2 text-xs text-slate-500">
+                        {request.description}
+                      </p>
+
+                      <div className="mt-3 flex items-center gap-3 text-[11px] font-semibold text-slate-600">
+                        <span className="inline-flex items-center gap-1">
+                          <TrendingUp size={13} className="text-amber-500" />
+                          {formatBudget(request.budget)}
+                        </span>
+                      </div>
+                      <div className="mt-2 flex items-center gap-3 text-[11px] text-slate-500">
+                        <span className="inline-flex items-center gap-1">
+                          <MapPin size={13} className="text-slate-400" />
+                          {request.location.county}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <Clock3 size={13} className="text-slate-400" />
+                          {formatDate(request.createdAt)}
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
             <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-              {requests.map((request) => (
+              {sortedRequests.map((request) => (
                 <div
                   key={request._id}
                   onClick={() => onSelectRequest?.(request)}
@@ -563,9 +721,9 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                       to={`/request/${request._id}`}
                       state={{ request }}
                       className="block text-center bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-lg transition text-sm"
-                      aria-label={`View details and reply to ${request.title}`}
+                      aria-label={`View details for ${request.title}`}
                     >
-                      View Details and Reply
+                      View Details
                     </Link>
                   </div>
                 </div>
@@ -608,7 +766,11 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                 Browse Listings
               </Link>
               <Link
-                to={user ? "/create-listing" : "/login?next=/create-listing"}
+                to={
+                  user
+                    ? "/create-listing?compact=1"
+                    : `/login?next=${encodeURIComponent("/create-listing?compact=1")}`
+                }
                 className="inline-flex justify-center items-center px-6 py-3 rounded-xl border-2 border-emerald-600 text-emerald-700 font-semibold hover:bg-emerald-50 transition"
               >
                 Create Listing

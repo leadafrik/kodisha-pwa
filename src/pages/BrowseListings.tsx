@@ -2,11 +2,12 @@ import React, { useMemo, useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useProperties } from "../contexts/PropertyContext";
 import { useAuth } from "../contexts/AuthContext";
+import { API_ENDPOINTS, apiRequest } from "../config/api";
 import { kenyaCounties } from "../data/kenyaCounties";
 import { handleImageError } from "../utils/imageFallback";
 import { getOptimizedImageUrl } from "../utils/imageOptimization";
 import { normalizeKenyanPhone } from "../utils/phone";
-import { Search, Filter, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
+import { Search, Filter, ChevronDown, ChevronUp, Sparkles, Eye, Bookmark, MessageCircle } from "lucide-react";
 import RaffleCampaign from "../components/RaffleCampaign";
 
 type Category = "all" | "produce" | "livestock" | "inputs" | "service";
@@ -35,6 +36,27 @@ type UnifiedCard = {
   ownerResponseTime?: string;
   ownerLastActive?: string;
   image?: string;
+};
+
+type TrendingCard = {
+  id: string;
+  category: Category;
+  listingType: "product" | "equipment" | "service" | "agrovet";
+  title: string;
+  description: string;
+  county: string;
+  locationLabel: string;
+  priceLabel?: string;
+  typeLabel: string;
+  verified: boolean;
+  ownerName?: string;
+  image?: string;
+  engagement: {
+    views: number;
+    saves: number;
+    recentInquiries: number;
+    score: number;
+  };
 };
 
 const formatPrice = (value?: number) =>
@@ -146,6 +168,8 @@ const BrowseListings: React.FC = () => {
   const [verifiedOnlyManual, setVerifiedOnlyManual] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("recommended");
   const [showRaffle, setShowRaffle] = useState(false);
+  const [trendingItems, setTrendingItems] = useState<TrendingCard[]>([]);
+  const [trendingLoading, setTrendingLoading] = useState(false);
   const isHighValueCategory =
     category !== "all" && highValueCategories.includes(category);
 
@@ -165,6 +189,36 @@ const BrowseListings: React.FC = () => {
     if (verifiedOnlyManual) return;
     setVerifiedOnly(isHighValueCategory);
   }, [isHighValueCategory, verifiedOnlyManual]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadTrending = async () => {
+      setTrendingLoading(true);
+      try {
+        const response = await apiRequest(API_ENDPOINTS.unifiedListings.trending(category, 6), {
+          cache: "no-store",
+        });
+        if (!cancelled) {
+          setTrendingItems(Array.isArray(response?.data) ? response.data : []);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setTrendingItems([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setTrendingLoading(false);
+        }
+      }
+    };
+
+    void loadTrending();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [category]);
 
   const cards = useMemo<UnifiedCard[]>(() => {
     // Product listings: Produce, Livestock, Inputs
@@ -742,6 +796,99 @@ const BrowseListings: React.FC = () => {
               </Link>
             </div>
           </div>
+        )}
+
+        {!loading && !trendingLoading && trendingItems.length > 0 && (
+          <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-rose-700">
+                  Trending now
+                </p>
+                <h2 className="mt-1 text-xl font-semibold text-slate-900">
+                  Listings buyers are engaging with most
+                </h2>
+              </div>
+              <p className="text-sm text-slate-500">
+                Based on views, saves, and recent inquiries.
+              </p>
+            </div>
+
+            <div className="flex gap-4 overflow-x-auto pb-2">
+              {trendingItems.map((card) => (
+                <Link
+                  key={`trending-${card.id}`}
+                  to={`/listings/${card.id}`}
+                  className="min-w-[250px] max-w-[280px] flex-1 overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:shadow-md"
+                >
+                  <div className="h-36 overflow-hidden bg-slate-100">
+                    {card.image ? (
+                      <img
+                        src={getOptimizedImageUrl(card.image, {
+                          width: 560,
+                          height: 360,
+                          fit: "fill",
+                        })}
+                        alt={card.title}
+                        onError={handleImageError}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-sm font-medium text-slate-400">
+                        No image available
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-3 p-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
+                        {card.typeLabel}
+                      </span>
+                      {card.priceLabel && (
+                        <span className="text-xs font-semibold text-emerald-700">
+                          {card.priceLabel}
+                        </span>
+                      )}
+                    </div>
+
+                    <div>
+                      <h3 className="line-clamp-2 text-sm font-semibold text-slate-900">
+                        {card.title}
+                      </h3>
+                      <p className="mt-1 line-clamp-2 text-xs text-slate-500">
+                        {card.description}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 text-[11px] text-slate-500">
+                      {card.verified && (
+                        <span className="rounded-full bg-emerald-50 px-2 py-1 font-semibold text-emerald-700">
+                          Verified
+                        </span>
+                      )}
+                      {card.ownerName && <span>By {card.ownerName}</span>}
+                    </div>
+
+                    <div className="flex items-center gap-3 border-t border-slate-100 pt-3 text-[11px] font-semibold text-slate-600">
+                      <span className="inline-flex items-center gap-1">
+                        <Eye className="h-3.5 w-3.5 text-slate-400" />
+                        {card.engagement.views}
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <Bookmark className="h-3.5 w-3.5 text-slate-400" />
+                        {card.engagement.saves}
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <MessageCircle className="h-3.5 w-3.5 text-slate-400" />
+                        {card.engagement.recentInquiries}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
         )}
 
         {!loading && topPicks.length > 0 && (

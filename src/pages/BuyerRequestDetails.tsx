@@ -11,6 +11,7 @@ interface BuyerRequest {
   description: string;
   category: string;
   productType?: string;
+  contactPhone?: string;
   budget?: {
     min?: number;
     max?: number;
@@ -34,6 +35,8 @@ interface BuyerRequest {
   };
   createdAt: string;
   updatedAt: string;
+  canViewDirectContact?: boolean;
+  isOwner?: boolean;
   responses?: Array<{
     _id: string;
     sellerId: string;
@@ -288,6 +291,8 @@ const BuyerRequestDetails: React.FC = () => {
   }
 
   const isOwnRequest = user?._id === request.userId._id;
+  const directContactPhone = request.contactPhone || request.userId.phone;
+  const signInNext = `/login?next=${encodeURIComponent(`/request/${request._id}`)}`;
 
   return (
     <div className="flex-1 py-8">
@@ -297,7 +302,7 @@ const BuyerRequestDetails: React.FC = () => {
             onClick={() => navigate('/request')}
             className="mb-6 flex items-center text-green-600 hover:text-green-700 font-semibold transition"
           >
-            <span className="mr-2">←</span> Back to Buy Requests
+            <span className="mr-2" aria-hidden="true">←</span> Back to Buy Requests
           </button>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -395,20 +400,24 @@ const BuyerRequestDetails: React.FC = () => {
                     <p className="text-xl font-bold text-gray-800">{request.userId.fullName}</p>
                     {typeof request.userId.ratings === 'number' && (
                       <p className="text-sm text-gray-600 mt-1">
-                        ⭐ Rating: {request.userId.ratings.toFixed(1)}
+                        ★ Rating: {request.userId.ratings.toFixed(1)}
                       </p>
                     )}
                   </div>
                 </div>
                 {/* Call/Contact Options */}
-                {request.userId.phone && (
+                {user && directContactPhone ? (
                   <div className="mt-4 flex gap-2">
                     <a
-                      href={`tel:${request.userId.phone}`}
+                      href={`tel:${directContactPhone}`}
                       className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 text-center"
                     >
                       Call Buyer
                     </a>
+                  </div>
+                ) : (
+                  <div className="mt-4 rounded-lg border border-blue-200 bg-white/80 p-3 text-sm text-slate-600">
+                    Sign in to reveal direct contact and reply to this request.
                   </div>
                 )}
               </div>
@@ -432,11 +441,11 @@ const BuyerRequestDetails: React.FC = () => {
                     >
                       {markingFulfilled ? (
                         <>
-                          <span className="animate-spin">⏳</span> Marking...
+                          <span className="animate-spin" aria-hidden="true">⌛</span> Marking...
                         </>
                       ) : (
                         <>
-                          <span>✓</span> Mark as Fulfilled
+                          <span aria-hidden="true">✓</span> Mark as Fulfilled
                         </>
                       )}
                     </button>
@@ -485,7 +494,7 @@ const BuyerRequestDetails: React.FC = () => {
                 </div>
               ) : (
                 <div className="bg-white rounded-lg shadow-md p-6 sticky top-4">
-                  <h3 className="text-lg font-bold text-gray-800 mb-4">Reply to Request</h3>
+                  <h3 className="text-lg font-bold text-gray-800 mb-4">Reply to Buyer</h3>
 
                   {submitted && (
                     <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
@@ -507,11 +516,14 @@ const BuyerRequestDetails: React.FC = () => {
                         Please log in to reply to this buy request.
                       </p>
                       <button
-                        onClick={() => navigate('/login')}
+                        onClick={() => navigate(signInNext)}
                         className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition"
                       >
-                        Log In
+                        Sign In to Reply
                       </button>
+                      <p className="mt-3 text-xs text-gray-500 text-center">
+                        Request details stay public. Direct contact unlocks after sign-in.
+                      </p>
                     </div>
                   ) : (
                     <form onSubmit={handleReplySubmit} className="space-y-4">

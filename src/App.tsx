@@ -128,11 +128,7 @@ const AppShell = () => {
             />
             <Route
               path="/request/:id"
-              element={
-                <ProtectedRoute>
-                  <BuyerRequestDetails />
-                </ProtectedRoute>
-              }
+              element={<BuyerRequestDetails />}
             />
             <Route path="/about" element={<AboutUs />} />
             <Route path="/contact" element={<AboutUs />} />
