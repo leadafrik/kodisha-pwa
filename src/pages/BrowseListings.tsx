@@ -369,13 +369,6 @@ const BrowseListings: React.FC = () => {
     });
   }, [cards, category, serviceSub, county, search, sortBy, verifiedOnly]);
 
-  const topPicks = useMemo(() => {
-    const searchTerm = search.trim().toLowerCase();
-    return [...filtered]
-      .sort((a, b) => getTopPickScore(b, searchTerm) - getTopPickScore(a, searchTerm))
-      .slice(0, 4);
-  }, [filtered, search]);
-
   const stats = useMemo(() => {
     const total = cards.length;
     const verifiedCount = cards.filter((card) => card.verified).length;
@@ -884,67 +877,6 @@ const BrowseListings: React.FC = () => {
                         {card.engagement.recentInquiries}
                       </span>
                     </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {!loading && topPicks.length > 0 && (
-          <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
-            <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
-                  Top picks
-                </p>
-                <h2 className="mt-1 text-xl font-semibold text-slate-900">
-                  Best matching listings right now
-                </h2>
-              </div>
-              <p className="text-sm text-slate-500">
-                Ranked by trust, visibility, and freshness.
-              </p>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {topPicks.map((card) => (
-                <Link
-                  key={`top-pick-${card.id}`}
-                  to={`/listings/${card.id}`}
-                  className="overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:shadow-md"
-                >
-                  <div className="h-36 overflow-hidden bg-slate-100">
-                    {card.image ? (
-                      <img
-                        src={getOptimizedImageUrl(card.image, {
-                          width: 560,
-                          height: 360,
-                          fit: "fill",
-                        })}
-                        alt={card.title}
-                        onError={handleImageError}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-sm font-medium text-slate-400">
-                        No image available
-                      </div>
-                    )}
-                  </div>
-                  <div className="space-y-2 p-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
-                        {card.typeLabel}
-                      </span>
-                      {card.priceLabel && (
-                        <span className="text-xs font-semibold text-emerald-700">{card.priceLabel}</span>
-                      )}
-                    </div>
-                    <h3 className="line-clamp-2 text-sm font-semibold text-slate-900">{card.title}</h3>
-                    {card.ownerId && card.ownerName && (
-                      <p className="text-xs font-semibold text-emerald-700">By {card.ownerName}</p>
-                    )}
                   </div>
                 </Link>
               ))}

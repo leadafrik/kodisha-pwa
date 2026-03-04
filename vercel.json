@@ -110,6 +110,12 @@
       "permanent": true
     }
   ],
+  "rewrites": [
+    {
+      "source": "/share/listing/(.*)",
+      "destination": "/api/share/listing/$1"
+    }
+  ],
   "headers": [
     {
       "source": "/login",

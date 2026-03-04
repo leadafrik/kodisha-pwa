@@ -829,6 +829,24 @@ const ListingDetails: React.FC = () => {
   const lastActiveLabel = formatLastActive(owner.lastActive || owner.updatedAt || listing.updatedAt || listing.createdAt);
   const sellerReviews: SellerReview[] = Array.isArray(userRatings?.ratings) ? userRatings.ratings : [];
   const sellerPhone = normalizeKenyanPhone(listing.contact || owner.phone);
+  const shareParams = new URLSearchParams();
+  shareParams.set("title", listing.title || listing.name || "Agrisoko listing");
+  shareParams.set(
+    "description",
+    (listing.description || "Browse this listing on Agrisoko.").slice(0, 180)
+  );
+  if (listing.images?.[0]) {
+    shareParams.set(
+      "image",
+      getOptimizedImageUrl(listing.images[0], {
+        width: 1200,
+        height: 630,
+        fit: "fill",
+      })
+    );
+  }
+  const shareUrl = `${window.location.origin}/share/listing/${listing._id}?${shareParams.toString()}`;
+  const hasMapCoordinates = Boolean(coords?.lat && coords?.lng);
   const isOwnListing = !!user?._id && !!owner?._id && String(user._id) === String(owner._id);
 
   // Determine owner/admin privileges for marking sold
@@ -983,34 +1001,16 @@ const ListingDetails: React.FC = () => {
 
           {/* Quick action CTAs */}
           <div className="flex flex-wrap gap-3 mb-6">
-            <a
-              href={`tel:${owner.phone || ''}`}
-              className="px-5 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
-            >
-              Call Seller
-            </a>
-            <button
-              onClick={() => {
-                if (!getAuthToken()) {
-                  window.location.href = `/login?next=/listings/${id}`;
-                } else {
-                  openChatPanel();
-                }
-              }}
-              className="px-5 py-2 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition"
-            >
-              Message
-            </button>
             <button
               onClick={() => {
                 if ((navigator as any).share) {
                   (navigator as any).share({
                     title: listing.title,
                     text: listing.description,
-                    url: window.location.href,
+                    url: shareUrl,
                   });
                 } else {
-                  window.alert('Share link: ' + window.location.href);
+                  window.alert('Share link: ' + shareUrl);
                 }
               }}
               className="px-5 py-2 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition"
@@ -1056,7 +1056,7 @@ const ListingDetails: React.FC = () => {
             )}
             {listing.sold && (
               <span className="px-4 py-2 bg-red-100 text-red-700 rounded-lg font-semibold text-sm">
-                Sold {hoursUntilHide !== null && hoursUntilHide > 0 && `• hides in ${Math.ceil(hoursUntilHide)}h`}
+                Sold {hoursUntilHide !== null && hoursUntilHide > 0 && `- hides in ${Math.ceil(hoursUntilHide)}h`}
               </span>
             )}
           </div>
@@ -1209,12 +1209,11 @@ const ListingDetails: React.FC = () => {
             </div>
           )}
 
-          <div className="mt-6">
-            <h2 className="font-semibold mb-2">Map Location</h2>
+          {hasMapCoordinates && (
+            <div className="mt-6">
+              <h2 className="font-semibold mb-2">Map Location</h2>
 
-            {!coords || !coords.lat || !coords.lng ? (
-              <p className="text-gray-500 text-sm">No map location was provided for this listing.</p>
-            ) : !showMap ? (
+              {!showMap ? (
               <div className="rounded-lg border border-gray-200 bg-white p-4">
                 <p className="text-sm text-gray-600">
                   Load the map only when you need directions.
@@ -1254,8 +1253,9 @@ const ListingDetails: React.FC = () => {
                   Open in Google Maps
                 </a>
               </Suspense>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Sidebar with seller + chat */}
@@ -1311,44 +1311,41 @@ const ListingDetails: React.FC = () => {
 
             {/* Rating display */}
             {userRatings?.aggregate && userRatings.aggregate.count > 0 && (
-              <div className="mb-3 p-2 bg-yellow-50 rounded border border-yellow-200">
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="flex items-center gap-0.5" aria-label={`Rating ${userRatings.aggregate.average.toFixed(1)} out of 5`}>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!ratingsLoaded && listing?.owner?._id) {
+                    void fetchUserRatings(listing.owner._id);
+                  }
+                  setShowReviewsModal(true);
+                }}
+                className="mb-3 flex w-full items-center justify-between rounded-lg border border-yellow-200 bg-yellow-50 px-3 py-2 text-left hover:bg-yellow-100"
+              >
+                <div className="min-w-0">
+                  <div
+                    className="flex items-center gap-0.5"
+                    aria-label={`Rating ${userRatings.aggregate.average.toFixed(1)} out of 5`}
+                  >
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star
                         key={star}
-                        className={`w-4 h-4 ${
+                        className={`h-4 w-4 ${
                           star <= Math.round(userRatings.aggregate.average)
-                            ? "text-yellow-500 fill-yellow-400"
-                            : "text-gray-300 fill-transparent"
+                            ? "fill-yellow-400 text-yellow-500"
+                            : "fill-transparent text-gray-300"
                         }`}
                         strokeWidth={2}
                         aria-hidden="true"
                       />
                     ))}
                   </div>
-                  <span className="text-sm font-semibold">
-                    {userRatings.aggregate.average.toFixed(1)} ({userRatings.aggregate.count} reviews)
-                  </span>
-                </div>
-                {userRatings.aggregate.breakdown.overall > 0 && (
-                  <p className="text-xs text-gray-600">
-                    Overall: {userRatings.aggregate.breakdown.overall.toFixed(1)}/5
+                  <p className="mt-1 text-sm font-semibold text-slate-900">
+                    {userRatings.aggregate.average.toFixed(1)} ({userRatings.aggregate.count} review
+                    {userRatings.aggregate.count === 1 ? "" : "s"})
                   </p>
-                )}
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!ratingsLoaded && listing?.owner?._id) {
-                      void fetchUserRatings(listing.owner._id);
-                    }
-                    setShowReviewsModal(true);
-                  }}
-                  className="mt-1 text-xs font-semibold text-yellow-700 underline decoration-dotted hover:text-yellow-800"
-                >
-                  Read reviews
-                </button>
-              </div>
+                </div>
+                <span className="text-xs font-semibold text-yellow-800">Read reviews</span>
+              </button>
             )}
 
             <div className="flex gap-2">
@@ -1443,82 +1440,69 @@ const ListingDetails: React.FC = () => {
               {owner.isVerified ? 'ID & phone verified' : 'Unverified seller'}
             </p>
           </div>
-          {/* Chat section - improved UI and microcopy */}
-          <div ref={chatSectionRef} className="bg-white p-4 rounded-lg border">
-            <h3 className="font-semibold mb-3">Message the Seller</h3>
-
-            {!chatReady ? (
-              <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4">
-                <p className="text-sm text-gray-600">
-                  Open the conversation only when you are ready to message.
-                </p>
+          {chatReady && (
+            <div ref={chatSectionRef} className="bg-white p-4 rounded-lg border">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <h3 className="font-semibold">Message the Seller</h3>
                 <button
                   type="button"
-                  onClick={() => {
-                    if (!getAuthToken()) {
-                      window.location.href = `/login?next=/listings/${id}`;
-                      return;
-                    }
-                    openChatPanel();
-                  }}
-                  className="mt-3 inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                  onClick={() => setChatReady(false)}
+                  className="text-xs font-semibold text-slate-500 hover:text-slate-700"
                 >
-                  Open chat
+                  Close chat
                 </button>
               </div>
-            ) : (
-              <>
-                <div className="max-h-64 overflow-y-auto border rounded-lg p-3 mb-3 bg-gray-50">
-                  {chatLoading ? (
-                    <p className="text-gray-500 text-center text-xs py-4">
-                      Loading conversation...
-                    </p>
-                  ) : messages.length === 0 ? (
-                    <p className="text-gray-500 text-center text-xs py-4">
-                      No messages yet. Ask about availability, pricing, or arrange a viewing.
-                    </p>
-                  ) : (
-                    messages.map((msg, idx) => (
-                      <div key={idx} className={`rounded p-2 mb-2 ${msg.from === owner._id ? 'bg-white border' : 'bg-green-50'}`}>
-                        <p className="text-xs text-gray-600 font-semibold mb-1">
-                          {msg.from === owner._id ? 'Seller' : 'You'} {msg.read && msg.from === owner._id ? '??????' : ''}
-                        </p>
-                        <p className="text-gray-800 text-sm">{msg.body}</p>
-                        <p className="text-[10px] text-gray-500 mt-1">
-                          {msg.createdAt ? new Date(msg.createdAt).toLocaleString() : ''}
-                        </p>
-                      </div>
-                    ))
-                  )}
-                  {typing && <p className="text-xs text-gray-500 italic">Seller is typing???</p>}
-                </div>
 
-                <textarea
-                  ref={messageInputRef}
-                  value={newMessage}
-                  onChange={(e) => {
-                    setNewMessage(e.target.value);
-                    sendTyping();
-                  }}
-                  className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
-                  placeholder="Type your message..."
-                  rows={3}
-                />
+              <div className="max-h-64 overflow-y-auto border rounded-lg p-3 mb-3 bg-gray-50">
+                {chatLoading ? (
+                  <p className="text-gray-500 text-center text-xs py-4">
+                    Loading conversation...
+                  </p>
+                ) : messages.length === 0 ? (
+                  <p className="text-gray-500 text-center text-xs py-4">
+                    No messages yet. Ask about availability, pricing, or arrange a viewing.
+                  </p>
+                ) : (
+                  messages.map((msg, idx) => (
+                    <div key={idx} className={`rounded p-2 mb-2 ${msg.from === owner._id ? 'bg-white border' : 'bg-green-50'}`}>
+                      <p className="text-xs text-gray-600 font-semibold mb-1">
+                        {msg.from === owner._id ? 'Seller' : 'You'} {msg.read && msg.from === owner._id ? '(seen)' : ''}
+                      </p>
+                      <p className="text-gray-800 text-sm">{msg.body}</p>
+                      <p className="text-[10px] text-gray-500 mt-1">
+                        {msg.createdAt ? new Date(msg.createdAt).toLocaleString() : ''}
+                      </p>
+                    </div>
+                  ))
+                )}
+                {typing && <p className="text-xs text-gray-500 italic">Seller is typing...</p>}
+              </div>
 
-                <button
-                  onClick={sendMessage}
-                  disabled={sending || !newMessage.trim()}
-                  className="w-full mt-2 bg-blue-600 text-white rounded-lg py-2 text-sm font-semibold hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition"
-                >
-                  {sending ? 'Sending...' : 'Send Message'}
-                </button>
+              <textarea
+                ref={messageInputRef}
+                value={newMessage}
+                onChange={(e) => {
+                  setNewMessage(e.target.value);
+                  sendTyping();
+                }}
+                className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
+                placeholder="Type your message..."
+                rows={3}
+              />
 
-                <p className="text-xs text-gray-500 mt-2 text-center">
-                  {getAuthToken() ? 'Messages are private and secure.' : 'Log in to send and receive messages.'}
-                </p>
-              </>
-            )}
-          </div>
+              <button
+                onClick={sendMessage}
+                disabled={sending || !newMessage.trim()}
+                className="w-full mt-2 bg-blue-600 text-white rounded-lg py-2 text-sm font-semibold hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition"
+              >
+                {sending ? 'Sending...' : 'Send Message'}
+              </button>
+
+              <p className="text-xs text-gray-500 mt-2 text-center">
+                {getAuthToken() ? 'Messages are private and secure.' : 'Log in to send and receive messages.'}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

@@ -575,27 +575,27 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
           <>
             {topRequests.length > 0 && (
               <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
-                <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="mb-3 flex flex-col gap-2 sm:mb-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
                       Top requests
                     </p>
-                    <h2 className="mt-1 text-xl font-semibold text-slate-900">
+                    <h2 className="mt-1 text-lg font-semibold text-slate-900 sm:text-xl">
                       Best demand opportunities right now
                     </h2>
                   </div>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-xs text-slate-500 sm:text-sm">
                     Ranked by urgency, detail, budget, and freshness.
                   </p>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 xl:grid-cols-4">
                   {topRequests.map((request) => (
                     <Link
                       key={`top-request-${request._id}`}
                       to={`/request/${request._id}`}
                       state={{ request }}
-                      className="rounded-2xl border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-md"
+                      className="min-w-[250px] max-w-[280px] flex-1 snap-start rounded-2xl border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-md md:min-w-0 md:max-w-none"
                     >
                       <div className="flex flex-wrap items-center gap-2">
                         <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${CATEGORY_PILL_STYLES[request.category]}`}>
