@@ -426,21 +426,21 @@ const Profile: React.FC = () => {
       items: userServices,
       emptyMessage: "No service listings yet.",
       emptyCta: "List a service",
-      emptyLink: "/create-listing",
+      emptyLink: "/create-listing?category=service",
     },
     agrovets: {
-      label: "Agrovets",
+      label: "Inputs",
       items: userAgrovets,
-      emptyMessage: "No agrovet listings yet.",
-      emptyCta: "Add agrovet listing",
-      emptyLink: "/create-listing",
+      emptyMessage: "No input listings yet.",
+      emptyCta: "List inputs",
+      emptyLink: "/create-listing?category=inputs",
     },
     products: {
       label: "Products",
       items: userProducts,
       emptyMessage: "No product listings yet.",
       emptyCta: "List a product",
-      emptyLink: "/create-listing",
+      emptyLink: "/create-listing?compact=1",
     },
   };
 
@@ -498,7 +498,7 @@ const Profile: React.FC = () => {
             </div>
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
               <p className="text-2xl font-bold text-emerald-700">{userAgrovets.length}</p>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Agrovets</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Inputs</p>
             </div>
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
               <p className="text-2xl font-bold text-emerald-700">{userProducts.length}</p>
@@ -512,7 +512,7 @@ const Profile: React.FC = () => {
                 <h2 className="text-lg font-bold text-slate-900">Quick Actions</h2>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
                   <Link
-                    to="/create-listing"
+                    to="/create-listing?compact=1"
                     className="rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
                   >
                     List for sale
@@ -703,7 +703,7 @@ const Profile: React.FC = () => {
 
               <div className="mt-5 flex flex-wrap items-center gap-3">
                 <Link
-                  to="/create-listing"
+                  to="/create-listing?compact=1"
                   className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
                 >
                   Add listing
