@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { API_BASE_URL, ensureValidAccessToken } from '../config/api';
 import * as Sentry from '@sentry/react';
 import { handleImageError } from "../utils/imageFallback";
+import { normalizeKenyanPhone } from "../utils/phone";
 
 interface BuyerRequest {
   _id: string;
@@ -291,7 +292,9 @@ const BuyerRequestDetails: React.FC = () => {
   }
 
   const isOwnRequest = user?._id === request.userId._id;
-  const directContactPhone = request.contactPhone || request.userId.phone;
+  const directContactPhone = normalizeKenyanPhone(
+    request.contactPhone || request.userId.phone
+  );
   const signInNext = `/login?next=${encodeURIComponent(`/request/${request._id}`)}`;
 
   return (

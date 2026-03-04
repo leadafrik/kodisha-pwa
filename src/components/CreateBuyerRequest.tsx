@@ -9,6 +9,7 @@ import {
 } from "../data/kenyaCounties";
 import { API_BASE_URL, ensureValidAccessToken } from "../config/api";
 import { validatePhone } from "../utils/formValidation";
+import { normalizeKenyanPhone } from "../utils/phone";
 
 const UNITS = ["kg", "tonnes", "bags", "units", "liters", "crates"];
 const DRAFT_STORAGE_KEY = "kodisha_buyer_request_draft_v3";
@@ -220,7 +221,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
   onSuccess,
   onCancel,
 }) => {
-  const { user } = useAuth();
+  const { user, updateProfile, refreshUser } = useAuth();
   const { isCompact } = useAdaptiveLayout();
   const [step, setStep] = useState<Step>(1);
   const [loading, setLoading] = useState(false);
@@ -669,6 +670,11 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
 
       localStorage.removeItem(DRAFT_STORAGE_KEY);
       setHasDraft(false);
+      const normalizedContactPhone = normalizeKenyanPhone(formData.contactPhone.trim());
+      if (normalizedContactPhone && normalizedContactPhone !== user?.phone) {
+        updateProfile({ phone: normalizedContactPhone });
+      }
+      void refreshUser();
       onSuccess?.();
     } catch (err: any) {
       setError(err?.message || "An error occurred while posting demand.");

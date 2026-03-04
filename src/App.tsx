@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import { PropertyProvider } from './contexts/PropertyContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { VerificationProvider } from './contexts/VerificationContext';
@@ -56,6 +56,11 @@ const LoadingFallback = () => (
     </div>
   </div>
 );
+
+const ShareListingRedirect = () => {
+  const { id } = useParams<{ id: string }>();
+  return <Navigate to={id ? `/listings/${id}` : "/browse"} replace />;
+};
 
 const shouldPadForMobileNav = (pathname: string, signedIn: boolean) => {
   if (!signedIn) return false;
@@ -172,6 +177,7 @@ const AppShell = () => {
             />
             <Route path="/listing/:id" element={<ListingDetails />} />
             <Route path="/listings/:id" element={<ListingDetails />} />
+            <Route path="/share/listing/:id" element={<ShareListingRedirect />} />
             <Route path="/seller/:userId" element={<SellerProfile />} />
             <Route path="/sellers/:userId" element={<SellerProfile />} />
             <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
