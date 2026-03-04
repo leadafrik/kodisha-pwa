@@ -4,12 +4,19 @@
  * Includes support for monthly reminder notifications
  */
 
-import { apiRequest, ensureValidAccessToken } from '../config/api';
+import { API_BASE_URL, apiRequest, ensureValidAccessToken } from '../config/api';
 
 export interface Notification {
   id: string;
   userId: string;
-  type: 'listing_alert' | 'buy_request_alert' | 'message' | 'rating' | 'monthly_reminder' | 'system';
+  type:
+    | 'listing_alert'
+    | 'buy_request_alert'
+    | 'message'
+    | 'rating'
+    | 'monthly_reminder'
+    | 'system'
+    | 'seller_new_listing';
   title: string;
   message: string;
   channel: 'in-app' | 'email' | 'push' | 'all';
@@ -121,7 +128,7 @@ export const getNotifications = async (
       throw new Error('Authentication required');
     }
     const response = await apiRequest(
-      `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/users/${userId}/notifications?limit=${limit}&offset=${offset}`,
+      `${API_BASE_URL}/notifications?limit=${limit}&skip=${offset}`,
       {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -159,9 +166,9 @@ export const markNotificationAsRead = async (
       throw new Error('Authentication required');
     }
     await apiRequest(
-      `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/users/${userId}/notifications/${notificationId}/read`,
+      `${API_BASE_URL}/notifications/${notificationId}/read`,
       {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
         },

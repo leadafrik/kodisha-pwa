@@ -118,6 +118,11 @@ export const API_ENDPOINTS = {
     list: `${API_BASE_URL}/favorites`,
     toggle: `${API_BASE_URL}/favorites/toggle`,
   },
+  sellerFollows: {
+    stats: (sellerId: string) => `${API_BASE_URL}/seller-follows/${sellerId}/stats`,
+    status: (sellerId: string) => `${API_BASE_URL}/seller-follows/${sellerId}/status`,
+    toggle: (sellerId: string) => `${API_BASE_URL}/seller-follows/${sellerId}/toggle`,
+  },
   reports: {
     submit: (sellerId: string) => `${API_BASE_URL}/reports/${sellerId}`,
   },

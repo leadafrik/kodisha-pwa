@@ -14,7 +14,14 @@ import { getOptimizedImageUrl } from "../utils/imageOptimization";
 import { getAuthToken } from "../utils/auth";
 import { Star } from "lucide-react";
 import { useProperties } from "../contexts/PropertyContext";
+import { useAuth } from "../contexts/AuthContext";
 import { buildMarketplaceCards, getMarketplaceCardScore } from "../utils/marketplaceCards";
+import {
+  getSellerFollowStats,
+  getSellerFollowStatus,
+  toggleSellerFollow,
+} from "../services/sellerFollowService";
+import { normalizeKenyanPhone } from "../utils/phone";
 
 const GoogleMapsLoader = lazy(() => import("../components/GoogleMapsLoader"));
 const ListingMap = lazy(() => import("../components/ListingMap"));
@@ -370,6 +377,7 @@ const ListingDetails: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
   const { productListings, serviceListings } = useProperties();
   const [listing, setListing] = useState<any>(null);
   const [markingSold, setMarkingSold] = useState(false);
@@ -394,6 +402,11 @@ const ListingDetails: React.FC = () => {
   const [chatReady, setChatReady] = useState(false);
   const [chatLoading, setChatLoading] = useState(false);
   const [ratingsLoaded, setRatingsLoaded] = useState(false);
+  const [sellerFollowState, setSellerFollowState] = useState({
+    isFollowing: false,
+    followerCount: 0,
+  });
+  const [followLoading, setFollowLoading] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const chatSectionRef = useRef<HTMLDivElement | null>(null);
@@ -759,6 +772,37 @@ const ListingDetails: React.FC = () => {
       .slice(0, 3);
   }, [listing?._id, owner?._id, productListings, serviceListings]);
 
+  useEffect(() => {
+    const sellerId = owner?._id?.toString?.() || String(owner?._id || "");
+    if (!sellerId) {
+      setSellerFollowState({ isFollowing: false, followerCount: 0 });
+      return;
+    }
+
+    const loadFollowState = async () => {
+      try {
+        if (user?._id && String(user._id) !== sellerId) {
+          const data = await getSellerFollowStatus(sellerId);
+          setSellerFollowState({
+            isFollowing: !!data.isFollowing,
+            followerCount: data.followerCount || 0,
+          });
+          return;
+        }
+
+        const data = await getSellerFollowStats(sellerId);
+        setSellerFollowState({
+          isFollowing: false,
+          followerCount: data.followerCount || 0,
+        });
+      } catch {
+        setSellerFollowState((prev) => ({ ...prev }));
+      }
+    };
+
+    void loadFollowState();
+  }, [owner?._id, user?._id]);
+
   if (loading) {
     return <div className="p-4 text-center text-gray-600">Loading listing...</div>;
   }
@@ -784,6 +828,8 @@ const ListingDetails: React.FC = () => {
   const responseTimeLabel = owner.responseTime || owner.responseTimeLabel || "Usually replies within 24 hours";
   const lastActiveLabel = formatLastActive(owner.lastActive || owner.updatedAt || listing.updatedAt || listing.createdAt);
   const sellerReviews: SellerReview[] = Array.isArray(userRatings?.ratings) ? userRatings.ratings : [];
+  const sellerPhone = normalizeKenyanPhone(listing.contact || owner.phone);
+  const isOwnListing = !!user?._id && !!owner?._id && String(user._id) === String(owner._id);
 
   // Determine owner/admin privileges for marking sold
   const currentUserRaw = localStorage.getItem('kodisha_user');
@@ -847,6 +893,27 @@ const ListingDetails: React.FC = () => {
       window.alert(err.message);
     } finally {
       setSubmittingRating(false);
+    }
+  };
+
+  const handleToggleFollowSeller = async () => {
+    if (!owner?._id || isOwnListing) return;
+    if (!getAuthToken()) {
+      window.location.href = `/login?next=/sellers/${owner._id}`;
+      return;
+    }
+
+    setFollowLoading(true);
+    try {
+      const result = await toggleSellerFollow(String(owner._id));
+      setSellerFollowState({
+        isFollowing: !!result.isFollowing,
+        followerCount: result.followerCount || 0,
+      });
+    } catch (err: any) {
+      window.alert(err?.message || "Failed to update seller follow status.");
+    } finally {
+      setFollowLoading(false);
     }
   };
 
@@ -1238,6 +1305,10 @@ const ListingDetails: React.FC = () => {
               {lastActiveLabel}
             </p>
 
+            <p className="mb-3 text-xs font-semibold text-slate-500">
+              {sellerFollowState.followerCount} follower{sellerFollowState.followerCount === 1 ? "" : "s"}
+            </p>
+
             {/* Rating display */}
             {userRatings?.aggregate && userRatings.aggregate.count > 0 && (
               <div className="mb-3 p-2 bg-yellow-50 rounded border border-yellow-200">
@@ -1281,13 +1352,22 @@ const ListingDetails: React.FC = () => {
             )}
 
             <div className="flex gap-2">
-              {listing.owner.phone ? (
-                <a
-                  href={`tel:${listing.owner.phone}`}
-                  className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 text-center"
-                >
-                  Call
-                </a>
+              {sellerPhone ? (
+                getAuthToken() ? (
+                  <a
+                    href={`tel:${sellerPhone}`}
+                    className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 text-center"
+                  >
+                    Call
+                  </a>
+                ) : (
+                  <Link
+                    to={`/login?next=${encodeURIComponent(`/listings/${id}`)}`}
+                    className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 text-center"
+                  >
+                    Call
+                  </Link>
+                )
               ) : (
                 <div className="flex-1 px-3 py-2 bg-gray-300 text-gray-600 rounded-lg text-sm font-semibold text-center cursor-not-allowed">
                   Call Unavailable
@@ -1306,6 +1386,21 @@ const ListingDetails: React.FC = () => {
                 Message
               </button>
             </div>
+
+            {!isOwnListing && (
+              <button
+                type="button"
+                onClick={handleToggleFollowSeller}
+                disabled={followLoading}
+                className="mt-2 inline-flex w-full items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 disabled:opacity-60"
+              >
+                {followLoading
+                  ? "Updating..."
+                  : sellerFollowState.isFollowing
+                  ? "Following seller"
+                  : "Follow seller"}
+              </button>
+            )}
 
             {owner._id && (
               <Link

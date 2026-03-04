@@ -4,6 +4,7 @@ import { ArrowLeft, MapPin, ShieldCheck } from "lucide-react";
 import UserRatingBadge from "../components/UserRatingBadge";
 import UserRatingsList from "../components/UserRatingsList";
 import { useProperties } from "../contexts/PropertyContext";
+import { useAuth } from "../contexts/AuthContext";
 import { getOptimizedImageUrl } from "../utils/imageOptimization";
 import { handleImageError } from "../utils/imageFallback";
 import { getUserProfile, UserProfile } from "../services/userService";
@@ -12,14 +13,25 @@ import {
   getMarketplaceCardScore,
   MarketplaceCard,
 } from "../utils/marketplaceCards";
+import {
+  getSellerFollowStats,
+  getSellerFollowStatus,
+  toggleSellerFollow,
+} from "../services/sellerFollowService";
 
 const SellerProfile: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { productListings, serviceListings, loading: listingsLoading } = useProperties();
   const [seller, setSeller] = useState<UserProfile | null>(null);
   const [loadingSeller, setLoadingSeller] = useState(true);
   const [error, setError] = useState<string>("");
+  const [followState, setFollowState] = useState({
+    isFollowing: false,
+    followerCount: 0,
+  });
+  const [followLoading, setFollowLoading] = useState(false);
 
   useEffect(() => {
     const loadSeller = async () => {
@@ -45,6 +57,33 @@ const SellerProfile: React.FC = () => {
 
     void loadSeller();
   }, [userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const loadFollowState = async () => {
+      try {
+        if (user?._id && String(user._id) !== userId) {
+          const data = await getSellerFollowStatus(userId);
+          setFollowState({
+            isFollowing: !!data.isFollowing,
+            followerCount: data.followerCount || 0,
+          });
+          return;
+        }
+
+        const data = await getSellerFollowStats(userId);
+        setFollowState({
+          isFollowing: false,
+          followerCount: data.followerCount || 0,
+        });
+      } catch {
+        setFollowState({ isFollowing: false, followerCount: 0 });
+      }
+    };
+
+    void loadFollowState();
+  }, [user?._id, userId]);
 
   const sellerListings = useMemo(() => {
     if (!userId) return [];
@@ -93,6 +132,28 @@ const SellerProfile: React.FC = () => {
 
   const locationParts = [seller.county, seller.constituency, seller.ward].filter(Boolean);
   const hasListings = sellerListings.length > 0;
+  const isOwnProfile = !!user?._id && !!userId && String(user._id) === userId;
+
+  const handleToggleFollow = async () => {
+    if (!userId || isOwnProfile) return;
+    if (!user?._id) {
+      navigate(`/login?next=${encodeURIComponent(`/sellers/${userId}`)}`);
+      return;
+    }
+
+    setFollowLoading(true);
+    try {
+      const result = await toggleSellerFollow(userId);
+      setFollowState({
+        isFollowing: !!result.isFollowing,
+        followerCount: result.followerCount || 0,
+      });
+    } catch (err: any) {
+      window.alert(err?.message || "Failed to update seller follow status.");
+    } finally {
+      setFollowLoading(false);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
@@ -153,6 +214,10 @@ const SellerProfile: React.FC = () => {
               <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-600">
                 Browse this seller&apos;s active Agrisoko listings and recent buyer reviews before you contact them.
               </p>
+
+              <p className="mt-3 text-sm font-semibold text-slate-500">
+                {followState.followerCount} follower{followState.followerCount === 1 ? "" : "s"}
+              </p>
             </div>
           </div>
 
@@ -171,6 +236,23 @@ const SellerProfile: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {!isOwnProfile && (
+          <div className="mt-5">
+            <button
+              type="button"
+              onClick={handleToggleFollow}
+              disabled={followLoading}
+              className="inline-flex items-center rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 disabled:opacity-60"
+            >
+              {followLoading
+                ? "Updating..."
+                : followState.isFollowing
+                ? "Following seller"
+                : "Follow seller"}
+            </button>
+          </div>
+        )}
 
         {Object.keys(listingMix).length > 0 && (
           <div className="mt-5 flex flex-wrap gap-2">

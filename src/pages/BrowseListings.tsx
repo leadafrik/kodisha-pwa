@@ -5,6 +5,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { kenyaCounties } from "../data/kenyaCounties";
 import { handleImageError } from "../utils/imageFallback";
 import { getOptimizedImageUrl } from "../utils/imageOptimization";
+import { normalizeKenyanPhone } from "../utils/phone";
 import { Search, Filter, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 import RaffleCampaign from "../components/RaffleCampaign";
 
@@ -77,17 +78,6 @@ const getTopPickScore = (item: UnifiedCard, searchTerm: string) => {
       : 0;
 
   return getScore(item) * 3 + getRecencyScore(item.createdAt) + exactTitleMatch + textMatch;
-};
-
-/**
- * Format phone number for tel: URI
- * Removes spaces, hyphens, and other non-alphanumeric characters
- * Preserves international + prefix
- */
-const formatPhoneForUri = (contact: string): string => {
-  if (!contact) return "";
-  // Remove spaces, hyphens, parentheses, periods
-  return contact.replace(/[\s\-().\s]/g, "");
 };
 
 const highValueCategories: Category[] = ["livestock", "inputs", "service"];
@@ -375,10 +365,10 @@ const BrowseListings: React.FC = () => {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="text-sm font-semibold text-slate-900">
-                    Sign in to view details and contact sellers
+                    Sign in to call, save, and contact sellers
                   </p>
                   <p className="text-xs text-slate-500">
-                    Save listings and message verified sellers directly.
+                    Listing details stay public. Sign in for direct contact and saved listings.
                   </p>
                 </div>
                 <Link
@@ -774,7 +764,7 @@ const BrowseListings: React.FC = () => {
               {topPicks.map((card) => (
                 <Link
                   key={`top-pick-${card.id}`}
-                  to={user ? `/listings/${card.id}` : "/login"}
+                  to={`/listings/${card.id}`}
                   className="overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:shadow-md"
                 >
                   <div className="h-36 overflow-hidden bg-slate-100">
@@ -914,15 +904,15 @@ const BrowseListings: React.FC = () => {
 
                   <div className="mt-3 flex gap-2">
                     <Link
-                      to={user ? `/listings/${card.id}` : "/login"}
+                      to={`/listings/${card.id}`}
                       className="flex-1 min-h-[44px] inline-flex items-center justify-center text-center rounded-xl bg-emerald-600 px-3 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition shadow-sm"
                     >
                       View details
                     </Link>
-                    {card.contact && (
+                    {card.contact && normalizeKenyanPhone(card.contact) && (
                       user ? (
                         <a
-                          href={`tel:${formatPhoneForUri(card.contact)}`}
+                          href={`tel:${normalizeKenyanPhone(card.contact)}`}
                           className="flex-1 min-h-[44px] inline-flex items-center justify-center text-center rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
                         >
                           Call
