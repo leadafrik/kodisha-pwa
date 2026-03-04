@@ -7,9 +7,11 @@ import { LegalConsents } from '../types/property';
 interface FacebookLoginButtonProps {
   onSuccess?: () => void;
   onError?: (error: string) => void;
+  onBlocked?: (reason: string) => void;
   className?: string;
   disabled?: boolean;
   legalConsents?: LegalConsents;
+  blockedReason?: string;
 }
 
 /**
@@ -19,9 +21,11 @@ interface FacebookLoginButtonProps {
 export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
   onSuccess,
   onError,
+  onBlocked,
   className = '',
   disabled = false,
   legalConsents,
+  blockedReason,
 }) => {
   const { loginWithFacebook } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -106,6 +110,15 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
   }, [resolveFacebookAppId]);
 
   const handleClick = async () => {
+    if (disabled) {
+      return;
+    }
+
+    if (blockedReason) {
+      onBlocked?.(blockedReason);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -158,6 +171,7 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
       onClick={handleClick}
       disabled={disabled || isLoading || !isInitialized}
       aria-label="Sign in with Facebook"
+      aria-disabled={Boolean(blockedReason)}
       className={`
         inline-flex items-center justify-center gap-2
         w-full px-4 py-3
@@ -166,6 +180,7 @@ export const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
         border-2 border-blue-600 hover:border-blue-700 disabled:border-gray-400
         rounded-lg transition-all duration-200
         focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+        ${blockedReason ? 'ring-1 ring-slate-200' : ''}
         ${className}
       `}
     >

@@ -7,9 +7,11 @@ import { LegalConsents } from "../types/property";
 interface GoogleLoginButtonProps {
   onSuccess?: () => void;
   onError?: (error: string) => void;
+  onBlocked?: (reason: string) => void;
   className?: string;
   disabled?: boolean;
   legalConsents?: LegalConsents;
+  blockedReason?: string;
 }
 
 /**
@@ -19,9 +21,11 @@ interface GoogleLoginButtonProps {
 export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
   onSuccess,
   onError,
+  onBlocked,
   className = "",
   disabled = false,
   legalConsents,
+  blockedReason,
 }) => {
   const { loginWithGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -106,6 +110,15 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
   }, [resolveGoogleClientId]);
 
   const handleClick = async () => {
+    if (disabled) {
+      return;
+    }
+
+    if (blockedReason) {
+      onBlocked?.(blockedReason);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -158,6 +171,7 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
       onClick={handleClick}
       disabled={disabled || isLoading || !isInitialized}
       aria-label="Sign in with Google"
+      aria-disabled={Boolean(blockedReason)}
       className={`
         inline-flex items-center justify-center gap-2
         w-full px-4 py-3
@@ -166,6 +180,7 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
         border-2 border-gray-300 hover:border-gray-400 disabled:border-gray-300
         rounded-lg transition-all duration-200
         focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500
+        ${blockedReason ? "ring-1 ring-slate-200" : ""}
         ${className}
       `}
     >

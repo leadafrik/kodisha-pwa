@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -78,6 +78,7 @@ const Login: React.FC = () => {
   const [signupConsents, setSignupConsents] = useState<LegalConsents>(
     defaultSignupConsents
   );
+  const signupConsentRef = useRef<HTMLDivElement | null>(null);
 
   // OTP State (email only for now)
   const [otpCode, setOtpCode] = useState("");
@@ -99,6 +100,15 @@ const Login: React.FC = () => {
     signupConsents.termsAccepted &&
     signupConsents.privacyAccepted &&
     signupConsents.dataProcessingConsent;
+
+  const promptConsentBeforeSocialSignup = (message: string) => {
+    setError(null);
+    setInfo(message);
+    signupConsentRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  };
 
   // OTP Timer
   useEffect(() => {
@@ -447,26 +457,33 @@ const Login: React.FC = () => {
           Fastest signup
         </p>
         <p className="text-center text-xs text-gray-500">
-          Accept the consent boxes below to continue with social or email signup.
+          Tick the 3 consent boxes once, then continue with Google, Facebook, or email.
         </p>
+        {!requiredSignupConsentsAccepted && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            Social signup opens after you tick the required consent boxes below.
+          </div>
+        )}
         <GoogleLoginButton
-          disabled={!requiredSignupConsentsAccepted}
           legalConsents={signupConsents}
           onSuccess={() => {
             trackGoogleEvent("sign_up", { method: "google" });
             navigate(redirectTo);
           }}
           onError={(error) => setError(error)}
+          onBlocked={promptConsentBeforeSocialSignup}
+          blockedReason="Tick the 3 required consent boxes below to continue with Google signup."
           className="text-sm w-full"
         />
         <FacebookLoginButton
-          disabled={!requiredSignupConsentsAccepted}
           legalConsents={signupConsents}
           onSuccess={() => {
             trackGoogleEvent("sign_up", { method: "facebook" });
             navigate(redirectTo);
           }}
           onError={(error) => setError(error)}
+          onBlocked={promptConsentBeforeSocialSignup}
+          blockedReason="Tick the 3 required consent boxes below to continue with Facebook signup."
           className="text-sm w-full"
         />
       </div>
@@ -529,7 +546,10 @@ const Login: React.FC = () => {
         You can add your county after signup.
       </p>
 
-      <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+      <div ref={signupConsentRef} className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+          Required before signup
+        </p>
         <label className="flex items-start gap-3 text-sm text-slate-700">
           <input
             type="checkbox"
