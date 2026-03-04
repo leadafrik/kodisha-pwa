@@ -34,6 +34,7 @@ const Favorites = lazy(() => import('./pages/Favorites'));
 const Messages = lazy(() => import('./pages/Messages'));
 const AdminReports = lazy(() => import('./pages/admin/Reports'));
 const AdminUserManagement = lazy(() => import('./pages/admin/UserManagement'));
+const AdminUserProfile = lazy(() => import('./pages/admin/UserProfile'));
 const AdminReportsManagement = lazy(() => import('./pages/admin/ReportsManagement'));
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
 const ListingManagement = lazy(() => import('./pages/admin/ListingManagement'));
@@ -196,6 +197,7 @@ const AppShell = () => {
             <Route path="/admin/reports" element={<ProtectedRoute><AdminReports /></ProtectedRoute>} />
             <Route path="/admin/profile-verification" element={<ProtectedRoute><AdminIDVerification /></ProtectedRoute>} />
             <Route path="/admin/users" element={<ProtectedRoute><AdminUserManagement /></ProtectedRoute>} />
+            <Route path="/admin/users/:userId" element={<ProtectedRoute><AdminUserProfile /></ProtectedRoute>} />
             <Route path="/admin/reports-management" element={<ProtectedRoute><AdminReportsManagement /></ProtectedRoute>} />
             <Route path="/admin/content-editor" element={<ProtectedRoute><AdminContentEditor /></ProtectedRoute>} />
             <Route path="/admin/listing-management" element={<ProtectedRoute><ListingManagement /></ProtectedRoute>} />

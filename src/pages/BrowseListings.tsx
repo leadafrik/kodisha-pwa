@@ -7,6 +7,7 @@ import { kenyaCounties } from "../data/kenyaCounties";
 import { handleImageError } from "../utils/imageFallback";
 import { getOptimizedImageUrl } from "../utils/imageOptimization";
 import { normalizeKenyanPhone } from "../utils/phone";
+import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
 import { Search, Filter, ChevronDown, ChevronUp, Sparkles, Eye, Bookmark, MessageCircle } from "lucide-react";
 import RaffleCampaign from "../components/RaffleCampaign";
 
@@ -157,6 +158,7 @@ const BrowseListings: React.FC = () => {
   const { category: categoryParam } = useParams<{ category?: string }>();
   const { serviceListings, productListings, loading } = useProperties();
   const { user } = useAuth();
+  const { isCompact } = useAdaptiveLayout();
 
   const category = useMemo(() => normalizeRouteCategory(categoryParam), [categoryParam]);
   const [serviceSub, setServiceSub] = useState<ServiceSubType>("all");
@@ -165,6 +167,7 @@ const BrowseListings: React.FC = () => {
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("recommended");
   const [showRaffle, setShowRaffle] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [trendingItems, setTrendingItems] = useState<TrendingCard[]>([]);
   const [trendingLoading, setTrendingLoading] = useState(false);
 
@@ -368,6 +371,13 @@ const BrowseListings: React.FC = () => {
   const hasActiveFilters = Boolean(
     county || search || category !== "all" || serviceSub !== "all" || verifiedOnly
   );
+  const activeFilterCount = [
+    Boolean(county),
+    category !== "all",
+    serviceSub !== "all",
+    verifiedOnly,
+    sortBy !== "recommended",
+  ].filter(Boolean).length;
 
   const categoryPills: Array<{ id: Category; label: string; icon?: string }> = [
     { id: "all", label: "All" },
@@ -536,7 +546,7 @@ const BrowseListings: React.FC = () => {
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-4 md:p-5 shadow-sm fade-up">
-            <div className="grid gap-3 md:grid-cols-[1.3fr_0.7fr] items-end">
+            <div className="space-y-3">
               <div className="space-y-2">
                 <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
                   Search listings
@@ -553,108 +563,259 @@ const BrowseListings: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
-                    County
-                  </label>
-                  <select
-                    value={county}
-                    onChange={(e) => setCounty(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
-                  >
-                    <option value="">All counties</option>
-                    {[...kenyaCounties]
-                      .sort((a, b) => a.name.localeCompare(b.name))
-                      .map((c) => (
-                        <option key={c.code} value={c.name.toLowerCase()}>
-                          {c.name}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-
-                {category === "service" ? (
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
-                      Service type
-                    </label>
-                    <select
-                      value={serviceSub}
-                      onChange={(e) =>
-                        setServiceSub(e.target.value as ServiceSubType)
-                      }
-                      className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+              {isCompact ? (
+                <>
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">
+                        {filtered.length} listing{filtered.length === 1 ? "" : "s"} found
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {activeFilterCount > 0
+                          ? `${activeFilterCount} filter${activeFilterCount === 1 ? "" : "s"} active`
+                          : "All listings"}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowMobileFilters((prev) => !prev)}
+                      className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50"
                     >
-                      <option value="all">All services</option>
-                      <option value="equipment">Equipment Hire</option>
-                      <option value="professional_services">Professional Services</option>
-                    </select>
+                      <Filter className="h-4 w-4" />
+                      Filters
+                      {showMobileFilters ? (
+                        <ChevronUp className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
+                      )}
+                    </button>
                   </div>
-                ) : (
-                  <div className="hidden sm:block" />
-                )}
-              </div>
-            </div>
 
-            <div className="mt-5 flex flex-wrap items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-widest text-slate-500">
-                Category
-              </span>
-              {categoryPills.map((pill) => {
-                const active = category === pill.id;
-                return (
-                  <button
-                    key={pill.id}
-                    type="button"
-                    onClick={() => {
-                      navigate(getBrowsePathForCategory(pill.id));
-                      setServiceSub("all");
-                    }}
-                    className={`rounded-full px-4 py-2 text-sm font-semibold border transition ${
-                      active
-                        ? "border-emerald-600 bg-emerald-600 text-white shadow-sm"
-                        : "border-slate-200 bg-white text-slate-700 hover:border-emerald-300 hover:bg-emerald-50"
-                    }`}
-                  >
-                    {pill.label}
-                  </button>
-                );
-              })}
-            </div>
+                  {showMobileFilters && (
+                    <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                          County
+                        </label>
+                        <select
+                          value={county}
+                          onChange={(e) => setCounty(e.target.value)}
+                          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                        >
+                          <option value="">All counties</option>
+                          {[...kenyaCounties]
+                            .sort((a, b) => a.name.localeCompare(b.name))
+                            .map((c) => (
+                              <option key={c.code} value={c.name.toLowerCase()}>
+                                {c.name}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
 
-            <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-500">
-              <label className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700">
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 accent-emerald-600"
-                  checked={verifiedOnly}
-                  onChange={() => setVerifiedOnly((prev) => !prev)}
-                />
-                Verified only
-              </label>
-            </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                          Sort
+                        </label>
+                        <select
+                          value={sortBy}
+                          onChange={(e) => setSortBy(e.target.value as SortOption)}
+                          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-700 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                        >
+                          <option value="recommended">Top picks</option>
+                          <option value="newest">Newest</option>
+                          <option value="verified">Verified first</option>
+                          <option value="price_low">Price: low to high</option>
+                          <option value="price_high">Price: high to low</option>
+                        </select>
+                      </div>
 
-            {hasActiveFilters && (
-              <div className="mt-4 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2 text-xs text-slate-500">
-                  <Filter className="h-4 w-4" />
-                  Filters active
-                </div>
-                <button
-                  onClick={() => {
-                    setCounty("");
-                    setSearch("");
-                    navigate("/browse");
-                    setServiceSub("all");
-                    setVerifiedOnly(false);
-                  }}
-                  className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition"
-                >
-                  Clear filters
-                </button>
-              </div>
-            )}
+                      {category === "service" && (
+                        <div className="space-y-2">
+                          <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                            Service type
+                          </label>
+                          <select
+                            value={serviceSub}
+                            onChange={(e) =>
+                              setServiceSub(e.target.value as ServiceSubType)
+                            }
+                            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                          >
+                            <option value="all">All services</option>
+                            <option value="equipment">Equipment Hire</option>
+                            <option value="professional_services">Professional Services</option>
+                          </select>
+                        </div>
+                      )}
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                          Category
+                        </label>
+                        <div className="flex gap-2 overflow-x-auto pb-1">
+                          {categoryPills.map((pill) => {
+                            const active = category === pill.id;
+                            return (
+                              <button
+                                key={pill.id}
+                                type="button"
+                                onClick={() => {
+                                  navigate(getBrowsePathForCategory(pill.id));
+                                  setServiceSub("all");
+                                }}
+                                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold border transition ${
+                                  active
+                                    ? "border-emerald-600 bg-emerald-600 text-white shadow-sm"
+                                    : "border-slate-200 bg-white text-slate-700 hover:border-emerald-300 hover:bg-emerald-50"
+                                }`}
+                              >
+                                {pill.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <label className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700">
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 accent-emerald-600"
+                          checked={verifiedOnly}
+                          onChange={() => setVerifiedOnly((prev) => !prev)}
+                        />
+                        Verified only
+                      </label>
+
+                      {hasActiveFilters && (
+                        <button
+                          onClick={() => {
+                            setCounty("");
+                            setSearch("");
+                            navigate("/browse");
+                            setServiceSub("all");
+                            setVerifiedOnly(false);
+                            setSortBy("recommended");
+                          }}
+                          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-white transition"
+                        >
+                          Clear filters
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div className="grid gap-3 md:grid-cols-[1.3fr_0.7fr] items-end">
+                    <div />
+
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                          County
+                        </label>
+                        <select
+                          value={county}
+                          onChange={(e) => setCounty(e.target.value)}
+                          className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                        >
+                          <option value="">All counties</option>
+                          {[...kenyaCounties]
+                            .sort((a, b) => a.name.localeCompare(b.name))
+                            .map((c) => (
+                              <option key={c.code} value={c.name.toLowerCase()}>
+                                {c.name}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+
+                      {category === "service" ? (
+                        <div className="space-y-2">
+                          <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                            Service type
+                          </label>
+                          <select
+                            value={serviceSub}
+                            onChange={(e) =>
+                              setServiceSub(e.target.value as ServiceSubType)
+                            }
+                            className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                          >
+                            <option value="all">All services</option>
+                            <option value="equipment">Equipment Hire</option>
+                            <option value="professional_services">Professional Services</option>
+                          </select>
+                        </div>
+                      ) : (
+                        <div className="hidden sm:block" />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-5 flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                      Category
+                    </span>
+                    {categoryPills.map((pill) => {
+                      const active = category === pill.id;
+                      return (
+                        <button
+                          key={pill.id}
+                          type="button"
+                          onClick={() => {
+                            navigate(getBrowsePathForCategory(pill.id));
+                            setServiceSub("all");
+                          }}
+                          className={`rounded-full px-4 py-2 text-sm font-semibold border transition ${
+                            active
+                              ? "border-emerald-600 bg-emerald-600 text-white shadow-sm"
+                              : "border-slate-200 bg-white text-slate-700 hover:border-emerald-300 hover:bg-emerald-50"
+                          }`}
+                        >
+                          {pill.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                    <label className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 accent-emerald-600"
+                        checked={verifiedOnly}
+                        onChange={() => setVerifiedOnly((prev) => !prev)}
+                      />
+                      Verified only
+                    </label>
+                  </div>
+
+                  {hasActiveFilters && (
+                    <div className="mt-4 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 text-xs text-slate-500">
+                        <Filter className="h-4 w-4" />
+                        Filters active
+                      </div>
+                      <button
+                        onClick={() => {
+                          setCounty("");
+                          setSearch("");
+                          navigate("/browse");
+                          setServiceSub("all");
+                          setVerifiedOnly(false);
+                          setSortBy("recommended");
+                        }}
+                        className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition"
+                      >
+                        Clear filters
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 fade-up">
@@ -666,7 +827,7 @@ const BrowseListings: React.FC = () => {
                 Top picks prioritize trust, visibility, and recency.
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className={`flex items-center gap-2 ${isCompact ? "hidden" : ""}`}>
               <label className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                 Sort
               </label>

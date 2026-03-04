@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Search, AlertTriangle, CheckCircle, Lock, Flag } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../../config/api';
 
 interface User {
@@ -16,6 +17,7 @@ interface User {
 }
 
 const AdminUserManagement: React.FC = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [users, setUsers] = useState<User[]>([]);
@@ -258,7 +260,20 @@ const AdminUserManagement: React.FC = () => {
               <tbody className="divide-y divide-gray-200">
                 {users.map((user) => (
                   <tr key={user._id} className="hover:bg-gray-50 transition">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{user.fullName}</td>
+                    <td className="px-6 py-4">
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/admin/users/${user._id}`)}
+                        className="text-left"
+                      >
+                        <div className="text-sm font-semibold text-gray-900 hover:text-green-700 transition">
+                          {user.fullName}
+                        </div>
+                        <div className="text-xs font-medium text-green-700">
+                          Open profile
+                        </div>
+                      </button>
+                    </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
                       <div>{user.email}</div>
                       <div className="text-xs text-gray-500">{user.phone}</div>
@@ -325,7 +340,7 @@ const AdminUserManagement: React.FC = () => {
                         }}
                         className="text-green-600 hover:text-green-700 font-medium text-sm"
                       >
-                        View Details
+                        Manage
                       </button>
                     </td>
                   </tr>

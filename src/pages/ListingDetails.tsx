@@ -804,7 +804,41 @@ const ListingDetails: React.FC = () => {
   }, [owner?._id, user?._id]);
 
   if (loading) {
-    return <div className="p-4 text-center text-gray-600">Loading listing...</div>;
+    return (
+      <div className="mx-auto max-w-5xl p-4">
+        <div className="mb-4 h-10 w-36 animate-pulse rounded-full bg-slate-100" />
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="space-y-4 lg:col-span-2">
+            <div className="space-y-3 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="h-8 w-3/4 animate-pulse rounded bg-slate-100" />
+              <div className="h-4 w-1/3 animate-pulse rounded bg-slate-100" />
+            </div>
+            <div className="h-80 animate-pulse rounded-3xl bg-slate-100" />
+            <div className="grid grid-cols-4 gap-2">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="h-20 animate-pulse rounded-2xl bg-slate-100" />
+              ))}
+            </div>
+            <div className="space-y-3 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="h-5 w-32 animate-pulse rounded bg-slate-100" />
+              <div className="h-4 w-full animate-pulse rounded bg-slate-100" />
+              <div className="h-4 w-5/6 animate-pulse rounded bg-slate-100" />
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="h-6 w-40 animate-pulse rounded bg-slate-100" />
+              <div className="mt-4 h-32 animate-pulse rounded-2xl bg-slate-100" />
+            </div>
+            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="h-5 w-28 animate-pulse rounded bg-slate-100" />
+              <div className="mt-4 h-10 animate-pulse rounded-xl bg-slate-100" />
+              <div className="mt-3 h-10 animate-pulse rounded-xl bg-slate-100" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!listing) {
@@ -848,6 +882,18 @@ const ListingDetails: React.FC = () => {
   const shareUrl = `${window.location.origin}/share/listing/${listing._id}?${shareParams.toString()}`;
   const hasMapCoordinates = Boolean(coords?.lat && coords?.lng);
   const isOwnListing = !!user?._id && !!owner?._id && String(user._id) === String(owner._id);
+  const handleBackToListings = () => {
+    if (
+      typeof document !== "undefined" &&
+      document.referrer &&
+      document.referrer.startsWith(window.location.origin)
+    ) {
+      navigate(-1);
+      return;
+    }
+
+    navigate("/browse");
+  };
 
   // Determine owner/admin privileges for marking sold
   const currentUserRaw = localStorage.getItem('kodisha_user');
@@ -937,6 +983,15 @@ const ListingDetails: React.FC = () => {
 
   return (
     <div className="p-4 max-w-5xl mx-auto">
+      <div className="mb-4">
+        <button
+          type="button"
+          onClick={handleBackToListings}
+          className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+        >
+          ← Back to listings
+        </button>
+      </div>
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           {/* Title + price row - improved layout */}
