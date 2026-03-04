@@ -99,7 +99,7 @@ const DEMAND_TEMPLATES: DemandTemplate[] = [
   },
   {
     id: "fertilizer",
-    label: "Farm Inputs",
+    label: "Inputs",
     category: "inputs",
     title: "Need NPK fertilizer for planting season",
     productType: "NPK fertilizer",

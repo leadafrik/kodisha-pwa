@@ -228,7 +228,7 @@ const BrowseListings: React.FC = () => {
           typeLabel = "Livestock";
         } else if (p.category === "inputs") {
           categoryLabel = "inputs";
-          typeLabel = "Farm Inputs";
+          typeLabel = "Inputs";
         }
         
         const ownerLastActive =
@@ -378,6 +378,20 @@ const BrowseListings: React.FC = () => {
     verifiedOnly,
     sortBy !== "recommended",
   ].filter(Boolean).length;
+  const sortSummary = useMemo(() => {
+    switch (sortBy) {
+      case "newest":
+        return "Showing newest listings first.";
+      case "verified":
+        return "Verified sellers appear first.";
+      case "price_low":
+        return "Showing lowest prices first.";
+      case "price_high":
+        return "Showing highest prices first.";
+      default:
+        return "Results prioritize trust, visibility, and recency.";
+    }
+  }, [sortBy]);
 
   const categoryPills: Array<{ id: Category; label: string; icon?: string }> = [
     { id: "all", label: "All" },
@@ -824,7 +838,7 @@ const BrowseListings: React.FC = () => {
                 {filtered.length} listing{filtered.length === 1 ? "" : "s"} found
               </span>
               <p className="mt-1 text-xs text-slate-500">
-                Top picks prioritize trust, visibility, and recency.
+                {sortSummary}
               </p>
             </div>
             <div className={`flex items-center gap-2 ${isCompact ? "hidden" : ""}`}>

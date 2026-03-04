@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { MapPin, TrendingUp, AlertCircle, Loader, Plus, Clock3 } from "lucide-react";
+import { MapPin, TrendingUp, AlertCircle, Plus, Clock3 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { API_BASE_URL } from "../config/api";
 import { kenyaCounties } from "../data/kenyaCounties";
@@ -57,7 +57,7 @@ const URGENCY_LABELS: Record<string, string> = {
 const CATEGORY_LABELS: Record<string, string> = {
   produce: "Produce",
   livestock: "Livestock",
-  inputs: "Farm Inputs",
+  inputs: "Inputs",
   service: "Services",
 };
 
@@ -438,7 +438,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                 <option value="">All Categories</option>
                 <option value="produce">Produce</option>
                 <option value="livestock">Livestock</option>
-                <option value="inputs">Farm Inputs</option>
+                <option value="inputs">Inputs</option>
                 <option value="service">Services</option>
               </select>
             </div>
@@ -554,8 +554,28 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
         )}
 
         {loading ? (
-          <div className="flex justify-center items-center py-16">
-            <Loader className="animate-spin text-emerald-600" size={40} />
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 mb-10">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div
+                key={`request-skeleton-${index}`}
+                className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
+              >
+                <div className="h-20 animate-pulse bg-slate-100" />
+                <div className="space-y-4 p-4">
+                  <div className="h-5 w-3/4 animate-pulse rounded bg-slate-100" />
+                  <div className="h-4 w-full animate-pulse rounded bg-slate-100" />
+                  <div className="h-4 w-5/6 animate-pulse rounded bg-slate-100" />
+                  <div className="rounded-2xl bg-slate-50 p-3 space-y-2">
+                    <div className="h-4 w-1/2 animate-pulse rounded bg-slate-100" />
+                    <div className="h-4 w-2/3 animate-pulse rounded bg-slate-100" />
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="h-10 flex-1 animate-pulse rounded-xl bg-slate-100" />
+                    <div className="h-10 flex-1 animate-pulse rounded-xl bg-slate-100" />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : requests.length === 0 ? (
           <div className="text-center py-16">

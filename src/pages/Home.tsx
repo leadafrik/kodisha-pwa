@@ -53,7 +53,7 @@ const buyerDemandSignals = [
   "Maize and beans suppliers",
   "Poultry and livestock",
   "Transport and tractor services",
-  "Agrovet inputs",
+  "Farm inputs and supplies",
 ];
 
 const trustFeatures = [
