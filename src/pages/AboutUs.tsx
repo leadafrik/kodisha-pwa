@@ -1,10 +1,11 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { kenyaCounties } from '../data/kenyaCounties';
 
 const AboutUs: React.FC = () => {
   const { user } = useAuth();
+  const location = useLocation();
 
   const founderName = "Stephen Omukoko Okoth";
   const founderWhatsapp = "254796389192";
@@ -47,6 +48,13 @@ const AboutUs: React.FC = () => {
     user?.verification?.status === "approved" || !!user?.verification?.idVerified;
   const verificationLink = user ? (isFullyVerified ? '/profile' : '/verify-id') : '/login';
   const verificationCta = user ? (isFullyVerified ? 'View verification status' : 'Verify your profile') : 'Sign in to verify';
+
+  useEffect(() => {
+    if (location.hash !== "#ceo-message") return;
+    const target = document.getElementById("ceo-message");
+    if (!target) return;
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [location.hash]);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -321,7 +329,7 @@ const AboutUs: React.FC = () => {
           </div>
         </section>
 
-        <section className="max-w-6xl mx-auto px-4 py-12">
+        <section id="ceo-message" className="max-w-6xl mx-auto px-4 py-12">
           <div className="grid gap-6 md:grid-cols-2">
             <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
               <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">Our Mission</p>

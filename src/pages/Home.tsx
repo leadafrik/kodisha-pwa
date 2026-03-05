@@ -13,6 +13,7 @@ import { useProperties } from "../contexts/PropertyContext";
 import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
 import { usePageContent } from "../hooks/usePageContent";
 import { PAYMENTS_ENABLED } from "../config/featureFlags";
+import { trackGoogleEvent } from "../utils/cookieConsent";
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
 const FREE_WINDOW_DAYS = 10;
@@ -230,6 +231,19 @@ const Home: React.FC = () => {
                     className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 sm:w-auto"
                   >
                     View Listings
+                  </Link>
+                </div>
+                <div className="mt-3">
+                  <Link
+                    to="/about#ceo-message"
+                    onClick={() =>
+                      trackGoogleEvent("view_ceo_message_click", {
+                        source: "home_hero",
+                      })
+                    }
+                    className="text-sm font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4 transition hover:text-slate-900"
+                  >
+                    Watch message from the CEO
                   </Link>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-semibold text-slate-700 sm:text-xs">
