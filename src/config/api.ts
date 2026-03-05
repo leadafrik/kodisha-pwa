@@ -49,6 +49,7 @@ export const SOCKET_URL = getSocketUrl();
 
 export const API_ENDPOINTS = {
   auth: {
+    csrfToken: `${API_BASE_URL}/auth/csrf-token`,
     register: `${API_BASE_URL}/auth/register`,
     login: `${API_BASE_URL}/auth/login`,
     facebookLogin: `${API_BASE_URL}/auth/facebook/login`,

@@ -8,9 +8,22 @@ export default function AdminLogin() {
 
   const loginAdmin = async () => {
     try {
+      const csrfResponse = await fetch(API_ENDPOINTS.auth.csrfToken, {
+        method: "GET",
+        credentials: "include",
+        headers: { Accept: "application/json" },
+      });
+      const csrfData = await csrfResponse.json().catch(() => ({}));
+      if (!csrfResponse.ok || !csrfData?.csrfToken) {
+        throw new Error(csrfData?.message || "Unable to start secure admin login.");
+      }
+
       const res = await fetch(API_ENDPOINTS.admin.login, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfData.csrfToken,
+        },
         credentials: "include",
         body: JSON.stringify({ phone, email, password }),
       });
