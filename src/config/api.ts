@@ -139,6 +139,7 @@ export const API_ENDPOINTS = {
     sellerAwarded: `${API_BASE_URL}/bulk-orders/seller/awarded`,
     getById: (id: string) => `${API_BASE_URL}/bulk-orders/${id}`,
     acceptOrder: (id: string) => `${API_BASE_URL}/bulk-orders/${id}/accept-order`,
+    markComplete: (id: string) => `${API_BASE_URL}/bulk-orders/${id}/mark-complete`,
     invoice: (id: string) => `${API_BASE_URL}/bulk-orders/${id}/invoice`,
     close: (id: string) => `${API_BASE_URL}/bulk-orders/${id}/close`,
     bids: {

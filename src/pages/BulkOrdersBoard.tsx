@@ -24,6 +24,15 @@ const formatBudget = (order: BulkOrder) => {
   return "Budget not set";
 };
 
+const formatLocation = (order: BulkOrder) => {
+  const parts = [
+    order.deliveryLocation?.ward,
+    order.deliveryLocation?.constituency,
+    order.deliveryLocation?.county,
+  ].filter(Boolean);
+  return parts.length ? parts.join(", ") : "Location not set";
+};
+
 const BulkOrdersBoard: React.FC = () => {
   const { user } = useAuth();
   const [orders, setOrders] = useState<BulkOrder[]>([]);
@@ -257,11 +266,17 @@ const BulkOrdersBoard: React.FC = () => {
                     <strong>Budget:</strong> {formatBudget(order)}
                   </p>
                   <p>
-                    <strong>Delivery:</strong> {order.deliveryLocation?.county} ({order.deliveryScope})
+                    <strong>Delivery:</strong> {formatLocation(order)} ({order.deliveryScope})
                   </p>
                   <p>
                     <strong>Bids:</strong> {order.bidCount || 0}
                   </p>
+                  {order.myBid && (
+                    <p>
+                      <strong>Your bid:</strong> {order.myBid.status} - KES{" "}
+                      {Number(order.myBid.quoteAmount || 0).toLocaleString()}
+                    </p>
+                  )}
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -269,7 +284,7 @@ const BulkOrdersBoard: React.FC = () => {
                     to={`/bulk/orders/${order._id}`}
                     className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
                   >
-                    View details
+                    {canRespond && order.status === "open" ? "View & bid" : "View details"}
                   </Link>
                 </div>
               </article>

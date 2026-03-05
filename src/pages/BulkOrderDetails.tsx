@@ -9,6 +9,7 @@ import {
   acceptBulkOrderBid,
   closeBulkOrder,
   getBulkOrderDetails,
+  markBulkOrderComplete,
   placeBulkOrderBid,
   rejectBulkOrderBid,
 } from "../services/bulkOrdersService";
@@ -28,6 +29,36 @@ const formatCurrency = (value?: number) => {
   return `KES ${value.toLocaleString()}`;
 };
 
+const completionMeta = (status?: string) => {
+  switch (status) {
+    case "buyer_marked":
+      return {
+        label: "Buyer confirmed complete",
+        className: "bg-sky-100 text-sky-700",
+      };
+    case "seller_marked":
+      return {
+        label: "Seller confirmed complete",
+        className: "bg-violet-100 text-violet-700",
+      };
+    case "completed":
+      return {
+        label: "Completed by both parties",
+        className: "bg-emerald-100 text-emerald-700",
+      };
+    case "presumed_complete":
+      return {
+        label: "Presumed complete",
+        className: "bg-amber-100 text-amber-700",
+      };
+    default:
+      return {
+        label: "Pending completion",
+        className: "bg-slate-100 text-slate-700",
+      };
+  }
+};
+
 const BulkOrderDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
@@ -45,6 +76,18 @@ const BulkOrderDetails: React.FC = () => {
   const canBid = Boolean(payload?.canBid);
   const myBid = payload?.myBid || null;
   const invoice = payload?.invoice || null;
+  const completionState = completionMeta(order?.completionStatus);
+  const sellerConfirmed = Boolean(order?.sellerMarkedCompleteAt);
+  const buyerConfirmed = Boolean(order?.buyerMarkedCompleteAt);
+  const canMarkComplete =
+    Boolean(
+      order &&
+        order.sellerAcceptedAt &&
+        (order.status === "awarded" || order.status === "closed") &&
+        (isOwner || myBid?.status === "accepted") &&
+        order.completionStatus !== "completed" &&
+        order.completionStatus !== "presumed_complete"
+    );
   const canAcceptAwardedOrder =
     Boolean(
       !isOwner &&
@@ -169,10 +212,23 @@ const BulkOrderDetails: React.FC = () => {
       setError("");
       setNotice("");
       await acceptAwardedBulkOrder(id, note || undefined);
-      setNotice("Order accepted. Invoice has been issued.");
+      setNotice("Order accepted. Invoice has been issued and emailed as PDF.");
       await loadDetails();
     } catch (err: any) {
       setError(err?.message || "Unable to accept awarded order.");
+    }
+  };
+
+  const handleMarkComplete = async () => {
+    if (!id) return;
+    try {
+      setError("");
+      setNotice("");
+      await markBulkOrderComplete(id);
+      setNotice("Completion update saved.");
+      await loadDetails();
+    } catch (err: any) {
+      setError(err?.message || "Unable to mark order completion.");
     }
   };
 
@@ -241,17 +297,24 @@ const BulkOrderDetails: React.FC = () => {
                   <h1 className="mt-1 text-2xl font-semibold text-slate-900">{order.title}</h1>
                   <p className="mt-1 text-sm text-slate-600">{order.itemName}</p>
                 </div>
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                    order.status === "open"
-                      ? "bg-emerald-100 text-emerald-700"
-                      : order.status === "awarded"
-                      ? "bg-amber-100 text-amber-700"
-                      : "bg-slate-100 text-slate-700"
-                  }`}
-                >
-                  {order.status}
-                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                      order.status === "open"
+                        ? "bg-emerald-100 text-emerald-700"
+                        : order.status === "awarded"
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-slate-100 text-slate-700"
+                    }`}
+                  >
+                    {order.status}
+                  </span>
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-semibold ${completionState.className}`}
+                  >
+                    {completionState.label}
+                  </span>
+                </div>
               </div>
 
               <div className="mt-4 grid gap-3 md:grid-cols-2">
@@ -262,6 +325,8 @@ const BulkOrderDetails: React.FC = () => {
                 </div>
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm">
                   <p><strong>County:</strong> {order.deliveryLocation?.county}</p>
+                  <p><strong>Constituency:</strong> {order.deliveryLocation?.constituency || "-"}</p>
+                  <p><strong>Ward:</strong> {order.deliveryLocation?.ward || "-"}</p>
                   <p><strong>Delivery scope:</strong> {order.deliveryScope}</p>
                   <p>
                     <strong>Deadline:</strong>{" "}
@@ -290,21 +355,54 @@ const BulkOrderDetails: React.FC = () => {
                     (Quote {formatCurrency(invoice.quoteAmount)} + Fee {formatCurrency(invoice.platformFeeAmount)})
                   </p>
                   <p><strong>Status:</strong> {invoice.status}</p>
+                  <p>
+                    <strong>Email delivery:</strong>{" "}
+                    {invoice.emailSentAt
+                      ? `Sent on ${new Date(invoice.emailSentAt).toLocaleString()}`
+                      : "Pending"}
+                  </p>
                 </div>
               )}
 
+              <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
+                <p>
+                  <strong>Buyer confirmation:</strong>{" "}
+                  {buyerConfirmed
+                    ? `Done on ${new Date(order.buyerMarkedCompleteAt as string).toLocaleString()}`
+                    : "Pending"}
+                </p>
+                <p>
+                  <strong>Seller confirmation:</strong>{" "}
+                  {sellerConfirmed
+                    ? `Done on ${new Date(order.sellerMarkedCompleteAt as string).toLocaleString()}`
+                    : "Pending"}
+                </p>
+                {order.completionReminderSentAt && (
+                  <p>
+                    <strong>Reminder sent:</strong>{" "}
+                    {new Date(order.completionReminderSentAt).toLocaleString()}
+                  </p>
+                )}
+                {order.presumedCompletedAt && (
+                  <p>
+                    <strong>Presumed complete:</strong>{" "}
+                    {new Date(order.presumedCompletedAt).toLocaleString()}
+                  </p>
+                )}
+              </div>
+
               {isOwner && (
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {order.status !== "closed" && (
+                  {canMarkComplete && (
                     <button
                       type="button"
-                      onClick={() => handleCloseOrder("closed")}
-                      className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                      onClick={handleMarkComplete}
+                      className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
                     >
-                      Mark closed
+                      Mark complete
                     </button>
                   )}
-                  {order.status !== "cancelled" && (
+                  {order.status !== "cancelled" && order.status !== "closed" && (
                     <button
                       type="button"
                       onClick={() => handleCloseOrder("cancelled")}
@@ -378,6 +476,17 @@ const BulkOrderDetails: React.FC = () => {
                       className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
                     >
                       Accept order and issue invoice
+                    </button>
+                  </div>
+                )}
+                {canMarkComplete && order?.sellerAcceptedAt && (
+                  <div className="mt-3">
+                    <button
+                      type="button"
+                      onClick={handleMarkComplete}
+                      className="rounded-lg border border-emerald-300 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50"
+                    >
+                      Mark complete
                     </button>
                   </div>
                 )}

@@ -1,7 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { kenyaCounties } from "../data/kenyaCounties";
+import {
+  getConstituenciesByCounty,
+  getWardsByConstituency,
+  kenyaCounties,
+} from "../data/kenyaCounties";
 import { getMyBulkAccessStatus } from "../services/bulkApplicationsService";
 import { BulkOrderCategory, createBulkOrder } from "../services/bulkOrdersService";
 
@@ -34,9 +38,44 @@ const BulkOrderCreate: React.FC = () => {
     "within_county"
   );
   const [county, setCounty] = useState(user?.county || "");
+  const [constituency, setConstituency] = useState("");
+  const [ward, setWard] = useState("");
   const [addressLine, setAddressLine] = useState("");
   const [deliveryDeadline, setDeliveryDeadline] = useState("");
   const [contactPhone, setContactPhone] = useState(user?.phone || "");
+
+  const constituencyOptions = useMemo(
+    () => (county ? getConstituenciesByCounty(county) : []),
+    [county]
+  );
+  const wardOptions = useMemo(
+    () => (county && constituency ? getWardsByConstituency(county, constituency) : []),
+    [county, constituency]
+  );
+
+  useEffect(() => {
+    if (!county) {
+      setConstituency("");
+      setWard("");
+      return;
+    }
+
+    const currentConstituencies = getConstituenciesByCounty(county);
+    const constituencyIsValid = currentConstituencies.some(
+      (option) => option.value === constituency
+    );
+    if (!constituencyIsValid) {
+      setConstituency("");
+      setWard("");
+      return;
+    }
+
+    const currentWards = getWardsByConstituency(county, constituency);
+    const wardIsValid = currentWards.some((option) => option.value === ward);
+    if (!wardIsValid) {
+      setWard("");
+    }
+  }, [county, constituency, ward]);
 
   useEffect(() => {
     if (!user) {
@@ -109,6 +148,8 @@ const BulkOrderCreate: React.FC = () => {
         deliveryScope,
         deliveryLocation: {
           county: county.trim(),
+          constituency: constituency.trim() || undefined,
+          ward: ward.trim() || undefined,
           addressLine: addressLine.trim() || undefined,
         },
         deliveryDeadline: deliveryDeadline || undefined,
@@ -322,6 +363,45 @@ const BulkOrderCreate: React.FC = () => {
             </div>
             <div>
               <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                Constituency
+              </label>
+              <select
+                value={constituency}
+                onChange={(event) => setConstituency(event.target.value)}
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                disabled={!county}
+              >
+                <option value="">Select constituency</option>
+                {constituencyOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                Ward
+              </label>
+              <select
+                value={ward}
+                onChange={(event) => setWard(event.target.value)}
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                disabled={!county || !constituency}
+              >
+                <option value="">Select ward</option>
+                {wardOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
                 Delivery deadline
               </label>
               <input
@@ -386,4 +466,3 @@ const BulkOrderCreate: React.FC = () => {
 };
 
 export default BulkOrderCreate;
-

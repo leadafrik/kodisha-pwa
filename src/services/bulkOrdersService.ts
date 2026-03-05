@@ -4,6 +4,12 @@ export type BulkOrderCategory = "produce" | "livestock" | "inputs" | "service";
 export type BulkOrderStatus = "open" | "awarded" | "closed" | "cancelled";
 export type BulkBidStatus = "pending" | "accepted" | "rejected" | "withdrawn";
 export type BulkInvoiceStatus = "issued" | "paid" | "cancelled";
+export type BulkCompletionStatus =
+  | "pending"
+  | "buyer_marked"
+  | "seller_marked"
+  | "completed"
+  | "presumed_complete";
 
 export interface BulkOrderInput {
   title: string;
@@ -81,6 +87,7 @@ export interface BulkOrderInvoice {
   totalBuyerAmount: number;
   status: BulkInvoiceStatus;
   issuedAt: string;
+  emailSentAt?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -119,6 +126,12 @@ export interface BulkOrder {
   awardedAt?: string;
   sellerAcceptedAt?: string;
   sellerAcceptanceNote?: string;
+  buyerMarkedCompleteAt?: string;
+  sellerMarkedCompleteAt?: string;
+  completionReminderSentAt?: string;
+  completionStatus?: BulkCompletionStatus;
+  presumedCompletedAt?: string;
+  closedBySystem?: boolean;
   closedAt?: string;
   cancellationReason?: string;
   createdAt: string;
@@ -206,6 +219,12 @@ export const acceptAwardedBulkOrder = async (orderId: string, note?: string) =>
   apiRequest(API_ENDPOINTS.bulkOrders.acceptOrder(orderId), {
     method: "PUT",
     body: JSON.stringify({ note }),
+  });
+
+export const markBulkOrderComplete = async (orderId: string) =>
+  apiRequest(API_ENDPOINTS.bulkOrders.markComplete(orderId), {
+    method: "PUT",
+    body: JSON.stringify({}),
   });
 
 export const getBulkOrderInvoice = async (orderId: string) =>
