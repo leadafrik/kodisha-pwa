@@ -7,7 +7,7 @@ import { kenyaCounties } from "../data/kenyaCounties";
 import { handleImageError } from "../utils/imageFallback";
 import { getOptimizedImageUrl } from "../utils/imageOptimization";
 import { normalizeKenyanPhone } from "../utils/phone";
-import { getMarketTrustScore, getTrustComponents } from "../utils/trustScore";
+import { getMarketTrustScore } from "../utils/trustScore";
 import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
 import {
   Search,
@@ -161,27 +161,6 @@ const getTopPickScore = (item: UnifiedCard, searchTerm: string) => {
       : 0;
 
   return getScore(item) + exactTitleMatch * 6 + textMatch * 3;
-};
-
-const getRankingReason = (item: UnifiedCard) => {
-  const reasons: string[] = [];
-  const trust = getTrustComponents(toTrustInput(item));
-  const trustScore = trust.total;
-  const followers = trust.followers;
-  const reviews = trust.ratingCount;
-  const tenureMonths = trust.monthsOnPlatform;
-
-  if (trustScore >= 75) reasons.push("high trust score");
-  else if (trustScore >= 60) reasons.push("trusted profile");
-  if (followers >= 10) reasons.push(`${followers}+ followers`);
-  if (reviews >= 3) reasons.push("strong reviews");
-  if (tenureMonths >= 3) reasons.push("time on platform");
-  if (item.verified) reasons.push("verified seller");
-  if (!item.verified) reasons.push("verify profile for trust boost");
-  if (item.boosted) reasons.push("boosted visibility");
-  if (getRecencyScore(item.createdAt) >= 2) reasons.push("recent activity");
-
-  return reasons.slice(0, 2).join(" + ") || "active listing";
 };
 
 const ROUTE_CATEGORY_MAP: Record<string, Category> = {
@@ -1304,11 +1283,6 @@ const BrowseListings: React.FC = () => {
                         {engagement.reachOuts} reach-outs
                       </span>
                     </div>
-                    {sortBy === "recommended" && (
-                      <p className="mt-2 text-[11px] font-semibold text-emerald-700">
-                        Ranked for: {getRankingReason(card)}
-                      </p>
-                    )}
                   </div>
 
                   <div className="mt-3 flex gap-2">
