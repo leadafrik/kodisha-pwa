@@ -17,8 +17,43 @@ type ReportSummary = {
   createdAt: string;
 };
 
+type TrafficTrendPoint = {
+  date?: string;
+  week?: string;
+  month?: string;
+  uniqueVisitors: number;
+  pageViews: number;
+  ctaClicks: number;
+};
+
+type TrafficSummary = {
+  overview: {
+    uniqueVisitorsToday: number;
+    uniqueVisitorsWeek: number;
+    uniqueVisitorsMonth: number;
+    uniqueVisitorsTotal: number;
+  };
+  trends: {
+    daily: TrafficTrendPoint[];
+    weekly: TrafficTrendPoint[];
+    monthly: TrafficTrendPoint[];
+  };
+  topPages: Array<{
+    pagePath: string;
+    views: number;
+    uniqueVisitors: number;
+  }>;
+  topActions: Array<{
+    action: string;
+    target?: string;
+    clicks: number;
+    uniqueVisitors: number;
+  }>;
+};
+
 const AnalyticsReports: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [traffic, setTraffic] = useState<TrafficSummary | null>(null);
   const [pendingReports, setPendingReports] = useState<ReportSummary[]>([]);
   const [flaggedCount, setFlaggedCount] = useState(0);
   const [pendingVerificationCount, setPendingVerificationCount] = useState(0);
@@ -30,17 +65,19 @@ const AnalyticsReports: React.FC = () => {
       try {
         setLoading(true);
         setError("");
-        const [dashboardRes, reportsRes, flaggedRes, verificationRes] = await Promise.all([
+        const [dashboardRes, reportsRes, flaggedRes, verificationRes, trafficRes] = await Promise.all([
           adminApiRequest("/admin/dashboard"),
           adminApiRequest("/reports?status=pending&limit=5&page=1"),
           adminApiRequest("/admin/users/search?status=flagged&limit=1&page=1"),
           adminApiRequest("/verification/pending?limit=200&status=pending"),
+          adminApiRequest("/analytics/admin/summary"),
         ]);
 
         setStats(dashboardRes?.data || null);
         setPendingReports(reportsRes?.data || []);
         setFlaggedCount(flaggedRes?.pagination?.total || 0);
         setPendingVerificationCount(verificationRes?.total || 0);
+        setTraffic(trafficRes?.data || null);
       } catch (err: any) {
         setError(err?.message || "Unable to load analytics.");
       } finally {
@@ -110,6 +147,22 @@ const AnalyticsReports: React.FC = () => {
 
             <div className="mt-6 grid gap-4 md:grid-cols-3">
               <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Unique today</p>
+                <p className="text-3xl font-semibold mt-3">{traffic?.overview?.uniqueVisitorsToday ?? 0}</p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Unique this week</p>
+                <p className="text-3xl font-semibold mt-3">{traffic?.overview?.uniqueVisitorsWeek ?? 0}</p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Unique this month</p>
+                <p className="text-3xl font-semibold mt-3">{traffic?.overview?.uniqueVisitorsMonth ?? 0}</p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Unique total</p>
+                <p className="text-3xl font-semibold mt-3">{traffic?.overview?.uniqueVisitorsTotal ?? 0}</p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-5">
                 <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Pending reports</p>
                 <p className="text-3xl font-semibold mt-3">{pendingReports.length}</p>
               </div>
@@ -124,6 +177,50 @@ const AnalyticsReports: React.FC = () => {
             </div>
 
             <div className="mt-8 grid gap-6 lg:grid-cols-2">
+              <div className="rounded-2xl border border-slate-200 bg-white p-6">
+                <h2 className="text-xl font-semibold text-slate-900">Daily visitor trend</h2>
+                <p className="text-sm text-slate-500 mt-1">Last 30 days</p>
+                {traffic?.trends?.daily?.length ? (
+                  <div className="mt-4 space-y-2 text-sm text-slate-600 max-h-64 overflow-y-auto pr-1">
+                    {traffic.trends.daily.map((point) => (
+                      <div
+                        key={point.date}
+                        className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-2"
+                      >
+                        <span>{point.date}</span>
+                        <span className="font-semibold text-slate-800">
+                          {point.uniqueVisitors} unique / {point.pageViews} views
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-4 text-sm text-slate-500">No visitor trend data yet.</p>
+                )}
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-white p-6">
+                <h2 className="text-xl font-semibold text-slate-900">Where users go most</h2>
+                <p className="text-sm text-slate-500 mt-1">Top pages by views</p>
+                {traffic?.topPages?.length ? (
+                  <div className="mt-4 space-y-2 text-sm text-slate-600">
+                    {traffic.topPages.slice(0, 8).map((page) => (
+                      <div
+                        key={page.pagePath}
+                        className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-2"
+                      >
+                        <span className="truncate pr-3 font-medium text-slate-800">{page.pagePath}</span>
+                        <span className="whitespace-nowrap text-xs text-slate-500">
+                          {page.views} views / {page.uniqueVisitors} unique
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-4 text-sm text-slate-500">No page data yet.</p>
+                )}
+              </div>
+
               <div className="rounded-2xl border border-slate-200 bg-white p-6">
                 <h2 className="text-xl font-semibold text-slate-900">Listing mix</h2>
                 <p className="text-sm text-slate-500 mt-1">Totals by category</p>
@@ -145,26 +242,93 @@ const AnalyticsReports: React.FC = () => {
               </div>
 
               <div className="rounded-2xl border border-slate-200 bg-white p-6">
-                <h2 className="text-xl font-semibold text-slate-900">Latest reports</h2>
-                <p className="text-sm text-slate-500 mt-1">Most recent pending issues</p>
-                {pendingReports.length === 0 ? (
-                  <p className="mt-4 text-sm text-slate-500">No pending reports.</p>
-                ) : (
+                <h2 className="text-xl font-semibold text-slate-900">Most clicked actions</h2>
+                <p className="text-sm text-slate-500 mt-1">Top click interactions</p>
+                {traffic?.topActions?.length ? (
                   <div className="mt-4 space-y-3">
-                    {pendingReports.map((report) => (
+                    {traffic.topActions.slice(0, 8).map((action, index) => (
                       <div
-                        key={report._id}
+                        key={`${action.action}-${action.target || "none"}-${index}`}
                         className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm"
                       >
-                        <p className="font-semibold text-slate-900">{report.reason}</p>
+                        <p className="font-semibold text-slate-900">
+                          {action.action}
+                          {action.target ? ` -> ${action.target}` : ""}
+                        </p>
                         <p className="text-xs text-slate-500 mt-1">
-                          {new Date(report.createdAt).toLocaleDateString()} | {report.status}
+                          {action.clicks} clicks | {action.uniqueVisitors} unique visitors
                         </p>
                       </div>
                     ))}
                   </div>
+                ) : (
+                  <p className="mt-4 text-sm text-slate-500">No click data yet.</p>
                 )}
               </div>
+            </div>
+
+            <div className="mt-6 grid gap-6 lg:grid-cols-2">
+              <div className="rounded-2xl border border-slate-200 bg-white p-6">
+                <h2 className="text-xl font-semibold text-slate-900">Weekly trend</h2>
+                <p className="text-sm text-slate-500 mt-1">Last 12 weeks</p>
+                {traffic?.trends?.weekly?.length ? (
+                  <div className="mt-4 space-y-2 text-sm text-slate-600 max-h-56 overflow-y-auto pr-1">
+                    {traffic.trends.weekly.map((point) => (
+                      <div
+                        key={point.week}
+                        className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-2"
+                      >
+                        <span>{point.week}</span>
+                        <span className="font-semibold text-slate-800">{point.uniqueVisitors} unique</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-4 text-sm text-slate-500">No weekly trend data yet.</p>
+                )}
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-white p-6">
+                <h2 className="text-xl font-semibold text-slate-900">Monthly trend</h2>
+                <p className="text-sm text-slate-500 mt-1">Last 12 months</p>
+                {traffic?.trends?.monthly?.length ? (
+                  <div className="mt-4 space-y-2 text-sm text-slate-600 max-h-56 overflow-y-auto pr-1">
+                    {traffic.trends.monthly.map((point) => (
+                      <div
+                        key={point.month}
+                        className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-2"
+                      >
+                        <span>{point.month}</span>
+                        <span className="font-semibold text-slate-800">{point.uniqueVisitors} unique</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-4 text-sm text-slate-500">No monthly trend data yet.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+              <h2 className="text-xl font-semibold text-slate-900">Latest reports</h2>
+              <p className="text-sm text-slate-500 mt-1">Most recent pending issues</p>
+              {pendingReports.length === 0 ? (
+                <p className="mt-4 text-sm text-slate-500">No pending reports.</p>
+              ) : (
+                <div className="mt-4 space-y-3">
+                  {pendingReports.map((report) => (
+                    <div
+                      key={report._id}
+                      className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm"
+                    >
+                      <p className="font-semibold text-slate-900">{report.reason}</p>
+                      <p className="text-xs text-slate-500 mt-1">
+                        {new Date(report.createdAt).toLocaleDateString()} | {report.status}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </>
         )}

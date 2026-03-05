@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import { PropertyProvider } from './contexts/PropertyContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -17,6 +17,7 @@ import NotFound from './pages/NotFound';
 import ServerError from './pages/ServerError';
 import Offline from './pages/Offline';
 import ProtectedRoute from "./routes/ProtectedRoute";
+import { trackTrafficClick, trackTrafficPageView } from './utils/trafficAnalytics';
 
 // Lazy load heavy components
 const Profile = lazy(() => import('./pages/Profile'));
@@ -102,6 +103,45 @@ export default App;
 const AppShell = () => {
   const { user } = useAuth();
   const location = useLocation();
+
+  useEffect(() => {
+    if (location.pathname.startsWith("/admin")) return;
+    trackTrafficPageView(location.pathname);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const handleDocumentClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+      const link = target.closest("a[href]") as HTMLAnchorElement | null;
+      if (!link) return;
+
+      const href = link.getAttribute("href");
+      if (!href) return;
+      if (href.startsWith("http") || href.startsWith("mailto:") || href.startsWith("tel:")) {
+        return;
+      }
+
+      let path = href;
+      try {
+        const url = new URL(href, window.location.origin);
+        path = url.pathname;
+      } catch {
+        // keep raw href for simple relative paths
+      }
+
+      if (!path.startsWith("/") || path.startsWith("/admin")) return;
+
+      trackTrafficClick({
+        action: "link_click",
+        pagePath: window.location.pathname,
+        target: path,
+      });
+    };
+
+    document.addEventListener("click", handleDocumentClick);
+    return () => document.removeEventListener("click", handleDocumentClick);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
