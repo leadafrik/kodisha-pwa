@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import InstallPrompt from './InstallPrompt';
 import { isInstalledAsApp } from '../utils/pwaInstall';
+import { BULK_BUYING_CUSTOMERS_LINK_VISIBLE } from '../config/featureFlags';
 
 const Footer: React.FC = () => {
   const [showInstall, setShowInstall] = useState(false);
@@ -68,6 +69,14 @@ const Footer: React.FC = () => {
             >
               Privacy Policy
             </Link>
+            {BULK_BUYING_CUSTOMERS_LINK_VISIBLE && (
+              <Link
+                to="/b2b"
+                className="text-gray-600 hover:text-green-700 hover:underline transition"
+              >
+                Bulk buying customers
+              </Link>
+            )}
             <a
               href="mailto:info@leadafrik.com"
               className="text-gray-600 hover:text-green-700 hover:underline transition"

@@ -12,7 +12,10 @@ import { useAuth } from "../contexts/AuthContext";
 import { useProperties } from "../contexts/PropertyContext";
 import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
 import { usePageContent } from "../hooks/usePageContent";
-import { PAYMENTS_ENABLED } from "../config/featureFlags";
+import {
+  BULK_BUYING_CUSTOMERS_LINK_VISIBLE,
+  PAYMENTS_ENABLED,
+} from "../config/featureFlags";
 import { trackGoogleEvent } from "../utils/cookieConsent";
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
@@ -251,14 +254,16 @@ const Home: React.FC = () => {
                       Watch message from the CEO
                     </Link>
                   </div>
-                  <div>
-                    <Link
-                      to="/b2b"
-                      className="text-sm font-semibold text-emerald-700 underline decoration-emerald-200 underline-offset-4 transition hover:text-emerald-800"
-                    >
-                      Explore Agrisoko B2B procurement
-                    </Link>
-                  </div>
+                  {BULK_BUYING_CUSTOMERS_LINK_VISIBLE && (
+                    <div>
+                      <Link
+                        to="/b2b"
+                        className="text-sm font-semibold text-emerald-700 underline decoration-emerald-200 underline-offset-4 transition hover:text-emerald-800"
+                      >
+                        Explore bulk buying customers
+                      </Link>
+                    </div>
+                  )}
                   <div className="flex flex-wrap gap-2 text-[11px] font-semibold text-slate-700 sm:text-xs">
                     <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1">
                       {liveListingCount.toLocaleString()} listings live
