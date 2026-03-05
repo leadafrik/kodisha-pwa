@@ -22,6 +22,7 @@ type TrafficTrendPoint = {
   week?: string;
   month?: string;
   uniqueVisitors: number;
+  newVisitors?: number;
   pageViews: number;
   ctaClicks: number;
 };
@@ -33,6 +34,9 @@ type TrafficSummary = {
     uniqueVisitorsMonth: number;
     uniqueVisitorsTotal: number;
     liveListingsNow?: number;
+    newVisitorsToday?: number;
+    newVisitorsWeek?: number;
+    newVisitorsMonth?: number;
   };
   trends: {
     daily: TrafficTrendPoint[];
@@ -146,22 +150,34 @@ const AnalyticsReports: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-6 grid gap-4 md:grid-cols-3">
+            <div className="mt-6 grid gap-4 md:grid-cols-4">
               <div className="rounded-2xl border border-slate-200 bg-white p-5">
-                <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Unique today</p>
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Unique devices today</p>
                 <p className="text-3xl font-semibold mt-3">{traffic?.overview?.uniqueVisitorsToday ?? 0}</p>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-white p-5">
-                <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Unique this week</p>
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Unique devices this week</p>
                 <p className="text-3xl font-semibold mt-3">{traffic?.overview?.uniqueVisitorsWeek ?? 0}</p>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-white p-5">
-                <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Unique this month</p>
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Unique devices this month</p>
                 <p className="text-3xl font-semibold mt-3">{traffic?.overview?.uniqueVisitorsMonth ?? 0}</p>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-white p-5">
-                <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Unique total</p>
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Unique devices total</p>
                 <p className="text-3xl font-semibold mt-3">{traffic?.overview?.uniqueVisitorsTotal ?? 0}</p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-500">New devices today</p>
+                <p className="text-3xl font-semibold mt-3">{traffic?.overview?.newVisitorsToday ?? 0}</p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-500">New devices this week</p>
+                <p className="text-3xl font-semibold mt-3">{traffic?.overview?.newVisitorsWeek ?? 0}</p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-500">New devices this month</p>
+                <p className="text-3xl font-semibold mt-3">{traffic?.overview?.newVisitorsMonth ?? 0}</p>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-white p-5">
                 <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Live listings now</p>
@@ -194,7 +210,7 @@ const AnalyticsReports: React.FC = () => {
                       >
                         <span>{point.date}</span>
                         <span className="font-semibold text-slate-800">
-                          {point.uniqueVisitors} unique / {point.pageViews} views
+                          {point.uniqueVisitors} unique / {point.newVisitors || 0} new / {point.pageViews} views
                         </span>
                       </div>
                     ))}
