@@ -54,6 +54,19 @@ type TrafficSummary = {
     clicks: number;
     uniqueVisitors: number;
   }>;
+  listingEngagement?: {
+    topListings: Array<{
+      id: string;
+      title: string;
+      category: string;
+      listingType: string;
+      views: number;
+      saves: number;
+      reachOuts: number;
+      score: number;
+      listingPath: string;
+    }>;
+  };
 };
 
 const AnalyticsReports: React.FC = () => {
@@ -328,6 +341,41 @@ const AnalyticsReports: React.FC = () => {
                   <p className="mt-4 text-sm text-slate-500">No monthly trend data yet.</p>
                 )}
               </div>
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+              <h2 className="text-xl font-semibold text-slate-900">Live listing engagement</h2>
+              <p className="text-sm text-slate-500 mt-1">
+                Views, saves, and reach-outs for listings currently visible to the public.
+              </p>
+              {traffic?.listingEngagement?.topListings?.length ? (
+                <div className="mt-4 space-y-3">
+                  {traffic.listingEngagement.topListings.map((listing, index) => (
+                    <div
+                      key={`${listing.id}-${index}`}
+                      className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="font-semibold text-slate-900">{listing.title}</p>
+                        <Link
+                          to={listing.listingPath}
+                          className="text-xs font-semibold text-emerald-700 hover:text-emerald-800"
+                        >
+                          Open listing
+                        </Link>
+                      </div>
+                      <p className="mt-1 text-xs uppercase tracking-[0.16em] text-slate-500">
+                        {listing.category} • {listing.listingType}
+                      </p>
+                      <p className="mt-2 text-xs text-slate-600">
+                        {listing.views} views • {listing.saves} saves • {listing.reachOuts} reach-outs
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-4 text-sm text-slate-500">No live listing engagement data yet.</p>
+              )}
             </div>
 
             <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
