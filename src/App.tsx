@@ -72,6 +72,11 @@ const ShareListingRedirect = () => {
   return <Navigate to={id ? `/listings/${id}` : "/browse"} replace />;
 };
 
+const ShareBuyRequestRedirect = () => {
+  const { id } = useParams<{ id: string }>();
+  return <Navigate to={id ? `/request/${id}` : "/request"} replace />;
+};
+
 const shouldPadForMobileNav = (pathname: string, signedIn: boolean) => {
   if (!signedIn) return false;
 
@@ -267,6 +272,8 @@ const AppShell = () => {
             <Route path="/listings/:id" element={<ListingDetails />} />
             <Route path="/l/:id" element={<ShareListingRedirect />} />
             <Route path="/share/listing/:id" element={<ShareListingRedirect />} />
+            <Route path="/r/:id" element={<ShareBuyRequestRedirect />} />
+            <Route path="/share/request/:id" element={<ShareBuyRequestRedirect />} />
             <Route path="/seller/:userId" element={<SellerProfile />} />
             <Route path="/sellers/:userId" element={<SellerProfile />} />
             <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />

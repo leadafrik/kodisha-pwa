@@ -80,6 +80,7 @@ const BuyerRequestDetails: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [markingFulfilled, setMarkingFulfilled] = useState(false);
+  const [shareFeedback, setShareFeedback] = useState('');
 
   // Try to get request from location state first
   const initialRequest = (location.state as any)?.request;
@@ -296,6 +297,29 @@ const BuyerRequestDetails: React.FC = () => {
     request.contactPhone || request.userId.phone
   );
   const signInNext = `/login?next=${encodeURIComponent(`/request/${request._id}`)}`;
+  const shareUrl = `${window.location.origin}/r/${request._id}`;
+
+  const handleShareRequest = async () => {
+    try {
+      if ((navigator as any).share) {
+        await (navigator as any).share({
+          title: request.title,
+          text: `Buy request on Agrisoko: ${request.title}`,
+          url: shareUrl,
+        });
+        setShareFeedback("Request link shared.");
+        return;
+      }
+
+      await navigator.clipboard.writeText(shareUrl);
+      setShareFeedback("Request link copied.");
+    } catch {
+      window.prompt("Copy this buy request link", shareUrl);
+      setShareFeedback("Share canceled.");
+    } finally {
+      window.setTimeout(() => setShareFeedback(""), 2500);
+    }
+  };
 
   return (
     <div className="flex-1 py-8">
@@ -334,6 +358,19 @@ const BuyerRequestDetails: React.FC = () => {
                   }`}>
                     {request.status?.charAt(0).toUpperCase() + request.status?.slice(1)}
                   </span>
+                </div>
+
+                <div className="mb-4 flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => void handleShareRequest()}
+                    className="inline-flex items-center rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    Share Request
+                  </button>
+                  {shareFeedback && (
+                    <p className="text-sm font-medium text-emerald-700">{shareFeedback}</p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 py-4 border-y border-gray-200 mb-4">
@@ -409,7 +446,11 @@ const BuyerRequestDetails: React.FC = () => {
                   </div>
                 </div>
                 {/* Call/Contact Options */}
-                {user && directContactPhone ? (
+                {!user ? (
+                  <div className="mt-4 rounded-lg border border-blue-200 bg-white/80 p-3 text-sm text-slate-600">
+                    Sign in to reveal direct contact and reply to this request.
+                  </div>
+                ) : directContactPhone ? (
                   <div className="mt-4 flex gap-2">
                     <a
                       href={`tel:${directContactPhone}`}
@@ -420,7 +461,7 @@ const BuyerRequestDetails: React.FC = () => {
                   </div>
                 ) : (
                   <div className="mt-4 rounded-lg border border-blue-200 bg-white/80 p-3 text-sm text-slate-600">
-                    Sign in to reveal direct contact and reply to this request.
+                    Buyer phone is not available yet. Use the reply form to connect.
                   </div>
                 )}
               </div>
