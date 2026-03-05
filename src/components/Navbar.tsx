@@ -13,6 +13,7 @@ import {
   LogOut,
   Heart,
   Shield,
+  Building2,
   type LucideIcon,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
@@ -34,6 +35,7 @@ type NavDropdownKey = "browse" | "sell";
 
 const shouldShowTopLevelMobileNav = (pathname: string) =>
   pathname === "/" ||
+  pathname === "/b2b" ||
   pathname === "/about" ||
   pathname === "/profile" ||
   pathname === "/messages" ||
@@ -72,6 +74,10 @@ const pathMatches = (pathname: string, key: string) => {
 
   if (key === "/about") {
     return pathname === "/about" || pathname === "/contact" || pathname === "/help";
+  }
+
+  if (key === "/b2b") {
+    return pathname === "/b2b" || pathname.startsWith("/b2b/");
   }
 
   return pathname === key;
@@ -141,6 +147,7 @@ const Navbar: React.FC = () => {
   const desktopNavItems = useMemo<NavItem[]>(() => {
     const items: NavItem[] = [
       { label: "Buy Requests", to: "/request" },
+      { label: "B2B", to: "/b2b" },
     ];
 
     if (user) {
@@ -244,7 +251,7 @@ const Navbar: React.FC = () => {
               </div>
 
               {desktopNavItems
-                .filter((item) => item.label === "Buy Requests")
+                .filter((item) => item.label === "Buy Requests" || item.label === "B2B")
                 .map((item) => {
                 const active = pathMatches(location.pathname, item.to);
                 return (
@@ -283,7 +290,7 @@ const Navbar: React.FC = () => {
               </div>
 
               {desktopNavItems
-                .filter((item) => item.label !== "Buy Requests")
+                .filter((item) => item.label !== "Buy Requests" && item.label !== "B2B")
                 .map((item) => {
                   const active = pathMatches(location.pathname, item.to);
                   return (
@@ -424,11 +431,13 @@ const Navbar: React.FC = () => {
               </div>
 
               {desktopNavItems
-                .filter((item) => item.label === "Buy Requests")
+                .filter((item) => item.label === "Buy Requests" || item.label === "B2B")
                 .map((item) => {
                 const Icon =
                   item.label === "Buy Requests"
                     ? ClipboardList
+                    : item.label === "B2B"
+                    ? Building2
                     : item.label === "Messages"
                     ? MessageSquare
                     : Info;
@@ -478,9 +487,14 @@ const Navbar: React.FC = () => {
               </div>
 
               {desktopNavItems
-                .filter((item) => item.label !== "Buy Requests")
+                .filter((item) => item.label !== "Buy Requests" && item.label !== "B2B")
                 .map((item) => {
-                  const Icon = item.label === "Messages" ? MessageSquare : Info;
+                  const Icon =
+                    item.label === "Messages"
+                      ? MessageSquare
+                      : item.label === "B2B"
+                      ? Building2
+                      : Info;
                   const active = pathMatches(location.pathname, item.to);
 
                   return (

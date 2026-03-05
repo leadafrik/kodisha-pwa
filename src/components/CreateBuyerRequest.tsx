@@ -12,7 +12,13 @@ import { validatePhone } from "../utils/formValidation";
 import { normalizeKenyanPhone } from "../utils/phone";
 
 const UNITS = ["kg", "tonnes", "bags", "units", "liters", "crates"];
-const DRAFT_STORAGE_KEY = "kodisha_buyer_request_draft_v3";
+
+type MarketType = "standard" | "b2b";
+
+const DRAFT_STORAGE_KEYS: Record<MarketType, string> = {
+  standard: "kodisha_buyer_request_draft_v3",
+  b2b: "kodisha_b2b_buyer_request_draft_v1",
+};
 
 type RequestCategory = "produce" | "livestock" | "inputs" | "service";
 type UrgencyLevel = "low" | "medium" | "high";
@@ -43,6 +49,7 @@ interface BuyerRequestFormData {
 interface CreateBuyerRequestProps {
   onSuccess?: () => void;
   onCancel?: () => void;
+  marketType?: MarketType;
 }
 
 interface DemandTemplate {
@@ -122,6 +129,65 @@ const DEMAND_TEMPLATES: DemandTemplate[] = [
     quantity: "1",
     unit: "units",
     urgency: "medium",
+  },
+];
+
+const B2B_DEMAND_TEMPLATES: DemandTemplate[] = [
+  {
+    id: "restaurant-produce",
+    label: "Restaurant Produce",
+    category: "produce",
+    title: "Need weekly produce supply for restaurant kitchens",
+    productType: "Tomatoes, onions, greens",
+    description:
+      "Seeking consistent weekly supply with clean packaging and reliable delivery windows.",
+    quantity: "500",
+    unit: "kg",
+    urgency: "high",
+    budgetMin: "85000",
+    budgetMax: "120000",
+  },
+  {
+    id: "school-cereals",
+    label: "School Cereals",
+    category: "produce",
+    title: "Need maize and beans for school term supply",
+    productType: "Dry maize and beans",
+    description:
+      "Institutional procurement for boarding school. Need verified suppliers with stable quality and delivery capacity.",
+    quantity: "120",
+    unit: "bags",
+    urgency: "medium",
+    budgetMin: "450000",
+    budgetMax: "620000",
+  },
+  {
+    id: "processor-transport",
+    label: "Processor Transport",
+    category: "service",
+    title: "Need contracted transport for produce collection",
+    productType: "5-10 ton transport service",
+    description:
+      "Looking for dependable logistics partners for recurring county-to-county produce collection.",
+    quantity: "8",
+    unit: "units",
+    urgency: "medium",
+    budgetMin: "160000",
+    budgetMax: "260000",
+  },
+  {
+    id: "bulk-inputs",
+    label: "Bulk Inputs",
+    category: "inputs",
+    title: "Need certified farm inputs for distribution",
+    productType: "Certified seeds and fertilizer",
+    description:
+      "Distributor sourcing verified input suppliers for recurring bulk orders and coordinated deliveries.",
+    quantity: "200",
+    unit: "bags",
+    urgency: "medium",
+    budgetMin: "300000",
+    budgetMax: "520000",
   },
 ];
 
@@ -220,7 +286,12 @@ const scoreToLabel = (score: number) => {
 export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
   onSuccess,
   onCancel,
+  marketType = "standard",
 }) => {
+  const activeMarketType: MarketType = marketType === "b2b" ? "b2b" : "standard";
+  const draftStorageKey = DRAFT_STORAGE_KEYS[activeMarketType];
+  const isB2B = activeMarketType === "b2b";
+  const demandTemplates = isB2B ? B2B_DEMAND_TEMPLATES : DEMAND_TEMPLATES;
   const { user, updateProfile, refreshUser } = useAuth();
   const { isCompact } = useAdaptiveLayout();
   const [step, setStep] = useState<Step>(1);
@@ -234,9 +305,9 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
   );
 
   useEffect(() => {
-    const draft = localStorage.getItem(DRAFT_STORAGE_KEY);
+    const draft = localStorage.getItem(draftStorageKey);
     setHasDraft(hasMeaningfulDraft(draft));
-  }, []);
+  }, [draftStorageKey]);
 
   useEffect(() => {
     if (!user?.phone && !user?.county) return;
@@ -279,18 +350,18 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
     );
 
     if (!shouldSave) {
-      localStorage.removeItem(DRAFT_STORAGE_KEY);
+      localStorage.removeItem(draftStorageKey);
       return;
     }
 
     localStorage.setItem(
-      DRAFT_STORAGE_KEY,
+      draftStorageKey,
       JSON.stringify({
         step,
         formData,
       })
     );
-  }, [formData, step]);
+  }, [draftStorageKey, formData, step]);
 
   const constituencies = useMemo(
     () =>
@@ -516,7 +587,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
   };
 
   const handleRestoreDraft = () => {
-    const draftRaw = localStorage.getItem(DRAFT_STORAGE_KEY);
+    const draftRaw = localStorage.getItem(draftStorageKey);
     if (!draftRaw) return;
     try {
       const parsed = JSON.parse(draftRaw) as {
@@ -569,13 +640,13 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
       setFieldErrors({});
       setHasDraft(false);
     } catch {
-      localStorage.removeItem(DRAFT_STORAGE_KEY);
+      localStorage.removeItem(draftStorageKey);
       setHasDraft(false);
     }
   };
 
   const handleDiscardDraft = () => {
-    localStorage.removeItem(DRAFT_STORAGE_KEY);
+    localStorage.removeItem(draftStorageKey);
     setHasDraft(false);
     setNotice("Draft discarded.");
     setError("");
@@ -636,6 +707,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
           : undefined;
 
       const payload = {
+        marketType: activeMarketType,
         title: formData.title.trim(),
         description: formData.description.trim(),
         category: formData.category,
@@ -668,7 +740,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
         throw new Error(responseData?.message || "Failed to create buyer request.");
       }
 
-      localStorage.removeItem(DRAFT_STORAGE_KEY);
+      localStorage.removeItem(draftStorageKey);
       setHasDraft(false);
       const normalizedContactPhone = normalizeKenyanPhone(formData.contactPhone.trim());
       if (normalizedContactPhone && normalizedContactPhone !== user?.phone) {
@@ -688,13 +760,17 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="max-w-2xl">
           <div className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-emerald-700">
-            Demand Studio
+            {isB2B ? "B2B Demand Desk" : "Demand Studio"}
           </div>
           <h2 className="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">
-            Post demand that attracts serious sellers
+            {isB2B
+              ? "Post institutional demand and collect bids fast"
+              : "Post demand that attracts serious sellers"}
           </h2>
           <p className="mt-2 text-sm text-slate-600 sm:text-base">
-            Share what you need and get matched offers quickly.
+            {isB2B
+              ? "Strictly demand-based procurement for restaurants, schools, processors, and distributors."
+              : "Share what you need and get matched offers quickly."}
           </p>
         </div>
 
@@ -813,10 +889,10 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
           <div className="space-y-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
-                Quick templates
+                {isB2B ? "B2B templates" : "Quick templates"}
               </p>
               <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
-                {DEMAND_TEMPLATES.map((template) => (
+                {demandTemplates.map((template) => (
                   <button
                     key={template.id}
                     type="button"

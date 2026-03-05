@@ -9,6 +9,7 @@ import Home from './pages/Home';
 import BrowseListings from './pages/BrowseListings';
 import Login from './pages/Login';
 import AboutUs from './pages/AboutUs';
+import B2B from './pages/B2B';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import WhatsAppFloatingButton from './components/WhatsAppFloatingButton';
@@ -69,6 +70,7 @@ const shouldPadForMobileNav = (pathname: string, signedIn: boolean) => {
 
   return (
     pathname === '/' ||
+    pathname === '/b2b' ||
     pathname === '/about' ||
     pathname === '/profile' ||
     pathname === '/messages' ||
@@ -177,6 +179,7 @@ const AppShell = () => {
               element={<BuyerRequestDetails />}
             />
             <Route path="/about" element={<AboutUs />} />
+            <Route path="/b2b" element={<B2B />} />
             <Route path="/contact" element={<AboutUs />} />
             <Route path="/help" element={<AboutUs />} />
             <Route path="/features" element={<Home />} />

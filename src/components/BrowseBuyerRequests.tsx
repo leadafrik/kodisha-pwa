@@ -28,6 +28,7 @@ interface BuyerRequest {
 
 interface BrowseBuyerRequestsProps {
   onSelectRequest?: (request: BuyerRequest) => void;
+  marketType?: "standard" | "b2b";
 }
 
 interface BuyerRequestCache {
@@ -70,7 +71,10 @@ const CATEGORY_PILL_STYLES: Record<string, string> = {
 
 export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
   onSelectRequest,
+  marketType = "standard",
 }) => {
+  const activeMarketType = marketType === "b2b" ? "b2b" : "standard";
+  const isB2B = activeMarketType === "b2b";
   const navigate = useNavigate();
   const { user } = useAuth();
   const [requests, setRequests] = useState<BuyerRequest[]>([]);
@@ -145,6 +149,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
       params.append("page", page.toString());
       params.append("limit", "12");
       params.append("status", "active"); // Only show active requests, not fulfilled
+      params.append("marketType", activeMarketType);
       if (filters.category) params.append("category", filters.category);
       if (filters.county !== "All Counties")
         params.append("county", filters.county);
@@ -189,7 +194,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [page, filters]);
+  }, [activeMarketType, page, filters]);
 
   useEffect(() => {
     fetchRequests();
@@ -364,23 +369,31 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
           <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] items-center">
             <div className="space-y-4 fade-rise">
               <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">
-                Agrisoko Demand Board
+                {isB2B ? "Agrisoko B2B Demand Board" : "Agrisoko Demand Board"}
               </p>
               <h1 className="buy-hero-title text-3xl sm:text-4xl md:text-5xl text-slate-900">
-                Find buyers ready to buy
+                {isB2B ? "Institutional demand from active buyers" : "Find buyers ready to buy"}
               </h1>
               <p className="text-base text-slate-600 max-w-xl">
-                Browse live demand and respond quickly.
+                {isB2B
+                  ? "Demand-first procurement for restaurants, schools, processors, and distributors."
+                  : "Browse live demand and respond quickly."}
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={() =>
-                    navigate(user ? "/request/new" : "/login?next=/request/new")
+                    navigate(
+                      user
+                        ? `/request/new?marketType=${activeMarketType}`
+                        : `/login?next=${encodeURIComponent(
+                            `/request/new?marketType=${activeMarketType}`
+                          )}`
+                    )
                   }
                   className="inline-flex w-full sm:w-auto justify-center items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200/60 hover:bg-emerald-700 transition"
                 >
                   <Plus size={18} />
-                  Post Demand
+                  {isB2B ? "Post B2B Demand" : "Post Demand"}
                 </button>
                 <Link
                   to="/browse"
@@ -776,8 +789,14 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
 
         <div className="mt-16 p-8 rounded-3xl bg-gradient-to-r from-white via-emerald-50 to-amber-50 border border-emerald-100">
           <div className="max-w-4xl mx-auto text-center">
-            <h3 className="text-2xl font-bold text-slate-900 mb-3">Need products instead?</h3>
-            <p className="text-slate-600 mb-6">Switch to marketplace listings and contact sellers directly.</p>
+            <h3 className="text-2xl font-bold text-slate-900 mb-3">
+              {isB2B ? "Need open marketplace offers instead?" : "Need products instead?"}
+            </h3>
+            <p className="text-slate-600 mb-6">
+              {isB2B
+                ? "Switch to live listings and contact verified sellers directly."
+                : "Switch to marketplace listings and contact sellers directly."}
+            </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 to="/browse"
