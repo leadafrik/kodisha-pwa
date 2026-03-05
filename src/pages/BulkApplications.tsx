@@ -124,9 +124,6 @@ const BulkApplications: React.FC = () => {
   const roleReviewNote =
     role === "buyer" ? status?.reviewNotes?.buyer : status?.reviewNotes?.seller;
 
-  const canPostB2B = Boolean(status?.canPostB2BDemand || status?.isAdmin);
-  const canRespondB2B = Boolean(status?.canRespondToB2BDemand || status?.isAdmin);
-
   const updateField = <K extends keyof BulkApplicationInput>(
     key: K,
     value: BulkApplicationInput[K]
@@ -262,41 +259,6 @@ const BulkApplications: React.FC = () => {
                 <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Seller status</p>
                 <p className="mt-1 text-sm font-semibold text-slate-900">{statusLabel(sellerStatus)}</p>
               </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Bulk buyer portal</p>
-              <p className="mt-1 text-sm font-semibold text-slate-900">{canPostB2B ? "Approved" : "Not approved yet"}</p>
-              <p className="mt-1 text-xs text-slate-500">Post bulk requirements and manage bids.</p>
-              <Link
-                to={canPostB2B ? "/bulk/orders/new" : "/bulk?role=buyer"}
-                className={`mt-2 inline-flex rounded-lg px-3 py-2 text-xs font-semibold ${
-                  canPostB2B
-                    ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                    : "border border-slate-300 text-slate-700 hover:bg-slate-50"
-                }`}
-              >
-                {canPostB2B ? "Post bulk order" : "Apply as buyer"}
-              </Link>
-            </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Bulk seller portal</p>
-              <p className="mt-1 text-sm font-semibold text-slate-900">{canRespondB2B ? "Approved" : "Not approved yet"}</p>
-              <p className="mt-1 text-xs text-slate-500">View bulk orders and submit bids.</p>
-              <Link
-                to={canRespondB2B ? "/bulk/seller/orders" : "/bulk?role=seller"}
-                className={`mt-2 inline-flex rounded-lg px-3 py-2 text-xs font-semibold ${
-                  canRespondB2B
-                    ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                    : "border border-slate-300 text-slate-700 hover:bg-slate-50"
-                }`}
-              >
-                {canRespondB2B ? "Open seller portal" : "Apply as seller"}
-              </Link>
             </div>
           </div>
         </section>
