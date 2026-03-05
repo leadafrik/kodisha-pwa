@@ -50,8 +50,14 @@ const AboutUs: React.FC = () => {
   const verificationCta = user ? (isFullyVerified ? 'View verification status' : 'Verify your profile') : 'Sign in to verify';
 
   useEffect(() => {
-    if (location.hash !== "#ceo-message") return;
-    const target = document.getElementById("ceo-message");
+    const targetId =
+      location.hash === "#ceo-video"
+        ? "ceo-video"
+        : location.hash === "#ceo-message"
+        ? "ceo-message"
+        : "";
+    if (!targetId) return;
+    const target = document.getElementById(targetId);
     if (!target) return;
     target.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [location.hash]);
@@ -424,7 +430,7 @@ const AboutUs: React.FC = () => {
                 </p>
               </div>
 
-              <div className="overflow-hidden rounded-2xl border border-slate-200">
+              <div id="ceo-video" className="overflow-hidden rounded-2xl border border-slate-200 scroll-mt-24">
                 <div className="relative w-full pb-[56.25%]">
                   <iframe
                     className="absolute inset-0 h-full w-full"

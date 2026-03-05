@@ -143,8 +143,8 @@ const Home: React.FC = () => {
     ? "Open your dashboard, post a listing, or browse live demand across Kenya."
     : heroDescription || "Create your free account in 10 seconds. List later.";
   const signupCtaLabel = isPhone ? "Sign Up" : "Sign Up Free";
-  const primaryCtaTo = user ? "/profile" : "/login?mode=signup&next=/browse";
-  const primaryCtaLabel = user ? "Open Dashboard" : signupCtaLabel;
+  const primaryCtaTo = user ? "/create-listing?compact=1" : "/login?mode=signup&next=/browse";
+  const primaryCtaLabel = user ? "List now" : signupCtaLabel;
   const browseTo = "/browse";
   const demandCtaTo = "/request";
   const demandCtaLabel = "View Buy Requests";
@@ -228,31 +228,37 @@ const Home: React.FC = () => {
                   </Link>
                   <Link
                     to={browseTo}
-                    className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 sm:w-auto"
+                    className={`inline-flex min-h-[46px] w-full items-center justify-center rounded-xl border bg-white px-6 py-3 text-sm font-semibold transition sm:w-auto ${
+                      user
+                        ? "border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+                        : "border-slate-300 text-slate-900 hover:bg-slate-50"
+                    }`}
                   >
                     View Listings
                   </Link>
                 </div>
-                <div className="mt-3">
-                  <Link
-                    to="/about#ceo-message"
-                    onClick={() =>
-                      trackGoogleEvent("view_ceo_message_click", {
-                        source: "home_hero",
-                      })
-                    }
-                    className="text-sm font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4 transition hover:text-slate-900"
-                  >
-                    Watch message from the CEO
-                  </Link>
-                </div>
-                <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-semibold text-slate-700 sm:text-xs">
-                  <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1">
-                    {liveListingCount.toLocaleString()} listings live
-                  </span>
-                  <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1">
-                    47 counties open
-                  </span>
+                <div className="mt-4 space-y-3">
+                  <div>
+                    <Link
+                      to="/about#ceo-video"
+                      onClick={() =>
+                        trackGoogleEvent("view_ceo_message_click", {
+                          source: "home_hero",
+                        })
+                      }
+                      className="text-sm font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4 transition hover:text-slate-900"
+                    >
+                      Watch message from the CEO
+                    </Link>
+                  </div>
+                  <div className="flex flex-wrap gap-2 text-[11px] font-semibold text-slate-700 sm:text-xs">
+                    <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1">
+                      {liveListingCount.toLocaleString()} listings live
+                    </span>
+                    <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1">
+                      47 counties open
+                    </span>
+                  </div>
                 </div>
               </div>
 
