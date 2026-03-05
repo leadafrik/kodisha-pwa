@@ -1443,7 +1443,7 @@ const ListingDetails: React.FC = () => {
                 {lastActiveLabel}
               </span>
               <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700">
-                Trust {sellerTrustScore}
+                Trust score {sellerTrustScore}
               </span>
               <span className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">
                 {sellerFollowState.followerCount} follower{sellerFollowState.followerCount === 1 ? "" : "s"}

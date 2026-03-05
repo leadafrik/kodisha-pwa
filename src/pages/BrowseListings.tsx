@@ -1254,7 +1254,7 @@ const BrowseListings: React.FC = () => {
                     <div className="flex items-center gap-2">
                       {marketTrustScore > 0 && (
                         <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
-                          Trust {marketTrustScore}
+                          Trust score {marketTrustScore}
                         </span>
                       )}
                       {card.paid && <span className="text-emerald-600">Priority</span>}
