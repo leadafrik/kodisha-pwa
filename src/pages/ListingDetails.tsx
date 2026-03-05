@@ -22,6 +22,7 @@ import {
   toggleSellerFollow,
 } from "../services/sellerFollowService";
 import { normalizeKenyanPhone } from "../utils/phone";
+import { getMarketTrustScore } from "../utils/trustScore";
 
 const GoogleMapsLoader = lazy(() => import("../components/GoogleMapsLoader"));
 const ListingMap = lazy(() => import("../components/ListingMap"));
@@ -912,6 +913,30 @@ const ListingDetails: React.FC = () => {
   const sellerReviews: SellerReview[] = Array.isArray(userRatings?.ratings) ? userRatings.ratings : [];
   const sellerPhone = normalizeKenyanPhone(listing.contact || owner.phone);
   const shareUrl = `${window.location.origin}/l/${listing._id}`;
+  const ratingAverage =
+    typeof userRatings?.aggregate?.average === "number"
+      ? userRatings.aggregate.average
+      : typeof owner?.ratings?.average === "number"
+      ? owner.ratings.average
+      : 0;
+  const ratingCount =
+    typeof userRatings?.aggregate?.count === "number"
+      ? userRatings.aggregate.count
+      : typeof owner?.ratings?.count === "number"
+      ? owner.ratings.count
+      : 0;
+  const sellerTrustScore = Math.round(
+    getMarketTrustScore({
+      isVerified: !!owner.isVerified,
+      ownerTrustScore:
+        typeof owner.trustScore === "number" ? owner.trustScore : undefined,
+      followerCount: sellerFollowState.followerCount || owner.followerCount || 0,
+      ratingAverage,
+      ratingCount,
+      createdAt: owner.createdAt,
+      responseTimeLabel: responseTimeLabel,
+    })
+  );
   const hasMapCoordinates = Boolean(coords?.lat && coords?.lng);
   const isOwnListing = !!user?._id && !!owner?._id && String(user._id) === String(owner._id);
   const publishShareFeedback = (message: string) => {
@@ -1417,6 +1442,9 @@ const ListingDetails: React.FC = () => {
               <span className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">
                 {lastActiveLabel}
               </span>
+              <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700">
+                Trust {sellerTrustScore}
+              </span>
               <span className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">
                 {sellerFollowState.followerCount} follower{sellerFollowState.followerCount === 1 ? "" : "s"}
               </span>
@@ -1430,6 +1458,11 @@ const ListingDetails: React.FC = () => {
                 {owner.isVerified ? "ID & phone verified" : "Unverified seller"}
               </span>
             </div>
+            {!owner.isVerified && (
+              <p className="mb-3 text-xs font-medium text-amber-700">
+                Verification boosts seller trust score and buyer confidence.
+              </p>
+            )}
 
             {/* Rating display */}
             {userRatings?.aggregate && userRatings.aggregate.count > 0 && (

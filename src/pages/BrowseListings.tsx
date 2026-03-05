@@ -7,6 +7,7 @@ import { kenyaCounties } from "../data/kenyaCounties";
 import { handleImageError } from "../utils/imageFallback";
 import { getOptimizedImageUrl } from "../utils/imageOptimization";
 import { normalizeKenyanPhone } from "../utils/phone";
+import { getMarketTrustScore, getTrustComponents } from "../utils/trustScore";
 import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
 import {
   Search,
@@ -47,6 +48,11 @@ type UnifiedCard = {
   createdAt?: Date;
   ownerResponseTime?: string;
   ownerLastActive?: string;
+  ownerTrustScore?: number;
+  ownerFollowerCount?: number;
+  ownerRatingAverage?: number;
+  ownerRatingCount?: number;
+  ownerCreatedAt?: Date;
   image?: string;
   deliveryScope: DeliveryScope;
 };
@@ -102,12 +108,34 @@ const getDeliveryScopeLabel = (scope: DeliveryScope) => {
   return "Delivery negotiable";
 };
 
+const toTrustInput = (item: UnifiedCard) => ({
+  isVerified: item.verified,
+  ownerTrustScore: item.ownerTrustScore,
+  followerCount: item.ownerFollowerCount,
+  ratingAverage: item.ownerRatingAverage,
+  ratingCount: item.ownerRatingCount,
+  createdAt: item.ownerCreatedAt,
+  responseTimeLabel: item.ownerResponseTime,
+});
+
 const getScore = (item: UnifiedCard) => {
-  // Sort priority: boosted first, then verified, then paid.
-  const boost = item.boosted ? 4 : 0;
-  const verified = item.verified ? 2 : 0;
-  const paid = item.paid ? 1 : 0;
-  return boost + paid + verified;
+  const marketTrustScore = getMarketTrustScore(toTrustInput(item));
+  const recency = getRecencyScore(item.createdAt) * 4;
+  const boost = item.boosted ? 28 : 0;
+  const verified = item.verified ? 16 : 0;
+  const paid = item.paid ? 8 : 0;
+  const trust = marketTrustScore * 0.6;
+
+  const responseText = (item.ownerResponseTime || "").toLowerCase();
+  const responseScore = responseText.includes("hour")
+    ? 8
+    : responseText.includes("day")
+    ? 5
+    : responseText.includes("week")
+    ? 2
+    : 3;
+
+  return boost + verified + paid + trust + recency + responseScore;
 };
 
 type SortOption = "recommended" | "newest" | "verified" | "price_low" | "price_high";
@@ -132,7 +160,28 @@ const getTopPickScore = (item: UnifiedCard, searchTerm: string) => {
       ? 1
       : 0;
 
-  return getScore(item) * 3 + getRecencyScore(item.createdAt) + exactTitleMatch + textMatch;
+  return getScore(item) + exactTitleMatch * 6 + textMatch * 3;
+};
+
+const getRankingReason = (item: UnifiedCard) => {
+  const reasons: string[] = [];
+  const trust = getTrustComponents(toTrustInput(item));
+  const trustScore = trust.total;
+  const followers = trust.followers;
+  const reviews = trust.ratingCount;
+  const tenureMonths = trust.monthsOnPlatform;
+
+  if (trustScore >= 75) reasons.push("high trust score");
+  else if (trustScore >= 60) reasons.push("trusted profile");
+  if (followers >= 10) reasons.push(`${followers}+ followers`);
+  if (reviews >= 3) reasons.push("strong reviews");
+  if (tenureMonths >= 3) reasons.push("time on platform");
+  if (item.verified) reasons.push("verified seller");
+  if (!item.verified) reasons.push("verify profile for trust boost");
+  if (item.boosted) reasons.push("boosted visibility");
+  if (getRecencyScore(item.createdAt) >= 2) reasons.push("recent activity");
+
+  return reasons.slice(0, 2).join(" + ") || "active listing";
 };
 
 const ROUTE_CATEGORY_MAP: Record<string, Category> = {
@@ -297,6 +346,15 @@ const BrowseListings: React.FC = () => {
           contact: p.contact || p.owner?.phone || p.owner?.email,
           ownerResponseTime,
           ownerLastActive: ownerLastActive ? formatLastActive(ownerLastActive) : undefined,
+          ownerTrustScore:
+            typeof p.owner?.trustScore === "number" ? p.owner.trustScore : undefined,
+          ownerFollowerCount:
+            typeof p.owner?.followerCount === "number" ? p.owner.followerCount : 0,
+          ownerRatingAverage:
+            typeof p.owner?.ratings?.average === "number" ? p.owner.ratings.average : undefined,
+          ownerRatingCount:
+            typeof p.owner?.ratings?.count === "number" ? p.owner.ratings.count : undefined,
+          ownerCreatedAt: p.owner?.createdAt ? new Date(p.owner.createdAt) : undefined,
           deliveryScope: normalizeDeliveryScope(p.deliveryScope),
         } as UnifiedCard;
       }) || [];
@@ -341,6 +399,15 @@ const BrowseListings: React.FC = () => {
           contact: s.contact || s.owner?.phone || s.owner?.email,
           ownerResponseTime,
           ownerLastActive: ownerLastActive ? formatLastActive(ownerLastActive) : undefined,
+          ownerTrustScore:
+            typeof s.owner?.trustScore === "number" ? s.owner.trustScore : undefined,
+          ownerFollowerCount:
+            typeof s.owner?.followerCount === "number" ? s.owner.followerCount : 0,
+          ownerRatingAverage:
+            typeof s.owner?.ratings?.average === "number" ? s.owner.ratings.average : undefined,
+          ownerRatingCount:
+            typeof s.owner?.ratings?.count === "number" ? s.owner.ratings.count : undefined,
+          ownerCreatedAt: s.owner?.createdAt ? new Date(s.owner.createdAt) : undefined,
           deliveryScope: normalizeDeliveryScope(s.deliveryScope),
         } as UnifiedCard;
       }) || [];
@@ -1119,6 +1186,7 @@ const BrowseListings: React.FC = () => {
               saves: 0,
               reachOuts: 0,
             };
+            const marketTrustScore = Math.round(getMarketTrustScore(toTrustInput(card)));
             const categoryColors: Record<Category, string> = {
               all: "bg-slate-100 text-slate-700",
               produce: "bg-orange-50 text-orange-700",
@@ -1183,7 +1251,14 @@ const BrowseListings: React.FC = () => {
                     <span className={`rounded-full px-3 py-1 ${badgeColor}`}>
                       {card.typeLabel}
                     </span>
-                    {card.paid && <span className="text-emerald-600">Priority</span>}
+                    <div className="flex items-center gap-2">
+                      {marketTrustScore > 0 && (
+                        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
+                          Trust {marketTrustScore}
+                        </span>
+                      )}
+                      {card.paid && <span className="text-emerald-600">Priority</span>}
+                    </div>
                   </div>
 
                   <h3 className="text-lg font-semibold text-slate-900 line-clamp-2 leading-tight">
@@ -1229,6 +1304,11 @@ const BrowseListings: React.FC = () => {
                         {engagement.reachOuts} reach-outs
                       </span>
                     </div>
+                    {sortBy === "recommended" && (
+                      <p className="mt-2 text-[11px] font-semibold text-emerald-700">
+                        Ranked for: {getRankingReason(card)}
+                      </p>
+                    )}
                   </div>
 
                   <div className="mt-3 flex gap-2">

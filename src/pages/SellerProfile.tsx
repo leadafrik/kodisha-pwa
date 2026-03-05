@@ -18,6 +18,7 @@ import {
   getSellerFollowStatus,
   toggleSellerFollow,
 } from "../services/sellerFollowService";
+import { getMarketTrustScore } from "../utils/trustScore";
 
 const SellerProfile: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -133,6 +134,23 @@ const SellerProfile: React.FC = () => {
   const locationParts = [seller.county, seller.constituency, seller.ward].filter(Boolean);
   const hasListings = sellerListings.length > 0;
   const isOwnProfile = !!user?._id && !!userId && String(user._id) === userId;
+  const sellerTrustScore = Math.round(
+    getMarketTrustScore({
+      isVerified: !!seller.isVerified,
+      ownerTrustScore:
+        typeof seller.trustScore === "number" ? seller.trustScore : undefined,
+      followerCount:
+        typeof followState.followerCount === "number"
+          ? followState.followerCount
+          : seller.followerCount || 0,
+      ratingAverage:
+        typeof seller.ratings?.average === "number" ? seller.ratings.average : 0,
+      ratingCount:
+        typeof seller.ratings?.count === "number" ? seller.ratings.count : 0,
+      createdAt: seller.createdAt,
+      responseTimeLabel: "Responds within a day",
+    })
+  );
 
   const handleToggleFollow = async () => {
     if (!userId || isOwnProfile) return;
@@ -218,6 +236,14 @@ const SellerProfile: React.FC = () => {
               <p className="mt-3 text-sm font-semibold text-slate-500">
                 {followState.followerCount} follower{followState.followerCount === 1 ? "" : "s"}
               </p>
+              <p className="mt-1 text-sm font-semibold text-emerald-700">
+                Trust score: {sellerTrustScore}
+              </p>
+              {!seller.isVerified && (
+                <p className="mt-1 text-xs font-medium text-amber-700">
+                  Verification boosts your trust score and buyer confidence.
+                </p>
+              )}
             </div>
           </div>
 
