@@ -5,9 +5,9 @@ import { useAuth } from "../contexts/AuthContext";
 
 const B2B: React.FC = () => {
   const { user } = useAuth();
-  const postDemandLink = user
-    ? "/request/new?marketType=b2b"
-    : `/login?mode=signup&next=${encodeURIComponent("/request/new?marketType=b2b")}`;
+  const applyLink = user
+    ? "/bulk"
+    : `/login?mode=signup&next=${encodeURIComponent("/bulk")}`;
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
@@ -26,16 +26,16 @@ const B2B: React.FC = () => {
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <Link
-              to={postDemandLink}
+              to={applyLink}
               className="inline-flex min-h-[46px] items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
             >
-              Post B2B demand
+              Apply for bulk access
             </Link>
             <Link
-              to="/request?marketType=b2b"
+              to={user ? "/bulk/orders" : "/bulk"}
               className="inline-flex min-h-[46px] items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
             >
-              View B2B demand
+              Open bulk order board
             </Link>
           </div>
         </div>

@@ -1,12 +1,47 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import CreateBuyerRequest from "../components/CreateBuyerRequest";
+import { useAuth } from "../contexts/AuthContext";
+import { getMyBulkAccessStatus } from "../services/bulkApplicationsService";
 
 const PostBuyRequest: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
   const marketType = new URLSearchParams(location.search).get("marketType") === "b2b" ? "b2b" : "standard";
   const isB2B = marketType === "b2b";
+  const [accessLoading, setAccessLoading] = useState(isB2B);
+  const [hasBulkBuyerAccess, setHasBulkBuyerAccess] = useState(!isB2B);
+  const [accessError, setAccessError] = useState("");
+
+  useEffect(() => {
+    if (!isB2B || !user) {
+      setAccessLoading(false);
+      setHasBulkBuyerAccess(true);
+      return;
+    }
+
+    let active = true;
+    setAccessLoading(true);
+    setAccessError("");
+    getMyBulkAccessStatus()
+      .then((status) => {
+        if (!active) return;
+        setHasBulkBuyerAccess(Boolean(status?.canPostB2BDemand || status?.isAdmin));
+      })
+      .catch((err: any) => {
+        if (!active) return;
+        setHasBulkBuyerAccess(false);
+        setAccessError(err?.message || "Unable to verify bulk buyer access.");
+      })
+      .finally(() => {
+        if (active) setAccessLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [isB2B, user]);
 
   const handleSuccess = () => {
     // Show success and redirect to browse requests
@@ -22,6 +57,28 @@ const PostBuyRequest: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-slate-50 py-10">
       <div className="mx-auto max-w-4xl px-4">
+        {accessLoading && (
+          <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600 shadow-sm">
+            Checking bulk buyer access...
+          </div>
+        )}
+
+        {!accessLoading && isB2B && !hasBulkBuyerAccess && (
+          <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-900 shadow-sm">
+            <p className="text-sm font-semibold">Bulk buyer approval required before posting B2B demand.</p>
+            {accessError && <p className="mt-1 text-xs">{accessError}</p>}
+            <button
+              type="button"
+              onClick={() => navigate("/bulk?role=buyer")}
+              className="mt-3 inline-flex rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700"
+            >
+              Apply as bulk buyer
+            </button>
+          </div>
+        )}
+
+        {!accessLoading && (!isB2B || hasBulkBuyerAccess) && (
+          <>
         <div className="mb-4 flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
             {isB2B ? "Institutional demand" : "Clear request"}
@@ -39,6 +96,8 @@ const PostBuyRequest: React.FC = () => {
           onCancel={handleCancel}
           marketType={marketType}
         />
+          </>
+        )}
       </div>
     </div>
   );

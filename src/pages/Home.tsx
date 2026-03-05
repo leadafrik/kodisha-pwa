@@ -13,7 +13,7 @@ import { useProperties } from "../contexts/PropertyContext";
 import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
 import { usePageContent } from "../hooks/usePageContent";
 import {
-  BULK_BUYING_CUSTOMERS_LINK_VISIBLE,
+  BULK_HOME_LINK_VISIBLE,
   PAYMENTS_ENABLED,
 } from "../config/featureFlags";
 import { trackGoogleEvent } from "../utils/cookieConsent";
@@ -254,10 +254,10 @@ const Home: React.FC = () => {
                       Watch message from the CEO
                     </Link>
                   </div>
-                  {BULK_BUYING_CUSTOMERS_LINK_VISIBLE && (
+                  {BULK_HOME_LINK_VISIBLE && (
                     <div>
                       <Link
-                        to="/b2b"
+                        to="/bulk"
                         className="text-sm font-semibold text-emerald-700 underline decoration-emerald-200 underline-offset-4 transition hover:text-emerald-800"
                       >
                         Explore bulk buying customers

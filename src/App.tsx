@@ -49,6 +49,13 @@ const AdminIDVerification = lazy(() => import('./pages/AdminIDVerification'));
 const AdminContentEditor = lazy(() => import('./pages/admin/AdminContentEditor'));
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
 const SellerProfile = lazy(() => import('./pages/SellerProfile'));
+const BulkApplications = lazy(() => import('./pages/BulkApplications'));
+const AdminBulkApplications = lazy(() => import('./pages/admin/BulkApplications'));
+const BulkOrdersBoard = lazy(() => import('./pages/BulkOrdersBoard'));
+const BulkOrderCreate = lazy(() => import('./pages/BulkOrderCreate'));
+const BulkOrderDetails = lazy(() => import('./pages/BulkOrderDetails'));
+const BulkSellerOrders = lazy(() => import('./pages/BulkSellerOrders'));
+const AdminBulkOrders = lazy(() => import('./pages/admin/BulkOrders'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -71,12 +78,14 @@ const shouldPadForMobileNav = (pathname: string, signedIn: boolean) => {
   return (
     pathname === '/' ||
     pathname === '/b2b' ||
+    pathname === '/bulk' ||
     pathname === '/about' ||
     pathname === '/profile' ||
     pathname === '/messages' ||
     pathname === '/favorites' ||
     pathname === '/request' ||
     pathname.startsWith('/browse') ||
+    pathname.startsWith('/bulk/') ||
     pathname.startsWith('/seller/') ||
     pathname.startsWith('/sellers/')
   );
@@ -180,6 +189,41 @@ const AppShell = () => {
             />
             <Route path="/about" element={<AboutUs />} />
             <Route path="/b2b" element={<B2B />} />
+            <Route path="/bulk" element={<BulkApplications />} />
+            <Route path="/bulk-buyer" element={<Navigate to="/bulk?role=buyer" replace />} />
+            <Route path="/bulk-seller" element={<Navigate to="/bulk?role=seller" replace />} />
+            <Route
+              path="/bulk/orders"
+              element={
+                <ProtectedRoute>
+                  <BulkOrdersBoard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/bulk/orders/new"
+              element={
+                <ProtectedRoute>
+                  <BulkOrderCreate />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/bulk/orders/:id"
+              element={
+                <ProtectedRoute>
+                  <BulkOrderDetails />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/bulk/seller/orders"
+              element={
+                <ProtectedRoute>
+                  <BulkSellerOrders />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/contact" element={<AboutUs />} />
             <Route path="/help" element={<AboutUs />} />
             <Route path="/features" element={<Home />} />
@@ -246,6 +290,8 @@ const AppShell = () => {
             <Route path="/admin/content-editor" element={<ProtectedRoute><AdminContentEditor /></ProtectedRoute>} />
             <Route path="/admin/listing-management" element={<ProtectedRoute><ListingManagement /></ProtectedRoute>} />
             <Route path="/admin/analytics" element={<ProtectedRoute><AnalyticsReports /></ProtectedRoute>} />
+            <Route path="/admin/bulk-applications" element={<ProtectedRoute><AdminBulkApplications /></ProtectedRoute>} />
+            <Route path="/admin/bulk-orders" element={<ProtectedRoute><AdminBulkOrders /></ProtectedRoute>} />
             <Route path="/legal/terms" element={<TermsOfService />} />
             <Route path="/legal/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfService />} />

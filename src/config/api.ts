@@ -124,6 +124,34 @@ export const API_ENDPOINTS = {
   raffle: {
     me: `${API_BASE_URL}/raffle/me`,
   },
+  bulkApplications: {
+    apply: `${API_BASE_URL}/bulk-applications/apply`,
+    myStatus: `${API_BASE_URL}/bulk-applications/me/status`,
+    admin: {
+      list: `${API_BASE_URL}/admin/bulk-applications`,
+      approve: (id: string) => `${API_BASE_URL}/admin/bulk-applications/${id}/approve`,
+      reject: (id: string) => `${API_BASE_URL}/admin/bulk-applications/${id}/reject`,
+    },
+  },
+  bulkOrders: {
+    list: `${API_BASE_URL}/bulk-orders`,
+    create: `${API_BASE_URL}/bulk-orders`,
+    sellerAwarded: `${API_BASE_URL}/bulk-orders/seller/awarded`,
+    getById: (id: string) => `${API_BASE_URL}/bulk-orders/${id}`,
+    acceptOrder: (id: string) => `${API_BASE_URL}/bulk-orders/${id}/accept-order`,
+    invoice: (id: string) => `${API_BASE_URL}/bulk-orders/${id}/invoice`,
+    close: (id: string) => `${API_BASE_URL}/bulk-orders/${id}/close`,
+    bids: {
+      create: (orderId: string) => `${API_BASE_URL}/bulk-orders/${orderId}/bids`,
+      accept: (orderId: string, bidId: string) =>
+        `${API_BASE_URL}/bulk-orders/${orderId}/bids/${bidId}/accept`,
+      reject: (orderId: string, bidId: string) =>
+        `${API_BASE_URL}/bulk-orders/${orderId}/bids/${bidId}/reject`,
+    },
+    admin: {
+      list: `${API_BASE_URL}/admin/bulk-orders`,
+    },
+  },
   messages: {
     send: `${API_BASE_URL}/messages`,
     threads: `${API_BASE_URL}/messages/threads`,

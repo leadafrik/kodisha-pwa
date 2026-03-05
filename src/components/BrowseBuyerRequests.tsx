@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { MapPin, TrendingUp, AlertCircle, Plus, Clock3 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
-import { API_BASE_URL } from "../config/api";
+import { API_BASE_URL, ensureValidAccessToken } from "../config/api";
 import { kenyaCounties } from "../data/kenyaCounties";
 
 interface BuyerRequest {
@@ -80,6 +80,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
   const [requests, setRequests] = useState<BuyerRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [bulkAccessRequired, setBulkAccessRequired] = useState(false);
 
   const [filters, setFilters] = useState({
     category: "",
@@ -128,6 +129,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
   const fetchRequests = useCallback(async () => {
     setLoading(true);
     setError("");
+    setBulkAccessRequired(false);
 
     const cached = getCachedRequests();
 
@@ -155,16 +157,32 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
         params.append("county", filters.county);
       if (filters.urgency) params.append("urgency", filters.urgency);
 
-      const response = await fetch(
-        `${API_BASE_URL}/buyer-requests?${params}`
-      );
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch buyer requests: ${response.status} ${response.statusText}`);
+      const token = isB2B ? await ensureValidAccessToken() : null;
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
       }
 
-      const data = await response.json();
-      
+      const response = await fetch(
+        `${API_BASE_URL}/buyer-requests?${params}`,
+        {
+          headers,
+          credentials: "include",
+        }
+      );
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        if (isB2B && (response.status === 401 || response.status === 403)) {
+          setBulkAccessRequired(true);
+        }
+        throw new Error(
+          data?.message ||
+            `Failed to fetch buyer requests: ${response.status} ${response.statusText}`
+        );
+      }
+
       // Validate API response structure
       if (!data.success) {
         throw new Error(data.message || "API returned unsuccessful response");
@@ -194,7 +212,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [activeMarketType, page, filters]);
+  }, [activeMarketType, filters, isB2B, page]);
 
   useEffect(() => {
     fetchRequests();
@@ -563,6 +581,25 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
             >
               Retry
             </button>
+          </div>
+        )}
+
+        {bulkAccessRequired && isB2B && (
+          <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-amber-900">
+            <p className="text-sm font-semibold">
+              Bulk demand access requires approval first.
+            </p>
+            <p className="mt-1 text-xs">
+              Apply as a bulk buyer or seller, then return after admin approval.
+            </p>
+            <div className="mt-3">
+              <Link
+                to={user ? "/bulk" : "/login?mode=signup&next=/bulk"}
+                className="inline-flex rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700"
+              >
+                Open bulk application
+              </Link>
+            </div>
           </div>
         )}
 

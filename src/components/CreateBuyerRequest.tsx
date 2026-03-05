@@ -69,6 +69,7 @@ interface DemandTemplate {
 interface StepErrors {
   title?: string;
   description?: string;
+  productType?: string;
   quantity?: string;
   budget?: string;
   county?: string;
@@ -491,6 +492,10 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
       } else if (formData.title.trim().length < 6) {
         nextErrors.title = "Title should be at least 6 characters.";
       }
+
+      if (isB2B && !formData.productType.trim()) {
+        nextErrors.productType = "Item or service type is required for B2B demand.";
+      }
     }
 
     if (targetStep === 2) {
@@ -500,7 +505,9 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
         nextErrors.description = "Add a bit more detail so sellers can quote accurately.";
       }
 
-      if (formData.quantity.trim()) {
+      if (isB2B && !formData.quantity.trim()) {
+        nextErrors.quantity = "Quantity is required for B2B demand.";
+      } else if (formData.quantity.trim()) {
         const quantityValue = Number(formData.quantity);
         if (!Number.isFinite(quantityValue) || quantityValue <= 0) {
           nextErrors.quantity = "Quantity must be greater than zero.";
@@ -525,6 +532,12 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
         maxValue < minValue
       ) {
         nextErrors.budget = "Max budget must be greater than min budget.";
+      } else if (
+        isB2B &&
+        minValue === undefined &&
+        maxValue === undefined
+      ) {
+        nextErrors.budget = "Budget is required for B2B demand.";
       }
     }
 
@@ -984,7 +997,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-slate-800">
-                  Product / service type
+                  Product / service type {isB2B ? "*" : ""}
                 </label>
                 <input
                   type="text"
@@ -992,10 +1005,12 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                   value={formData.productType}
                   onChange={(e) => setTopLevelField("productType", e.target.value)}
                   placeholder={selectedCategoryMeta.typePlaceholder}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-200"
+                  className={`w-full rounded-xl border bg-slate-50/70 px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-200 ${
+                    fieldErrors.productType ? "border-red-300" : "border-slate-200"
+                  }`}
                 />
-                <p className="mt-1 text-xs text-slate-500">
-                  Short and specific is best.
+                <p className={`mt-1 text-xs ${fieldErrors.productType ? "text-red-600" : "text-slate-500"}`}>
+                  {fieldErrors.productType || "Short and specific is best."}
                 </p>
               </div>
             </div>
@@ -1035,7 +1050,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
             <div className="grid gap-4 md:grid-cols-[1fr_180px_1fr]">
               <div>
                 <label className="mb-2 block text-sm font-semibold text-slate-800">
-                  Quantity
+                  Quantity {isB2B ? "*" : ""}
                 </label>
                 <input
                   type="text"
@@ -1085,7 +1100,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <div className="flex items-center justify-between gap-2">
                 <h3 className="text-sm font-semibold text-slate-800">Budget range</h3>
-                <span className="text-xs text-slate-500">Optional</span>
+                <span className="text-xs text-slate-500">{isB2B ? "Required" : "Optional"}</span>
               </div>
               <div className="mt-3 grid gap-4 md:grid-cols-2">
                 <div>

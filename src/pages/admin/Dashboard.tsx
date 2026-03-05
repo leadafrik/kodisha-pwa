@@ -9,6 +9,7 @@ import {
   Lock,
   FileEdit,
   RefreshCw,
+  Building2,
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { adminApiRequest } from "../../config/api";
@@ -367,6 +368,52 @@ const AdminDashboard: React.FC = () => {
                   <li>- Review pending listings</li>
                   <li>- Maintain active inventory</li>
                   <li>- Remove violations fast</li>
+                </ul>
+              </Link>
+
+              <Link
+                to="/admin/bulk-applications"
+                className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="h-12 w-12 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center">
+                    <Building2 size={24} />
+                  </div>
+                  <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
+                    B2B
+                  </span>
+                </div>
+                <h3 className="mt-4 text-xl font-semibold text-slate-900">Bulk Applications</h3>
+                <p className="mt-2 text-sm text-slate-600">
+                  Review bulk buyer and seller applications before granting portal access.
+                </p>
+                <ul className="mt-4 space-y-2 text-sm text-slate-600">
+                  <li>- Buyer/seller role approval</li>
+                  <li>- Institution readiness checks</li>
+                  <li>- Approval and rejection notes</li>
+                </ul>
+              </Link>
+
+              <Link
+                to="/admin/bulk-orders"
+                className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="h-12 w-12 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center">
+                    <BarChart3 size={24} />
+                  </div>
+                  <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
+                    B2B
+                  </span>
+                </div>
+                <h3 className="mt-4 text-xl font-semibold text-slate-900">Bulk Orders</h3>
+                <p className="mt-2 text-sm text-slate-600">
+                  Track demand, bid volume, and award status for institutional trade.
+                </p>
+                <ul className="mt-4 space-y-2 text-sm text-slate-600">
+                  <li>- Open vs awarded order tracking</li>
+                  <li>- Bid counts by order</li>
+                  <li>- Buyer and county activity</li>
                 </ul>
               </Link>
 
