@@ -1137,15 +1137,15 @@ const BrowseListings: React.FC = () => {
                     </div>
 
                     <div className="grid grid-cols-3 gap-1.5 border-t border-slate-100 pt-2.5 text-[10px] font-semibold text-slate-600 lg:text-[9px]">
-                      <span className="inline-flex items-center justify-center gap-1 rounded-lg bg-slate-50 px-2 py-1.5 lg:px-1.5 lg:gap-0.5">
+                      <span className="inline-flex items-center justify-center gap-1 rounded-lg bg-slate-50 px-2 py-1.5 lg:px-1.5 lg:gap-0.5 whitespace-nowrap">
                         <Eye className="h-3.5 w-3.5 text-slate-400" />
                         {card.engagement.views} views
                       </span>
-                      <span className="inline-flex items-center justify-center gap-1 rounded-lg bg-slate-50 px-2 py-1.5 lg:px-1.5 lg:gap-0.5">
+                      <span className="inline-flex items-center justify-center gap-1 rounded-lg bg-slate-50 px-2 py-1.5 lg:px-1.5 lg:gap-0.5 whitespace-nowrap">
                         <Bookmark className="h-3.5 w-3.5 text-slate-400" />
                         {card.engagement.saves} saves
                       </span>
-                      <span className="inline-flex items-center justify-center gap-1 rounded-lg bg-slate-50 px-2 py-1.5 lg:px-1.5 lg:gap-0.5">
+                      <span className="inline-flex items-center justify-center gap-1 rounded-lg bg-slate-50 px-2 py-1.5 lg:px-1.5 lg:gap-0.5 whitespace-nowrap text-[9px] lg:text-[8px]">
                         <MessageCircle className="h-3.5 w-3.5 text-slate-400" />
                         {card.engagement.recentInquiries} reach-outs
                       </span>
@@ -1278,7 +1278,7 @@ const BrowseListings: React.FC = () => {
                         <Bookmark className="h-3.5 w-3.5 text-slate-400" />
                         {engagement.saves} saves
                       </span>
-                      <span className="inline-flex items-center gap-1">
+                      <span className="inline-flex items-center gap-1 whitespace-nowrap">
                         <MessageCircle className="h-3.5 w-3.5 text-slate-400" />
                         {engagement.reachOuts} reach-outs
                       </span>
