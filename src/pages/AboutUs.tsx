@@ -49,6 +49,15 @@ const AboutUs: React.FC = () => {
   const verificationLink = user ? (isFullyVerified ? '/profile' : '/verify-id') : '/login';
   const verificationCta = user ? (isFullyVerified ? 'View verification status' : 'Verify your profile') : 'Sign in to verify';
 
+  const handleLeaderImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = event.currentTarget;
+    img.onerror = null;
+    img.src = "/logo192.png";
+    img.style.objectFit = "contain";
+    img.style.backgroundColor = "#f8fafc";
+    img.style.padding = "20px";
+  };
+
   useEffect(() => {
     const targetId =
       location.hash === "#ceo-video"
@@ -363,6 +372,8 @@ const AboutUs: React.FC = () => {
                   alt={`${founderName} - Founder of Agrisoko`}
                   className="w-full rounded-2xl object-cover shadow-sm"
                   loading="lazy"
+                  decoding="async"
+                  onError={handleLeaderImageError}
                 />
               </div>
               <div>
@@ -467,6 +478,8 @@ const AboutUs: React.FC = () => {
                   alt={`${cooName} - ${cooTitle} at Agrisoko`}
                   className="w-full rounded-2xl object-cover shadow-sm"
                   loading="lazy"
+                  decoding="async"
+                  onError={handleLeaderImageError}
                 />
               </div>
               <div>
@@ -515,6 +528,8 @@ const AboutUs: React.FC = () => {
                   alt={`${chiefOfStaffName} - ${chiefOfStaffTitle} at Agrisoko`}
                   className="w-full rounded-2xl object-cover shadow-sm"
                   loading="lazy"
+                  decoding="async"
+                  onError={handleLeaderImageError}
                 />
               </div>
               <div>
@@ -563,6 +578,8 @@ const AboutUs: React.FC = () => {
                   alt={`${cmoName} - ${cmoTitle} at Agrisoko`}
                   className="w-full rounded-2xl object-cover shadow-sm"
                   loading="lazy"
+                  decoding="async"
+                  onError={handleLeaderImageError}
                 />
               </div>
               <div>
@@ -611,6 +628,8 @@ const AboutUs: React.FC = () => {
                   alt={`${fieldOpsLeadName} - ${fieldOpsLeadTitle} at Agrisoko`}
                   className="w-full rounded-2xl object-cover shadow-sm"
                   loading="lazy"
+                  decoding="async"
+                  onError={handleLeaderImageError}
                 />
               </div>
               <div>

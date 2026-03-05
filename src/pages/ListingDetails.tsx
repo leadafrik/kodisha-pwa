@@ -152,17 +152,26 @@ const fetchLegacyListingFallback = async (id: string) => {
     { url: API_ENDPOINTS.services.agrovets.list, listingType: "agrovet" },
   ];
 
-  for (const source of sources) {
-    const items = await fetchPublicCollection(source.url);
-    const match = items.find((item: any) => {
-      const candidateId = item?._id?.toString?.() || item?.id?.toString?.() || String(item?._id || item?.id || "");
+  const collections = await Promise.all(
+    sources.map(async (source) => ({
+      listingType: source.listingType,
+      items: await fetchPublicCollection(source.url),
+    }))
+  );
+
+  for (const collection of collections) {
+    const match = collection.items.find((item: any) => {
+      const candidateId =
+        item?._id?.toString?.() ||
+        item?.id?.toString?.() ||
+        String(item?._id || item?.id || "");
       return candidateId === id;
     });
 
     if (match) {
       return normalizeListingForView({
         ...match,
-        listingType: source.listingType,
+        listingType: collection.listingType,
       });
     }
   }
@@ -480,9 +489,17 @@ const ListingDetails: React.FC = () => {
         setLoading(false);
         return;
       }
-      const res = await fetch(`${API_BASE_URL}/unified-listings/${id}`, {
-        cache: "no-store",
-      });
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 8000);
+      let res: Response;
+      try {
+        res = await fetch(`${API_BASE_URL}/unified-listings/${id}`, {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+      } finally {
+        window.clearTimeout(timeout);
+      }
       if (!res.ok) {
         console.error('Listing fetch failed with status:', res.status);
         const fallbackListing = await fetchLegacyListingFallback(id as string);
