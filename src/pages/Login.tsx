@@ -490,18 +490,16 @@ const Login: React.FC = () => {
   const renderSignup = () => (
     <>
     <form onSubmit={handleSignupSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <p className="text-center text-xs font-semibold text-gray-500 uppercase tracking-widest">
-          Fastest signup
+      <div className="space-y-3 rounded-2xl border border-emerald-100 bg-emerald-50/70 px-4 py-3">
+        <p className="text-center text-xs font-semibold text-emerald-700 uppercase tracking-widest">
+          Quick signup
         </p>
-        <p className="text-center text-xs text-gray-500">
-          Tap Google, Facebook, or email. Required consent is captured in one step.
+        <p className="text-center text-sm text-emerald-900">
+          Choose Google, Facebook, or email. Required consent is captured in one step.
         </p>
-        {!requiredSignupConsentsAccepted && (
-          <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
-            Social signup opens a consent checklist first so users do not hit a dead end.
-          </div>
-        )}
+        <p className="text-center text-xs text-emerald-700/90">
+          You can continue immediately after ticking the required boxes.
+        </p>
         <GoogleLoginButton
           legalConsents={signupConsents}
           onSuccess={() => {
