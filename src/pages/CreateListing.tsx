@@ -14,6 +14,7 @@ type ProduceSubcategory = "crops" | "fruits" | "vegetables" | "grains" | "other"
 type LivestockSubcategory = "cattle" | "poultry" | "goats" | "pigs" | "sheep" | "other";
 type InputsSubcategory = "fertilizer" | "pesticides" | "seeds" | "tools" | "equipment" | "feeds" | "other";
 type ServiceSubcategory = "equipment_rental" | "consulting" | "labor" | "transportation" | "processing" | "other";
+type DeliveryScope = "countrywide" | "within_county" | "negotiable";
 
 interface ListingFormData {
   step: number;
@@ -30,6 +31,7 @@ interface ListingFormData {
   quantity: string;
   unit: string;
   availableFrom: string;
+  deliveryScope: DeliveryScope;
   images: File[];
   contact: string;
   subscribed: boolean;
@@ -40,6 +42,16 @@ const PRODUCE_SUBCATEGORIES: ProduceSubcategory[] = ["crops", "fruits", "vegetab
 const LIVESTOCK_SUBCATEGORIES: LivestockSubcategory[] = ["cattle", "poultry", "goats", "pigs", "sheep", "other"];
 const INPUTS_SUBCATEGORIES: InputsSubcategory[] = ["fertilizer", "pesticides", "seeds", "tools", "equipment", "feeds", "other"];
 const SERVICE_SUBCATEGORIES: ServiceSubcategory[] = ["equipment_rental", "consulting", "labor", "transportation", "processing", "other"];
+const DELIVERY_SCOPE_OPTIONS: Array<{ value: DeliveryScope; label: string; helper: string }> = [
+  { value: "countrywide", label: "Countrywide", helper: "I can deliver across Kenya." },
+  { value: "within_county", label: "Within county", helper: "Delivery is available only in my county." },
+  { value: "negotiable", label: "Negotiable", helper: "Delivery can be discussed with buyer." },
+];
+const DELIVERY_SCOPE_LABELS: Record<DeliveryScope, string> = {
+  countrywide: "Countrywide",
+  within_county: "Within county",
+  negotiable: "Negotiable",
+};
 
 const UNITS = ["kg", "bag", "ton", "bunch", "dozen", "piece", "liter", "gallon", "box", "crate"];
 const RECOMMENDED_UNIT_BY_CATEGORY: Record<ListingCategory, string> = {
@@ -100,6 +112,7 @@ const CreateListing: React.FC = () => {
     quantity: "",
     unit: "kg",
     availableFrom: "",
+    deliveryScope: "negotiable",
     images: [],
     contact: user?.phone || "",
     subscribed: false,
@@ -446,6 +459,7 @@ const CreateListing: React.FC = () => {
       formData.append("ward", form.ward);
       formData.append("approximateLocation", form.approximateLocation.trim());
       formData.append("availableFrom", form.availableFrom);
+      formData.append("deliveryScope", form.deliveryScope);
       formData.append("contact", form.contact.trim());
       formData.append("subscriptionActive", form.subscribed ? "true" : "false");
       formData.append("premiumBadge", form.premiumBadge ? "true" : "false");
@@ -986,6 +1000,36 @@ const CreateListing: React.FC = () => {
                 {/* Available From */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    Delivery scope
+                  </label>
+                  <select
+                    value={form.deliveryScope}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        deliveryScope: e.target.value as DeliveryScope,
+                      }))
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  >
+                    {DELIVERY_SCOPE_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1 text-xs text-gray-600">
+                    {
+                      DELIVERY_SCOPE_OPTIONS.find((option) => option.value === form.deliveryScope)
+                        ?.helper
+                    }{" "}
+                    This appears as a delivery tag on your listing.
+                  </p>
+                </div>
+
+                {/* Available From */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
                     <Calendar className="w-4 h-4 inline mr-2" />
                     Available From (Optional)
                   </label>
@@ -1194,6 +1238,12 @@ const CreateListing: React.FC = () => {
                       </span>
                     </p>
                   )}
+                  <p>
+                    <span className="text-gray-600">Delivery:</span>
+                    <span className="font-semibold text-gray-900 ml-2">
+                      {DELIVERY_SCOPE_LABELS[form.deliveryScope]}
+                    </span>
+                  </p>
                   <p>
                     <span className="text-gray-600">Images:</span>
                     <span className="font-semibold text-gray-900 ml-2">{form.images.length} uploaded</span>

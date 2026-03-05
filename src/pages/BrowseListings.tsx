@@ -8,11 +8,22 @@ import { handleImageError } from "../utils/imageFallback";
 import { getOptimizedImageUrl } from "../utils/imageOptimization";
 import { normalizeKenyanPhone } from "../utils/phone";
 import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
-import { Search, Filter, ChevronDown, ChevronUp, Sparkles, Eye, Bookmark, MessageCircle } from "lucide-react";
+import {
+  Search,
+  Filter,
+  ChevronDown,
+  ChevronUp,
+  Sparkles,
+  Eye,
+  Bookmark,
+  MessageCircle,
+  Truck,
+} from "lucide-react";
 import RaffleCampaign from "../components/RaffleCampaign";
 
 type Category = "all" | "produce" | "livestock" | "inputs" | "service";
 type ServiceSubType = "all" | "equipment" | "professional_services";
+type DeliveryScope = "countrywide" | "within_county" | "negotiable";
 
 type UnifiedCard = {
   id: string;
@@ -37,6 +48,7 @@ type UnifiedCard = {
   ownerResponseTime?: string;
   ownerLastActive?: string;
   image?: string;
+  deliveryScope: DeliveryScope;
 };
 
 type TrendingCard = {
@@ -52,6 +64,7 @@ type TrendingCard = {
   verified: boolean;
   ownerName?: string;
   image?: string;
+  deliveryScope: DeliveryScope;
   engagement: {
     views: number;
     saves: number;
@@ -75,6 +88,19 @@ const buildLocation = (loc: any) =>
   [loc?.ward, loc?.constituency, loc?.county, loc?.approximateLocation]
     .filter(Boolean)
     .join(", ");
+
+const normalizeDeliveryScope = (value?: string): DeliveryScope => {
+  if (value === "countrywide" || value === "within_county") {
+    return value;
+  }
+  return "negotiable";
+};
+
+const getDeliveryScopeLabel = (scope: DeliveryScope) => {
+  if (scope === "countrywide") return "Countrywide delivery";
+  if (scope === "within_county") return "Within county";
+  return "Delivery negotiable";
+};
 
 const getScore = (item: UnifiedCard) => {
   // Sort priority: boosted first, then verified, then paid.
@@ -200,7 +226,13 @@ const BrowseListings: React.FC = () => {
           cache: "no-store",
         });
         if (!cancelled) {
-          setTrendingItems(Array.isArray(response?.data) ? response.data : []);
+          const items = Array.isArray(response?.data) ? response.data : [];
+          setTrendingItems(
+            items.map((item: any) => ({
+              ...item,
+              deliveryScope: normalizeDeliveryScope(item?.deliveryScope),
+            }))
+          );
         }
       } catch (error) {
         if (!cancelled) {
@@ -265,6 +297,7 @@ const BrowseListings: React.FC = () => {
           contact: p.contact || p.owner?.phone || p.owner?.email,
           ownerResponseTime,
           ownerLastActive: ownerLastActive ? formatLastActive(ownerLastActive) : undefined,
+          deliveryScope: normalizeDeliveryScope(p.deliveryScope),
         } as UnifiedCard;
       }) || [];
 
@@ -308,6 +341,7 @@ const BrowseListings: React.FC = () => {
           contact: s.contact || s.owner?.phone || s.owner?.email,
           ownerResponseTime,
           ownerLastActive: ownerLastActive ? formatLastActive(ownerLastActive) : undefined,
+          deliveryScope: normalizeDeliveryScope(s.deliveryScope),
         } as UnifiedCard;
       }) || [];
 
@@ -995,7 +1029,7 @@ const BrowseListings: React.FC = () => {
                 <Link
                   key={`trending-${card.id}`}
                   to={`/listings/${card.id}`}
-                  className="min-w-[250px] max-w-[280px] flex-1 overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:shadow-md"
+                  className="min-w-[250px] max-w-[280px] flex-[0_0_270px] overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:shadow-md lg:flex-[0_0_255px] lg:max-w-[255px]"
                 >
                   <div className="h-36 overflow-hidden bg-slate-100">
                     {card.image ? (
@@ -1016,7 +1050,7 @@ const BrowseListings: React.FC = () => {
                     )}
                   </div>
 
-                  <div className="space-y-3 p-3">
+                  <div className="flex h-full flex-col gap-3 p-3">
                     <div className="flex items-start justify-between gap-2">
                       <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
                         {card.typeLabel}
@@ -1032,30 +1066,40 @@ const BrowseListings: React.FC = () => {
                       <h3 className="line-clamp-2 text-sm font-semibold text-slate-900">
                         {card.title}
                       </h3>
-                      <p className="mt-1 line-clamp-2 text-xs text-slate-500">
+                      <p className="mt-1 min-h-[2.25rem] line-clamp-2 text-xs text-slate-500">
                         {card.description}
                       </p>
                     </div>
 
-                    <div className="flex flex-wrap gap-2 text-[11px] text-slate-500">
-                      {card.verified && (
-                        <span className="rounded-full bg-emerald-50 px-2 py-1 font-semibold text-emerald-700">
-                          Verified
+                    <div className="space-y-1 text-[11px] text-slate-500">
+                      <div className="min-h-[1.2rem] flex flex-wrap gap-2">
+                        {card.verified && (
+                          <span className="rounded-full bg-emerald-50 px-2 py-1 font-semibold text-emerald-700">
+                            Verified
+                          </span>
+                        )}
+                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 font-semibold text-slate-700">
+                          <Truck className="h-3 w-3" />
+                          {getDeliveryScopeLabel(card.deliveryScope)}
                         </span>
+                      </div>
+                      {card.ownerName && (
+                        <p className="line-clamp-1 text-[11px] text-slate-500">
+                          By {card.ownerName}
+                        </p>
                       )}
-                      {card.ownerName && <span>By {card.ownerName}</span>}
                     </div>
 
-                    <div className="flex items-center gap-3 border-t border-slate-100 pt-3 text-[11px] font-semibold text-slate-600">
-                      <span className="inline-flex items-center gap-1">
+                    <div className="mt-auto grid grid-cols-3 gap-2 border-t border-slate-100 pt-3 text-[10px] font-semibold text-slate-600 lg:text-[9px]">
+                      <span className="inline-flex items-center justify-center gap-1 rounded-lg bg-slate-50 px-2 py-1.5 lg:px-1.5 lg:gap-0.5">
                         <Eye className="h-3.5 w-3.5 text-slate-400" />
                         {card.engagement.views} views
                       </span>
-                      <span className="inline-flex items-center gap-1">
+                      <span className="inline-flex items-center justify-center gap-1 rounded-lg bg-slate-50 px-2 py-1.5 lg:px-1.5 lg:gap-0.5">
                         <Bookmark className="h-3.5 w-3.5 text-slate-400" />
                         {card.engagement.saves} saves
                       </span>
-                      <span className="inline-flex items-center gap-1">
+                      <span className="inline-flex items-center justify-center gap-1 rounded-lg bg-slate-50 px-2 py-1.5 lg:px-1.5 lg:gap-0.5">
                         <MessageCircle className="h-3.5 w-3.5 text-slate-400" />
                         {card.engagement.recentInquiries} reach-outs
                       </span>
@@ -1161,6 +1205,10 @@ const BrowseListings: React.FC = () => {
                     )}
                     <p className="text-xs text-slate-500 font-medium">
                       Location: {card.locationLabel || "Location pending"}
+                    </p>
+                    <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
+                      <Truck className="h-3.5 w-3.5" />
+                      {getDeliveryScopeLabel(card.deliveryScope)}
                     </p>
                     {(card.ownerResponseTime || card.ownerLastActive) && (
                       <p className="mt-1 text-xs text-slate-500">

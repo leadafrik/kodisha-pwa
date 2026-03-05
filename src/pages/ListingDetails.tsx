@@ -57,6 +57,22 @@ const formatLastActive = (value?: string | Date) => {
   return `Active ${date.toLocaleDateString()}`;
 };
 
+type DeliveryScope = "countrywide" | "within_county" | "negotiable";
+
+const normalizeDeliveryScope = (value?: string): DeliveryScope => {
+  if (value === "countrywide" || value === "within_county") {
+    return value;
+  }
+  return "negotiable";
+};
+
+const getDeliveryScopeLabel = (value?: string) => {
+  const scope = normalizeDeliveryScope(value);
+  if (scope === "countrywide") return "Countrywide delivery";
+  if (scope === "within_county") return "Within county";
+  return "Delivery negotiable";
+};
+
 interface Message {
   _id?: string;
   from: string;
@@ -131,6 +147,7 @@ const normalizeListingForView = (listing: any) => {
       constituency: location.constituency || location.subRegion || "",
       ward: location.ward || "",
     },
+    deliveryScope: normalizeDeliveryScope(listing.deliveryScope),
   };
 };
 
@@ -204,6 +221,7 @@ const EquipmentDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
       <p><strong>Services Available:</strong> {Array.isArray(listing.services) ? listing.services.join(', ') : listing.services || '—'}</p>
       {(listing.pricing || listing.price) && <p><strong>Pricing:</strong> {listing.pricing || (typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : listing.price)}</p>}
       {typeof listing.operatorIncluded !== 'undefined' && <p><strong>Operator Included:</strong> {listing.operatorIncluded ? 'Yes' : 'No'}</p>}
+      <p><strong>Delivery:</strong> {getDeliveryScopeLabel(listing.deliveryScope)}</p>
       {listing.minHirePeriod && <p><strong>Min Hire Period:</strong> {listing.minHirePeriod}</p>}
       {listing.maxHirePeriod && <p><strong>Max Hire Period:</strong> {listing.maxHirePeriod}</p>}
     </div>
@@ -218,6 +236,7 @@ const ProfessionalDetailsSection: React.FC<{ listing: any }> = ({ listing }) => 
       {listing.experience && <p><strong>Years of Experience:</strong> {listing.experience}</p>}
       {listing.qualifications && <p><strong>Qualifications:</strong> {listing.qualifications}</p>}
       {(listing.pricing || listing.price) && <p><strong>Rate:</strong> {listing.pricing || (typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : listing.price)}</p>}
+      <p><strong>Delivery:</strong> {getDeliveryScopeLabel(listing.deliveryScope)}</p>
     </div>
   </div>
 );
@@ -256,6 +275,7 @@ const AgrovetDetailsSection: React.FC<{ listing: any }> = ({ listing }) => {
         {(listing.pricing || listing.price) && <p><strong>Pricing Info:</strong> {listing.pricing || (typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : listing.price)}</p>}
         {listing.specialization && <p><strong>Specialization:</strong> {listing.specialization}</p>}
         {listing.businessHours && <p><strong>Business Hours:</strong> {listing.businessHours}</p>}
+        <p><strong>Delivery:</strong> {getDeliveryScopeLabel(listing.deliveryScope)}</p>
       </div>
     </div>
   );
@@ -269,6 +289,7 @@ const ProductDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
       {listing.price && <p><strong>Price per Unit:</strong> {typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : listing.price}</p>}
       {listing.unit && <p><strong>Unit:</strong> {listing.unit}</p>}
       {listing.quantity && <p><strong>Quantity Available:</strong> {listing.quantity}</p>}
+      <p><strong>Delivery:</strong> {getDeliveryScopeLabel(listing.deliveryScope)}</p>
       {listing.grade && <p><strong>Grade:</strong> {listing.grade}</p>}
       {listing.harvestDate && <p><strong>Harvest Date:</strong> {new Date(listing.harvestDate).toLocaleDateString()}</p>}
     </div>
