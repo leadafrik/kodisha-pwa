@@ -11,6 +11,9 @@ const AboutUs: React.FC = () => {
   const founderWhatsappDisplay = "0796 389 192";
   const founderImage = "/images/stephen-omukoko-okoth.jpg";
   const founderLinkedIn = "https://www.linkedin.com/in/stephen-omukoko-okoth-a4a5b7188";
+  const ceoVideoEmbedUrl =
+    "https://www.youtube.com/embed/JoFzDK2ct8w?si=D6PUkI_gdBWTdUgj";
+  const ceoVideoWatchUrl = "https://www.youtube.com/watch?v=JoFzDK2ct8w";
   const cooName = "Joseph Mugalla";
   const cooTitle = "Chief Operating Officer";
   const cooImage = "/images/joseph-mugalla.jpeg";
@@ -392,6 +395,50 @@ const AboutUs: React.FC = () => {
                     View LinkedIn Profile
                   </a>
                 </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="max-w-6xl mx-auto px-4 py-12">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
+            <div className="flex flex-col gap-5">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">
+                  Message from the CEO
+                </p>
+                <h2 className="about-title text-3xl text-slate-900 mt-3">
+                  Watch the founder's message on Agrisoko's mission
+                </h2>
+                <p className="text-slate-600 mt-3">
+                  A short message from {founderName} on why Agrisoko exists and where we are taking
+                  Kenya's agricultural marketplace.
+                </p>
+              </div>
+
+              <div className="overflow-hidden rounded-2xl border border-slate-200">
+                <div className="relative w-full pb-[56.25%]">
+                  <iframe
+                    className="absolute inset-0 h-full w-full"
+                    src={ceoVideoEmbedUrl}
+                    title="Message from the CEO - Agrisoko"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                  />
+                </div>
+              </div>
+
+              <div>
+                <a
+                  href={ceoVideoWatchUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                >
+                  Watch on YouTube
+                </a>
               </div>
             </div>
           </div>
