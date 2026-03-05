@@ -1010,7 +1010,7 @@ const BrowseListings: React.FC = () => {
 
         {!loading && !trendingLoading && trendingItems.length > 0 && (
           <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
-            <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mb-3 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-rose-700">
                   Trending now
@@ -1024,7 +1024,7 @@ const BrowseListings: React.FC = () => {
               </p>
             </div>
 
-            <div className="flex gap-4 overflow-x-auto pb-2">
+            <div className="flex items-start gap-4 overflow-x-auto pb-2">
               {trendingItems.map((card) => (
                 <Link
                   key={`trending-${card.id}`}
@@ -1050,7 +1050,7 @@ const BrowseListings: React.FC = () => {
                     )}
                   </div>
 
-                  <div className="flex h-full flex-col gap-3 p-3">
+                  <div className="flex flex-col gap-2.5 p-3">
                     <div className="flex items-start justify-between gap-2">
                       <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
                         {card.typeLabel}
@@ -1066,13 +1066,13 @@ const BrowseListings: React.FC = () => {
                       <h3 className="line-clamp-2 text-sm font-semibold text-slate-900">
                         {card.title}
                       </h3>
-                      <p className="mt-1 min-h-[2.25rem] line-clamp-2 text-xs text-slate-500">
+                      <p className="mt-1 line-clamp-2 text-xs text-slate-500">
                         {card.description}
                       </p>
                     </div>
 
                     <div className="space-y-1 text-[11px] text-slate-500">
-                      <div className="min-h-[1.2rem] flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-2">
                         {card.verified && (
                           <span className="rounded-full bg-emerald-50 px-2 py-1 font-semibold text-emerald-700">
                             Verified
@@ -1090,7 +1090,7 @@ const BrowseListings: React.FC = () => {
                       )}
                     </div>
 
-                    <div className="mt-auto grid grid-cols-3 gap-2 border-t border-slate-100 pt-3 text-[10px] font-semibold text-slate-600 lg:text-[9px]">
+                    <div className="grid grid-cols-3 gap-1.5 border-t border-slate-100 pt-2.5 text-[10px] font-semibold text-slate-600 lg:text-[9px]">
                       <span className="inline-flex items-center justify-center gap-1 rounded-lg bg-slate-50 px-2 py-1.5 lg:px-1.5 lg:gap-0.5">
                         <Eye className="h-3.5 w-3.5 text-slate-400" />
                         {card.engagement.views} views

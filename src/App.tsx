@@ -218,6 +218,7 @@ const AppShell = () => {
             />
             <Route path="/listing/:id" element={<ListingDetails />} />
             <Route path="/listings/:id" element={<ListingDetails />} />
+            <Route path="/l/:id" element={<ShareListingRedirect />} />
             <Route path="/share/listing/:id" element={<ShareListingRedirect />} />
             <Route path="/seller/:userId" element={<SellerProfile />} />
             <Route path="/sellers/:userId" element={<SellerProfile />} />

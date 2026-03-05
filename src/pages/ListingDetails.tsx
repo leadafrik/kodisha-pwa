@@ -911,23 +911,7 @@ const ListingDetails: React.FC = () => {
   const lastActiveLabel = formatLastActive(owner.lastActive || owner.updatedAt || listing.updatedAt || listing.createdAt);
   const sellerReviews: SellerReview[] = Array.isArray(userRatings?.ratings) ? userRatings.ratings : [];
   const sellerPhone = normalizeKenyanPhone(listing.contact || owner.phone);
-  const shareParams = new URLSearchParams();
-  shareParams.set("title", listing.title || listing.name || "Agrisoko listing");
-  shareParams.set(
-    "description",
-    (listing.description || "Browse this listing on Agrisoko.").slice(0, 180)
-  );
-  if (listing.images?.[0]) {
-    shareParams.set(
-      "image",
-      getOptimizedImageUrl(listing.images[0], {
-        width: 1200,
-        height: 630,
-        fit: "fill",
-      })
-    );
-  }
-  const shareUrl = `${window.location.origin}/share/listing/${listing._id}?${shareParams.toString()}`;
+  const shareUrl = `${window.location.origin}/l/${listing._id}`;
   const hasMapCoordinates = Boolean(coords?.lat && coords?.lng);
   const isOwnListing = !!user?._id && !!owner?._id && String(user._id) === String(owner._id);
   const publishShareFeedback = (message: string) => {
