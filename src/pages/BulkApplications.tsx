@@ -123,6 +123,8 @@ const BulkApplications: React.FC = () => {
   const activeRoleStatus = role === "buyer" ? buyerStatus : sellerStatus;
   const roleReviewNote =
     role === "buyer" ? status?.reviewNotes?.buyer : status?.reviewNotes?.seller;
+  const canPostB2B = Boolean(status?.canPostB2BDemand || status?.isAdmin);
+  const canRespondB2B = Boolean(status?.canRespondToB2BDemand || status?.isAdmin);
 
   const updateField = <K extends keyof BulkApplicationInput>(
     key: K,
@@ -259,6 +261,40 @@ const BulkApplications: React.FC = () => {
                 <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Seller status</p>
                 <p className="mt-1 text-sm font-semibold text-slate-900">{statusLabel(sellerStatus)}</p>
               </div>
+            </div>
+          </div>
+
+          <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+              Quick actions
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <Link
+                to="/bulk/orders"
+                className="inline-flex rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Open demand board
+              </Link>
+              <Link
+                to={canPostB2B ? "/bulk/orders/new" : "/bulk?role=buyer"}
+                className={`inline-flex rounded-lg px-3 py-2 text-xs font-semibold ${
+                  canPostB2B
+                    ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                    : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                {canPostB2B ? "Post bulk order" : "Apply as bulk buyer"}
+              </Link>
+              <Link
+                to={canRespondB2B ? "/bulk/seller/orders" : "/bulk?role=seller"}
+                className={`inline-flex rounded-lg px-3 py-2 text-xs font-semibold ${
+                  canRespondB2B
+                    ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                    : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                {canRespondB2B ? "Open seller portal" : "Apply as bulk seller"}
+              </Link>
             </div>
           </div>
         </section>
