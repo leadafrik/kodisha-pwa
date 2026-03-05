@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Building2, CheckCircle2, ShieldAlert } from "lucide-react";
+import { Building2, CheckCircle2, ChevronDown, ChevronUp, ShieldAlert } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { kenyaCounties } from "../data/kenyaCounties";
 import {
@@ -40,6 +40,11 @@ const FREQUENCY_OPTIONS = [
   { value: "as_needed", label: "As needed" },
 ] as const;
 
+const ROLE_OPTIONS = [
+  { value: "buyer", label: "Bulk buyer" },
+  { value: "seller", label: "Bulk seller" },
+] as const;
+
 const statusLabel = (status: string) => {
   if (status === "approved") return "Approved";
   if (status === "pending") return "Pending review";
@@ -56,6 +61,7 @@ const BulkApplications: React.FC = () => {
   }, [location.search]);
 
   const [role, setRole] = useState<BulkRole>(roleParam);
+  const [showForm, setShowForm] = useState(false);
   const [status, setStatus] = useState<BulkAccessStatusResponse | null>(null);
   const [loadingStatus, setLoadingStatus] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -216,100 +222,104 @@ const BulkApplications: React.FC = () => {
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-10 text-slate-900">
       <div className="mx-auto max-w-5xl space-y-6">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">
+        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-700">
             <Building2 className="h-4 w-4" />
             Bulk buyers & sellers
           </div>
-          <h1 className="mt-3 text-2xl font-semibold sm:text-3xl">
-            Apply for bulk buyer or seller access
-          </h1>
+          <h1 className="mt-3 text-xl font-semibold sm:text-2xl">Bulk buyer/seller access</h1>
           <p className="mt-2 text-sm text-slate-600">
             We review each bulk account manually so institutional demand stays trusted.
           </p>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={() => {
-                setRole("buyer");
-                updateField("role", "buyer");
-              }}
-              className={`rounded-2xl border px-4 py-3 text-left ${
-                role === "buyer"
-                  ? "border-emerald-300 bg-emerald-50"
-                  : "border-slate-200 bg-white hover:bg-slate-50"
-              }`}
-            >
-              <p className="text-sm font-semibold text-slate-900">Bulk buyer</p>
-              <p className="mt-1 text-xs text-slate-600">Hospitals, restaurants, schools, processors.</p>
-              <p className="mt-2 text-xs font-semibold text-emerald-700">
-                Status: {statusLabel(buyerStatus)}
-              </p>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setRole("seller");
-                updateField("role", "seller");
-              }}
-              className={`rounded-2xl border px-4 py-3 text-left ${
-                role === "seller"
-                  ? "border-emerald-300 bg-emerald-50"
-                  : "border-slate-200 bg-white hover:bg-slate-50"
-              }`}
-            >
-              <p className="text-sm font-semibold text-slate-900">Bulk seller</p>
-              <p className="mt-1 text-xs text-slate-600">Farms, cooperatives, distributors, suppliers.</p>
-              <p className="mt-2 text-xs font-semibold text-emerald-700">
-                Status: {statusLabel(sellerStatus)}
-              </p>
-            </button>
+          <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,240px)_minmax(0,1fr)]">
+            <div>
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                Role
+              </label>
+              <select
+                value={role}
+                onChange={(event) => {
+                  const nextRole = event.target.value as BulkRole;
+                  setRole(nextRole);
+                  updateField("role", nextRole);
+                }}
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+              >
+                {ROLE_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Buyer status</p>
+                <p className="mt-1 text-sm font-semibold text-slate-900">{statusLabel(buyerStatus)}</p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Seller status</p>
+                <p className="mt-1 text-sm font-semibold text-slate-900">{statusLabel(sellerStatus)}</p>
+              </div>
+            </div>
           </div>
         </section>
 
-        <section className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <p className="text-xs uppercase tracking-widest text-slate-500">Bulk buyer portal</p>
-            <p className="mt-2 text-sm font-semibold text-slate-900">
-              {canPostB2B ? "Approved" : "Not approved yet"}
-            </p>
-            <Link
-              to={canPostB2B ? "/bulk/orders/new" : "/bulk?role=buyer"}
-              className={`mt-3 inline-flex rounded-lg px-4 py-2 text-sm font-semibold ${
-                canPostB2B
-                  ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                  : "border border-slate-300 text-slate-700 hover:bg-slate-50"
-              }`}
-            >
-              {canPostB2B ? "Post bulk order" : "Apply as buyer"}
-            </Link>
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <p className="text-xs uppercase tracking-widest text-slate-500">Bulk seller portal</p>
-            <p className="mt-2 text-sm font-semibold text-slate-900">
-              {canRespondB2B ? "Approved" : "Not approved yet"}
-            </p>
-            <Link
-              to={canRespondB2B ? "/bulk/seller/orders" : "/bulk?role=seller"}
-              className={`mt-3 inline-flex rounded-lg px-4 py-2 text-sm font-semibold ${
-                canRespondB2B
-                  ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                  : "border border-slate-300 text-slate-700 hover:bg-slate-50"
-              }`}
-            >
-              {canRespondB2B ? "Open seller portal" : "Apply as seller"}
-            </Link>
+        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Bulk buyer portal</p>
+              <p className="mt-1 text-sm font-semibold text-slate-900">{canPostB2B ? "Approved" : "Not approved yet"}</p>
+              <p className="mt-1 text-xs text-slate-500">Post bulk requirements and manage bids.</p>
+              <Link
+                to={canPostB2B ? "/bulk/orders/new" : "/bulk?role=buyer"}
+                className={`mt-2 inline-flex rounded-lg px-3 py-2 text-xs font-semibold ${
+                  canPostB2B
+                    ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                    : "border border-slate-300 text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                {canPostB2B ? "Post bulk order" : "Apply as buyer"}
+              </Link>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">Bulk seller portal</p>
+              <p className="mt-1 text-sm font-semibold text-slate-900">{canRespondB2B ? "Approved" : "Not approved yet"}</p>
+              <p className="mt-1 text-xs text-slate-500">View bulk orders and submit bids.</p>
+              <Link
+                to={canRespondB2B ? "/bulk/seller/orders" : "/bulk?role=seller"}
+                className={`mt-2 inline-flex rounded-lg px-3 py-2 text-xs font-semibold ${
+                  canRespondB2B
+                    ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                    : "border border-slate-300 text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                {canRespondB2B ? "Open seller portal" : "Apply as seller"}
+              </Link>
+            </div>
           </div>
         </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-slate-900">
-            {role === "buyer" ? "Bulk buyer application" : "Bulk seller application"}
-          </h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Share enough detail for manual approval and onboarding calls.
-          </p>
+        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">
+                {role === "buyer" ? "Bulk buyer application" : "Bulk seller application"}
+              </h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Open the form only when you are ready to apply.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowForm((prev) => !prev)}
+              className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              {showForm ? "Hide application form" : "Open application form"}
+              {showForm ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </button>
+          </div>
 
           {loadingStatus && (
             <p className="mt-4 text-sm text-slate-500">Loading your current access status...</p>
@@ -332,248 +342,257 @@ const BulkApplications: React.FC = () => {
             </div>
           )}
 
-          <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
-                  Contact person
-                </label>
-                <input
-                  value={form.contactName}
-                  onChange={(e) => updateField("contactName", e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
-                  placeholder="Name of contact person"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
-                  Farm or institution name
-                </label>
-                <input
-                  value={form.organizationName}
-                  onChange={(e) => updateField("organizationName", e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
-                  placeholder="Farm / institution"
-                />
-              </div>
-            </div>
+          {!showForm && (
+            <p className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+              Form is hidden to keep this page clean. Use <strong>Open application form</strong> when ready.
+            </p>
+          )}
 
-            <div className="grid gap-4 sm:grid-cols-2">
+          {showForm && (
+            <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                    Contact person
+                  </label>
+                  <input
+                    value={form.contactName}
+                    onChange={(e) => updateField("contactName", e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                    placeholder="Name of contact person"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                    Farm or institution name
+                  </label>
+                  <input
+                    value={form.organizationName}
+                    onChange={(e) => updateField("organizationName", e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                    placeholder="Farm / institution"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                    Institution type
+                  </label>
+                  <select
+                    value={form.institutionType}
+                    onChange={(e) =>
+                      updateField("institutionType", e.target.value as BulkApplicationInput["institutionType"])
+                    }
+                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                  >
+                    {INSTITUTION_TYPES.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                    Delivery coverage
+                  </label>
+                  <select
+                    value={form.deliveryCoverage}
+                    onChange={(e) =>
+                      updateField(
+                        "deliveryCoverage",
+                        e.target.value as BulkApplicationInput["deliveryCoverage"]
+                      )
+                    }
+                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                  >
+                    {DELIVERY_COVERAGE.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                    County
+                  </label>
+                  <select
+                    value={form.address.county}
+                    onChange={(e) => updateAddress("county", e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                  >
+                    <option value="">Select county</option>
+                    {kenyaCounties.map((county) => (
+                      <option key={county.name} value={county.name}>
+                        {county.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                    Street address
+                  </label>
+                  <input
+                    value={form.address.streetAddress || ""}
+                    onChange={(e) => updateAddress("streetAddress", e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                    placeholder="Street / area"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                    Phone number
+                  </label>
+                  <input
+                    value={form.phone}
+                    onChange={(e) => updateField("phone", e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                    placeholder="+2547..."
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => updateField("email", e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                    placeholder="you@example.com"
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
-                  Institution type
+                  {role === "buyer" ? "Products you need" : "Products you sell"}
                 </label>
-                <select
-                  value={form.institutionType}
-                  onChange={(e) =>
-                    updateField("institutionType", e.target.value as BulkApplicationInput["institutionType"])
-                  }
+                <textarea
+                  value={productsInput}
+                  onChange={(e) => setProductsInput(e.target.value)}
                   className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                  rows={3}
+                  placeholder="Example: maize, onions, certified seeds"
+                />
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                    Frequency
+                  </label>
+                  <select
+                    value={form.procurementFrequency || "weekly"}
+                    onChange={(e) =>
+                      updateField(
+                        "procurementFrequency",
+                        e.target.value as BulkApplicationInput["procurementFrequency"]
+                      )
+                    }
+                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                  >
+                    {FREQUENCY_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                    Monthly volume
+                  </label>
+                  <input
+                    value={form.monthlyVolume || ""}
+                    onChange={(e) => updateField("monthlyVolume", e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                    placeholder="e.g. 20 tonnes"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                    Budget per order
+                  </label>
+                  <input
+                    value={form.estimatedBudgetPerOrder || ""}
+                    onChange={(e) => updateField("estimatedBudgetPerOrder", e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                    placeholder="e.g. KES 250,000"
+                  />
+                </div>
+              </div>
+
+              {role === "seller" && (
+                <div>
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                    Years in agriculture
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={form.yearsInAgriculture ?? ""}
+                    onChange={(e) =>
+                      updateField(
+                        "yearsInAgriculture",
+                        e.target.value === "" ? undefined : Number(e.target.value)
+                      )
+                    }
+                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                  Additional notes
+                </label>
+                <textarea
+                  value={form.notes || ""}
+                  onChange={(e) => updateField("notes", e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                  rows={3}
+                  placeholder="Anything your onboarding team should know"
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                <div className="flex items-start gap-2 text-sm text-slate-600">
+                  {activeRoleStatus === "approved" ? (
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-600" />
+                  ) : (
+                    <ShieldAlert className="mt-0.5 h-4 w-4 text-amber-600" />
+                  )}
+                  <span>
+                    Current status for this role:{" "}
+                    <strong className="text-slate-900">{statusLabel(activeRoleStatus)}</strong>
+                  </span>
+                </div>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="rounded-xl bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:bg-slate-300"
                 >
-                  {INSTITUTION_TYPES.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                  {submitting ? "Submitting..." : "Submit application"}
+                </button>
               </div>
-              <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
-                  Delivery coverage
-                </label>
-                <select
-                  value={form.deliveryCoverage}
-                  onChange={(e) =>
-                    updateField(
-                      "deliveryCoverage",
-                      e.target.value as BulkApplicationInput["deliveryCoverage"]
-                    )
-                  }
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
-                >
-                  {DELIVERY_COVERAGE.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
-                  County
-                </label>
-                <select
-                  value={form.address.county}
-                  onChange={(e) => updateAddress("county", e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
-                >
-                  <option value="">Select county</option>
-                  {kenyaCounties.map((county) => (
-                    <option key={county.name} value={county.name}>
-                      {county.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
-                  Street address
-                </label>
-                <input
-                  value={form.address.streetAddress || ""}
-                  onChange={(e) => updateAddress("streetAddress", e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
-                  placeholder="Street / area"
-                />
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
-                  Phone number
-                </label>
-                <input
-                  value={form.phone}
-                  onChange={(e) => updateField("phone", e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
-                  placeholder="+2547..."
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => updateField("email", e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
-                  placeholder="you@example.com"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
-                {role === "buyer" ? "Products you need" : "Products you sell"}
-              </label>
-              <textarea
-                value={productsInput}
-                onChange={(e) => setProductsInput(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
-                rows={3}
-                placeholder="Example: maize, onions, certified seeds"
-              />
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
-                  Frequency
-                </label>
-                <select
-                  value={form.procurementFrequency || "weekly"}
-                  onChange={(e) =>
-                    updateField(
-                      "procurementFrequency",
-                      e.target.value as BulkApplicationInput["procurementFrequency"]
-                    )
-                  }
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
-                >
-                  {FREQUENCY_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
-                  Monthly volume
-                </label>
-                <input
-                  value={form.monthlyVolume || ""}
-                  onChange={(e) => updateField("monthlyVolume", e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
-                  placeholder="e.g. 20 tonnes"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
-                  Budget per order
-                </label>
-                <input
-                  value={form.estimatedBudgetPerOrder || ""}
-                  onChange={(e) => updateField("estimatedBudgetPerOrder", e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
-                  placeholder="e.g. KES 250,000"
-                />
-              </div>
-            </div>
-
-            {role === "seller" && (
-              <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
-                  Years in agriculture
-                </label>
-                <input
-                  type="number"
-                  min={0}
-                  value={form.yearsInAgriculture ?? ""}
-                  onChange={(e) =>
-                    updateField(
-                      "yearsInAgriculture",
-                      e.target.value === "" ? undefined : Number(e.target.value)
-                    )
-                  }
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
-                />
-              </div>
-            )}
-
-            <div>
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
-                Additional notes
-              </label>
-              <textarea
-                value={form.notes || ""}
-                onChange={(e) => updateField("notes", e.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
-                rows={3}
-                placeholder="Anything your onboarding team should know"
-              />
-            </div>
-
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-              <div className="flex items-start gap-2 text-sm text-slate-600">
-                {activeRoleStatus === "approved" ? (
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-600" />
-                ) : (
-                  <ShieldAlert className="mt-0.5 h-4 w-4 text-amber-600" />
-                )}
-                <span>
-                  Current status for this role:{" "}
-                  <strong className="text-slate-900">{statusLabel(activeRoleStatus)}</strong>
-                </span>
-              </div>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="rounded-xl bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:bg-slate-300"
-              >
-                {submitting ? "Submitting..." : "Submit application"}
-              </button>
-            </div>
-          </form>
+            </form>
+          )}
         </section>
       </div>
     </main>
   );
+
 };
 
 export default BulkApplications;

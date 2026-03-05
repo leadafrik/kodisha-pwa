@@ -87,18 +87,6 @@ const pathMatches = (pathname: string, key: string) => {
     return pathname === "/bulk" || pathname.startsWith("/bulk/");
   }
 
-  if (key === "/bulk-buyer") {
-    const search =
-      typeof window !== "undefined" ? window.location.search || "" : "";
-    return pathname === "/bulk-buyer" || (pathname === "/bulk" && search.includes("role=buyer"));
-  }
-
-  if (key === "/bulk-seller") {
-    const search =
-      typeof window !== "undefined" ? window.location.search || "" : "";
-    return pathname === "/bulk-seller" || (pathname === "/bulk" && search.includes("role=seller"));
-  }
-
   return pathname === key;
 };
 
@@ -167,8 +155,7 @@ const Navbar: React.FC = () => {
     const items: NavItem[] = [{ label: "Buy Requests", to: "/request" }];
 
     if (BULK_NAV_LINK_VISIBLE) {
-      items.push({ label: "Bulk Buyer", to: "/bulk-buyer" });
-      items.push({ label: "Bulk Seller", to: "/bulk-seller" });
+      items.push({ label: "Bulk Buyer/Seller", to: "/bulk" });
     }
 
     if (user) {
@@ -272,7 +259,7 @@ const Navbar: React.FC = () => {
               </div>
 
               {desktopNavItems
-                .filter((item) => item.to === "/request" || item.to.startsWith("/bulk-"))
+                .filter((item) => item.to === "/request" || item.to === "/bulk")
                 .map((item) => {
                 const active = pathMatches(location.pathname, item.to);
                 return (
@@ -311,7 +298,7 @@ const Navbar: React.FC = () => {
               </div>
 
               {desktopNavItems
-                .filter((item) => item.to !== "/request" && !item.to.startsWith("/bulk-"))
+                .filter((item) => item.to !== "/request" && item.to !== "/bulk")
                 .map((item) => {
                   const active = pathMatches(location.pathname, item.to);
                   return (
@@ -452,12 +439,12 @@ const Navbar: React.FC = () => {
               </div>
 
               {desktopNavItems
-                .filter((item) => item.to === "/request" || item.to.startsWith("/bulk-"))
+                .filter((item) => item.to === "/request" || item.to === "/bulk")
                 .map((item) => {
                 const Icon =
                   item.to === "/request"
                     ? ClipboardList
-                    : item.to.startsWith("/bulk-")
+                    : item.to === "/bulk"
                     ? Building2
                     : item.label === "Messages"
                     ? MessageSquare
@@ -508,12 +495,12 @@ const Navbar: React.FC = () => {
               </div>
 
               {desktopNavItems
-                .filter((item) => item.to !== "/request" && !item.to.startsWith("/bulk-"))
+                .filter((item) => item.to !== "/request" && item.to !== "/bulk")
                 .map((item) => {
                   const Icon =
                     item.label === "Messages"
                       ? MessageSquare
-                      : item.to.startsWith("/bulk-")
+                      : item.to === "/bulk"
                       ? Building2
                       : Info;
                   const active = pathMatches(location.pathname, item.to);
