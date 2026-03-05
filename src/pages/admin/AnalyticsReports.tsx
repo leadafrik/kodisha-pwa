@@ -32,6 +32,7 @@ type TrafficSummary = {
     uniqueVisitorsWeek: number;
     uniqueVisitorsMonth: number;
     uniqueVisitorsTotal: number;
+    liveListingsNow?: number;
   };
   trends: {
     daily: TrafficTrendPoint[];
@@ -161,6 +162,10 @@ const AnalyticsReports: React.FC = () => {
               <div className="rounded-2xl border border-slate-200 bg-white p-5">
                 <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Unique total</p>
                 <p className="text-3xl font-semibold mt-3">{traffic?.overview?.uniqueVisitorsTotal ?? 0}</p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Live listings now</p>
+                <p className="text-3xl font-semibold mt-3">{traffic?.overview?.liveListingsNow ?? 0}</p>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-white p-5">
                 <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Pending reports</p>
