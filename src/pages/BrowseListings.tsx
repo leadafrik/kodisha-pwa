@@ -60,6 +60,12 @@ type TrendingCard = {
   };
 };
 
+type EngagementMetrics = {
+  views: number;
+  saves: number;
+  reachOuts: number;
+};
+
 const formatPrice = (value?: number) =>
   typeof value === "number"
     ? `KSh ${value.toLocaleString()}`
@@ -170,6 +176,7 @@ const BrowseListings: React.FC = () => {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [trendingItems, setTrendingItems] = useState<TrendingCard[]>([]);
   const [trendingLoading, setTrendingLoading] = useState(false);
+  const [engagementById, setEngagementById] = useState<Record<string, EngagementMetrics>>({});
 
   useEffect(() => {
     if (categoryParam && normalizeRouteCategory(categoryParam) === "all" && categoryParam.toLowerCase() !== "all") {
@@ -308,6 +315,40 @@ const BrowseListings: React.FC = () => {
       (c): c is UnifiedCard => !!c && !!c.id
     );
   }, [productListings, serviceListings]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const listingIds = cards.map((card) => card.id).filter(Boolean);
+
+    if (listingIds.length === 0) {
+      setEngagementById({});
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    const loadEngagement = async () => {
+      try {
+        const response = await apiRequest(
+          API_ENDPOINTS.unifiedListings.engagement(listingIds),
+          { cache: "no-store" }
+        );
+        if (!cancelled) {
+          setEngagementById(response?.data || {});
+        }
+      } catch {
+        if (!cancelled) {
+          setEngagementById({});
+        }
+      }
+    };
+
+    void loadEngagement();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [cards]);
 
   const filtered = useMemo(() => {
     const searchTerm = search.trim().toLowerCase();
@@ -1008,15 +1049,15 @@ const BrowseListings: React.FC = () => {
                     <div className="flex items-center gap-3 border-t border-slate-100 pt-3 text-[11px] font-semibold text-slate-600">
                       <span className="inline-flex items-center gap-1">
                         <Eye className="h-3.5 w-3.5 text-slate-400" />
-                        {card.engagement.views}
+                        {card.engagement.views} views
                       </span>
                       <span className="inline-flex items-center gap-1">
                         <Bookmark className="h-3.5 w-3.5 text-slate-400" />
-                        {card.engagement.saves}
+                        {card.engagement.saves} saves
                       </span>
                       <span className="inline-flex items-center gap-1">
                         <MessageCircle className="h-3.5 w-3.5 text-slate-400" />
-                        {card.engagement.recentInquiries}
+                        {card.engagement.recentInquiries} reach-outs
                       </span>
                     </div>
                   </div>
@@ -1029,6 +1070,11 @@ const BrowseListings: React.FC = () => {
         {!loading && (
           <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filtered.map((card, index) => {
+            const engagement = engagementById[card.id] || {
+              views: 0,
+              saves: 0,
+              reachOuts: 0,
+            };
             const categoryColors: Record<Category, string> = {
               all: "bg-slate-100 text-slate-700",
               produce: "bg-orange-50 text-orange-700",
@@ -1121,6 +1167,20 @@ const BrowseListings: React.FC = () => {
                         {[card.ownerResponseTime, card.ownerLastActive].filter(Boolean).join(" - ")}
                       </p>
                     )}
+                    <div className="mt-2 flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-600">
+                      <span className="inline-flex items-center gap-1">
+                        <Eye className="h-3.5 w-3.5 text-slate-400" />
+                        {engagement.views} views
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <Bookmark className="h-3.5 w-3.5 text-slate-400" />
+                        {engagement.saves} saves
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <MessageCircle className="h-3.5 w-3.5 text-slate-400" />
+                        {engagement.reachOuts} reach-outs
+                      </span>
+                    </div>
                   </div>
 
                   <div className="mt-3 flex gap-2">

@@ -104,6 +104,14 @@ export const API_ENDPOINTS = {
   },
   unifiedListings: {
     countActive: `${API_BASE_URL}/unified-listings/count/active`,
+    engagement: (ids: string[]) => {
+      const filtered = ids.filter(Boolean).slice(0, 120);
+      const params = new URLSearchParams();
+      if (filtered.length) {
+        params.set("ids", filtered.join(","));
+      }
+      return `${API_BASE_URL}/unified-listings/engagement${params.toString() ? `?${params.toString()}` : ""}`;
+    },
     trending: (category?: string, limit = 8) => {
       const params = new URLSearchParams();
       if (category && category !== "all") {
