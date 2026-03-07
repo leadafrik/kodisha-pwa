@@ -207,7 +207,7 @@ const Home: React.FC = () => {
     liveCountyCount > 0 ? `${liveCountyCount.toLocaleString()} counties active` : "47 counties open";
   const signupCtaLabel = isPhone ? "Sign Up" : "Sign Up Free";
   const primaryCtaTo = user ? "/create-listing?compact=1" : "/login?mode=signup&next=/browse";
-  const primaryCtaLabel = user ? "List now" : signupCtaLabel;
+  const primaryCtaLabel = user ? "List free today" : signupCtaLabel;
   const browseTo = "/browse";
   const demandCtaTo = "/request";
   const demandCtaLabel = "View Buy Requests";
