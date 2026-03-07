@@ -15,6 +15,7 @@ type LivestockSubcategory = "cattle" | "poultry" | "goats" | "pigs" | "sheep" | 
 type InputsSubcategory = "fertilizer" | "pesticides" | "seeds" | "tools" | "equipment" | "feeds" | "other";
 type ServiceSubcategory = "equipment_rental" | "consulting" | "labor" | "transportation" | "processing" | "other";
 type DeliveryScope = "countrywide" | "within_county" | "negotiable";
+type ListingEntryMode = "single" | "batch";
 
 interface ListingFormData {
   step: number;
@@ -36,6 +37,17 @@ interface ListingFormData {
   contact: string;
   subscribed: boolean;
   premiumBadge: boolean;
+}
+
+interface BatchListingItem {
+  id: string;
+  title: string;
+  description: string;
+  price: string;
+  quantity: string;
+  unit: string;
+  deliveryScope: DeliveryScope;
+  images: File[];
 }
 
 const PRODUCE_SUBCATEGORIES: ProduceSubcategory[] = ["crops", "fruits", "vegetables", "grains", "other"];
@@ -70,6 +82,17 @@ const CATEGORY_DESCRIPTIONS = {
 
 const CATEGORY_OPTIONS: ListingCategory[] = ["produce", "livestock", "inputs", "service"];
 const LISTING_PROGRESS_LABELS = ["Category", "Location", "Details", "Verify"] as const;
+const MAX_BATCH_ITEMS = 20;
+const createBatchItem = (unit = "kg", deliveryScope: DeliveryScope = "negotiable"): BatchListingItem => ({
+  id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+  title: "",
+  description: "",
+  price: "",
+  quantity: "",
+  unit,
+  deliveryScope,
+  images: [],
+});
 
 const DESCRIPTION_HINTS: Record<ListingCategory, { helper: string; placeholder: string }> = {
   produce: {
@@ -124,6 +147,8 @@ const CreateListing: React.FC = () => {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [entryMode, setEntryMode] = useState<ListingEntryMode>("single");
+  const [batchItems, setBatchItems] = useState<BatchListingItem[]>([createBatchItem("kg")]);
   const [idVerified, setIdVerified] = useState(false);
   const [selfieVerified, setSelfieVerified] = useState(false);
   const [hasDraft, setHasDraft] = useState(false);
@@ -199,6 +224,14 @@ const CreateListing: React.FC = () => {
     if (!raw) return false;
     try {
       const parsed = JSON.parse(raw);
+      const parsedBatchItems = Array.isArray(parsed?.batchItems) ? parsed.batchItems : [];
+      const hasBatchContent = parsedBatchItems.some(
+        (item: any) =>
+          item?.title ||
+          item?.description ||
+          item?.price ||
+          item?.quantity
+      );
       return Boolean(
         parsed?.category ||
           parsed?.subcategory ||
@@ -207,7 +240,8 @@ const CreateListing: React.FC = () => {
           parsed?.county ||
           parsed?.price ||
           parsed?.quantity ||
-          parsed?.contact
+          parsed?.contact ||
+          hasBatchContent
       );
     } catch {
       return false;
@@ -235,11 +269,17 @@ const CreateListing: React.FC = () => {
       form.county ||
       form.price ||
       form.quantity ||
-      form.contact;
+      form.contact ||
+      batchItems.some((item) => item.title || item.description || item.price || item.quantity);
     if (!shouldSave) return;
-    const draft = { ...form, images: [] };
+    const draft = {
+      ...form,
+      images: [],
+      entryMode,
+      batchItems: batchItems.map((item) => ({ ...item, images: [] })),
+    };
     localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
-  }, [form]);
+  }, [form, batchItems, entryMode]);
 
   // Update verification status
   useEffect(() => {
@@ -313,19 +353,53 @@ const CreateListing: React.FC = () => {
         placeholder: "Describe what you are listing clearly and practically.",
       };
 
+  const batchReadiness = useMemo(() => {
+    const itemCount = batchItems.length;
+    const readyCount = batchItems.filter((item) => {
+      const hasBaseFields =
+        item.title.trim().length >= 6 &&
+        item.description.trim().length >= 20 &&
+        !!item.price;
+      const hasQuantity = form.category === "inputs" ? true : !!item.quantity;
+      const hasImages = item.images.length > 0;
+      return hasBaseFields && hasQuantity && hasImages;
+    }).length;
+    return { itemCount, readyCount };
+  }, [batchItems, form.category]);
+
   const trustSignals = useMemo(
     () => [
-      { label: "Clear title", done: form.title.trim().length >= 12 },
-      { label: "Detailed description", done: form.description.trim().length >= 80 },
+      {
+        label: "Clear title",
+        done:
+          entryMode === "batch"
+            ? batchReadiness.readyCount > 0
+            : form.title.trim().length >= 12,
+      },
+      {
+        label: "Detailed description",
+        done:
+          entryMode === "batch"
+            ? batchItems.some((item) => item.description.trim().length >= 50)
+            : form.description.trim().length >= 80,
+      },
       { label: "Complete location", done: !!form.county && !!form.constituency && !!form.ward },
       { label: "Public contact added", done: !!form.contact.trim() },
       {
         label: "At least 3 photos",
-        done: form.listingType === "buy" ? true : form.images.length >= 3,
+        done:
+          form.listingType === "buy"
+            ? true
+            : entryMode === "batch"
+            ? batchItems.reduce((total, item) => total + item.images.length, 0) >= 3
+            : form.images.length >= 3,
       },
       { label: "ID + selfie verified", done: idVerified && selfieVerified },
     ],
     [
+      entryMode,
+      batchReadiness.readyCount,
+      batchItems,
       form.title,
       form.description,
       form.county,
@@ -356,6 +430,46 @@ const CreateListing: React.FC = () => {
       ...prev,
       images: prev.images.filter((_, i) => i !== index),
     }));
+  };
+
+  const updateBatchItem = (itemId: string, updater: (item: BatchListingItem) => BatchListingItem) => {
+    setBatchItems((prev) =>
+      prev.map((item) => (item.id === itemId ? updater(item) : item))
+    );
+  };
+
+  const handleBatchImageUpload = (itemId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    updateBatchItem(itemId, (item) => {
+      const imagesToAdd = Array.from(files).slice(0, 5 - item.images.length);
+      return { ...item, images: [...item.images, ...imagesToAdd] };
+    });
+  };
+
+  const removeBatchImage = (itemId: string, imageIndex: number) => {
+    updateBatchItem(itemId, (item) => ({
+      ...item,
+      images: item.images.filter((_, idx) => idx !== imageIndex),
+    }));
+  };
+
+  const addBatchItem = () => {
+    setError("");
+    setNotice("");
+    if (batchItems.length >= MAX_BATCH_ITEMS) {
+      setError(`You can add up to ${MAX_BATCH_ITEMS} items per batch. Submit this batch, then add more.`);
+      return;
+    }
+    const defaultUnit = recommendedUnit || form.unit || "kg";
+    setBatchItems((prev) => [...prev, createBatchItem(defaultUnit, form.deliveryScope)]);
+  };
+
+  const removeBatchItem = (itemId: string) => {
+    setBatchItems((prev) => {
+      if (prev.length <= 1) return prev;
+      return prev.filter((item) => item.id !== itemId);
+    });
   };
 
   const validateStep = (): boolean => {
@@ -391,29 +505,66 @@ const CreateListing: React.FC = () => {
     }
 
     if (form.step === 4) {
-      if (!form.title.trim()) {
-        setError("Please enter a title for your listing");
-        return false;
-      }
-      if (!form.description.trim()) {
-        setError("Please enter a description");
-        return false;
-      }
-      if (!form.price) {
-        setError("Please enter a price");
-        return false;
-      }
-      if (form.category !== "inputs" && !form.quantity) {
-        setError("Please enter a quantity");
-        return false;
-      }
       if (!form.contact.trim()) {
         setError("Please enter a phone number");
         return false;
       }
-      if (form.listingType === "sell" && !form.images.length) {
-        setError("Please upload at least one image");
+
+      if (entryMode === "single") {
+        if (!form.title.trim()) {
+          setError("Please enter a title for your listing");
+          return false;
+        }
+        if (!form.description.trim()) {
+          setError("Please enter a description");
+          return false;
+        }
+        if (!form.price) {
+          setError("Please enter a price");
+          return false;
+        }
+        if (form.category !== "inputs" && !form.quantity) {
+          setError("Please enter a quantity");
+          return false;
+        }
+        if (form.listingType === "sell" && !form.images.length) {
+          setError("Please upload at least one image");
+          return false;
+        }
+        return true;
+      }
+
+      if (!batchItems.length) {
+        setError("Add at least one item in your batch.");
         return false;
+      }
+      if (batchItems.length > MAX_BATCH_ITEMS) {
+        setError(`A batch can contain up to ${MAX_BATCH_ITEMS} items.`);
+        return false;
+      }
+      for (let i = 0; i < batchItems.length; i += 1) {
+        const item = batchItems[i];
+        const itemLabel = `Item ${i + 1}`;
+        if (!item.title.trim()) {
+          setError(`${itemLabel}: add a title.`);
+          return false;
+        }
+        if (!item.description.trim()) {
+          setError(`${itemLabel}: add a description.`);
+          return false;
+        }
+        if (!item.price) {
+          setError(`${itemLabel}: add a price.`);
+          return false;
+        }
+        if (form.category !== "inputs" && !item.quantity) {
+          setError(`${itemLabel}: add a quantity.`);
+          return false;
+        }
+        if (form.listingType === "sell" && item.images.length < 1) {
+          setError(`${itemLabel}: upload at least one image.`);
+          return false;
+        }
       }
       return true;
     }
@@ -445,68 +596,160 @@ const CreateListing: React.FC = () => {
     setError("");
 
     try {
-      const formData = new FormData();
-      formData.append("title", form.title.trim());
-      formData.append("description", form.description.trim());
-      formData.append("category", form.category!);
-      formData.append("subcategory", form.subcategory!);
-      formData.append("listingType", form.listingType!);
-      formData.append("price", form.price);
-      formData.append("quantity", form.quantity);
-      formData.append("unit", form.unit);
-      formData.append("county", form.county);
-      formData.append("constituency", form.constituency);
-      formData.append("ward", form.ward);
-      formData.append("approximateLocation", form.approximateLocation.trim());
-      formData.append("availableFrom", form.availableFrom);
-      formData.append("deliveryScope", form.deliveryScope);
-      formData.append("contact", form.contact.trim());
-      formData.append("subscriptionActive", form.subscribed ? "true" : "false");
-      formData.append("premiumBadge", form.premiumBadge ? "true" : "false");
-      formData.append("premiumBadgePrice", form.premiumBadge && !isFreeLaunch ? "199" : "0");
-
-      form.images.forEach((img) => formData.append("images", img));
-
       const token = await ensureValidAccessToken();
       if (!token) {
         setError("Session expired. Please log in again.");
-        setUploading(false);
         return;
       }
-      const response = await fetch(`${API_BASE_URL}/products`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
 
-      const result = await response.json();
+      const postSingleListing = async (payload: {
+        title: string;
+        description: string;
+        price: string;
+        quantity: string;
+        unit: string;
+        deliveryScope: DeliveryScope;
+        images: File[];
+      }) => {
+        const formData = new FormData();
+        formData.append("title", payload.title.trim());
+        formData.append("description", payload.description.trim());
+        formData.append("category", form.category!);
+        formData.append("subcategory", form.subcategory!);
+        formData.append("listingType", form.listingType!);
+        formData.append("price", payload.price);
+        formData.append("quantity", payload.quantity);
+        formData.append("unit", payload.unit);
+        formData.append("county", form.county);
+        formData.append("constituency", form.constituency);
+        formData.append("ward", form.ward);
+        formData.append("approximateLocation", form.approximateLocation.trim());
+        formData.append("availableFrom", form.availableFrom);
+        formData.append("deliveryScope", payload.deliveryScope);
+        formData.append("contact", form.contact.trim());
+        formData.append("subscriptionActive", form.subscribed ? "true" : "false");
+        formData.append("premiumBadge", entryMode === "single" && form.premiumBadge ? "true" : "false");
+        formData.append(
+          "premiumBadgePrice",
+          entryMode === "single" && form.premiumBadge && !isFreeLaunch ? "199" : "0"
+        );
+        payload.images.forEach((img) => formData.append("images", img));
 
-      if (!response.ok || !result.success) {
-        let errorMsg = result.message || "Failed to create listing";
-        
-        if (response.status === 403) {
-          errorMsg = "You do not have permission to publish right now. Please try again or contact support.";
+        const response = await fetch(`${API_BASE_URL}/products`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        });
+
+        let result: any = null;
+        try {
+          result = await response.json();
+        } catch {
+          result = null;
         }
-        
-        setError(errorMsg);
-        setUploading(false);
+
+        if (!response.ok || !result?.success) {
+          let errorMsg = result?.message || "Failed to create listing";
+          if (response.status === 403) {
+            errorMsg =
+              "You do not have permission to publish right now. Please try again or contact support.";
+          }
+          if (response.status === 429 && result?.code === "UNVERIFIED_ACTIVE_CAP_REACHED") {
+            errorMsg = result?.message || errorMsg;
+          }
+          return { ok: false as const, errorMsg };
+        }
+
+        return {
+          ok: true as const,
+          publishStatus: String(result?.data?.publishStatus || "").toLowerCase(),
+        };
+      };
+
+      if (entryMode === "single") {
+        const singleResult = await postSingleListing({
+          title: form.title,
+          description: form.description,
+          price: form.price,
+          quantity: form.quantity,
+          unit: form.unit,
+          deliveryScope: form.deliveryScope,
+          images: form.images,
+        });
+
+        if (!singleResult.ok) {
+          setError(singleResult.errorMsg);
+          return;
+        }
+
+        localStorage.removeItem(DRAFT_STORAGE_KEY);
+        setHasDraft(false);
+        if (singleResult.publishStatus === "active") {
+          alert("Listing published successfully! It is now visible to buyers.");
+        } else {
+          alert(
+            "Listing submitted successfully! It will go live after admin approval. Verify your ID + selfie to speed up future listings."
+          );
+        }
+        navigate("/browse");
         return;
       }
 
-      // Success!
+      const failedItems: Array<{ item: BatchListingItem; errorMsg: string }> = [];
+      let createdCount = 0;
+      let activeCount = 0;
+
+      for (const item of batchItems) {
+        const batchResult = await postSingleListing({
+          title: item.title,
+          description: item.description,
+          price: item.price,
+          quantity: item.quantity,
+          unit: item.unit,
+          deliveryScope: item.deliveryScope,
+          images: item.images,
+        });
+        if (!batchResult.ok) {
+          failedItems.push({ item, errorMsg: batchResult.errorMsg });
+          continue;
+        }
+        createdCount += 1;
+        if (batchResult.publishStatus === "active") {
+          activeCount += 1;
+        }
+      }
+
+      if (createdCount === 0) {
+        setError(failedItems[0]?.errorMsg || "Failed to create listings.");
+        return;
+      }
+
+      if (failedItems.length > 0) {
+        setBatchItems(
+          failedItems.map((entry) => ({
+            ...entry.item,
+            id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          }))
+        );
+        setNotice(
+          `${createdCount} listing(s) submitted successfully${activeCount ? `, ${activeCount} live now` : ""}.`
+        );
+        setError(
+          `${failedItems.length} item(s) still need updates before publishing. Fix the remaining cards and submit again.`
+        );
+        setForm((prev) => ({ ...prev, step: 4 }));
+        return;
+      }
+
       localStorage.removeItem(DRAFT_STORAGE_KEY);
       setHasDraft(false);
-      const publishStatus = String(result?.data?.publishStatus || "").toLowerCase();
-      if (publishStatus === "active") {
-        alert("Listing published successfully! It is now visible to buyers.");
-      } else {
-        alert(
-          "Listing submitted successfully! It will go live after admin approval. Verify your ID + selfie to speed up future listings."
-        );
-      }
+      alert(
+        `${createdCount} listing(s) submitted successfully${activeCount ? `, ${activeCount} are live now.` : "."}`
+      );
       navigate("/browse");
     } catch (err: any) {
       setError(err.message || "An error occurred while creating your listing");
+    } finally {
       setUploading(false);
     }
   };
@@ -534,12 +777,28 @@ const CreateListing: React.FC = () => {
     try {
       const parsed = JSON.parse(draftRaw);
       const restoredStep = Math.min(Math.max(Number(parsed.step) || 2, 2), 5);
+      const restoredEntryMode: ListingEntryMode =
+        parsed?.entryMode === "batch" ? "batch" : "single";
+      const restoredBatchItems: BatchListingItem[] = Array.isArray(parsed?.batchItems)
+        ? parsed.batchItems.slice(0, MAX_BATCH_ITEMS).map((item: any) => ({
+            ...createBatchItem(
+              item?.unit || recommendedUnit || form.unit || "kg",
+              item?.deliveryScope || "negotiable"
+            ),
+            title: String(item?.title || ""),
+            description: String(item?.description || ""),
+            price: String(item?.price || ""),
+            quantity: String(item?.quantity || ""),
+          }))
+        : [createBatchItem(recommendedUnit || form.unit || "kg", form.deliveryScope)];
       setForm((prev) => ({
         ...prev,
         ...parsed,
         images: [],
         step: restoredStep,
       }));
+      setEntryMode(restoredEntryMode);
+      setBatchItems(restoredBatchItems.length ? restoredBatchItems : [createBatchItem(recommendedUnit || form.unit || "kg", form.deliveryScope)]);
       setHasDraft(false);
       setNotice("Draft restored. Continue where you left off.");
     } catch {
@@ -906,96 +1165,311 @@ const CreateListing: React.FC = () => {
               </h2>
 
               <div className="space-y-5">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                  <p className="text-sm font-semibold text-slate-900">Listing mode</p>
+                  <p className="mt-1 text-xs text-slate-600">
+                    Single is fastest for one item. Batch lets you publish up to {MAX_BATCH_ITEMS} items in one go.
+                  </p>
+                  <div className="mt-3 inline-flex rounded-lg border border-slate-200 bg-white p-1">
+                    <button
+                      type="button"
+                      onClick={() => setEntryMode("single")}
+                      className={`rounded-md px-3 py-1.5 text-sm font-semibold transition ${
+                        entryMode === "single"
+                          ? "bg-emerald-600 text-white"
+                          : "text-slate-700 hover:bg-slate-100"
+                      }`}
+                    >
+                      Single
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEntryMode("batch")}
+                      className={`rounded-md px-3 py-1.5 text-sm font-semibold transition ${
+                        entryMode === "batch"
+                          ? "bg-emerald-600 text-white"
+                          : "text-slate-700 hover:bg-slate-100"
+                      }`}
+                    >
+                      Batch
+                    </button>
+                  </div>
+                </div>
+
                 <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4">
-                  <p className="text-sm font-semibold text-emerald-900">Required to publish (about 30 seconds)</p>
+                  <p className="text-sm font-semibold text-emerald-900">
+                    {entryMode === "single"
+                      ? "Required to publish (about 30 seconds)"
+                      : "Required per item in this batch"}
+                  </p>
                   <p className="mt-1 text-xs text-emerald-800">
-                    Add a title, price, contact number, and at least one photo. You can optimize the rest after publishing.
+                    {entryMode === "single"
+                      ? "Add a title, price, contact number, and at least one photo. You can optimize the rest after publishing."
+                      : "Each item needs a title, description, price, and at least one photo. Location, category, and contact apply to all items."}
                   </p>
                 </div>
 
-                {/* Title */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">Title *</label>
-                  <input
-                    type="text"
-                    placeholder="e.g., Fresh Tomatoes, Dairy Cow, Tractor"
-                    value={form.title}
-                    onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
-                </div>
-
-                {/* Description */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">Description *</label>
-                  <p className="mb-2 text-xs text-gray-600">{descriptionCopy.helper}</p>
-                  <textarea
-                    placeholder={descriptionCopy.placeholder}
-                    value={form.description}
-                    onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
-                    rows={5}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
-                </div>
-
-                {/* Price and Quantity */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">Price (KSh) *</label>
-                    <input
-                      type="number"
-                      placeholder="0"
-                      value={form.price}
-                      onChange={(e) => setForm((prev) => ({ ...prev, price: e.target.value }))}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                    <p className="text-xs text-gray-600 mt-1">
-                      {isFreeLaunch ? "Commission: Free for now" : `Commission: KSh ${commission.toFixed(0)}`}
-                    </p>
-                  </div>
-
-                  {form.category !== "inputs" && (
+                {entryMode === "single" ? (
+                  <>
+                    {/* Title */}
                     <div>
-                      <label className="block text-sm font-semibold text-gray-900 mb-2">Quantity *</label>
-                      <div className="flex gap-2">
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">Title *</label>
+                      <input
+                        type="text"
+                        placeholder="e.g., Fresh Tomatoes, Dairy Cow, Tractor"
+                        value={form.title}
+                        onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      />
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">Description *</label>
+                      <p className="mb-2 text-xs text-gray-600">{descriptionCopy.helper}</p>
+                      <textarea
+                        placeholder={descriptionCopy.placeholder}
+                        value={form.description}
+                        onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
+                        rows={5}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      />
+                    </div>
+
+                    {/* Price and Quantity */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-900 mb-2">Price (KSh) *</label>
                         <input
                           type="number"
-                          placeholder="Amount"
-                          value={form.quantity}
-                          onChange={(e) => setForm((prev) => ({ ...prev, quantity: e.target.value }))}
-                          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          placeholder="0"
+                          value={form.price}
+                          onChange={(e) => setForm((prev) => ({ ...prev, price: e.target.value }))}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                         />
-                        <select
-                          value={form.unit}
-                          onChange={(e) => setForm((prev) => ({ ...prev, unit: e.target.value }))}
-                          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        >
-                          {UNITS.map((u) => (
-                            <option key={u} value={u}>
-                              {u}
-                            </option>
-                          ))}
-                        </select>
+                        <p className="text-xs text-gray-600 mt-1">
+                          {isFreeLaunch ? "Commission: Free for now" : `Commission: KSh ${commission.toFixed(0)}`}
+                        </p>
                       </div>
-                      {recommendedUnit && (
-                        <div className="mt-2 flex flex-wrap items-center gap-2">
-                          <p className="text-xs text-gray-600">
-                            Recommended unit for this category: <span className="font-semibold">{recommendedUnit}</span>
-                          </p>
-                          {form.unit !== recommendedUnit && (
-                            <button
-                              type="button"
-                              onClick={() => setForm((prev) => ({ ...prev, unit: recommendedUnit }))}
-                              className="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+
+                      {form.category !== "inputs" && (
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-900 mb-2">Quantity *</label>
+                          <div className="flex gap-2">
+                            <input
+                              type="number"
+                              placeholder="Amount"
+                              value={form.quantity}
+                              onChange={(e) => setForm((prev) => ({ ...prev, quantity: e.target.value }))}
+                              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            />
+                            <select
+                              value={form.unit}
+                              onChange={(e) => setForm((prev) => ({ ...prev, unit: e.target.value }))}
+                              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                             >
-                              Use recommended
-                            </button>
+                              {UNITS.map((u) => (
+                                <option key={u} value={u}>
+                                  {u}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          {recommendedUnit && (
+                            <div className="mt-2 flex flex-wrap items-center gap-2">
+                              <p className="text-xs text-gray-600">
+                                Recommended unit for this category: <span className="font-semibold">{recommendedUnit}</span>
+                              </p>
+                              {form.unit !== recommendedUnit && (
+                                <button
+                                  type="button"
+                                  onClick={() => setForm((prev) => ({ ...prev, unit: recommendedUnit }))}
+                                  className="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+                                >
+                                  Use recommended
+                                </button>
+                              )}
+                            </div>
                           )}
                         </div>
                       )}
                     </div>
-                  )}
-                </div>
+                  </>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                      <p className="text-sm font-semibold text-slate-900">
+                        {batchReadiness.readyCount}/{batchReadiness.itemCount} items ready
+                      </p>
+                      <button
+                        type="button"
+                        onClick={addBatchItem}
+                        disabled={batchItems.length >= MAX_BATCH_ITEMS}
+                        className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                      >
+                        Add item
+                      </button>
+                    </div>
+
+                    {batchItems.map((item, index) => (
+                      <div key={item.id} className="rounded-xl border border-slate-200 p-4">
+                        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                          <p className="text-sm font-semibold text-slate-900">Item {index + 1}</p>
+                          {batchItems.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeBatchItem(item.id)}
+                              className="rounded-lg border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50"
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="space-y-4">
+                          <div>
+                            <label className="mb-2 block text-sm font-semibold text-gray-900">Title *</label>
+                            <input
+                              type="text"
+                              placeholder="e.g., Urea fertilizer 50kg"
+                              value={item.title}
+                              onChange={(e) =>
+                                updateBatchItem(item.id, (current) => ({ ...current, title: e.target.value }))
+                              }
+                              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-green-500"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="mb-2 block text-sm font-semibold text-gray-900">Description *</label>
+                            <textarea
+                              placeholder={descriptionCopy.placeholder}
+                              value={item.description}
+                              onChange={(e) =>
+                                updateBatchItem(item.id, (current) => ({ ...current, description: e.target.value }))
+                              }
+                              rows={4}
+                              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-green-500"
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="mb-2 block text-sm font-semibold text-gray-900">Price (KSh) *</label>
+                              <input
+                                type="number"
+                                placeholder="0"
+                                value={item.price}
+                                onChange={(e) =>
+                                  updateBatchItem(item.id, (current) => ({ ...current, price: e.target.value }))
+                                }
+                                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-green-500"
+                              />
+                            </div>
+                            {form.category !== "inputs" && (
+                              <div>
+                                <label className="mb-2 block text-sm font-semibold text-gray-900">Quantity *</label>
+                                <div className="flex gap-2">
+                                  <input
+                                    type="number"
+                                    placeholder="Amount"
+                                    value={item.quantity}
+                                    onChange={(e) =>
+                                      updateBatchItem(item.id, (current) => ({
+                                        ...current,
+                                        quantity: e.target.value,
+                                      }))
+                                    }
+                                    className="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-green-500"
+                                  />
+                                  <select
+                                    value={item.unit}
+                                    onChange={(e) =>
+                                      updateBatchItem(item.id, (current) => ({ ...current, unit: e.target.value }))
+                                    }
+                                    className="rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-green-500"
+                                  >
+                                    {UNITS.map((unit) => (
+                                      <option key={unit} value={unit}>
+                                        {unit}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="mb-2 block text-sm font-semibold text-gray-900">
+                              Delivery scope
+                            </label>
+                            <select
+                              value={item.deliveryScope}
+                              onChange={(e) =>
+                                updateBatchItem(item.id, (current) => ({
+                                  ...current,
+                                  deliveryScope: e.target.value as DeliveryScope,
+                                }))
+                              }
+                              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-green-500"
+                            >
+                              {DELIVERY_SCOPE_OPTIONS.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="mb-2 block text-sm font-semibold text-gray-900">
+                              Upload images ({item.images.length}/5) *
+                            </label>
+                            <div className="rounded-lg border-2 border-dashed border-gray-300 p-4 text-center">
+                              <input
+                                id={`batch-image-input-${item.id}`}
+                                type="file"
+                                multiple
+                                accept="image/*"
+                                onChange={(e) => handleBatchImageUpload(item.id, e)}
+                                disabled={item.images.length >= 5}
+                                className="hidden"
+                              />
+                              <label
+                                htmlFor={`batch-image-input-${item.id}`}
+                                className="cursor-pointer text-sm font-semibold text-gray-800"
+                              >
+                                Add photos for this item
+                              </label>
+                              <p className="mt-1 text-xs text-gray-600">PNG, JPG up to 5 images</p>
+                            </div>
+                            {item.images.length > 0 && (
+                              <div className="mt-3 grid grid-cols-5 gap-2">
+                                {item.images.map((img, imageIndex) => (
+                                  <div key={`${item.id}-${imageIndex}`} className="relative group">
+                                    <img
+                                      src={URL.createObjectURL(img)}
+                                      alt={`Item ${index + 1} preview ${imageIndex + 1}`}
+                                      className="h-20 w-full rounded-lg object-cover"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => removeBatchImage(item.id, imageIndex)}
+                                      className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50 text-[11px] font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100"
+                                    >
+                                      Remove
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 {/* Available From */}
                 <div>
@@ -1010,6 +1484,7 @@ const CreateListing: React.FC = () => {
                         deliveryScope: e.target.value as DeliveryScope,
                       }))
                     }
+                    disabled={entryMode === "batch"}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   >
                     {DELIVERY_SCOPE_OPTIONS.map((option) => (
@@ -1023,7 +1498,9 @@ const CreateListing: React.FC = () => {
                       DELIVERY_SCOPE_OPTIONS.find((option) => option.value === form.deliveryScope)
                         ?.helper
                     }{" "}
-                    This appears as a delivery tag on your listing.
+                    {entryMode === "batch"
+                      ? "Batch mode uses each item's delivery scope."
+                      : "This appears as a delivery tag on your listing."}
                   </p>
                 </div>
 
@@ -1057,50 +1534,52 @@ const CreateListing: React.FC = () => {
                 </div>
 
                 {/* Images */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    <Camera className="w-4 h-4 inline mr-2" />
-                    Upload Images ({form.images.length}/5) *
-                  </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    <input
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      disabled={form.images.length >= 5}
-                      className="hidden"
-                      id="imageInput"
-                    />
-                    <label htmlFor="imageInput" className="cursor-pointer">
-                      <Camera className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-                      <p className="text-sm font-semibold text-gray-900">Click to upload or drag and drop</p>
-                      <p className="text-xs text-gray-600">PNG, JPG up to 5 images. Listings with photos get more buyer calls.</p>
+                {entryMode === "single" && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      <Camera className="w-4 h-4 inline mr-2" />
+                      Upload Images ({form.images.length}/5) *
                     </label>
-                  </div>
-
-                  {/* Image Preview */}
-                  {form.images.length > 0 && (
-                    <div className="mt-4 grid grid-cols-5 gap-3">
-                      {form.images.map((img, idx) => (
-                        <div key={idx} className="relative group">
-                          <img
-                            src={URL.createObjectURL(img)}
-                            alt={`Preview ${idx + 1}`}
-                            className="w-full h-24 object-cover rounded-lg"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeImage(idx)}
-                            className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <span className="text-white text-xs font-semibold">Remove</span>
-                          </button>
-                        </div>
-                      ))}
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        disabled={form.images.length >= 5}
+                        className="hidden"
+                        id="imageInput"
+                      />
+                      <label htmlFor="imageInput" className="cursor-pointer">
+                        <Camera className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                        <p className="text-sm font-semibold text-gray-900">Click to upload or drag and drop</p>
+                        <p className="text-xs text-gray-600">PNG, JPG up to 5 images. Listings with photos get more buyer calls.</p>
+                      </label>
                     </div>
-                  )}
-                </div>
+
+                    {/* Image Preview */}
+                    {form.images.length > 0 && (
+                      <div className="mt-4 grid grid-cols-5 gap-3">
+                        {form.images.map((img, idx) => (
+                          <div key={idx} className="relative group">
+                            <img
+                              src={URL.createObjectURL(img)}
+                              alt={`Preview ${idx + 1}`}
+                              className="w-full h-24 object-cover rounded-lg"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeImage(idx)}
+                              className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <span className="text-white text-xs font-semibold">Remove</span>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4">
                   <div className="flex items-center justify-between gap-3">
@@ -1222,32 +1701,61 @@ const CreateListing: React.FC = () => {
                       {form.ward}, {form.constituency}, {form.county}
                     </span>
                   </p>
-                  <p>
-                    <span className="text-gray-600">Title:</span>
-                    <span className="font-semibold text-gray-900 ml-2">{form.title}</span>
-                  </p>
-                  <p>
-                    <span className="text-gray-600">Price:</span>
-                    <span className="font-semibold text-gray-900 ml-2">KSh {Number(form.price).toLocaleString()}</span>
-                  </p>
-                  {form.quantity && (
-                    <p>
-                      <span className="text-gray-600">Quantity:</span>
-                      <span className="font-semibold text-gray-900 ml-2">
-                        {form.quantity} {form.unit}
-                      </span>
-                    </p>
+                  {entryMode === "single" ? (
+                    <>
+                      <p>
+                        <span className="text-gray-600">Title:</span>
+                        <span className="font-semibold text-gray-900 ml-2">{form.title}</span>
+                      </p>
+                      <p>
+                        <span className="text-gray-600">Price:</span>
+                        <span className="font-semibold text-gray-900 ml-2">
+                          KSh {Number(form.price).toLocaleString()}
+                        </span>
+                      </p>
+                      {form.quantity && (
+                        <p>
+                          <span className="text-gray-600">Quantity:</span>
+                          <span className="font-semibold text-gray-900 ml-2">
+                            {form.quantity} {form.unit}
+                          </span>
+                        </p>
+                      )}
+                      <p>
+                        <span className="text-gray-600">Delivery:</span>
+                        <span className="font-semibold text-gray-900 ml-2">
+                          {DELIVERY_SCOPE_LABELS[form.deliveryScope]}
+                        </span>
+                      </p>
+                      <p>
+                        <span className="text-gray-600">Images:</span>
+                        <span className="font-semibold text-gray-900 ml-2">{form.images.length} uploaded</span>
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p>
+                        <span className="text-gray-600">Mode:</span>
+                        <span className="font-semibold text-gray-900 ml-2">Batch</span>
+                      </p>
+                      <p>
+                        <span className="text-gray-600">Items in batch:</span>
+                        <span className="font-semibold text-gray-900 ml-2">{batchItems.length}</span>
+                      </p>
+                      <p>
+                        <span className="text-gray-600">Ready items:</span>
+                        <span className="font-semibold text-gray-900 ml-2">
+                          {batchReadiness.readyCount}/{batchReadiness.itemCount}
+                        </span>
+                      </p>
+                      <p>
+                        <span className="text-gray-600">Total photos:</span>
+                        <span className="font-semibold text-gray-900 ml-2">
+                          {batchItems.reduce((total, item) => total + item.images.length, 0)}
+                        </span>
+                      </p>
+                    </>
                   )}
-                  <p>
-                    <span className="text-gray-600">Delivery:</span>
-                    <span className="font-semibold text-gray-900 ml-2">
-                      {DELIVERY_SCOPE_LABELS[form.deliveryScope]}
-                    </span>
-                  </p>
-                  <p>
-                    <span className="text-gray-600">Images:</span>
-                    <span className="font-semibold text-gray-900 ml-2">{form.images.length} uploaded</span>
-                  </p>
                   <p>
                     <span className="text-gray-600">Trust readiness:</span>
                     <span className="font-semibold text-gray-900 ml-2">{trustScore}%</span>
@@ -1256,25 +1764,27 @@ const CreateListing: React.FC = () => {
               </div>
 
               {/* Premium Options */}
-              <div className="bg-blue-50 rounded-lg p-6 border border-blue-200 mb-6">
-                <h3 className="font-bold text-gray-900 mb-4">Boost Your Listing (Optional)</h3>
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={form.premiumBadge}
-                    onChange={(e) => setForm((prev) => ({ ...prev, premiumBadge: e.target.checked }))}
-                    className="w-5 h-5 text-green-600"
-                  />
-                  <div>
-                    <p className="font-semibold text-gray-900">
-                      Premium Badge {isFreeLaunch ? "(Free for now)" : "(KSh 199)"}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Get a premium badge to stand out{isFreeLaunch ? " - free for now." : "."}
-                    </p>
-                  </div>
-                </label>
-              </div>
+              {entryMode === "single" && (
+                <div className="bg-blue-50 rounded-lg p-6 border border-blue-200 mb-6">
+                  <h3 className="font-bold text-gray-900 mb-4">Boost Your Listing (Optional)</h3>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={form.premiumBadge}
+                      onChange={(e) => setForm((prev) => ({ ...prev, premiumBadge: e.target.checked }))}
+                      className="w-5 h-5 text-green-600"
+                    />
+                    <div>
+                      <p className="font-semibold text-gray-900">
+                        Premium Badge {isFreeLaunch ? "(Free for now)" : "(KSh 199)"}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Get a premium badge to stand out{isFreeLaunch ? " - free for now." : "."}
+                      </p>
+                    </div>
+                  </label>
+                </div>
+              )}
 
               <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
                 <p className="font-semibold mb-2">Your listing will be:</p>
@@ -1291,7 +1801,13 @@ const CreateListing: React.FC = () => {
                 disabled={uploading}
                 className="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 disabled:opacity-50 transition-all"
               >
-                {uploading ? "Publishing listing..." : "Publish Listing - start receiving buyer inquiries"}
+                {uploading
+                  ? entryMode === "batch"
+                    ? "Publishing batch..."
+                    : "Publishing listing..."
+                  : entryMode === "batch"
+                  ? "Publish batch listings - start receiving buyer inquiries"
+                  : "Publish Listing - start receiving buyer inquiries"}
               </button>
             </div>
           )}
