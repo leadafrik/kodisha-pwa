@@ -82,6 +82,7 @@ const shouldPadForMobileNav = (pathname: string, signedIn: boolean) => {
 
   return (
     pathname === '/' ||
+    pathname === '/home' ||
     pathname === '/b2b' ||
     pathname === '/bulk' ||
     pathname === '/about' ||
@@ -165,7 +166,8 @@ const AppShell = () => {
       <div className={`flex-1 py-4 ${shouldPadForMobileNav(location.pathname, !!user) ? "pb-24 lg:pb-4" : ""}`}>
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<BrowseListings />} />
+            <Route path="/home" element={<Home />} />
             <Route
               path="/create-listing"
               element={
@@ -231,13 +233,13 @@ const AppShell = () => {
             />
             <Route path="/contact" element={<AboutUs />} />
             <Route path="/help" element={<AboutUs />} />
-            <Route path="/features" element={<Home />} />
-            <Route path="/pricing" element={<Home />} />
-            <Route path="/blog" element={<Home />} />
+            <Route path="/features" element={<Navigate to="/browse" replace />} />
+            <Route path="/pricing" element={<Navigate to="/browse" replace />} />
+            <Route path="/blog" element={<Navigate to="/browse" replace />} />
             <Route path="/careers" element={<Home />} />
             <Route path="/cookies" element={<PrivacyPolicy />} />
-            <Route path="/status" element={<Home />} />
-            <Route path="/feedback" element={<Home />} />
+            <Route path="/status" element={<Navigate to="/browse" replace />} />
+            <Route path="/feedback" element={<Navigate to="/browse" replace />} />
             <Route path="/login" element={<Login />} />
             <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/admin/login" element={<AdminLogin />} />
