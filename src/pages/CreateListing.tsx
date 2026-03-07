@@ -5,7 +5,7 @@ import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
 import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from "../data/kenyaCounties";
 import { API_BASE_URL, ensureValidAccessToken } from "../config/api";
 import { PAYMENTS_ENABLED } from "../config/featureFlags";
-import { AlertCircle, CheckCircle2, MapPin, Tag, Calendar, Camera, FileText } from "lucide-react";
+import { CheckCircle2, MapPin, Tag, Calendar, Camera } from "lucide-react";
 import { ErrorAlert } from "../components/ui";
 
 type ListingCategory = "produce" | "livestock" | "inputs" | "service";
@@ -59,11 +59,6 @@ const DELIVERY_SCOPE_OPTIONS: Array<{ value: DeliveryScope; label: string; helpe
   { value: "within_county", label: "Within county", helper: "Delivery is available only in my county." },
   { value: "negotiable", label: "Negotiable", helper: "Delivery can be discussed with buyer." },
 ];
-const DELIVERY_SCOPE_LABELS: Record<DeliveryScope, string> = {
-  countrywide: "Countrywide",
-  within_county: "Within county",
-  negotiable: "Negotiable",
-};
 
 const UNITS = ["kg", "bag", "ton", "bunch", "dozen", "piece", "liter", "gallon", "box", "crate"];
 const RECOMMENDED_UNIT_BY_CATEGORY: Record<ListingCategory, string> = {
@@ -81,7 +76,7 @@ const CATEGORY_DESCRIPTIONS = {
 };
 
 const CATEGORY_OPTIONS: ListingCategory[] = ["produce", "livestock", "inputs", "service"];
-const LISTING_PROGRESS_LABELS = ["Category", "Location", "Details", "Verify"] as const;
+const LISTING_PROGRESS_LABELS = ["Basics", "Publish"] as const;
 const MAX_BATCH_ITEMS = 20;
 const createBatchItem = (unit = "kg", deliveryScope: DeliveryScope = "negotiable"): BatchListingItem => ({
   id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
@@ -114,6 +109,8 @@ const DESCRIPTION_HINTS: Record<ListingCategory, { helper: string; placeholder: 
 };
 
 const DRAFT_STORAGE_KEY = "kodisha_listing_draft_v1";
+const MIN_FLOW_STEP = 2;
+const MAX_FLOW_STEP = 3;
 
 const CreateListing: React.FC = () => {
   const navigate = useNavigate();
@@ -121,8 +118,8 @@ const CreateListing: React.FC = () => {
   const { user, refreshUser } = useAuth();
   const { isCompact } = useAdaptiveLayout();
   const [form, setForm] = useState<ListingFormData>({
-    step: 1,
-    listingType: null,
+    step: MIN_FLOW_STEP,
+    listingType: "sell",
     category: null,
     subcategory: null,
     title: "",
@@ -199,12 +196,6 @@ const CreateListing: React.FC = () => {
       refreshUser();
     }
   }, [user?._id, refreshUser]);
-
-  useEffect(() => {
-    if (form.step === 1 && !form.listingType) {
-      setForm((prev) => ({ ...prev, listingType: "sell", step: 2 }));
-    }
-  }, [form.step, form.listingType]);
 
   useEffect(() => {
     if (!requestedCategory) return;
@@ -343,8 +334,8 @@ const CreateListing: React.FC = () => {
   const recommendedUnit = form.category
     ? RECOMMENDED_UNIT_BY_CATEGORY[form.category]
     : null;
-  const progressStep = Math.max(1, Math.min(4, form.step - 1));
-  const progressPercent = Math.round((progressStep / 4) * 100);
+  const progressStep = form.step >= MAX_FLOW_STEP ? 2 : 1;
+  const progressPercent = Math.round((progressStep / LISTING_PROGRESS_LABELS.length) * 100);
   const currentProgressLabel = LISTING_PROGRESS_LABELS[progressStep - 1];
   const descriptionCopy = form.category
     ? DESCRIPTION_HINTS[form.category]
@@ -485,10 +476,6 @@ const CreateListing: React.FC = () => {
         setError("Please select a subcategory");
         return false;
       }
-      return true;
-    }
-
-    if (form.step === 3) {
       if (!form.county) {
         setError("Please select your county");
         return false;
@@ -504,7 +491,7 @@ const CreateListing: React.FC = () => {
       return true;
     }
 
-    if (form.step === 4) {
+    if (form.step === 3) {
       if (!form.contact.trim()) {
         setError("Please enter a phone number");
         return false;
@@ -569,10 +556,6 @@ const CreateListing: React.FC = () => {
       return true;
     }
 
-    if (form.step === 5) {
-      return true;
-    }
-
     return true;
   };
 
@@ -585,7 +568,7 @@ const CreateListing: React.FC = () => {
   const handlePrevStep = () => {
     setError("");
     setNotice("");
-    setForm((prev) => ({ ...prev, step: Math.max(2, prev.step - 1) }));
+    setForm((prev) => ({ ...prev, step: Math.max(MIN_FLOW_STEP, prev.step - 1) }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -776,7 +759,10 @@ const CreateListing: React.FC = () => {
     if (!draftRaw) return;
     try {
       const parsed = JSON.parse(draftRaw);
-      const restoredStep = Math.min(Math.max(Number(parsed.step) || 2, 2), 5);
+      const restoredStep = Math.min(
+        Math.max(Number(parsed.step) || MIN_FLOW_STEP, MIN_FLOW_STEP),
+        MAX_FLOW_STEP
+      );
       const restoredEntryMode: ListingEntryMode =
         parsed?.entryMode === "batch" ? "batch" : "single";
       const restoredBatchItems: BatchListingItem[] = Array.isArray(parsed?.batchItems)
@@ -866,7 +852,7 @@ const CreateListing: React.FC = () => {
                   />
                 </div>
                 <p className="mt-2 text-xs text-slate-500">
-                  Step {progressStep} of 4
+                  Step {progressStep} of {LISTING_PROGRESS_LABELS.length}
                 </p>
               </div>
             </div>
@@ -943,7 +929,7 @@ const CreateListing: React.FC = () => {
           )}
 
         {/* Form Container */}
-        <form onSubmit={form.step === 5 ? handleSubmit : (e) => e.preventDefault()}>
+        <form onSubmit={form.step === MAX_FLOW_STEP ? handleSubmit : (e) => e.preventDefault()}>
           {/* Step 2: Category Selection */}
           {form.step === 2 && (
             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
@@ -1002,7 +988,6 @@ const CreateListing: React.FC = () => {
                           setForm((prev) => ({
                             ...prev,
                             subcategory: value,
-                            step: value ? Math.max(prev.step, 3) : prev.step,
                           }));
                           setError("");
                           setNotice("");
@@ -1060,7 +1045,6 @@ const CreateListing: React.FC = () => {
                       setForm((prev) => ({
                         ...prev,
                         subcategory: value,
-                        step: value ? Math.max(prev.step, 3) : prev.step,
                       }));
                       setError("");
                       setNotice("");
@@ -1076,89 +1060,77 @@ const CreateListing: React.FC = () => {
                   </select>
                 </div>
               )}
-            </div>
-          )}
-
-          {/* Step 3: Location */}
-          {form.step === 3 && (
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <MapPin className="w-5 h-5" /> Where is it located?
-              </h2>
-
-              <div className="space-y-5">
-                {/* County */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">County *</label>
-                  <select
-                    value={form.county}
-                    onChange={(e) => setForm((prev) => ({ ...prev, county: e.target.value }))}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  >
-                    <option value="">Select a county...</option>
-                    {kenyaCounties.map((c) => (
-                      <option key={c.code} value={c.name}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Constituency */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">Constituency *</label>
-                  <select
-                    value={form.constituency}
-                    onChange={(e) => setForm((prev) => ({ ...prev, constituency: e.target.value }))}
-                    disabled={!form.county}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-100"
-                  >
-                    <option value="">Select a constituency...</option>
-                    {constituencies.map((c) => (
-                      <option key={c.value} value={c.value}>
-                        {c.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Ward */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">Ward *</label>
-                  <select
-                    value={form.ward}
-                    onChange={(e) => setForm((prev) => ({ ...prev, ward: e.target.value }))}
-                    disabled={!form.constituency}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-100"
-                  >
-                    <option value="">Select a ward...</option>
-                    {wards.map((w) => (
-                      <option key={w.value} value={w.value}>
-                        {w.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Approximate Location */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Specific Location (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g., Near the marketplace, Main road"
-                    value={form.approximateLocation}
-                    onChange={(e) => setForm((prev) => ({ ...prev, approximateLocation: e.target.value }))}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
+              <div className="mt-6 border-t border-slate-200 pt-6">
+                <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-gray-900">
+                  <MapPin className="h-5 w-5" /> Where is it located?
+                </h3>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-gray-900">County *</label>
+                    <select
+                      value={form.county}
+                      onChange={(e) => setForm((prev) => ({ ...prev, county: e.target.value }))}
+                      className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-green-500"
+                    >
+                      <option value="">Select a county...</option>
+                      {kenyaCounties.map((c) => (
+                        <option key={c.code} value={c.name}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-gray-900">Constituency *</label>
+                    <select
+                      value={form.constituency}
+                      onChange={(e) => setForm((prev) => ({ ...prev, constituency: e.target.value }))}
+                      disabled={!form.county}
+                      className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+                    >
+                      <option value="">Select a constituency...</option>
+                      {constituencies.map((c) => (
+                        <option key={c.value} value={c.value}>
+                          {c.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-gray-900">Ward *</label>
+                    <select
+                      value={form.ward}
+                      onChange={(e) => setForm((prev) => ({ ...prev, ward: e.target.value }))}
+                      disabled={!form.constituency}
+                      className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+                    >
+                      <option value="">Select a ward...</option>
+                      {wards.map((w) => (
+                        <option key={w.value} value={w.value}>
+                          {w.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-gray-900">
+                      Specific location (optional)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g., Near main road"
+                      value={form.approximateLocation}
+                      onChange={(e) => setForm((prev) => ({ ...prev, approximateLocation: e.target.value }))}
+                      className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-green-500"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Step 4: Listing Details */}
-          {form.step === 4 && (
+          {/* Step 3: Listing Details */}
+          {form.step === 3 && (
             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
               <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                 <Tag className="w-5 h-5" /> Listing Details
@@ -1612,203 +1584,36 @@ const CreateListing: React.FC = () => {
                     ))}
                   </div>
                 </div>
-              </div>
-            </div>
-          )}
 
-          {/* Step 5: Verification & Confirmation */}
-          {form.step === 5 && (
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <FileText className="w-5 h-5" /> Review & Confirm
-              </h2>
-
-              {idVerified && selfieVerified ? (
-                <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-                  <p className="flex items-center gap-2 font-semibold text-emerald-700">
-                    <CheckCircle2 className="w-5 h-5" />
-                    Profile verified
-                  </p>
-                  <p className="mt-1 text-sm text-emerald-700">
-                    Your trust badge is active. This listing can go live immediately after you publish.
-                  </p>
-                </div>
-              ) : (
-                <div className="mb-6 space-y-3">
-                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-                    <p className="flex items-center gap-2 font-semibold text-amber-700">
-                      {idVerified ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-                      National ID verification
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                  {idVerified && selfieVerified ? (
+                    <p className="font-semibold">
+                      Profile verified. Your listing has stronger trust and can go live faster.
                     </p>
-                    <p className="text-sm mt-1 text-amber-700">
-                      {idVerified
-                        ? "Verified"
-                        : isVerificationPending
-                        ? "Submitted - pending approval"
-                        : "Not verified yet - add ID to build trust faster"}
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-                    <p className="flex items-center gap-2 font-semibold text-amber-700">
-                      {selfieVerified ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-                      Selfie verification
-                    </p>
-                    <p className="text-sm mt-1 text-amber-700">
-                      {selfieVerified
-                        ? "Verified"
-                        : isVerificationPending
-                        ? "Submitted - pending approval"
-                        : "Not verified yet - add a selfie to increase buyer trust"}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {showVerificationNudge && (
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
-                  <p className="text-amber-800 font-semibold mb-2">Publish now, verify to rank higher</p>
-                  <p className="text-amber-700 text-sm mb-4">
-                    Your listing can still be submitted now. If you choose to verify, Agrisoko uses your ID only for identity review, deletes the uploaded images promptly after admin review, and keeps only the verification outcome needed to strengthen trust.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => navigate(verifyIdPath)}
-                    className="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700"
-                  >
-                    Verify profile
-                  </button>
-                </div>
-              )}
-
-              {/* Listing Summary */}
-              <div className="bg-gray-50 rounded-lg p-6 mb-6 border border-gray-200">
-                <h3 className="font-bold text-gray-900 mb-4">Listing Summary</h3>
-                <div className="space-y-3 text-sm">
-                  <p>
-                    <span className="text-gray-600">Type:</span>
-                    <span className="font-semibold text-gray-900 ml-2 capitalize">{form.listingType}</span>
-                  </p>
-                  <p>
-                    <span className="text-gray-600">Category:</span>
-                    <span className="font-semibold text-gray-900 ml-2 capitalize">
-                      {form.category} - {form.subcategory}
-                    </span>
-                  </p>
-                  <p>
-                    <span className="text-gray-600">Location:</span>
-                    <span className="font-semibold text-gray-900 ml-2">
-                      {form.ward}, {form.constituency}, {form.county}
-                    </span>
-                  </p>
-                  {entryMode === "single" ? (
-                    <>
-                      <p>
-                        <span className="text-gray-600">Title:</span>
-                        <span className="font-semibold text-gray-900 ml-2">{form.title}</span>
-                      </p>
-                      <p>
-                        <span className="text-gray-600">Price:</span>
-                        <span className="font-semibold text-gray-900 ml-2">
-                          KSh {Number(form.price).toLocaleString()}
-                        </span>
-                      </p>
-                      {form.quantity && (
-                        <p>
-                          <span className="text-gray-600">Quantity:</span>
-                          <span className="font-semibold text-gray-900 ml-2">
-                            {form.quantity} {form.unit}
-                          </span>
-                        </p>
-                      )}
-                      <p>
-                        <span className="text-gray-600">Delivery:</span>
-                        <span className="font-semibold text-gray-900 ml-2">
-                          {DELIVERY_SCOPE_LABELS[form.deliveryScope]}
-                        </span>
-                      </p>
-                      <p>
-                        <span className="text-gray-600">Images:</span>
-                        <span className="font-semibold text-gray-900 ml-2">{form.images.length} uploaded</span>
-                      </p>
-                    </>
                   ) : (
                     <>
-                      <p>
-                        <span className="text-gray-600">Mode:</span>
-                        <span className="font-semibold text-gray-900 ml-2">Batch</span>
-                      </p>
-                      <p>
-                        <span className="text-gray-600">Items in batch:</span>
-                        <span className="font-semibold text-gray-900 ml-2">{batchItems.length}</span>
-                      </p>
-                      <p>
-                        <span className="text-gray-600">Ready items:</span>
-                        <span className="font-semibold text-gray-900 ml-2">
-                          {batchReadiness.readyCount}/{batchReadiness.itemCount}
-                        </span>
-                      </p>
-                      <p>
-                        <span className="text-gray-600">Total photos:</span>
-                        <span className="font-semibold text-gray-900 ml-2">
-                          {batchItems.reduce((total, item) => total + item.images.length, 0)}
-                        </span>
+                      <p className="font-semibold">Verification is optional, but it improves buyer trust.</p>
+                      <p className="mt-1 text-amber-800">
+                        You can publish now and verify later to rank higher.
                       </p>
                     </>
                   )}
-                  <p>
-                    <span className="text-gray-600">Trust readiness:</span>
-                    <span className="font-semibold text-gray-900 ml-2">{trustScore}%</span>
-                  </p>
                 </div>
+
+                <button
+                  type="submit"
+                  disabled={uploading}
+                  className="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 disabled:opacity-50 transition-all"
+                >
+                  {uploading
+                    ? entryMode === "batch"
+                      ? "Publishing batch..."
+                      : "Publishing listing..."
+                    : entryMode === "batch"
+                    ? "Publish batch listings"
+                    : "Publish listing"}
+                </button>
               </div>
-
-              {/* Premium Options */}
-              {entryMode === "single" && (
-                <div className="bg-blue-50 rounded-lg p-6 border border-blue-200 mb-6">
-                  <h3 className="font-bold text-gray-900 mb-4">Boost Your Listing (Optional)</h3>
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={form.premiumBadge}
-                      onChange={(e) => setForm((prev) => ({ ...prev, premiumBadge: e.target.checked }))}
-                      className="w-5 h-5 text-green-600"
-                    />
-                    <div>
-                      <p className="font-semibold text-gray-900">
-                        Premium Badge {isFreeLaunch ? "(Free for now)" : "(KSh 199)"}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Get a premium badge to stand out{isFreeLaunch ? " - free for now." : "."}
-                      </p>
-                    </div>
-                  </label>
-                </div>
-              )}
-
-              <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-                <p className="font-semibold mb-2">Your listing will be:</p>
-                <ul className="space-y-1">
-                  <li>[x] Visible across Kenya</li>
-                  <li>[x] Shown to active buyers</li>
-                  <li>[x] Protected by verified profile signals</li>
-                </ul>
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={uploading}
-                className="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 disabled:opacity-50 transition-all"
-              >
-                {uploading
-                  ? entryMode === "batch"
-                    ? "Publishing batch..."
-                    : "Publishing listing..."
-                  : entryMode === "batch"
-                  ? "Publish batch listings - start receiving buyer inquiries"
-                  : "Publish Listing - start receiving buyer inquiries"}
-              </button>
             </div>
           )}
 
@@ -1816,7 +1621,7 @@ const CreateListing: React.FC = () => {
           <div
             className={`mt-6 flex flex-col gap-3 sm:flex-row sm:gap-4 ${isCompact ? "sticky bottom-3 z-20 rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-xl backdrop-blur" : ""}`}
           >
-            {form.step > 2 && (
+            {form.step > MIN_FLOW_STEP && (
               <button
                 type="button"
                 onClick={handlePrevStep}
@@ -1825,7 +1630,7 @@ const CreateListing: React.FC = () => {
                 Previous
               </button>
             )}
-            {form.step < 5 && form.step !== 2 && (
+            {form.step < MAX_FLOW_STEP && (
               <button
                 type="button"
                 onClick={handleNextStep}
