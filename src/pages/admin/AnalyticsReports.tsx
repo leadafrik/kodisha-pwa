@@ -67,7 +67,40 @@ type TrafficSummary = {
       listingPath: string;
     }>;
   };
+  conversion?: {
+    routes?: Array<{
+      key: string;
+      label: string;
+      path: string;
+      views: number;
+      uniqueVisitors: number;
+    }>;
+    funnel?: {
+      homeUniqueVisitors: number;
+      signupUniqueVisitors: number;
+      browseUniqueVisitors: number;
+      createListingUniqueVisitors: number;
+      listingDetailsUniqueVisitors: number;
+      homeToSignupRate: number;
+      homeToBrowseRate: number;
+      signupToCreateListingRate: number;
+      browseToDetailsRate: number;
+    };
+    ctaTargets?: Array<{
+      target: string;
+      clicks: number;
+      uniqueVisitors: number;
+    }>;
+    primaryCtaSignals?: {
+      signUpClicks: number;
+      browseClicks: number;
+      listNowClicks: number;
+      buyRequestClicks: number;
+    };
+  };
 };
+
+const formatPercent = (value: number | undefined) => `${Number(value || 0).toFixed(1)}%`;
 
 const AnalyticsReports: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -114,6 +147,11 @@ const AnalyticsReports: React.FC = () => {
         verified: value.verified,
       }))
     : [];
+
+  const funnel = traffic?.conversion?.funnel;
+  const primarySignals = traffic?.conversion?.primaryCtaSignals;
+  const conversionRoutes = traffic?.conversion?.routes || [];
+  const conversionTargets = traffic?.conversion?.ctaTargets || [];
 
   return (
     <div className="min-h-screen bg-slate-50 px-6 py-10">
@@ -210,6 +248,51 @@ const AnalyticsReports: React.FC = () => {
               </div>
             </div>
 
+            <div className="mt-8 rounded-2xl border border-emerald-200 bg-emerald-50/50 p-6">
+              <h2 className="text-xl font-semibold text-slate-900">Conversion focus (account to list to browse)</h2>
+              <p className="text-sm text-slate-600 mt-1">
+                Signals showing how users move from discovery into account creation and listing intent.
+              </p>
+              <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-xl border border-emerald-200 bg-white p-4">
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Home to sign up rate</p>
+                  <p className="mt-2 text-2xl font-semibold text-slate-900">
+                    {formatPercent(funnel?.homeToSignupRate)}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {funnel?.signupUniqueVisitors || 0} signup visitors from {funnel?.homeUniqueVisitors || 0} home visitors
+                  </p>
+                </div>
+                <div className="rounded-xl border border-emerald-200 bg-white p-4">
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Home to browse rate</p>
+                  <p className="mt-2 text-2xl font-semibold text-slate-900">
+                    {formatPercent(funnel?.homeToBrowseRate)}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {funnel?.browseUniqueVisitors || 0} browse visitors
+                  </p>
+                </div>
+                <div className="rounded-xl border border-emerald-200 bg-white p-4">
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Signup to create listing</p>
+                  <p className="mt-2 text-2xl font-semibold text-slate-900">
+                    {formatPercent(funnel?.signupToCreateListingRate)}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {funnel?.createListingUniqueVisitors || 0} reached listing page
+                  </p>
+                </div>
+                <div className="rounded-xl border border-emerald-200 bg-white p-4">
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Browse to listing details</p>
+                  <p className="mt-2 text-2xl font-semibold text-slate-900">
+                    {formatPercent(funnel?.browseToDetailsRate)}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {funnel?.listingDetailsUniqueVisitors || 0} visited listing detail pages
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="mt-8 grid gap-6 lg:grid-cols-2">
               <div className="rounded-2xl border border-slate-200 bg-white p-6">
                 <h2 className="text-xl font-semibold text-slate-900">Daily visitor trend</h2>
@@ -278,25 +361,105 @@ const AnalyticsReports: React.FC = () => {
               <div className="rounded-2xl border border-slate-200 bg-white p-6">
                 <h2 className="text-xl font-semibold text-slate-900">Most clicked actions</h2>
                 <p className="text-sm text-slate-500 mt-1">Top click interactions</p>
-                {traffic?.topActions?.length ? (
-                  <div className="mt-4 space-y-3">
-                    {traffic.topActions.slice(0, 8).map((action, index) => (
+                {traffic?.topActions?.length || conversionTargets.length ? (
+                  <div className="mt-4 space-y-4">
+                    {conversionTargets.length > 0 && (
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                          Top targets
+                        </p>
+                        <div className="mt-2 space-y-2">
+                          {conversionTargets.slice(0, 6).map((target) => (
+                            <div
+                              key={target.target}
+                              className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm"
+                            >
+                              <p className="font-semibold text-slate-900">{target.target}</p>
+                              <p className="text-xs text-slate-500 mt-1">
+                                {target.clicks} clicks | {target.uniqueVisitors} unique visitors
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {traffic?.topActions?.length ? (
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                          Top action labels
+                        </p>
+                        <div className="mt-2 space-y-2">
+                          {traffic.topActions.slice(0, 6).map((action, index) => (
+                            <div
+                              key={`${action.action}-${action.target || "none"}-${index}`}
+                              className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm"
+                            >
+                              <p className="font-semibold text-slate-900">
+                                {action.action}
+                                {action.target ? ` to ${action.target}` : ""}
+                              </p>
+                              <p className="text-xs text-slate-500 mt-1">
+                                {action.clicks} clicks | {action.uniqueVisitors} unique visitors
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : (
+                  <p className="mt-4 text-sm text-slate-500">No click data yet.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-6 grid gap-6 lg:grid-cols-2">
+              <div className="rounded-2xl border border-slate-200 bg-white p-6">
+                <h2 className="text-xl font-semibold text-slate-900">Primary CTA signal counts</h2>
+                <p className="text-sm text-slate-500 mt-1">
+                  Click totals for the core growth actions.
+                </p>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-xl bg-slate-50 px-4 py-3">
+                    <p className="text-xs uppercase tracking-[0.14em] text-slate-500">Sign up clicks</p>
+                    <p className="mt-2 text-xl font-semibold text-slate-900">{primarySignals?.signUpClicks ?? 0}</p>
+                  </div>
+                  <div className="rounded-xl bg-slate-50 px-4 py-3">
+                    <p className="text-xs uppercase tracking-[0.14em] text-slate-500">Browse clicks</p>
+                    <p className="mt-2 text-xl font-semibold text-slate-900">{primarySignals?.browseClicks ?? 0}</p>
+                  </div>
+                  <div className="rounded-xl bg-slate-50 px-4 py-3">
+                    <p className="text-xs uppercase tracking-[0.14em] text-slate-500">List now clicks</p>
+                    <p className="mt-2 text-xl font-semibold text-slate-900">{primarySignals?.listNowClicks ?? 0}</p>
+                  </div>
+                  <div className="rounded-xl bg-slate-50 px-4 py-3">
+                    <p className="text-xs uppercase tracking-[0.14em] text-slate-500">Buy request clicks</p>
+                    <p className="mt-2 text-xl font-semibold text-slate-900">{primarySignals?.buyRequestClicks ?? 0}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-white p-6">
+                <h2 className="text-xl font-semibold text-slate-900">Route conversion map</h2>
+                <p className="text-sm text-slate-500 mt-1">
+                  Unique visitors and views on key conversion routes.
+                </p>
+                {conversionRoutes.length ? (
+                  <div className="mt-4 space-y-2 text-sm text-slate-600 max-h-64 overflow-y-auto pr-1">
+                    {conversionRoutes.map((route) => (
                       <div
-                        key={`${action.action}-${action.target || "none"}-${index}`}
-                        className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm"
+                        key={route.key}
+                        className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-2"
                       >
-                        <p className="font-semibold text-slate-900">
-                          {action.action}
-                          {action.target ? ` -> ${action.target}` : ""}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-1">
-                          {action.clicks} clicks | {action.uniqueVisitors} unique visitors
-                        </p>
+                        <span className="font-medium text-slate-800">{route.label}</span>
+                        <span className="text-xs text-slate-500">
+                          {route.uniqueVisitors} unique | {route.views} views
+                        </span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="mt-4 text-sm text-slate-500">No click data yet.</p>
+                  <p className="mt-4 text-sm text-slate-500">No conversion route data yet.</p>
                 )}
               </div>
             </div>
@@ -365,10 +528,10 @@ const AnalyticsReports: React.FC = () => {
                         </Link>
                       </div>
                       <p className="mt-1 text-xs uppercase tracking-[0.16em] text-slate-500">
-                        {listing.category} • {listing.listingType}
+                        {listing.category} | {listing.listingType}
                       </p>
                       <p className="mt-2 text-xs text-slate-600">
-                        {listing.views} views • {listing.saves} saves • {listing.reachOuts} reach-outs
+                        {listing.views} views | {listing.saves} saves | {listing.reachOuts} reach-outs
                       </p>
                     </div>
                   ))}
