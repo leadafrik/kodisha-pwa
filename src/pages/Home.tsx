@@ -319,10 +319,10 @@ const Home: React.FC = () => {
                   Built in Kenya
                 </p>
                 <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl">
-                  Conversion-focused homepage. Deep trust page.
+                  Trusted trade, built for Kenya.
                 </h2>
                 <p className="mt-2 max-w-2xl text-sm text-slate-600">
-                  Agrisoko keeps this page focused on action, while our About page carries the full story, team, and trust process.
+                  Learn how Agrisoko verifies profiles, supports safe trading, and who is building the platform.
                 </p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Link
