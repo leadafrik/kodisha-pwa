@@ -83,12 +83,6 @@ const trustFeatures = [
   },
 ];
 
-const trustSnapshot = [
-  "Built by a Kenyan team with field operations on the ground",
-  "ID verification and moderation to reduce fraud and improve trust",
-  "Direct support and escalation paths when deals need intervention",
-];
-
 const isLiveStatus = (status: unknown) => {
   const normalized = String(status || "").toLowerCase();
   if (!normalized) return true;
@@ -107,6 +101,12 @@ const toValidDate = (value: unknown): Date | null => {
   if (!value) return null;
   const parsed = value instanceof Date ? value : new Date(String(value));
   return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const formatPriceLabel = (value: unknown) => {
+  const amount = Number(value);
+  if (!Number.isFinite(amount) || amount <= 0) return "Contact for price";
+  return `KSh ${amount.toLocaleString()}`;
 };
 
 const Home: React.FC = () => {
@@ -129,6 +129,58 @@ const Home: React.FC = () => {
     return liveProducts + liveServices;
   }, [productListings, serviceListings]);
 
+  const liveCountyCount = useMemo(() => {
+    const counties = new Set<string>();
+    (productListings || []).forEach((item: any) => {
+      if (!isLiveStatus(item?.publishStatus || item?.status)) return;
+      const county = String(item?.county || "").trim();
+      if (county) counties.add(county.toLowerCase());
+    });
+    (serviceListings || []).forEach((item: any) => {
+      if (!isLiveStatus(item?.publishStatus || item?.status)) return;
+      if (item?.isDeleted === true || item?.deletedAt) return;
+      const county = String(item?.county || "").trim();
+      if (county) counties.add(county.toLowerCase());
+    });
+    return counties.size;
+  }, [productListings, serviceListings]);
+
+  const latestLiveListings = useMemo(() => {
+    const normalizedProducts = (productListings || [])
+      .filter((item: any) => isLiveStatus(item?.publishStatus || item?.status))
+      .map((item: any) => ({
+        id: String(item?._id || item?.id || ""),
+        title: String(item?.title || item?.name || "Listing"),
+        category: String(item?.category || "produce"),
+        county: String(item?.county || ""),
+        priceLabel: formatPriceLabel(item?.price),
+        createdAt: toValidDate(item?.updatedAt || item?.createdAt),
+      }))
+      .filter((item) => !!item.id);
+
+    const normalizedServices = (serviceListings || [])
+      .filter((item: any) => {
+        if (!isLiveStatus(item?.publishStatus || item?.status)) return false;
+        if (item?.isDeleted === true || item?.deletedAt) return false;
+        return true;
+      })
+      .map((item: any) => ({
+        id: String(item?._id || item?.id || ""),
+        title: String(item?.title || item?.name || "Service listing"),
+        category: "service",
+        county: String(item?.county || ""),
+        priceLabel: formatPriceLabel(
+          item?.price ?? item?.serviceFee ?? item?.rate ?? item?.hourlyRate
+        ),
+        createdAt: toValidDate(item?.updatedAt || item?.createdAt),
+      }))
+      .filter((item) => !!item.id);
+
+    return [...normalizedProducts, ...normalizedServices]
+      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0))
+      .slice(0, 3);
+  }, [productListings, serviceListings]);
+
   const signupDate = toValidDate(user?.createdAt);
   const freeWindowEndsAt = signupDate
     ? signupDate.getTime() + FREE_WINDOW_DAYS * MILLISECONDS_IN_DAY
@@ -147,10 +199,12 @@ const Home: React.FC = () => {
     : `KSh 0 for your first ${FREE_WINDOW_DAYS} days`;
 
   const displayHeadline =
-    heroHeadline || "Get direct buyers in your county - without brokers.";
+    heroHeadline || "Kenya's marketplace for farmers and buyers - no brokers.";
   const displayDescription = user
     ? "Open your dashboard, post a listing, or browse live demand across Kenya."
-    : heroDescription || "Create your free account in 10 seconds. List later.";
+    : heroDescription || "Sell produce directly, find verified suppliers, and close deals faster.";
+  const countyCoverageLabel =
+    liveCountyCount > 0 ? `${liveCountyCount.toLocaleString()} counties active` : "47 counties open";
   const signupCtaLabel = isPhone ? "Sign Up" : "Sign Up Free";
   const primaryCtaTo = user ? "/create-listing?compact=1" : "/login?mode=signup&next=/browse";
   const primaryCtaLabel = user ? "List now" : signupCtaLabel;
@@ -159,7 +213,6 @@ const Home: React.FC = () => {
   const demandCtaLabel = "View Buy Requests";
   const aboutCtaTo = "/about#founder-story";
   const aboutCtaLabel = user ? "How trust works" : "Why Agrisoko";
-  const teamCtaTo = "/about#team";
   const urgencyBody = isGlobalFreeListing
     ? "No listing fee right now."
     : user
@@ -173,9 +226,9 @@ const Home: React.FC = () => {
       copy: isGlobalFreeListing ? "No listing fee right now." : urgencyBody,
     },
     {
-      title: user ? "You are ready" : "Start now",
+      title: user ? "Start selling in minutes" : "Start now",
       copy: user
-        ? "Open your dashboard, verify when ready, and publish your first listing."
+        ? "Start selling in minutes. Open your dashboard and publish your first listing."
         : "Create your account now. Verify when ready.",
     },
   ];
@@ -260,7 +313,7 @@ const Home: React.FC = () => {
                       }
                       className="text-sm font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4 transition hover:text-slate-900"
                     >
-                      Watch message from the CEO
+                      Why we built Agrisoko
                     </Link>
                   </div>
                   {BULK_HOME_LINK_VISIBLE && (
@@ -278,7 +331,7 @@ const Home: React.FC = () => {
                       {liveListingCount.toLocaleString()} listings live
                     </span>
                     <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1">
-                      47 counties open
+                      {countyCoverageLabel}
                     </span>
                   </div>
                 </div>
@@ -313,40 +366,71 @@ const Home: React.FC = () => {
 
         <section className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-            <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+            <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
-                  Built in Kenya
+                  Latest market activity
                 </p>
                 <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl">
-                  Trusted trade, built for Kenya.
+                  Real listings are already moving.
                 </h2>
                 <p className="mt-2 max-w-2xl text-sm text-slate-600">
-                  Learn how Agrisoko verifies profiles, supports safe trading, and who is building the platform.
+                  See what sellers are posting now, jump into details, and connect faster.
                 </p>
+                <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
+                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">
+                    {liveListingCount.toLocaleString()} live listings
+                  </span>
+                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">
+                    {countyCoverageLabel}
+                  </span>
+                </div>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Link
-                    to={aboutCtaTo}
+                    to={browseTo}
                     className="inline-flex min-h-[42px] items-center justify-center rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                  >
+                    View listings
+                  </Link>
+                  <Link
+                    to={aboutCtaTo}
+                    className="inline-flex min-h-[42px] items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                   >
                     {aboutCtaLabel}
                   </Link>
-                  <Link
-                    to={teamCtaTo}
-                    className="inline-flex min-h-[42px] items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                  >
-                    Meet the team
-                  </Link>
                 </div>
               </div>
-              <ul className="space-y-2 text-sm text-slate-700">
-                {trustSnapshot.map((line) => (
-                  <li key={line} className="flex items-start gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5">
-                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-600" />
-                    <span>{line}</span>
-                  </li>
-                ))}
-              </ul>
+              {latestLiveListings.length > 0 ? (
+                <ul className="space-y-2.5 text-sm text-slate-700">
+                  {latestLiveListings.map((item) => (
+                    <li
+                      key={item.id}
+                      className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="line-clamp-2 font-semibold text-slate-900">{item.title}</p>
+                        <span className="whitespace-nowrap text-xs font-semibold text-emerald-700">
+                          {item.priceLabel}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs uppercase tracking-[0.12em] text-slate-500">
+                        {item.category} {item.county ? `- ${item.county}` : ""}
+                      </p>
+                      <Link
+                        to={`/listings/${item.id}`}
+                        className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 transition hover:text-emerald-800"
+                      >
+                        View details
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600">
+                  Listings are loading. Open the marketplace to view all live inventory.
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -432,7 +516,9 @@ const Home: React.FC = () => {
                   <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
                     Coverage
                   </p>
-                  <p className="mt-1 text-sm font-semibold text-slate-900 sm:text-lg">47 counties</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-900 sm:text-lg">
+                    {countyCoverageLabel}
+                  </p>
                 </div>
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
