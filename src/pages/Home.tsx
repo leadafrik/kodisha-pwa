@@ -83,6 +83,12 @@ const trustFeatures = [
   },
 ];
 
+const trustSnapshot = [
+  "Built by a Kenyan team with field operations on the ground",
+  "ID verification and moderation to reduce fraud and improve trust",
+  "Direct support and escalation paths when deals need intervention",
+];
+
 const isLiveStatus = (status: unknown) => {
   const normalized = String(status || "").toLowerCase();
   if (!normalized) return true;
@@ -151,6 +157,9 @@ const Home: React.FC = () => {
   const browseTo = "/browse";
   const demandCtaTo = "/request";
   const demandCtaLabel = "View Buy Requests";
+  const aboutCtaTo = "/about#founder-story";
+  const aboutCtaLabel = user ? "How trust works" : "Why Agrisoko";
+  const teamCtaTo = "/about#team";
   const urgencyBody = isGlobalFreeListing
     ? "No listing fee right now."
     : user
@@ -298,6 +307,46 @@ const Home: React.FC = () => {
                   ))}
                 </div>
               </aside>
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
+                  Built in Kenya
+                </p>
+                <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl">
+                  Conversion-focused homepage. Deep trust page.
+                </h2>
+                <p className="mt-2 max-w-2xl text-sm text-slate-600">
+                  Agrisoko keeps this page focused on action, while our About page carries the full story, team, and trust process.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Link
+                    to={aboutCtaTo}
+                    className="inline-flex min-h-[42px] items-center justify-center rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                  >
+                    {aboutCtaLabel}
+                  </Link>
+                  <Link
+                    to={teamCtaTo}
+                    className="inline-flex min-h-[42px] items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                  >
+                    Meet the team
+                  </Link>
+                </div>
+              </div>
+              <ul className="space-y-2 text-sm text-slate-700">
+                {trustSnapshot.map((line) => (
+                  <li key={line} className="flex items-start gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-600" />
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </section>

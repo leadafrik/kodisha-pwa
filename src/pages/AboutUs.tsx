@@ -363,7 +363,7 @@ const AboutUs: React.FC = () => {
           </div>
         </section>
 
-        <section className="max-w-6xl mx-auto px-4 py-12">
+        <section id="founder-story" className="max-w-6xl mx-auto scroll-mt-24 px-4 py-12">
           <div className="rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
             <div className="grid gap-8 md:grid-cols-[0.8fr_1.2fr] items-start">
               <div>
@@ -425,7 +425,7 @@ const AboutUs: React.FC = () => {
           </div>
         </section>
 
-        <section className="max-w-6xl mx-auto px-4 py-12">
+        <section id="team" className="max-w-6xl mx-auto scroll-mt-24 px-4 py-12">
           <div className="rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
             <div className="flex flex-col gap-5">
               <div>
