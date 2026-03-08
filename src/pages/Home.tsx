@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -17,9 +17,14 @@ import {
   PAYMENTS_ENABLED,
 } from "../config/featureFlags";
 import { trackGoogleEvent } from "../utils/cookieConsent";
+import { trackTrafficClick } from "../utils/trafficAnalytics";
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
 const FREE_WINDOW_DAYS = 10;
+const HERO_VARIANT_KEY = "agrisoko_home_hero_variant_v2";
+const HERO_VARIANT_SEEN_KEY = "agrisoko_home_hero_variant_seen_v2";
+
+type HeroVariant = "sell_first" | "find_first";
 
 const conversionPillars = [
   {
@@ -113,9 +118,40 @@ const Home: React.FC = () => {
   const { user } = useAuth();
   const { isPhone, isTouch, prefersReducedMotion } = useAdaptiveLayout();
   const { productListings, serviceListings } = useProperties();
+  const [heroVariant, setHeroVariant] = useState<HeroVariant>("sell_first");
 
   const { content: heroHeadline } = usePageContent("home.hero.headline");
   const { content: heroDescription } = usePageContent("home.hero.description");
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(HERO_VARIANT_KEY);
+      if (saved === "sell_first" || saved === "find_first") {
+        setHeroVariant(saved);
+        return;
+      }
+      const assigned: HeroVariant = Math.random() < 0.5 ? "sell_first" : "find_first";
+      localStorage.setItem(HERO_VARIANT_KEY, assigned);
+      setHeroVariant(assigned);
+    } catch {
+      setHeroVariant("sell_first");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (user) return;
+    try {
+      const seenKey = `${HERO_VARIANT_SEEN_KEY}_${heroVariant}`;
+      if (sessionStorage.getItem(seenKey)) return;
+      sessionStorage.setItem(seenKey, "1");
+    } catch {
+      // Continue tracking even if session storage is unavailable.
+    }
+    trackTrafficClick({
+      action: `funnel_home_variant_seen_${heroVariant}`,
+      target: "/",
+    });
+  }, [heroVariant, user]);
 
   const liveListingCount = useMemo(() => {
     const liveProducts = (productListings || []).filter((item: any) =>
@@ -198,11 +234,20 @@ const Home: React.FC = () => {
       : "Free launch window ended"
     : `KSh 0 for your first ${FREE_WINDOW_DAYS} days`;
 
-  const displayHeadline =
-    heroHeadline || "Sell your farm produce directly to verified buyers across Kenya.";
+  const heroHeadlineFallback =
+    heroVariant === "find_first"
+      ? "Find reliable produce and suppliers across Kenya - without middlemen."
+      : "Sell your farm produce directly to verified buyers across Kenya.";
+  const heroDescriptionFallback =
+    heroVariant === "find_first"
+      ? "Discover active listings, compare trusted sellers, and close deals faster."
+      : "Buy and sell faster with trusted profiles, direct chat, and transparent listings.";
+  const displayHeadline = heroHeadline || heroHeadlineFallback;
   const displayDescription = user
-    ? "Open your dashboard, post a listing, or browse live demand across Kenya."
-    : heroDescription || "Buy and sell faster with trusted profiles, direct chat, and transparent listings.";
+    ? isPhone
+      ? "Post fast, find demand, and close deals."
+      : "Open your dashboard, post a listing, or browse live demand across Kenya."
+    : heroDescription || (isPhone ? "Sell or find produce in minutes with verified profiles." : heroDescriptionFallback);
   const countyCoverageLabel =
     liveCountyCount > 0 ? `${liveCountyCount.toLocaleString()} counties active` : "47 counties open";
   const primaryCtaTo = user
@@ -211,6 +256,12 @@ const Home: React.FC = () => {
   const primaryCtaLabel = user ? "List free today" : "Sell Produce";
   const browseTo = "/browse";
   const browseCtaLabel = "Find Produce";
+  const sellClickAction = user
+    ? "funnel_home_sell_click_logged_in"
+    : `funnel_home_sell_click_${heroVariant}`;
+  const findClickAction = user
+    ? "funnel_home_find_click_logged_in"
+    : `funnel_home_find_click_${heroVariant}`;
   const demandCtaTo = "/request";
   const demandCtaLabel = "View Buy Requests";
   const aboutCtaTo = "/about#founder-story";
@@ -234,6 +285,7 @@ const Home: React.FC = () => {
         : "Create your account now. Verify when ready.",
     },
   ];
+  const visibleHeroFocusItems = isPhone ? heroFocusItems.slice(0, 1) : heroFocusItems;
   const finalCallCopy = isGlobalFreeListing
     ? "Create your account and post your first listing. Listing is free right now."
     : user && daysLeft <= 0
@@ -287,24 +339,68 @@ const Home: React.FC = () => {
                 </p>
 
                 <div className="mt-6 flex flex-col gap-3 sm:mt-7 sm:flex-row">
-                  <Link
-                    to={primaryCtaTo}
-                    className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-300/40 transition hover:bg-emerald-700 sm:w-auto"
-                  >
-                    {primaryCtaLabel}
-                  </Link>
-                  <Link
-                    to={browseTo}
-                    className={`inline-flex min-h-[46px] w-full items-center justify-center rounded-xl border bg-white px-6 py-3 text-sm font-semibold transition sm:w-auto ${
-                      user
-                        ? "border-emerald-300 text-emerald-700 hover:bg-emerald-50"
-                        : "border-slate-300 text-slate-900 hover:bg-slate-50"
-                    }`}
-                  >
-                    {browseCtaLabel}
-                  </Link>
+                  {heroVariant === "find_first" && !user ? (
+                    <>
+                      <Link
+                        to={browseTo}
+                        onClick={() =>
+                          trackTrafficClick({
+                            action: findClickAction,
+                            target: browseTo,
+                          })
+                        }
+                        className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-300/40 transition hover:bg-emerald-700 sm:w-auto"
+                      >
+                        {browseCtaLabel}
+                      </Link>
+                      <Link
+                        to={primaryCtaTo}
+                        onClick={() =>
+                          trackTrafficClick({
+                            action: sellClickAction,
+                            target: "/create-listing",
+                          })
+                        }
+                        className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 sm:w-auto"
+                      >
+                        {primaryCtaLabel}
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        to={primaryCtaTo}
+                        onClick={() =>
+                          trackTrafficClick({
+                            action: sellClickAction,
+                            target: "/create-listing",
+                          })
+                        }
+                        className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-300/40 transition hover:bg-emerald-700 sm:w-auto"
+                      >
+                        {primaryCtaLabel}
+                      </Link>
+                      <Link
+                        to={browseTo}
+                        onClick={() =>
+                          trackTrafficClick({
+                            action: findClickAction,
+                            target: browseTo,
+                          })
+                        }
+                        className={`inline-flex min-h-[46px] w-full items-center justify-center rounded-xl border bg-white px-6 py-3 text-sm font-semibold transition sm:w-auto ${
+                          user
+                            ? "border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+                            : "border-slate-300 text-slate-900 hover:bg-slate-50"
+                        }`}
+                      >
+                        {browseCtaLabel}
+                      </Link>
+                    </>
+                  )}
                 </div>
                 <div className="mt-4 space-y-3">
+                  {!isPhone && (
                   <div>
                     <Link
                       to="/about#ceo-video"
@@ -318,6 +414,7 @@ const Home: React.FC = () => {
                       Why we built Agrisoko
                     </Link>
                   </div>
+                  )}
                   {BULK_HOME_LINK_VISIBLE && (
                     <div>
                       <Link
@@ -351,7 +448,7 @@ const Home: React.FC = () => {
                   Fast start. Strong trust.
                 </h2>
                 <div className="mt-4 space-y-3 sm:mt-5">
-                  {heroFocusItems.map((item) => (
+                  {visibleHeroFocusItems.map((item) => (
                     <div
                       key={item.title}
                       className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 sm:p-4"
@@ -531,6 +628,12 @@ const Home: React.FC = () => {
               </div>
               <Link
                 to={demandCtaTo}
+                onClick={() =>
+                  trackTrafficClick({
+                    action: "funnel_home_view_buy_requests",
+                    target: demandCtaTo,
+                  })
+                }
                 className="mt-6 inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-100 sm:w-auto"
               >
                 {demandCtaLabel}
@@ -567,12 +670,24 @@ const Home: React.FC = () => {
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <Link
                 to={primaryCtaTo}
+                onClick={() =>
+                  trackTrafficClick({
+                    action: "funnel_home_final_sell_click",
+                    target: "/create-listing",
+                  })
+                }
                 className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50 sm:w-auto"
               >
                 {primaryCtaLabel}
               </Link>
               <Link
                 to={browseTo}
+                onClick={() =>
+                  trackTrafficClick({
+                    action: "funnel_home_final_find_click",
+                    target: browseTo,
+                  })
+                }
                 className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl border border-white/80 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10 sm:w-auto"
               >
                 {browseCtaLabel}
@@ -590,6 +705,12 @@ const Home: React.FC = () => {
             </p>
             <Link
               to={primaryCtaTo}
+              onClick={() =>
+                trackTrafficClick({
+                  action: "funnel_home_sticky_sell_click",
+                  target: "/create-listing",
+                })
+              }
               className="inline-flex min-h-[42px] w-full items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 sm:w-auto"
             >
               {primaryCtaLabel}

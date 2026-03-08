@@ -6,6 +6,7 @@ import GoogleLoginButton from "../components/GoogleLoginButtonV2";
 import FacebookLoginButton from "../components/FacebookLoginButtonV2";
 import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
 import { trackGoogleEvent, trackGooglePageView } from "../utils/cookieConsent";
+import { trackTrafficClick } from "../utils/trafficAnalytics";
 import { LegalConsents } from "../types/property";
 
 type Mode = "login" | "signup" | "otp-verify" | "forgot" | "otp-reset";
@@ -175,6 +176,10 @@ const Login: React.FC = () => {
     trackGoogleEvent("view_sign_up_page", {
       page_path: "/login?mode=signup",
     });
+    trackTrafficClick({
+      action: "funnel_signup_view",
+      target: "/login",
+    });
   }, [mode]);
 
   const resetMessages = () => {
@@ -256,6 +261,10 @@ const Login: React.FC = () => {
         legalConsents: signupConsents,
       });
       trackGoogleEvent("sign_up", { method: "email" });
+      trackTrafficClick({
+        action: "funnel_signup_complete_email",
+        target: "/login",
+      });
 
       try {
         await login(email, signupData.password);
@@ -385,18 +394,33 @@ const Login: React.FC = () => {
         <p className="text-center text-xs font-semibold text-gray-500 uppercase tracking-widest">
           Sign in with
         </p>
-        <div className="grid grid-cols-2 gap-3">
-          <GoogleLoginButton
-            onSuccess={() => navigate(redirectTo)}
-            onError={(error) => setError(error)}
-            className="text-sm"
-          />
+        <GoogleLoginButton
+          onSuccess={() => {
+            trackTrafficClick({
+              action: "funnel_signin_google_success",
+              target: redirectTo,
+            });
+            navigate(redirectTo);
+          }}
+          onError={(error) => setError(error)}
+          className="text-sm w-full"
+        />
+        <div className="grid grid-cols-1 gap-3">
           <FacebookLoginButton
-            onSuccess={() => navigate(redirectTo)}
+            onSuccess={() => {
+              trackTrafficClick({
+                action: "funnel_signin_facebook_success",
+                target: redirectTo,
+              });
+              navigate(redirectTo);
+            }}
             onError={(error) => setError(error)}
-            className="text-sm"
+            className="text-sm w-full"
           />
         </div>
+        <p className="text-center text-xs text-emerald-700">
+          Fastest path: continue with Google.
+        </p>
       </div>
 
       {/* Divider */}
@@ -450,7 +474,7 @@ const Login: React.FC = () => {
       <button
         type="submit"
         disabled={loading || !loginData.emailOrPhone || !loginData.password}
-        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300
+        className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300
           text-white font-semibold py-2.5 rounded-lg transition-colors duration-200 text-sm"
       >
         {loading ? "Signing in..." : "Sign In"}
@@ -504,6 +528,10 @@ const Login: React.FC = () => {
           legalConsents={signupConsents}
           onSuccess={() => {
             trackGoogleEvent("sign_up", { method: "google" });
+            trackTrafficClick({
+              action: "funnel_signup_complete_google",
+              target: redirectTo,
+            });
             navigate(redirectTo);
           }}
           onError={(error) => setError(error)}
@@ -520,6 +548,10 @@ const Login: React.FC = () => {
           legalConsents={signupConsents}
           onSuccess={() => {
             trackGoogleEvent("sign_up", { method: "facebook" });
+            trackTrafficClick({
+              action: "funnel_signup_complete_facebook",
+              target: redirectTo,
+            });
             navigate(redirectTo);
           }}
           onError={(error) => setError(error)}

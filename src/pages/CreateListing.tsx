@@ -7,6 +7,7 @@ import { API_BASE_URL, ensureValidAccessToken } from "../config/api";
 import { PAYMENTS_ENABLED } from "../config/featureFlags";
 import { CheckCircle2, MapPin, Tag, Calendar, Camera } from "lucide-react";
 import { ErrorAlert } from "../components/ui";
+import { trackTrafficClick } from "../utils/trafficAnalytics";
 
 type ListingCategory = "produce" | "livestock" | "inputs" | "service";
 type ListingType = "sell" | "buy";
@@ -109,6 +110,7 @@ const DESCRIPTION_HINTS: Record<ListingCategory, { helper: string; placeholder: 
 };
 
 const DRAFT_STORAGE_KEY = "kodisha_listing_draft_v1";
+const LISTING_STARTED_TRACK_KEY = "agrisoko_funnel_listing_started_v2";
 const MIN_FLOW_STEP = 2;
 const MAX_FLOW_STEP = 3;
 
@@ -196,6 +198,21 @@ const CreateListing: React.FC = () => {
       refreshUser();
     }
   }, [user?._id, refreshUser]);
+
+  useEffect(() => {
+    if (!user?._id) return;
+    try {
+      const trackedForUserId = sessionStorage.getItem(LISTING_STARTED_TRACK_KEY);
+      if (trackedForUserId === user._id) return;
+      sessionStorage.setItem(LISTING_STARTED_TRACK_KEY, user._id);
+    } catch {
+      // No-op
+    }
+    trackTrafficClick({
+      action: "funnel_listing_started",
+      target: "/create-listing",
+    });
+  }, [user?._id]);
 
   useEffect(() => {
     if (!requestedCategory) return;
@@ -667,6 +684,13 @@ const CreateListing: React.FC = () => {
 
         localStorage.removeItem(DRAFT_STORAGE_KEY);
         setHasDraft(false);
+        trackTrafficClick({
+          action:
+            singleResult.publishStatus === "active"
+              ? "funnel_listing_published_single"
+              : "funnel_listing_submitted_single_pending",
+          target: "/browse",
+        });
         if (singleResult.publishStatus === "active") {
           alert("Listing published successfully! It is now visible to buyers.");
         } else {
@@ -717,6 +741,13 @@ const CreateListing: React.FC = () => {
         setNotice(
           `${createdCount} listing(s) submitted successfully${activeCount ? `, ${activeCount} live now` : ""}.`
         );
+        trackTrafficClick({
+          action:
+            activeCount > 0
+              ? "funnel_listing_published_batch_partial"
+              : "funnel_listing_submitted_batch_partial",
+          target: "/create-listing",
+        });
         setError(
           `${failedItems.length} item(s) still need updates before publishing. Fix the remaining cards and submit again.`
         );
@@ -726,6 +757,13 @@ const CreateListing: React.FC = () => {
 
       localStorage.removeItem(DRAFT_STORAGE_KEY);
       setHasDraft(false);
+      trackTrafficClick({
+        action:
+          activeCount > 0
+            ? "funnel_listing_published_batch"
+            : "funnel_listing_submitted_batch_pending",
+        target: "/browse",
+      });
       alert(
         `${createdCount} listing(s) submitted successfully${activeCount ? `, ${activeCount} are live now.` : "."}`
       );
