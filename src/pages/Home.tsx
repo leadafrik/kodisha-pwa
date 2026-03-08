@@ -54,10 +54,10 @@ const tradeSteps = [
 ];
 
 const buyerDemandSignals = [
-  "Maize and beans suppliers",
-  "Poultry and livestock",
-  "Transport and tractor services",
-  "Farm inputs and supplies",
+  "Maize suppliers - Uasin Gishu",
+  "Poultry suppliers - Kisumu",
+  "Onion suppliers - Machakos",
+  "Farm inputs - Nakuru",
 ];
 
 const trustFeatures = [
@@ -199,16 +199,18 @@ const Home: React.FC = () => {
     : `KSh 0 for your first ${FREE_WINDOW_DAYS} days`;
 
   const displayHeadline =
-    heroHeadline || "Kenya's marketplace for farmers and buyers - no brokers.";
+    heroHeadline || "Sell your farm produce directly to verified buyers across Kenya.";
   const displayDescription = user
     ? "Open your dashboard, post a listing, or browse live demand across Kenya."
-    : heroDescription || "Sell produce directly, find verified suppliers, and close deals faster.";
+    : heroDescription || "Buy and sell faster with trusted profiles, direct chat, and transparent listings.";
   const countyCoverageLabel =
     liveCountyCount > 0 ? `${liveCountyCount.toLocaleString()} counties active` : "47 counties open";
-  const signupCtaLabel = isPhone ? "Sign Up" : "Sign Up Free";
-  const primaryCtaTo = user ? "/create-listing?compact=1" : "/login?mode=signup&next=/browse";
-  const primaryCtaLabel = user ? "List free today" : signupCtaLabel;
+  const primaryCtaTo = user
+    ? "/create-listing?compact=1"
+    : `/login?mode=signup&next=${encodeURIComponent("/create-listing?compact=1")}`;
+  const primaryCtaLabel = user ? "List free today" : "Sell Produce";
   const browseTo = "/browse";
+  const browseCtaLabel = "Find Produce";
   const demandCtaTo = "/request";
   const demandCtaLabel = "View Buy Requests";
   const aboutCtaTo = "/about#founder-story";
@@ -299,7 +301,7 @@ const Home: React.FC = () => {
                         : "border-slate-300 text-slate-900 hover:bg-slate-50"
                     }`}
                   >
-                    View Listings
+                    {browseCtaLabel}
                   </Link>
                 </div>
                 <div className="mt-4 space-y-3">
@@ -390,7 +392,7 @@ const Home: React.FC = () => {
                     to={browseTo}
                     className="inline-flex min-h-[42px] items-center justify-center rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
                   >
-                    View listings
+                    {browseCtaLabel}
                   </Link>
                   <Link
                     to={aboutCtaTo}
@@ -573,7 +575,7 @@ const Home: React.FC = () => {
                 to={browseTo}
                 className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl border border-white/80 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10 sm:w-auto"
               >
-                View Listings
+                {browseCtaLabel}
               </Link>
             </div>
           </div>

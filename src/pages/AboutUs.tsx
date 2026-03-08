@@ -42,6 +42,33 @@ const AboutUs: React.FC = () => {
     "https://wa.me/254796389192",
     "https://chat.whatsapp.com/HzCaV5YVz86CjwajiOHR5i",
   ];
+  const faqItems = [
+    {
+      question: "What is Agrisoko?",
+      answer:
+        "Agrisoko is a Kenyan agricultural marketplace where farmers, buyers, and service providers trade produce, livestock, inputs, and services directly.",
+    },
+    {
+      question: "Is ID verification required to create an account?",
+      answer:
+        "No. You can create an account and browse without verification. Verification is optional but recommended because it improves trust and listing visibility.",
+    },
+    {
+      question: "How does verification work?",
+      answer:
+        "Users submit ID and selfie for manual review. Approved profiles get verified status. If rejected, users receive a reason and can resubmit.",
+    },
+    {
+      question: "Do you support land or property listings?",
+      answer:
+        "No. Agrisoko focuses on agricultural produce, livestock, inputs, and services only.",
+    },
+    {
+      question: "How is user data handled?",
+      answer:
+        "Agrisoko handles marketplace data in line with Kenya's Data Protection Act, 2019 and provides clear support channels for data inquiries.",
+    },
+  ];
 
   const countiesCount = kenyaCounties.length;
   const isFullyVerified =
@@ -254,32 +281,14 @@ const AboutUs: React.FC = () => {
               "@context": "https://schema.org",
               "@type": "FAQPage",
               mainEntityOfPage: "https://www.agrisoko254.com/about",
-              mainEntity: [
-                {
-                  "@type": "Question",
-                  name: "What is Agrisoko?",
-                  acceptedAnswer: {
-                    "@type": "Answer",
-                    text: "Agrisoko is a Kenyan agricultural marketplace where farmers, buyers, and service providers connect to trade produce, inputs, livestock, and services directly.",
-                  },
+              mainEntity: faqItems.map((item) => ({
+                "@type": "Question",
+                name: item.question,
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: item.answer,
                 },
-                {
-                  "@type": "Question",
-                  name: "How does verification work?",
-                  acceptedAnswer: {
-                    "@type": "Answer",
-                    text: "Sellers submit ID and selfie verification to build trust. Verified profiles receive higher visibility and faster approvals.",
-                  },
-                },
-                {
-                  "@type": "Question",
-                  name: "How do I list on Agrisoko?",
-                  acceptedAnswer: {
-                    "@type": "Answer",
-                    text: "Create an account, fill in your listing details, and publish. You can also post a buy request if you are looking to purchase.",
-                  },
-                },
-              ],
+              })),
             },
             null,
             2
@@ -308,10 +317,10 @@ const AboutUs: React.FC = () => {
                 <div className="flex flex-wrap gap-3">
                   {!user && (
                     <Link
-                      to="/login"
+                      to="/login?mode=signup&next=/browse"
                       className="inline-flex items-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition"
                     >
-                      Sign In
+                      Create account / Sign in
                     </Link>
                   )}
                   <Link
@@ -674,7 +683,7 @@ const AboutUs: React.FC = () => {
               </Link>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
               <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="flex items-center gap-3">
                   <div className="h-12 w-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">PR</div>
@@ -685,6 +694,19 @@ const AboutUs: React.FC = () => {
                   <li>- Vegetables and fruits</li>
                   <li>- Grains and cereals</li>
                   <li>- Farm-to-buyer deals</li>
+                </ul>
+              </div>
+
+              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center font-bold">LV</div>
+                  <h3 className="text-xl font-semibold text-slate-900">Livestock</h3>
+                </div>
+                <p className="text-sm text-slate-600 mt-3">Cattle, poultry, goats, and other livestock from active sellers.</p>
+                <ul className="mt-4 space-y-2 text-sm text-slate-600">
+                  <li>- Poultry and chicks</li>
+                  <li>- Cattle and goats</li>
+                  <li>- Direct seller contact</li>
                 </ul>
               </div>
 
@@ -732,11 +754,51 @@ const AboutUs: React.FC = () => {
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <h3 className="text-xl font-semibold text-slate-900">How it works</h3>
               <ol className="mt-4 space-y-3 text-sm text-slate-600">
-                <li><span className="font-semibold text-slate-800">1. Sign up and verify</span> - Create your profile and verify identity.</li>
-                <li><span className="font-semibold text-slate-800">2. List or browse</span> - Post a listing or search.</li>
-                <li><span className="font-semibold text-slate-800">3. Connect and agree</span> - Chat and settle terms.</li>
-                <li><span className="font-semibold text-slate-800">4. Complete and rate</span> - Close the deal.</li>
+                <li><span className="font-semibold text-slate-800">1. Create account</span> - Open your profile in seconds.</li>
+                <li><span className="font-semibold text-slate-800">2. Verify when ready</span> - Optional, but boosts trust and visibility.</li>
+                <li><span className="font-semibold text-slate-800">3. List or browse</span> - Post supply or search active listings.</li>
+                <li><span className="font-semibold text-slate-800">4. Connect and rate</span> - Close deals directly and build reputation.</li>
               </ol>
+            </div>
+          </div>
+        </section>
+
+        <section className="max-w-6xl mx-auto px-4 py-12">
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">
+                Privacy and trust
+              </p>
+              <h3 className="mt-2 text-xl font-semibold text-slate-900">Compliance-first operations</h3>
+              <ul className="mt-4 space-y-2 text-sm text-slate-600">
+                <li>- Data practices aligned with Kenya&apos;s Data Protection Act, 2019.</li>
+                <li>- ID verification is optional for account creation and browsing.</li>
+                <li>- Manual review is used to keep verification quality consistent.</li>
+                <li>- Support and escalation channels are available through email and WhatsApp.</li>
+              </ul>
+              <div className="mt-4">
+                <Link
+                  to="/privacy"
+                  className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                >
+                  Read Privacy Policy
+                </Link>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">
+                FAQ
+              </p>
+              <h3 className="mt-2 text-xl font-semibold text-slate-900">Common questions</h3>
+              <div className="mt-4 space-y-3">
+                {faqItems.map((item) => (
+                  <div key={item.question} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                    <p className="text-sm font-semibold text-slate-900">{item.question}</p>
+                    <p className="mt-1 text-sm text-slate-600">{item.answer}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -750,10 +812,10 @@ const AboutUs: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {!user && (
                 <Link
-                  to="/login"
+                  to="/login?mode=signup&next=/browse"
                   className="inline-flex justify-center items-center px-6 py-3 rounded-xl bg-white text-emerald-700 font-semibold hover:bg-emerald-50 transition"
                 >
-                  Sign In
+                  Create account / Sign in
                 </Link>
               )}
               <Link

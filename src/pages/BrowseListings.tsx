@@ -587,7 +587,7 @@ const BrowseListings: React.FC = () => {
                       to={`/login?mode=signup&next=${encodeURIComponent("/browse")}`}
                       className="inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition"
                     >
-                      Create free account
+                      Create account / Sign in
                     </Link>
                   )}
                   <Link
