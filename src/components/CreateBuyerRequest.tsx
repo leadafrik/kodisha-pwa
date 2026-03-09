@@ -199,9 +199,9 @@ const STEPS: Array<{ id: Step; label: string; caption: string }> = [
 ];
 
 const CATEGORY_STYLES: Record<RequestCategory, string> = {
-  produce: "border-orange-200 bg-orange-50 text-orange-800",
-  livestock: "border-amber-200 bg-amber-50 text-amber-800",
-  inputs: "border-sky-200 bg-sky-50 text-sky-800",
+  produce: "border-emerald-200 bg-emerald-50 text-emerald-800",
+  livestock: "border-emerald-200 bg-emerald-50 text-emerald-800",
+  inputs: "border-emerald-200 bg-emerald-50 text-emerald-800",
   service: "border-emerald-200 bg-emerald-50 text-emerald-800",
 };
 
@@ -778,12 +778,12 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
           <h2 className="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">
             {isB2B
               ? "Post institutional demand and collect bids fast"
-              : "Post demand that attracts serious sellers"}
+              : "Post demand and get matched offers fast"}
           </h2>
           <p className="mt-2 text-sm text-slate-600 sm:text-base">
             {isB2B
               ? "Strictly demand-based procurement for restaurants, schools, processors, and distributors."
-              : "Share what you need and get matched offers quickly."}
+              : "Share what you need and get offers quickly."}
           </p>
         </div>
 
@@ -869,14 +869,14 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
           <button
             type="button"
             onClick={handleRestoreDraft}
-            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+            className="ui-btn-primary min-h-[38px] rounded-lg px-4 py-2 text-sm"
           >
             Restore draft
           </button>
           <button
             type="button"
             onClick={handleDiscardDraft}
-            className="rounded-lg border border-emerald-200 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100"
+            className="ui-btn-secondary min-h-[38px] rounded-lg px-4 py-2 text-sm"
           >
             Discard
           </button>
@@ -891,7 +891,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
       )}
 
       {notice && !error && (
-        <div className="mb-4 flex items-start gap-2 rounded-xl border border-blue-200 bg-blue-50 p-4 text-blue-700">
+        <div className="mb-4 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">
           <CheckCircle2 size={20} className="mt-0.5 flex-shrink-0" />
           <span>{notice}</span>
         </div>
@@ -928,7 +928,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                   onChange={(e) =>
                     setTopLevelField("category", e.target.value as RequestCategory)
                   }
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-200"
+                  className="ui-input-muted"
                 >
                   {CATEGORY_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -948,7 +948,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                   onChange={(e) =>
                     setTopLevelField("urgency", e.target.value as UrgencyLevel)
                   }
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-200"
+                  className="ui-input-muted"
                 >
                   {URGENCY_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -956,9 +956,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                     </option>
                   ))}
                 </select>
-                <p className="mt-1 text-xs text-slate-500">
-                  Set expectations clearly so suppliers know how fast to respond.
-                </p>
+                <p className="mt-1 text-xs text-slate-500">Set expected response speed.</p>
               </div>
             </div>
 
@@ -974,7 +972,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                   onChange={(e) => setTopLevelField("title", e.target.value)}
                   maxLength={100}
                   placeholder="e.g., Need 20 bags of fresh onions this week"
-                  className={`w-full rounded-xl border bg-slate-50/70 px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-200 ${
+                  className={`ui-input-muted ${
                     fieldErrors.title ? "border-red-300" : "border-slate-200"
                   }`}
                 />
@@ -1005,7 +1003,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                   value={formData.productType}
                   onChange={(e) => setTopLevelField("productType", e.target.value)}
                   placeholder={selectedCategoryMeta.typePlaceholder}
-                  className={`w-full rounded-xl border bg-slate-50/70 px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-200 ${
+                  className={`ui-input-muted ${
                     fieldErrors.productType ? "border-red-300" : "border-slate-200"
                   }`}
                 />
@@ -1030,7 +1028,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                 placeholder="Describe quantity, quality, timing, and key requirements."
                 rows={5}
                 maxLength={2000}
-                className={`w-full rounded-xl border bg-slate-50/70 px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-200 ${
+                className={`ui-input-muted ${
                   fieldErrors.description ? "border-red-300" : "border-slate-200"
                 }`}
               />
@@ -1062,7 +1060,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                   }}
                   inputMode="decimal"
                   placeholder="e.g., 200"
-                  className={`w-full rounded-xl border bg-slate-50/70 px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-200 ${
+                  className={`ui-input-muted ${
                     fieldErrors.quantity ? "border-red-300" : "border-slate-200"
                   }`}
                 />
@@ -1077,7 +1075,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                   name="unit"
                   value={formData.unit}
                   onChange={(e) => setTopLevelField("unit", e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-200"
+                  className="ui-input-muted"
                 >
                   {UNITS.map((unit) => (
                     <option key={unit} value={unit}>
@@ -1114,7 +1112,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                     onChange={(e) => setBudgetField("min", e.target.value)}
                     inputMode="numeric"
                     placeholder="e.g., 25000"
-                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
+                    className="ui-input"
                   />
                 </div>
                 <div>
@@ -1128,7 +1126,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                     onChange={(e) => setBudgetField("max", e.target.value)}
                     inputMode="numeric"
                     placeholder="e.g., 40000"
-                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
+                    className="ui-input"
                   />
                 </div>
               </div>
@@ -1155,7 +1153,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                   name="location.county"
                   value={formData.location.county}
                   onChange={(e) => setLocationField("county", e.target.value)}
-                  className={`w-full rounded-xl border bg-slate-50/70 px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-200 ${
+                  className={`ui-input-muted ${
                     fieldErrors.county ? "border-red-300" : "border-slate-200"
                   }`}
                 >
@@ -1179,7 +1177,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                   value={formData.location.constituency}
                   onChange={(e) => setLocationField("constituency", e.target.value)}
                   disabled={!formData.location.county}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-200 disabled:bg-slate-100"
+                  className="ui-input-muted disabled:bg-slate-100"
                 >
                   <option value="">Select constituency</option>
                   {constituencies.map((constituency) => (
@@ -1196,7 +1194,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                   value={formData.location.ward}
                   onChange={(e) => setLocationField("ward", e.target.value)}
                   disabled={!formData.location.constituency}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-200 disabled:bg-slate-100"
+                  className="ui-input-muted disabled:bg-slate-100"
                 >
                   <option value="">Select ward</option>
                   {wards.map((ward) => (
@@ -1218,7 +1216,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                   value={formData.contactPhone}
                   onChange={(e) => setTopLevelField("contactPhone", e.target.value)}
                   placeholder="+254712345678"
-                  className={`w-full rounded-xl border bg-slate-50/70 px-4 py-3 text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-200 ${
+                  className={`ui-input-muted ${
                     fieldErrors.contactPhone ? "border-red-300" : "border-slate-200"
                   }`}
                 />
@@ -1227,8 +1225,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                     fieldErrors.contactPhone ? "text-red-600" : "text-slate-500"
                   }`}
                 >
-                  {fieldErrors.contactPhone ||
-                    "Optional, but helps with faster follow-up."}
+                  {fieldErrors.contactPhone || "Optional. Helps faster follow-up."}
                 </p>
               </div>
 
@@ -1300,7 +1297,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
               <button
                 type="button"
                 onClick={onCancel}
-                className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                className="ui-btn-ghost px-5 py-3"
               >
                 Cancel
               </button>
@@ -1309,7 +1306,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
               <button
                 type="button"
                 onClick={handlePrevStep}
-                className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                className="ui-btn-ghost px-5 py-3"
               >
                 Previous
               </button>
@@ -1321,7 +1318,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
               <button
                 type="button"
                 onClick={handleNextStep}
-                className="rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200/60 transition hover:bg-emerald-700"
+                className="ui-btn-primary px-6 py-3"
               >
                 Continue
               </button>
@@ -1329,7 +1326,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
               <button
                 type="submit"
                 disabled={loading}
-                className="rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200/60 transition hover:bg-emerald-700 disabled:bg-slate-300"
+                className="ui-btn-primary px-6 py-3"
               >
                 {loading ? "Posting demand..." : "Post Demand"}
               </button>
@@ -1342,3 +1339,4 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
 };
 
 export default CreateBuyerRequest;
+

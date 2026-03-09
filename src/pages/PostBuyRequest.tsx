@@ -70,7 +70,7 @@ const PostBuyRequest: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate("/bulk?role=buyer")}
-              className="mt-3 inline-flex rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700"
+              className="ui-btn-primary mt-3 rounded-lg px-4 py-2 text-sm"
             >
               Apply as bulk buyer
             </button>

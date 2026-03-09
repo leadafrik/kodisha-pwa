@@ -555,7 +555,7 @@ const BrowseListings: React.FC = () => {
                 </div>
                 <Link
                   to="/login"
-                  className="inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition"
+                  className="ui-btn-primary px-4 py-2 text-sm"
                 >
                   Sign In
                 </Link>
@@ -577,28 +577,20 @@ const BrowseListings: React.FC = () => {
                 </p>
                 <div className="mt-4 flex flex-wrap gap-3">
                   <Link
-                    to="/about"
-                    className="inline-flex items-center rounded-lg border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 transition"
-                  >
-                    Learn about Agrisoko
-                  </Link>
-                  {!user && (
-                    <Link
-                      to={`/login?mode=signup&next=${encodeURIComponent("/browse")}`}
-                      className="inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition"
-                    >
-                      Create account / Sign in
-                    </Link>
-                  )}
-                  <Link
                     to={
                       user
                         ? "/create-listing?compact=1"
                         : `/login?mode=signup&next=${encodeURIComponent("/create-listing?compact=1")}`
                     }
-                    className="inline-flex items-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 transition"
+                    className="ui-btn-primary px-4 py-2 text-sm"
                   >
                     List free today
+                  </Link>
+                  <Link
+                    to="/about"
+                    className="ui-btn-ghost px-4 py-2 text-sm"
+                  >
+                    Learn about Agrisoko
                   </Link>
                 </div>
                 <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold text-slate-500">
@@ -1044,7 +1036,7 @@ const BrowseListings: React.FC = () => {
                   setSearch("");
                   setVerifiedOnly(false);
                 }}
-                className="inline-flex min-h-[44px] items-center justify-center px-6 py-3 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition shadow-sm"
+                className="ui-btn-primary px-6 py-3"
               >
                 Browse all listings
               </button>
@@ -1054,7 +1046,7 @@ const BrowseListings: React.FC = () => {
                     ? "/create-listing?compact=1"
                     : `/login?mode=signup&next=${encodeURIComponent("/create-listing?compact=1")}`
                 }
-                className="inline-flex min-h-[44px] items-center justify-center px-6 py-3 rounded-lg border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition"
+                className="ui-btn-ghost px-6 py-3"
               >
                 {user ? "List free today" : "Sign in to list"}
               </Link>
@@ -1066,7 +1058,7 @@ const BrowseListings: React.FC = () => {
           <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="mb-3 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-rose-700">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
                   Trending now
                 </p>
                 <h2 className="mt-1 text-xl font-semibold text-slate-900">
@@ -1176,10 +1168,10 @@ const BrowseListings: React.FC = () => {
             const marketTrustScore = Math.round(getMarketTrustScore(toTrustInput(card)));
             const categoryColors: Record<Category, string> = {
               all: "bg-slate-100 text-slate-700",
-              produce: "bg-orange-50 text-orange-700",
-              livestock: "bg-rose-50 text-rose-700",
-              inputs: "bg-blue-50 text-blue-700",
-              service: "bg-amber-50 text-amber-700",
+              produce: "bg-emerald-50 text-emerald-700",
+              livestock: "bg-emerald-50 text-emerald-700",
+              inputs: "bg-emerald-50 text-emerald-700",
+              service: "bg-emerald-50 text-emerald-700",
             };
             const badgeColor = categoryColors[card.category] || categoryColors.produce;
 

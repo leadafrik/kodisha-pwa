@@ -781,13 +781,13 @@ const CreateListing: React.FC = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white flex items-center justify-center p-4">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Please Log In</h1>
           <p className="text-gray-600 mb-6">You must be logged in to create a listing.</p>
           <button
             onClick={() => navigate("/login")}
-            className="bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700"
+            className="ui-btn-primary px-6 py-2"
           >
             Go to Login
           </button>
@@ -873,7 +873,7 @@ const CreateListing: React.FC = () => {
                   Create your listing in 2 minutes
                 </h1>
                 <p className="text-sm md:text-base text-slate-600 max-w-xl">
-                  Start with the essentials now, then improve trust signals to attract more buyer inquiries.
+                  Start with essentials, then optimize trust signals after publishing.
                 </p>
               </div>
 
@@ -902,9 +902,7 @@ const CreateListing: React.FC = () => {
         </section>
 
         <div className="max-w-5xl mx-auto px-4 pb-16">
-          <p className="mb-6 text-sm text-slate-500">
-            {isCompact ? "Drafts save automatically." : "Drafts save automatically on this device."}
-          </p>
+          <p className="mb-6 text-sm text-slate-500">Drafts save automatically on this device.</p>
 
           {showVerificationNudge && (
             <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 flex flex-wrap items-center gap-3">
@@ -919,7 +917,7 @@ const CreateListing: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate(verifyIdPath)}
-                className="px-4 py-2 rounded-lg bg-amber-600 text-white text-sm font-semibold hover:bg-amber-700"
+                className="ui-btn-primary min-h-[38px] rounded-lg px-4 py-2 text-sm"
               >
                 Verify to boost trust
               </button>
@@ -927,9 +925,9 @@ const CreateListing: React.FC = () => {
           )}
 
           {isVerificationPending && (
-            <div className="mb-6 rounded-2xl border border-blue-200 bg-blue-50 p-4">
-              <p className="text-blue-900 font-semibold">Verification submitted</p>
-              <p className="text-blue-700 text-sm mt-1">
+            <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+              <p className="text-emerald-900 font-semibold">Verification submitted</p>
+              <p className="text-emerald-800 text-sm mt-1">
                 Your ID review is in progress. You can keep posting while the trust badge is being reviewed.
               </p>
             </div>
@@ -941,14 +939,14 @@ const CreateListing: React.FC = () => {
               <button
                 type="button"
                 onClick={handleRestoreDraft}
-                className="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700"
+                className="ui-btn-primary min-h-[38px] rounded-lg px-4 py-2 text-sm"
               >
                 Restore draft
               </button>
               <button
                 type="button"
                 onClick={handleDiscardDraft}
-                className="px-4 py-2 rounded-lg border border-emerald-200 text-emerald-700 text-sm font-semibold hover:bg-emerald-100"
+                className="ui-btn-secondary min-h-[38px] rounded-lg px-4 py-2 text-sm"
               >
                 Discard
               </button>
@@ -964,9 +962,9 @@ const CreateListing: React.FC = () => {
             />
           )}
           {notice && !error && (
-            <div className="mb-6 bg-blue-50 border border-blue-200 rounded-2xl p-4 flex gap-3">
-              <CheckCircle2 className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-              <p className="text-blue-700">{notice}</p>
+            <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex gap-3">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+              <p className="text-emerald-800">{notice}</p>
             </div>
           )}
 
@@ -982,7 +980,7 @@ const CreateListing: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => navigate("/request/new")}
-                  className="rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 transition"
+                  className="ui-btn-secondary min-h-[34px] rounded-lg px-3 py-1.5 text-xs"
                 >
                   Post a buy request
                 </button>
@@ -1011,7 +1009,7 @@ const CreateListing: React.FC = () => {
                           setError("");
                           setNotice("");
                         }}
-                        className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-green-500"
+                        className="ui-input"
                       >
                         <option value="">Select a category...</option>
                         {CATEGORY_OPTIONS.map((cat) => (
@@ -1034,7 +1032,7 @@ const CreateListing: React.FC = () => {
                           setError("");
                           setNotice("");
                         }}
-                        className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-green-500"
+                        className="ui-input"
                       >
                         <option value="">Select a subcategory...</option>
                         {subcategoryOptions.map((sub) => (
@@ -1064,8 +1062,8 @@ const CreateListing: React.FC = () => {
                       }}
                       className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
                         form.category === cat
-                          ? "border-green-600 bg-green-50"
-                          : "border-gray-200 hover:border-green-300"
+                          ? "border-emerald-600 bg-emerald-50"
+                          : "border-gray-200 hover:border-emerald-300"
                       }`}
                     >
                       <p className="font-bold text-gray-900">
@@ -1091,7 +1089,7 @@ const CreateListing: React.FC = () => {
                       setError("");
                       setNotice("");
                     }}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="ui-input"
                   >
                     <option value="">Select a subcategory...</option>
                     {subcategoryOptions.map((sub) => (
@@ -1112,7 +1110,7 @@ const CreateListing: React.FC = () => {
                     <select
                       value={form.county}
                       onChange={(e) => setForm((prev) => ({ ...prev, county: e.target.value }))}
-                      className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-green-500"
+                      className="ui-input"
                     >
                       <option value="">Select a county...</option>
                       {kenyaCounties.map((c) => (
@@ -1128,7 +1126,7 @@ const CreateListing: React.FC = () => {
                       value={form.constituency}
                       onChange={(e) => setForm((prev) => ({ ...prev, constituency: e.target.value }))}
                       disabled={!form.county}
-                      className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+                      className="ui-input disabled:bg-slate-100"
                     >
                       <option value="">Select a constituency...</option>
                       {constituencies.map((c) => (
@@ -1144,7 +1142,7 @@ const CreateListing: React.FC = () => {
                       value={form.ward}
                       onChange={(e) => setForm((prev) => ({ ...prev, ward: e.target.value }))}
                       disabled={!form.constituency}
-                      className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+                      className="ui-input disabled:bg-slate-100"
                     >
                       <option value="">Select a ward...</option>
                       {wards.map((w) => (
@@ -1163,7 +1161,7 @@ const CreateListing: React.FC = () => {
                       placeholder="e.g., Near main road"
                       value={form.approximateLocation}
                       onChange={(e) => setForm((prev) => ({ ...prev, approximateLocation: e.target.value }))}
-                      className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-green-500"
+                      className="ui-input"
                     />
                   </div>
                 </div>
@@ -1233,7 +1231,7 @@ const CreateListing: React.FC = () => {
                         placeholder="e.g., Fresh Tomatoes, Dairy Cow, Tractor"
                         value={form.title}
                         onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="ui-input"
                       />
                     </div>
 
@@ -1246,7 +1244,7 @@ const CreateListing: React.FC = () => {
                         value={form.description}
                         onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
                         rows={5}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="ui-input"
                       />
                     </div>
 
@@ -1259,7 +1257,7 @@ const CreateListing: React.FC = () => {
                           placeholder="0"
                           value={form.price}
                           onChange={(e) => setForm((prev) => ({ ...prev, price: e.target.value }))}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          className="ui-input"
                         />
                         <p className="text-xs text-gray-600 mt-1">
                           {isFreeLaunch ? "Commission: Free for now" : `Commission: KSh ${commission.toFixed(0)}`}
@@ -1275,12 +1273,12 @@ const CreateListing: React.FC = () => {
                               placeholder="Amount"
                               value={form.quantity}
                               onChange={(e) => setForm((prev) => ({ ...prev, quantity: e.target.value }))}
-                              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                              className="flex-1 ui-input"
                             />
                             <select
                               value={form.unit}
                               onChange={(e) => setForm((prev) => ({ ...prev, unit: e.target.value }))}
-                              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                              className="ui-input"
                             >
                               {UNITS.map((u) => (
                                 <option key={u} value={u}>
@@ -1319,7 +1317,7 @@ const CreateListing: React.FC = () => {
                         type="button"
                         onClick={addBatchItem}
                         disabled={batchItems.length >= MAX_BATCH_ITEMS}
-                        className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                        className="ui-btn-primary min-h-[38px] rounded-lg px-3 py-2 text-sm"
                       >
                         Add item
                       </button>
@@ -1350,7 +1348,7 @@ const CreateListing: React.FC = () => {
                               onChange={(e) =>
                                 updateBatchItem(item.id, (current) => ({ ...current, title: e.target.value }))
                               }
-                              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-green-500"
+                              className="ui-input"
                             />
                           </div>
 
@@ -1363,7 +1361,7 @@ const CreateListing: React.FC = () => {
                                 updateBatchItem(item.id, (current) => ({ ...current, description: e.target.value }))
                               }
                               rows={4}
-                              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-green-500"
+                              className="ui-input"
                             />
                           </div>
 
@@ -1377,7 +1375,7 @@ const CreateListing: React.FC = () => {
                                 onChange={(e) =>
                                   updateBatchItem(item.id, (current) => ({ ...current, price: e.target.value }))
                                 }
-                                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-green-500"
+                                className="ui-input"
                               />
                             </div>
                             {form.category !== "inputs" && (
@@ -1394,14 +1392,14 @@ const CreateListing: React.FC = () => {
                                         quantity: e.target.value,
                                       }))
                                     }
-                                    className="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-green-500"
+                                    className="flex-1 ui-input"
                                   />
                                   <select
                                     value={item.unit}
                                     onChange={(e) =>
                                       updateBatchItem(item.id, (current) => ({ ...current, unit: e.target.value }))
                                     }
-                                    className="rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-green-500"
+                                    className="ui-input px-3 py-2"
                                   >
                                     {UNITS.map((unit) => (
                                       <option key={unit} value={unit}>
@@ -1426,7 +1424,7 @@ const CreateListing: React.FC = () => {
                                   deliveryScope: e.target.value as DeliveryScope,
                                 }))
                               }
-                              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-green-500"
+                              className="ui-input"
                             >
                               {DELIVERY_SCOPE_OPTIONS.map((option) => (
                                 <option key={option.value} value={option.value}>
@@ -1499,7 +1497,7 @@ const CreateListing: React.FC = () => {
                       }))
                     }
                     disabled={entryMode === "batch"}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="ui-input"
                   >
                     {DELIVERY_SCOPE_OPTIONS.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -1514,7 +1512,7 @@ const CreateListing: React.FC = () => {
                     }{" "}
                     {entryMode === "batch"
                       ? "Batch mode uses each item's delivery scope."
-                      : "This appears as a delivery tag on your listing."}
+                      : "Shown as a delivery tag on your listing."}
                   </p>
                 </div>
 
@@ -1528,7 +1526,7 @@ const CreateListing: React.FC = () => {
                     type="date"
                     value={form.availableFrom}
                     onChange={(e) => setForm((prev) => ({ ...prev, availableFrom: e.target.value }))}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="ui-input"
                   />
                 </div>
 
@@ -1540,10 +1538,10 @@ const CreateListing: React.FC = () => {
                     placeholder="+254712345678"
                     value={form.contact}
                     onChange={(e) => setForm((prev) => ({ ...prev, contact: e.target.value }))}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="ui-input"
                   />
                   <p className="text-xs text-gray-600 mt-1">
-                    Buyers contact you faster with this number. Add a line you can answer quickly.
+                    Buyers contact you faster with this number.
                   </p>
                 </div>
 
@@ -1566,8 +1564,8 @@ const CreateListing: React.FC = () => {
                       />
                       <label htmlFor="imageInput" className="cursor-pointer">
                         <Camera className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-                        <p className="text-sm font-semibold text-gray-900">Click to upload or drag and drop</p>
-                        <p className="text-xs text-gray-600">PNG, JPG up to 5 images. Listings with photos get more buyer calls.</p>
+                        <p className="text-sm font-semibold text-gray-900">Upload photos</p>
+                        <p className="text-xs text-gray-600">PNG, JPG up to 5 images.</p>
                       </label>
                     </div>
 
@@ -1645,7 +1643,7 @@ const CreateListing: React.FC = () => {
                 <button
                   type="submit"
                   disabled={uploading}
-                  className="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 disabled:opacity-50 transition-all"
+                  className="ui-btn-primary w-full py-3 font-bold"
                 >
                   {uploading
                     ? entryMode === "batch"
@@ -1667,7 +1665,7 @@ const CreateListing: React.FC = () => {
               <button
                 type="button"
                 onClick={handlePrevStep}
-                className="flex-1 border border-slate-300 text-slate-700 font-semibold py-3 rounded-xl hover:bg-slate-50"
+                className="ui-btn-ghost flex-1 py-3"
               >
                 Previous
               </button>
@@ -1676,7 +1674,7 @@ const CreateListing: React.FC = () => {
               <button
                 type="button"
                 onClick={handleNextStep}
-                className="flex-1 bg-emerald-600 text-white font-semibold py-3 rounded-xl hover:bg-emerald-700"
+                className="ui-btn-primary flex-1 py-3"
               >
                 Next
               </button>
@@ -1690,3 +1688,4 @@ const CreateListing: React.FC = () => {
 };
 
 export default CreateListing;
+

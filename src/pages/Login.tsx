@@ -441,9 +441,7 @@ const Login: React.FC = () => {
           type="text"
           value={loginData.emailOrPhone}
           onChange={(e) => setLoginData({ ...loginData, emailOrPhone: e.target.value })}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm
-            focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100
-            placeholder:text-gray-400 transition-colors"
+          className="ui-input placeholder:text-gray-400"
           placeholder="name@example.com"
         />
       </div>
@@ -456,9 +454,7 @@ const Login: React.FC = () => {
             type={visiblePasswords.login ? "text" : "password"}
             value={loginData.password}
             onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-10 text-sm
-              focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100
-              placeholder:text-gray-400 transition-colors"
+            className="ui-input pr-10 placeholder:text-gray-400"
             placeholder="Enter your password"
           />
           <button
@@ -475,8 +471,7 @@ const Login: React.FC = () => {
       <button
         type="submit"
         disabled={loading || !loginData.emailOrPhone || !loginData.password}
-        className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300
-          text-white font-semibold py-2.5 rounded-lg transition-colors duration-200 text-sm"
+        className="ui-btn-primary w-full"
       >
         {loading ? "Signing in..." : "Sign In"}
       </button>
@@ -488,7 +483,7 @@ const Login: React.FC = () => {
           setMode("forgot");
           resetMessages();
         }}
-        className="block w-full text-center text-sm text-blue-600 hover:text-blue-700 hover:underline font-medium"
+        className="block w-full text-center text-sm text-emerald-700 hover:text-emerald-800 hover:underline font-medium"
       >
         Forgot password?
       </button>
@@ -503,7 +498,7 @@ const Login: React.FC = () => {
               setMode("signup");
               resetMessages();
             }}
-            className="font-semibold text-blue-600 hover:text-blue-700"
+            className="font-semibold text-emerald-700 hover:text-emerald-800"
           >
             Create an account
           </button>
@@ -520,10 +515,7 @@ const Login: React.FC = () => {
           Quick signup
         </p>
         <p className="text-center text-sm text-emerald-900">
-          Choose Google, Facebook, or email. Required consent is captured in one step.
-        </p>
-        <p className="text-center text-xs text-emerald-700/90">
-          You can continue immediately after ticking the required boxes.
+          Tap Google, Facebook, or email. Required consent is captured once.
         </p>
         <GoogleLoginButton
           legalConsents={signupConsents}
@@ -583,7 +575,7 @@ const Login: React.FC = () => {
             type="text"
             value={signupData.name}
             onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="ui-input"
             placeholder="Your full name"
           />
         </div>
@@ -594,7 +586,7 @@ const Login: React.FC = () => {
             type="email"
             value={signupData.emailOrPhone}
             onChange={(e) => setSignupData({ ...signupData, emailOrPhone: e.target.value })}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="ui-input"
             placeholder="your.email@example.com"
           />
         </div>
@@ -606,7 +598,7 @@ const Login: React.FC = () => {
               type={visiblePasswords.signup ? "text" : "password"}
               value={signupData.password}
               onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="ui-input pr-10"
               placeholder="Use 8+ characters"
             />
             <button
@@ -620,10 +612,6 @@ const Login: React.FC = () => {
           </div>
         </div>
       </div>
-
-      <p className="text-xs text-gray-500">
-        You can add your county after signup.
-      </p>
 
       <div ref={signupConsentRef} className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
         <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
@@ -639,10 +627,10 @@ const Login: React.FC = () => {
                 termsAccepted: e.target.checked,
               }))
             }
-            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-500"
           />
           <span>
-            I agree to the <a href="/legal/terms" className="font-semibold text-blue-600 hover:underline">Terms of Service</a>.
+            I agree to the <a href="/legal/terms" className="font-semibold text-emerald-700 hover:underline">Terms of Service</a>.
           </span>
         </label>
         <label className="flex items-start gap-3 text-sm text-slate-700">
@@ -655,10 +643,10 @@ const Login: React.FC = () => {
                 privacyAccepted: e.target.checked,
               }))
             }
-            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-500"
           />
           <span>
-            I have read the <a href="/legal/privacy" className="font-semibold text-blue-600 hover:underline">Privacy Policy</a>.
+            I have read the <a href="/legal/privacy" className="font-semibold text-emerald-700 hover:underline">Privacy Policy</a>.
           </span>
         </label>
         <label className="flex items-start gap-3 text-sm text-slate-700">
@@ -671,7 +659,7 @@ const Login: React.FC = () => {
                 dataProcessingConsent: e.target.checked,
               }))
             }
-            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-500"
           />
           <span>
             I consent to Agrisoko processing my account and verification data to operate the marketplace and verify trust signals.
@@ -687,7 +675,7 @@ const Login: React.FC = () => {
                 marketingConsent: e.target.checked,
               }))
             }
-            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-500"
           />
           <span>Send me product updates and marketing messages.</span>
         </label>
@@ -696,7 +684,7 @@ const Login: React.FC = () => {
       <button
         type="submit"
         disabled={loading || !requiredSignupConsentsAccepted}
-        className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-60"
+        className="ui-btn-primary w-full"
       >
         {loading ? "Creating account..." : "Create Free Account"}
       </button>
@@ -707,7 +695,7 @@ const Login: React.FC = () => {
           setMode("login");
           resetMessages();
         }}
-        className="w-full text-center text-blue-600 font-semibold hover:underline"
+        className="ui-btn-ghost w-full"
       >
         Already have account? Sign in
       </button>
@@ -743,11 +731,11 @@ const Login: React.FC = () => {
                     termsAccepted: e.target.checked,
                   }))
                 }
-                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-500"
               />
               <span>
                 I agree to the{" "}
-                <a href="/legal/terms" className="font-semibold text-blue-600 hover:underline">
+                <a href="/legal/terms" className="font-semibold text-emerald-700 hover:underline">
                   Terms of Service
                 </a>
                 .
@@ -763,11 +751,11 @@ const Login: React.FC = () => {
                     privacyAccepted: e.target.checked,
                   }))
                 }
-                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-500"
               />
               <span>
                 I have read the{" "}
-                <a href="/legal/privacy" className="font-semibold text-blue-600 hover:underline">
+                <a href="/legal/privacy" className="font-semibold text-emerald-700 hover:underline">
                   Privacy Policy
                 </a>
                 .
@@ -783,7 +771,7 @@ const Login: React.FC = () => {
                     dataProcessingConsent: e.target.checked,
                   }))
                 }
-                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-500"
               />
               <span>
                 I consent to Agrisoko processing my account and verification data to operate the marketplace and verify trust signals.
@@ -799,7 +787,7 @@ const Login: React.FC = () => {
                     marketingConsent: e.target.checked,
                   }))
                 }
-                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-500"
               />
               <span>Send me product updates and marketing messages.</span>
             </label>
@@ -809,7 +797,7 @@ const Login: React.FC = () => {
             <button
               type="button"
               onClick={dismissSocialConsentModal}
-              className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+              className="ui-btn-ghost min-h-[40px] rounded-full px-4 py-2"
             >
               Close
             </button>
@@ -817,7 +805,7 @@ const Login: React.FC = () => {
               type="button"
               onClick={continuePendingSocialSignup}
               disabled={!requiredSignupConsentsAccepted}
-              className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+              className="ui-btn-primary min-h-[40px] rounded-full px-4 py-2"
             >
               {pendingSocialProvider === "facebook" ? "Continue with Facebook" : "Continue with Google"}
             </button>
@@ -842,7 +830,7 @@ const Login: React.FC = () => {
           type="text"
           value={otpCode}
           onChange={(e) => setOtpCode(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 text-center text-2xl tracking-widest"
+          className="ui-input text-center text-2xl tracking-widest"
           placeholder="000000"
           maxLength={6}
         />
@@ -851,7 +839,7 @@ const Login: React.FC = () => {
       <button
         type="submit"
         disabled={loading || !otpCode.trim()}
-        className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 disabled:opacity-60"
+        className="ui-btn-primary w-full py-3"
       >
         {loading ? "Verifying..." : "Verify Code"}
       </button>
@@ -860,7 +848,7 @@ const Login: React.FC = () => {
         type="button"
         onClick={handleResendOtp}
         disabled={!canResendOtp}
-        className="w-full text-center text-green-700 font-semibold hover:underline disabled:opacity-60"
+        className="ui-btn-ghost w-full"
       >
         {canResendOtp ? "Resend Code" : `Resend in ${otpTimer}s`}
       </button>
@@ -875,7 +863,7 @@ const Login: React.FC = () => {
           type="email"
           value={resetData.emailOrPhone}
           onChange={(e) => setResetData({ ...resetData, emailOrPhone: e.target.value })}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="ui-input"
           placeholder="you@example.com"
         />
         <p className="mt-2 text-xs text-gray-500">
@@ -886,7 +874,7 @@ const Login: React.FC = () => {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 disabled:opacity-60"
+        className="ui-btn-primary w-full py-3"
       >
         {loading ? "Sending..." : "Send Reset Code"}
       </button>
@@ -897,7 +885,7 @@ const Login: React.FC = () => {
           setMode("login");
           resetMessages();
         }}
-        className="w-full text-center text-green-700 font-semibold hover:underline"
+        className="ui-btn-ghost w-full"
       >
         Back to Sign In
       </button>
@@ -912,7 +900,7 @@ const Login: React.FC = () => {
           type="text"
           value={resetData.code}
           onChange={(e) => setResetData({ ...resetData, code: e.target.value })}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="ui-input"
           placeholder="6-digit code"
           maxLength={6}
         />
@@ -925,7 +913,7 @@ const Login: React.FC = () => {
             type={visiblePasswords.resetNew ? "text" : "password"}
             value={resetData.newPassword}
             onChange={(e) => setResetData({ ...resetData, newPassword: e.target.value })}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="ui-input pr-10"
             placeholder="Min 6 characters"
           />
           <button
@@ -946,7 +934,7 @@ const Login: React.FC = () => {
             type={visiblePasswords.resetConfirm ? "text" : "password"}
             value={resetData.confirmPassword}
             onChange={(e) => setResetData({ ...resetData, confirmPassword: e.target.value })}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="ui-input pr-10"
             placeholder="Confirm password"
           />
           <button
@@ -963,7 +951,7 @@ const Login: React.FC = () => {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 disabled:opacity-60"
+        className="ui-btn-primary w-full py-3"
       >
         {loading ? "Resetting..." : "Reset Password"}
       </button>
@@ -972,7 +960,7 @@ const Login: React.FC = () => {
         type="button"
         onClick={handleResendOtp}
         disabled={!canResendOtp}
-        className="w-full text-center text-green-700 font-semibold hover:underline disabled:opacity-60 text-sm"
+        className="ui-btn-ghost w-full text-sm"
       >
         {canResendOtp ? "Resend Code" : `Resend in ${otpTimer}s`}
       </button>
@@ -1006,7 +994,7 @@ const Login: React.FC = () => {
   return (
     <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-emerald-50">
       <div className="pointer-events-none absolute -top-20 right-0 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-0 left-0 h-72 w-72 rounded-full bg-sky-200/30 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 left-0 h-72 w-72 rounded-full bg-amber-200/30 blur-3xl" />
 
       <div className="px-4 py-8 md:py-12">
         <div className="mx-auto grid w-full max-w-6xl items-stretch gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10">
@@ -1076,3 +1064,4 @@ const Login: React.FC = () => {
 };
 
 export default Login;
+

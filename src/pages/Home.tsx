@@ -246,8 +246,8 @@ const Home: React.FC = () => {
   const displayDescription = user
     ? isPhone
       ? "Post fast, find demand, and close deals."
-      : "Open your dashboard, post a listing, or browse live demand across Kenya."
-    : heroDescription || (isPhone ? "Sell or find produce in minutes with verified profiles." : heroDescriptionFallback);
+      : "Post listings, find demand, and close deals across Kenya."
+    : heroDescription || (isPhone ? "Sell or find produce in minutes." : heroDescriptionFallback);
   const countyCoverageLabel =
     liveCountyCount > 0 ? `${liveCountyCount.toLocaleString()} counties active` : "47 counties open";
   const primaryCtaTo = user
@@ -281,8 +281,8 @@ const Home: React.FC = () => {
     {
       title: user ? "Start selling in minutes" : "Start now",
       copy: user
-        ? "Start selling in minutes. Open your dashboard and publish your first listing."
-        : "Create your account now. Verify when ready.",
+        ? "Open your dashboard and publish your first listing."
+        : "Create your account now.",
     },
   ];
   const visibleHeroFocusItems = isPhone ? heroFocusItems.slice(0, 1) : heroFocusItems;
@@ -349,7 +349,7 @@ const Home: React.FC = () => {
                             target: browseTo,
                           })
                         }
-                        className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-300/40 transition hover:bg-emerald-700 sm:w-auto"
+                        className="ui-btn-primary w-full px-6 sm:w-auto"
                       >
                         {browseCtaLabel}
                       </Link>
@@ -361,7 +361,7 @@ const Home: React.FC = () => {
                             target: "/create-listing",
                           })
                         }
-                        className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 sm:w-auto"
+                        className="ui-btn-ghost w-full px-6 sm:w-auto"
                       >
                         {primaryCtaLabel}
                       </Link>
@@ -376,7 +376,7 @@ const Home: React.FC = () => {
                             target: "/create-listing",
                           })
                         }
-                        className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-300/40 transition hover:bg-emerald-700 sm:w-auto"
+                        className="ui-btn-primary w-full px-6 sm:w-auto"
                       >
                         {primaryCtaLabel}
                       </Link>
@@ -388,10 +388,10 @@ const Home: React.FC = () => {
                             target: browseTo,
                           })
                         }
-                        className={`inline-flex min-h-[46px] w-full items-center justify-center rounded-xl border bg-white px-6 py-3 text-sm font-semibold transition sm:w-auto ${
+                        className={`ui-btn-ghost w-full px-6 sm:w-auto ${
                           user
                             ? "border-emerald-300 text-emerald-700 hover:bg-emerald-50"
-                            : "border-slate-300 text-slate-900 hover:bg-slate-50"
+                            : ""
                         }`}
                       >
                         {browseCtaLabel}
@@ -487,13 +487,13 @@ const Home: React.FC = () => {
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Link
                     to={browseTo}
-                    className="inline-flex min-h-[42px] items-center justify-center rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                    className="ui-btn-secondary min-h-[42px] px-4 py-2"
                   >
                     {browseCtaLabel}
                   </Link>
                   <Link
                     to={aboutCtaTo}
-                    className="inline-flex min-h-[42px] items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                    className="ui-btn-ghost min-h-[42px] px-4 py-2"
                   >
                     {aboutCtaLabel}
                   </Link>
@@ -634,7 +634,7 @@ const Home: React.FC = () => {
                     target: demandCtaTo,
                   })
                 }
-                className="mt-6 inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-100 sm:w-auto"
+                className="ui-btn-ghost mt-6 w-full sm:w-auto"
               >
                 {demandCtaLabel}
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -711,7 +711,7 @@ const Home: React.FC = () => {
                   target: "/create-listing",
                 })
               }
-              className="inline-flex min-h-[42px] w-full items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 sm:w-auto"
+              className="ui-btn-primary w-full sm:w-auto"
             >
               {primaryCtaLabel}
             </Link>
