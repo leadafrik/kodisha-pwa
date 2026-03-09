@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -26,6 +26,41 @@ const defaultSignupConsents: LegalConsents = {
   privacyAccepted: false,
   marketingConsent: false,
   dataProcessingConsent: false,
+};
+
+const EMAIL_DOMAIN_TYPO_MAP: Record<string, string> = {
+  "gamil.com": "gmail.com",
+  "gmial.com": "gmail.com",
+  "gmai.com": "gmail.com",
+  "gmil.com": "gmail.com",
+  "gmail.co": "gmail.com",
+  "gmail.con": "gmail.com",
+  "yaho.com": "yahoo.com",
+  "yhoo.com": "yahoo.com",
+  "yahoo.co": "yahoo.com",
+  "yahoo.con": "yahoo.com",
+  "outlok.com": "outlook.com",
+  "outllok.com": "outlook.com",
+  "outlook.co": "outlook.com",
+  "outlook.con": "outlook.com",
+  "hotmial.com": "hotmail.com",
+  "hotmal.com": "hotmail.com",
+  "hotmail.co": "hotmail.com",
+  "icloud.co": "icloud.com",
+  "iclod.com": "icloud.com",
+  "protonmai.com": "protonmail.com",
+  "protonmail.co": "protonmail.com",
+};
+
+const getEmailTypoSuggestion = (email: string): string | null => {
+  const trimmed = email.trim().toLowerCase();
+  const atIndex = trimmed.lastIndexOf("@");
+  if (atIndex <= 0 || atIndex === trimmed.length - 1) return null;
+  const local = trimmed.slice(0, atIndex);
+  const domain = trimmed.slice(atIndex + 1);
+  const correctedDomain = EMAIL_DOMAIN_TYPO_MAP[domain];
+  if (!correctedDomain || correctedDomain === domain) return null;
+  return `${local}@${correctedDomain}`;
 };
 
 const Login: React.FC = () => {
@@ -74,6 +109,7 @@ const Login: React.FC = () => {
   const [signupData, setSignupData] = useState({
     name: "",
     emailOrPhone: "",
+    confirmEmail: "",
     password: "",
     inviteCode: inviteCodeFromQuery,
   });
@@ -109,6 +145,14 @@ const Login: React.FC = () => {
     signupConsents.termsAccepted &&
     signupConsents.privacyAccepted &&
     signupConsents.dataProcessingConsent;
+  const normalizedSignupEmail = signupData.emailOrPhone.trim().toLowerCase();
+  const normalizedSignupConfirmEmail = signupData.confirmEmail.trim().toLowerCase();
+  const emailTypoSuggestion = useMemo(
+    () => getEmailTypoSuggestion(normalizedSignupEmail),
+    [normalizedSignupEmail]
+  );
+  const emailMismatch =
+    !!normalizedSignupConfirmEmail && normalizedSignupEmail !== normalizedSignupConfirmEmail;
 
   const promptConsentBeforeSocialSignup = (message: string) => {
     setError(null);
@@ -250,6 +294,22 @@ const Login: React.FC = () => {
       return;
     }
     const email = input.toLowerCase();
+    const confirmEmail = signupData.confirmEmail.trim().toLowerCase();
+
+    if (!confirmEmail) {
+      setError("Please confirm your email address.");
+      return;
+    }
+
+    if (confirmEmail !== email) {
+      setError("Email and confirm email do not match.");
+      return;
+    }
+
+    if (emailTypoSuggestion && emailTypoSuggestion !== email) {
+      setError(`Possible typo detected. Did you mean ${emailTypoSuggestion}?`);
+      return;
+    }
 
     try {
       await register({
@@ -585,9 +645,24 @@ const Login: React.FC = () => {
           <input
             type="email"
             value={signupData.emailOrPhone}
-            onChange={(e) => setSignupData({ ...signupData, emailOrPhone: e.target.value })}
+            onChange={(e) =>
+              setSignupData({ ...signupData, emailOrPhone: e.target.value })
+            }
             className="ui-input"
             placeholder="your.email@example.com"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Confirm email *</label>
+          <input
+            type="email"
+            value={signupData.confirmEmail}
+            onChange={(e) =>
+              setSignupData({ ...signupData, confirmEmail: e.target.value })
+            }
+            className="ui-input"
+            placeholder="Re-enter your email"
           />
         </div>
 
@@ -612,6 +687,29 @@ const Login: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {emailMismatch && (
+        <p className="text-xs text-red-600">Email and confirm email do not match.</p>
+      )}
+
+      {emailTypoSuggestion && emailTypoSuggestion !== normalizedSignupEmail && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-900">
+          <p className="font-semibold">Possible typo in email domain.</p>
+          <button
+            type="button"
+            onClick={() =>
+              setSignupData((prev) => ({
+                ...prev,
+                emailOrPhone: emailTypoSuggestion,
+                confirmEmail: emailTypoSuggestion,
+              }))
+            }
+            className="mt-1 text-sm font-semibold text-emerald-700 hover:text-emerald-800"
+          >
+            Use {emailTypoSuggestion}
+          </button>
+        </div>
+      )}
 
       <div ref={signupConsentRef} className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
         <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">

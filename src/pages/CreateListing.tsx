@@ -174,9 +174,8 @@ const CreateListing: React.FC = () => {
     }
     return null;
   }, [searchParams]);
-  const compactEntryMode = searchParams.get("compact") === "1";
   const hasPresetCategory = !!requestedCategory;
-  const useCompactCategoryStep = hasPresetCategory || compactEntryMode;
+  const useCompactCategoryStep = true;
 
   // Pre-fill contact
   useEffect(() => {
@@ -1075,31 +1074,6 @@ const CreateListing: React.FC = () => {
                 </div>
               )}
 
-              {form.category && !useCompactCategoryStep && (
-                <div>
-                  <h3 className="font-bold text-gray-900 mb-4">Select a subcategory</h3>
-                  <select
-                    value={form.subcategory ?? ""}
-                    onChange={(e) => {
-                      const value = (e.target.value || null) as ListingFormData["subcategory"];
-                      setForm((prev) => ({
-                        ...prev,
-                        subcategory: value,
-                      }));
-                      setError("");
-                      setNotice("");
-                    }}
-                    className="ui-input"
-                  >
-                    <option value="">Select a subcategory...</option>
-                    {subcategoryOptions.map((sub) => (
-                      <option key={sub} value={sub}>
-                        {sub}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
               <div className="mt-6 border-t border-slate-200 pt-6">
                 <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-gray-900">
                   <MapPin className="h-5 w-5" /> Where is it located?
