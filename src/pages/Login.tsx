@@ -101,9 +101,10 @@ const Login: React.FC = () => {
     newPassword: "",
     confirmPassword: "",
   });
+  const signupDefaultNext = "/create-listing?compact=1";
   const redirectTo =
     searchParams.get("next") ||
-    (mode === "signup" || mode === "otp-verify" ? "/browse" : "/profile");
+    (mode === "signup" || mode === "otp-verify" ? signupDefaultNext : "/profile");
   const requiredSignupConsentsAccepted =
     signupConsents.termsAccepted &&
     signupConsents.privacyAccepted &&

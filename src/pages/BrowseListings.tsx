@@ -1052,7 +1052,7 @@ const BrowseListings: React.FC = () => {
                 to={
                   user
                     ? "/create-listing?compact=1"
-                    : `/login?next=${encodeURIComponent("/create-listing?compact=1")}`
+                    : `/login?mode=signup&next=${encodeURIComponent("/create-listing?compact=1")}`
                 }
                 className="inline-flex min-h-[44px] items-center justify-center px-6 py-3 rounded-lg border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition"
               >
@@ -1352,7 +1352,7 @@ const BrowseListings: React.FC = () => {
                 to={
                   user
                     ? "/create-listing?compact=1"
-                    : `/login?next=${encodeURIComponent("/create-listing?compact=1")}`
+                    : `/login?mode=signup&next=${encodeURIComponent("/create-listing?compact=1")}`
                 }
                 className="inline-flex justify-center items-center rounded-xl border border-slate-300 px-6 py-3 text-slate-700 font-semibold hover:bg-white transition"
               >

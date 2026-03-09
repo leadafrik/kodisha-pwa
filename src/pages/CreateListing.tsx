@@ -212,6 +212,10 @@ const CreateListing: React.FC = () => {
       action: "funnel_listing_started",
       target: "/create-listing",
     });
+    trackTrafficClick({
+      action: "funnel_create_listing_opened",
+      target: "/create-listing",
+    });
   }, [user?._id]);
 
   useEffect(() => {

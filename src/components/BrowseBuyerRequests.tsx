@@ -403,7 +403,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                     navigate(
                       user
                         ? `/request/new?marketType=${activeMarketType}`
-                        : `/login?next=${encodeURIComponent(
+                        : `/login?mode=signup&next=${encodeURIComponent(
                             `/request/new?marketType=${activeMarketType}`
                           )}`
                     )
@@ -845,7 +845,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                 to={
                   user
                     ? "/create-listing?compact=1"
-                    : `/login?next=${encodeURIComponent("/create-listing?compact=1")}`
+                    : `/login?mode=signup&next=${encodeURIComponent("/create-listing?compact=1")}`
                 }
                 className="inline-flex justify-center items-center px-6 py-3 rounded-xl border-2 border-emerald-600 text-emerald-700 font-semibold hover:bg-emerald-50 transition"
               >

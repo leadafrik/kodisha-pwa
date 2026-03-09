@@ -101,6 +101,13 @@ type TrafficSummary = {
 };
 
 const formatPercent = (value: number | undefined) => `${Number(value || 0).toFixed(1)}%`;
+const humanizeAction = (value: string) =>
+  value
+    .replace(/^funnel_/, "")
+    .replace(/^link_click/, "link click")
+    .replace(/_/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
 const AnalyticsReports: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -147,11 +154,18 @@ const AnalyticsReports: React.FC = () => {
         verified: value.verified,
       }))
     : [];
+  const nonZeroBreakdownItems = breakdownItems.filter(
+    (item) => item.total > 0 || item.pending > 0 || item.verified > 0
+  );
 
   const funnel = traffic?.conversion?.funnel;
   const primarySignals = traffic?.conversion?.primaryCtaSignals;
   const conversionRoutes = traffic?.conversion?.routes || [];
   const conversionTargets = traffic?.conversion?.ctaTargets || [];
+  const funnelActions =
+    traffic?.topActions?.filter((action) => action.action.startsWith("funnel_")) || [];
+  const genericActions =
+    traffic?.topActions?.filter((action) => !action.action.startsWith("funnel_")) || [];
 
   return (
     <div className="min-h-screen bg-slate-50 px-6 py-10">
@@ -341,11 +355,11 @@ const AnalyticsReports: React.FC = () => {
               <div className="rounded-2xl border border-slate-200 bg-white p-6">
                 <h2 className="text-xl font-semibold text-slate-900">Listing mix</h2>
                 <p className="text-sm text-slate-500 mt-1">Totals by category</p>
-                {breakdownItems.length === 0 ? (
+                {nonZeroBreakdownItems.length === 0 ? (
                   <p className="mt-4 text-sm text-slate-500">No breakdown data yet.</p>
                 ) : (
                   <div className="mt-4 space-y-3 text-sm text-slate-600">
-                    {breakdownItems.map((item) => (
+                    {nonZeroBreakdownItems.map((item) => (
                       <div
                         key={item.key}
                         className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-2"
@@ -383,19 +397,42 @@ const AnalyticsReports: React.FC = () => {
                         </div>
                       </div>
                     )}
-                    {traffic?.topActions?.length ? (
+                    {funnelActions.length > 0 ? (
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                          Top action labels
+                          Funnel signals
                         </p>
                         <div className="mt-2 space-y-2">
-                          {traffic.topActions.slice(0, 6).map((action, index) => (
+                          {funnelActions.slice(0, 8).map((action, index) => (
+                            <div
+                              key={`${action.action}-${action.target || "none"}-${index}`}
+                              className="rounded-xl border border-emerald-100 bg-emerald-50/40 px-4 py-3 text-sm"
+                            >
+                              <p className="font-semibold text-slate-900">
+                                {humanizeAction(action.action)}
+                                {action.target ? ` to ${action.target}` : ""}
+                              </p>
+                              <p className="text-xs text-slate-500 mt-1">
+                                {action.clicks} clicks | {action.uniqueVisitors} unique visitors
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+                    {genericActions.length ? (
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                          Top generic actions
+                        </p>
+                        <div className="mt-2 space-y-2">
+                          {genericActions.slice(0, 6).map((action, index) => (
                             <div
                               key={`${action.action}-${action.target || "none"}-${index}`}
                               className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm"
                             >
                               <p className="font-semibold text-slate-900">
-                                {action.action}
+                                {humanizeAction(action.action)}
                                 {action.target ? ` to ${action.target}` : ""}
                               </p>
                               <p className="text-xs text-slate-500 mt-1">
@@ -429,7 +466,7 @@ const AnalyticsReports: React.FC = () => {
                     <p className="mt-2 text-xl font-semibold text-slate-900">{primarySignals?.browseClicks ?? 0}</p>
                   </div>
                   <div className="rounded-xl bg-slate-50 px-4 py-3">
-                    <p className="text-xs uppercase tracking-[0.14em] text-slate-500">List now clicks</p>
+                    <p className="text-xs uppercase tracking-[0.14em] text-slate-500">List CTA clicks</p>
                     <p className="mt-2 text-xl font-semibold text-slate-900">{primarySignals?.listNowClicks ?? 0}</p>
                   </div>
                   <div className="rounded-xl bg-slate-50 px-4 py-3">
