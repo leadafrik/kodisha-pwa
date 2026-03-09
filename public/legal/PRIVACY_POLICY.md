@@ -4,9 +4,11 @@ Last Updated: March 1, 2026
 
 Agrisoko is committed to handling personal data with care and in line with Kenya's Data Protection Act, 2019. This Privacy Policy explains what we collect, why we collect it, how we use it, and the choices available to you when you use agrisoko254.com and related Agrisoko services.
 
+Agrisoko is the marketplace brand operated by LeadAfrik Agricultural Solutions.
+
 ## 1. Who we are
 
-Agrisoko is a Kenyan agricultural marketplace that helps farmers, buyers, agrovets, and agricultural service providers connect directly.
+Agrisoko is a Kenyan agricultural marketplace that helps farmers, buyers, agrovets, and agricultural service providers connect directly. The platform is operated by LeadAfrik Agricultural Solutions.
 
 Contact for privacy questions or requests:
 - Email: info@leadafrik.com

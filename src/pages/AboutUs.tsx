@@ -7,6 +7,8 @@ const AboutUs: React.FC = () => {
   const { user } = useAuth();
   const location = useLocation();
 
+  const brandName = "Agrisoko";
+  const legalEntityName = "LeadAfrik Agricultural Solutions";
   const founderName = "Stephen Omukoko Okoth";
   const founderWhatsapp = "254796389192";
   const founderWhatsappDisplay = "0796 389 192";
@@ -132,8 +134,9 @@ const AboutUs: React.FC = () => {
               "@context": "https://schema.org",
               "@type": "Organization",
               "@id": "https://www.agrisoko254.com/#organization",
-              name: "Agrisoko Limited",
-              alternateName: "Agrisoko",
+              name: brandName,
+              legalName: legalEntityName,
+              alternateName: "Agrisoko254",
               url: "https://www.agrisoko254.com",
               logo: "https://www.agrisoko254.com/logo512.png",
               email: "info@leadafrik.com",
@@ -173,7 +176,8 @@ const AboutUs: React.FC = () => {
               sameAs: [founderLinkedIn],
               worksFor: {
                 "@type": "Organization",
-                name: "Agrisoko Limited",
+                name: brandName,
+                legalName: legalEntityName,
               },
               address: {
                 "@type": "PostalAddress",
@@ -195,7 +199,8 @@ const AboutUs: React.FC = () => {
               description: fieldOpsLeadSummary,
               worksFor: {
                 "@type": "Organization",
-                name: "Agrisoko Limited",
+                name: brandName,
+                legalName: legalEntityName,
               },
               address: {
                 "@type": "PostalAddress",
@@ -218,7 +223,8 @@ const AboutUs: React.FC = () => {
               sameAs: [cooLinkedIn],
               worksFor: {
                 "@type": "Organization",
-                name: "Agrisoko Limited",
+                name: brandName,
+                legalName: legalEntityName,
               },
               address: {
                 "@type": "PostalAddress",
@@ -241,7 +247,8 @@ const AboutUs: React.FC = () => {
               sameAs: [chiefOfStaffLinkedIn],
               worksFor: {
                 "@type": "Organization",
-                name: "Agrisoko Limited",
+                name: brandName,
+                legalName: legalEntityName,
               },
               address: {
                 "@type": "PostalAddress",
@@ -264,7 +271,8 @@ const AboutUs: React.FC = () => {
               sameAs: [cmoLinkedIn],
               worksFor: {
                 "@type": "Organization",
-                name: "Agrisoko Limited",
+                name: brandName,
+                legalName: legalEntityName,
               },
               address: {
                 "@type": "PostalAddress",
@@ -310,6 +318,9 @@ const AboutUs: React.FC = () => {
                 <p className="text-base text-slate-600 max-w-xl">
                   Agrisoko connects farmers, traders, agrovets, and buyers across all 47 counties.
                   We help Kenyans trade directly, reduce broker costs, and build trust through verified profiles.
+                </p>
+                <p className="text-sm text-slate-500 max-w-xl">
+                  Agrisoko is operated by {legalEntityName}.
                 </p>
                 <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
                   Karibuni. Biashara bila middlemen - direct to farm, direct to buyer.

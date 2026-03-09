@@ -5,6 +5,7 @@ import { isInstalledAsApp } from '../utils/pwaInstall';
 import { BULK_FOOTER_LINK_VISIBLE } from '../config/featureFlags';
 
 const Footer: React.FC = () => {
+  const legalEntityName = 'LeadAfrik Agricultural Solutions';
   const [showInstall, setShowInstall] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
 
@@ -53,6 +54,7 @@ const Footer: React.FC = () => {
           <div className="text-center md:text-left">
             <h3 className="text-lg font-bold text-green-700">Agrisoko</h3>
             <p className="text-xs text-gray-600">Trusted agricultural marketplace across Kenya</p>
+            <p className="text-[11px] text-gray-500">Operated by {legalEntityName}</p>
           </div>
 
           {/* Legal Links */}

@@ -4,6 +4,8 @@ Last Updated: March 1, 2026
 
 These Terms of Service govern your use of Agrisoko, including agrisoko254.com, our marketplace features, messaging tools, verification flows, and related services.
 
+Agrisoko is the marketplace brand operated by LeadAfrik Agricultural Solutions.
+
 By creating an account or using Agrisoko, you agree to these Terms and our Privacy Policy.
 
 ## 1. What Agrisoko is

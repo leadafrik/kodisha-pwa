@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const PrivacyPolicy: React.FC = () => {
+  const legalEntityName = 'LeadAfrik Agricultural Solutions';
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -46,6 +47,7 @@ const PrivacyPolicy: React.FC = () => {
             </button>
             <h1 className="text-3xl font-bold text-white">Privacy Policy</h1>
             <p className="text-blue-50 mt-2">How Agrisoko handles personal data and verification records</p>
+            <p className="text-blue-100 mt-1 text-sm">Agrisoko is operated by {legalEntityName}.</p>
           </div>
 
           <div className="px-8 py-8">
@@ -58,6 +60,9 @@ const PrivacyPolicy: React.FC = () => {
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
               <p className="text-sm text-blue-800">
                 <strong>Your rights:</strong> Subject to applicable law, you may request access, correction, deletion, or objection to certain processing by contacting Agrisoko.
+              </p>
+              <p className="text-sm text-blue-800 mt-2">
+                <strong>Legal entity:</strong> The Agrisoko platform is operated by {legalEntityName}.
               </p>
             </div>
             <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-4">

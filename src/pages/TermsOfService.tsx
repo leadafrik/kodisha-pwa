@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const TermsOfService: React.FC = () => {
+  const legalEntityName = 'LeadAfrik Agricultural Solutions';
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -46,6 +47,7 @@ const TermsOfService: React.FC = () => {
             </button>
             <h1 className="text-3xl font-bold text-white">Terms of Service</h1>
             <p className="text-green-50 mt-2">Rules for using the Agrisoko marketplace</p>
+            <p className="text-green-100 mt-1 text-sm">Agrisoko is operated by {legalEntityName}.</p>
           </div>
 
           <div className="px-8 py-8">
@@ -58,6 +60,9 @@ const TermsOfService: React.FC = () => {
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
               <p className="text-sm text-green-800">
                 <strong>Marketplace note:</strong> Agrisoko provides the platform, trust tools, and moderation controls, but users remain responsible for their own trade decisions, due diligence, and transaction terms.
+              </p>
+              <p className="text-sm text-green-800 mt-2">
+                <strong>Legal entity:</strong> The Agrisoko platform is operated by {legalEntityName}.
               </p>
             </div>
             <div className="mt-4 flex flex-wrap gap-4 text-sm">
