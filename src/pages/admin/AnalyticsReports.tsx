@@ -91,6 +91,21 @@ type TrafficSummary = {
       clicks: number;
       uniqueVisitors: number;
     }>;
+    acquisition?: {
+      channels: Array<{
+        source: string;
+        medium: string;
+        visits: number;
+        uniqueVisitors: number;
+      }>;
+      campaigns: Array<{
+        source: string;
+        medium: string;
+        campaign: string;
+        visits: number;
+        uniqueVisitors: number;
+      }>;
+    };
     primaryCtaSignals?: {
       signUpClicks: number;
       browseClicks: number;
@@ -162,6 +177,8 @@ const AnalyticsReports: React.FC = () => {
   const primarySignals = traffic?.conversion?.primaryCtaSignals;
   const conversionRoutes = traffic?.conversion?.routes || [];
   const conversionTargets = traffic?.conversion?.ctaTargets || [];
+  const acquisitionChannels = traffic?.conversion?.acquisition?.channels || [];
+  const acquisitionCampaigns = traffic?.conversion?.acquisition?.campaigns || [];
   const funnelActions =
     traffic?.topActions?.filter((action) => action.action.startsWith("funnel_")) || [];
   const genericActions =
@@ -304,6 +321,59 @@ const AnalyticsReports: React.FC = () => {
                     {funnel?.listingDetailsUniqueVisitors || 0} visited listing detail pages
                   </p>
                 </div>
+              </div>
+            </div>
+
+            <div className="mt-6 grid gap-6 lg:grid-cols-2">
+              <div className="rounded-2xl border border-slate-200 bg-white p-6">
+                <h2 className="text-xl font-semibold text-slate-900">Acquisition channels</h2>
+                <p className="text-sm text-slate-500 mt-1">Last 30 days (source + medium)</p>
+                {acquisitionChannels.length ? (
+                  <div className="mt-4 space-y-2 text-sm text-slate-600 max-h-72 overflow-y-auto pr-1">
+                    {acquisitionChannels.map((channel, index) => (
+                      <div
+                        key={`${channel.source}-${channel.medium}-${index}`}
+                        className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-2"
+                      >
+                        <span className="font-medium text-slate-800">
+                          {channel.source} / {channel.medium}
+                        </span>
+                        <span className="text-xs text-slate-500">
+                          {channel.uniqueVisitors} unique | {channel.visits} visits
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-4 text-sm text-slate-500">No channel data yet. Start sharing UTM links.</p>
+                )}
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-white p-6">
+                <h2 className="text-xl font-semibold text-slate-900">Top campaigns</h2>
+                <p className="text-sm text-slate-500 mt-1">Last 30 days (UTM campaign tracking)</p>
+                {acquisitionCampaigns.length ? (
+                  <div className="mt-4 space-y-2 text-sm text-slate-600 max-h-72 overflow-y-auto pr-1">
+                    {acquisitionCampaigns.map((campaign, index) => (
+                      <div
+                        key={`${campaign.source}-${campaign.medium}-${campaign.campaign}-${index}`}
+                        className="rounded-xl bg-slate-50 px-4 py-2"
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="font-medium text-slate-800 truncate">{campaign.campaign}</span>
+                          <span className="text-xs text-slate-500 whitespace-nowrap">
+                            {campaign.uniqueVisitors} unique
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs text-slate-500">
+                          {campaign.source} / {campaign.medium} • {campaign.visits} visits
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-4 text-sm text-slate-500">No campaign data yet.</p>
+                )}
               </div>
             </div>
 
