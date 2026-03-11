@@ -88,6 +88,29 @@ const trustFeatures = [
   },
 ];
 
+const founderLetterParagraphs = [
+  "When I first started Agrisoko, almost everyone told me the same thing:",
+  "\"Kenyans do not trust digital platforms. There are too many scammers.\"",
+  "Others told me marketplaces never work. They said buyers would come and find no sellers. Sellers would come and find no buyers. And eventually everyone would leave.",
+  "Some advised me to start small, just one county instead of all 47. Others said I should sell only one product instead of many.",
+  "And many warned me of something else: \"If you connect farmers and buyers, they will eventually leave the platform and trade on the side.\"",
+  "In many ways, they were right. These are real challenges.",
+  "But there was something they failed to see.",
+  "They underestimated the power of Kenyans when we believe in something together.",
+  "Because at the heart of this country are people of goodwill, people who support each other, uplift each other, and stand together when there is a vision worth building.",
+  "So I chose to trust something simple but powerful: people.",
+  "I chose to trust farmers who wake up before sunrise and work tirelessly to feed our nation. I chose to trust buyers who want better access to quality food and fair prices. And I chose to trust Kenyans like you, the person reading this.",
+  "I believe a day will come when Kenyan farmers will finally enjoy the full fruits of their labour without losing a big portion of their hard-earned income to brokers.",
+  "I believe a day will come when agriculture will connect us in new ways, where from the comfort of our homes we can access high-quality agricultural products from farmers across the country.",
+  "And I believe that one day, what is now a fragmented agricultural market will become a unified marketplace, where farmers list their produce with pride and buyers shop with confidence.",
+  "That future is what Agrisoko is trying to build.",
+  "And that is why I will not take this marketplace down.",
+  "Because building something meaningful is never easy. But it becomes possible when people believe in it together.",
+  "If this vision speaks to you, then join us.",
+  "Sign up today. Tell a friend to tell a friend.",
+  "And together, let us build the future of agriculture in Kenya.",
+];
+
 const isLiveStatus = (status: unknown) => {
   const normalized = String(status || "").toLowerCase();
   if (!normalized) return true;
@@ -306,12 +329,15 @@ const Home: React.FC = () => {
   return (
     <main className="min-h-screen bg-slate-50 pb-28 text-slate-900 sm:pb-24">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700&family=Sora:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:wght@500;700&family=Sora:wght@400;500;600;700&display=swap');
         .home-shell {
           font-family: "Sora", "Segoe UI", "Tahoma", sans-serif;
         }
         .home-title {
           font-family: "Fraunces", "Georgia", serif;
+        }
+        .home-handwritten {
+          font-family: "Caveat", "Segoe Script", "Bradley Hand", cursive;
         }
       `}</style>
 
@@ -534,45 +560,84 @@ const Home: React.FC = () => {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 py-10 sm:py-14">
-          <div className="mb-7">
-            <div>
+        <section className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <div className="max-w-4xl">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
-                Why join
+                Founder note
               </p>
-              <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl md:text-4xl">
-                Clear value
+              <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl">
+                Why we started Agrisoko
               </h2>
+              <p className="mt-2 max-w-2xl text-sm text-slate-600">
+                A direct note from Stephen on trust, middlemen, and the future of agriculture in Kenya.
+              </p>
             </div>
-          </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            {conversionPillars.map((pillar) => (
-              <article key={pillar.title} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-                <h3 className="text-lg font-semibold text-slate-900">{pillar.title}</h3>
-                <p className="mt-2 text-sm text-slate-600">{pillar.copy}</p>
-              </article>
-            ))}
+
+            <div className="relative mt-5 max-w-4xl rotate-[-1.2deg] rounded-[2rem] border border-emerald-300 bg-[linear-gradient(160deg,#d9f99d_0%,#bbf7d0_55%,#86efac_100%)] px-5 py-6 text-slate-900 shadow-[0_20px_45px_rgba(21,128,61,0.16)] sm:px-7 sm:py-7">
+              <div className="absolute left-1/2 top-0 h-10 w-24 -translate-x-1/2 -translate-y-1/2 rotate-[3deg] rounded-b-2xl bg-white/55 shadow-sm backdrop-blur-sm" />
+              <div className="absolute -right-3 top-6 h-14 w-14 rounded-full bg-white/18 blur-xl" />
+              <div className="absolute bottom-4 left-4 h-10 w-10 rounded-full bg-emerald-200/60 blur-lg" />
+              <p className="home-handwritten text-[2rem] font-bold leading-none text-emerald-950 sm:text-[2.35rem]">
+                Why we Started Agrisoko
+              </p>
+              <div className="mt-4 space-y-3 home-handwritten text-[1.42rem] leading-[1.18] text-slate-900 sm:text-[1.62rem]">
+                {founderLetterParagraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </div>
+              <p className="home-handwritten mt-5 text-[1.7rem] font-bold text-emerald-950 sm:text-[1.9rem]">
+                Stephen
+              </p>
+            </div>
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 py-10 sm:py-14">
-          <div className="mb-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">How it works</p>
-            <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl md:text-4xl">
-              3 steps
-            </h2>
-          </div>
+        <section className="mx-auto max-w-7xl px-4 py-8 sm:py-10">
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
+                  Why join
+                </p>
+                <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl">
+                  Clear value, simple start.
+                </h2>
+                <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                  {conversionPillars.map((pillar) => (
+                    <div
+                      key={pillar.title}
+                      className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5"
+                    >
+                      <p className="text-sm font-semibold text-slate-900">{pillar.title}</p>
+                      <p className="mt-1 text-sm text-slate-600">{pillar.copy}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
-            {tradeSteps.map((step, index) => (
-              <article key={step.title} className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">
-                  {index + 1}
-                </span>
-                <h3 className="mt-3 text-lg font-semibold text-slate-900">{step.title}</h3>
-                <p className="mt-1 text-sm text-slate-600">{step.copy}</p>
-              </article>
-            ))}
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 sm:p-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
+                  How it works
+                </p>
+                <div className="mt-4 space-y-3">
+                  {tradeSteps.map((step, index) => (
+                    <div
+                      key={step.title}
+                      className="flex items-start gap-3 rounded-2xl border border-white/80 bg-white/90 px-3.5 py-3"
+                    >
+                      <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">
+                        {index + 1}
+                      </span>
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">{step.title}</p>
+                        <p className="mt-0.5 text-sm text-slate-600">{step.copy}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
