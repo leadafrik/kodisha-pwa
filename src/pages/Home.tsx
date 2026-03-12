@@ -131,15 +131,9 @@ const toValidDate = (value: unknown): Date | null => {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 };
 
-const formatPriceLabel = (value: unknown) => {
-  const amount = Number(value);
-  if (!Number.isFinite(amount) || amount <= 0) return "Contact for price";
-  return `KSh ${amount.toLocaleString()}`;
-};
-
 const Home: React.FC = () => {
   const { user } = useAuth();
-  const { isPhone, isTouch, prefersReducedMotion } = useAdaptiveLayout();
+  const { isPhone } = useAdaptiveLayout();
   const { productListings, serviceListings } = useProperties();
   const [heroVariant, setHeroVariant] = useState<HeroVariant>("sell_first");
 
@@ -204,42 +198,6 @@ const Home: React.FC = () => {
     return counties.size;
   }, [productListings, serviceListings]);
 
-  const latestLiveListings = useMemo(() => {
-    const normalizedProducts = (productListings || [])
-      .filter((item: any) => isLiveStatus(item?.publishStatus || item?.status))
-      .map((item: any) => ({
-        id: String(item?._id || item?.id || ""),
-        title: String(item?.title || item?.name || "Listing"),
-        category: String(item?.category || "produce"),
-        county: String(item?.county || ""),
-        priceLabel: formatPriceLabel(item?.price),
-        createdAt: toValidDate(item?.updatedAt || item?.createdAt),
-      }))
-      .filter((item) => !!item.id);
-
-    const normalizedServices = (serviceListings || [])
-      .filter((item: any) => {
-        if (!isLiveStatus(item?.publishStatus || item?.status)) return false;
-        if (item?.isDeleted === true || item?.deletedAt) return false;
-        return true;
-      })
-      .map((item: any) => ({
-        id: String(item?._id || item?.id || ""),
-        title: String(item?.title || item?.name || "Service listing"),
-        category: "service",
-        county: String(item?.county || ""),
-        priceLabel: formatPriceLabel(
-          item?.price ?? item?.serviceFee ?? item?.rate ?? item?.hourlyRate
-        ),
-        createdAt: toValidDate(item?.updatedAt || item?.createdAt),
-      }))
-      .filter((item) => !!item.id);
-
-    return [...normalizedProducts, ...normalizedServices]
-      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0))
-      .slice(0, 3);
-  }, [productListings, serviceListings]);
-
   const signupDate = toValidDate(user?.createdAt);
   const freeWindowEndsAt = signupDate
     ? signupDate.getTime() + FREE_WINDOW_DAYS * MILLISECONDS_IN_DAY
@@ -287,28 +245,6 @@ const Home: React.FC = () => {
     : `funnel_home_find_click_${heroVariant}`;
   const demandCtaTo = "/request";
   const demandCtaLabel = "View Buy Requests";
-  const aboutCtaTo = "/about#founder-story";
-  const aboutCtaLabel = user ? "How trust works" : "Why Agrisoko";
-  const urgencyBody = isGlobalFreeListing
-    ? "No listing fee right now."
-    : user
-    ? daysLeft > 0
-      ? "Use your active free window to post now and lock in trust early."
-      : "You can still list and build trust momentum even after the initial free window."
-    : `Every new account gets a personal ${FREE_WINDOW_DAYS}-day KSh 0 listing window.`;
-  const heroFocusItems = [
-    {
-      title: isGlobalFreeListing ? "Free to list" : "Launch window",
-      copy: isGlobalFreeListing ? "No listing fee right now." : urgencyBody,
-    },
-    {
-      title: user ? "Start selling in minutes" : "Start now",
-      copy: user
-        ? "Open your dashboard and publish your first listing."
-        : "Create your account now.",
-    },
-  ];
-  const visibleHeroFocusItems = isPhone ? heroFocusItems.slice(0, 1) : heroFocusItems;
   const finalCallCopy = isGlobalFreeListing
     ? "Create your account and post your first listing. Listing is free right now."
     : user && daysLeft <= 0
@@ -347,8 +283,8 @@ const Home: React.FC = () => {
           <div className="pointer-events-none absolute -bottom-12 right-0 h-72 w-72 rounded-full bg-amber-200/35 blur-3xl" />
 
           <div className="relative mx-auto max-w-7xl px-4 pb-10 pt-10 sm:pb-12 sm:pt-14 md:pb-16 md:pt-20">
-            <div className="grid gap-5 sm:gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
-              <div className="max-w-4xl">
+            <div className="max-w-4xl">
+              <div>
                 <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-amber-800">
                   <Sparkles className="h-3.5 w-3.5" />
                   Free Listing Window
@@ -461,101 +397,6 @@ const Home: React.FC = () => {
                   </div>
                 </div>
               </div>
-
-              <aside
-                className={`rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-sm sm:p-6 ${
-                  prefersReducedMotion ? "" : "transition-transform duration-300"
-                } ${isTouch ? "" : "lg:hover:-translate-y-0.5"}`}
-              >
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">
-                  Why now
-                </p>
-                <h2 className="home-title mt-3 text-2xl text-slate-900 sm:text-3xl">
-                  Fast start. Strong trust.
-                </h2>
-                <div className="mt-4 space-y-3 sm:mt-5">
-                  {visibleHeroFocusItems.map((item) => (
-                    <div
-                      key={item.title}
-                      className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 sm:p-4"
-                    >
-                      <p className="text-sm font-semibold text-slate-900">{item.title}</p>
-                      <p className="mt-1 text-sm text-slate-600">{item.copy}</p>
-                    </div>
-                  ))}
-                </div>
-              </aside>
-            </div>
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-            <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
-                  Latest market activity
-                </p>
-                <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl">
-                  Real listings are already moving.
-                </h2>
-                <p className="mt-2 max-w-2xl text-sm text-slate-600">
-                  See what sellers are posting now, jump into details, and connect faster.
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
-                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">
-                    {liveListingCount.toLocaleString()} live listings
-                  </span>
-                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1">
-                    {countyCoverageLabel}
-                  </span>
-                </div>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Link
-                    to={browseTo}
-                    className="ui-btn-secondary min-h-[42px] px-4 py-2"
-                  >
-                    {browseCtaLabel}
-                  </Link>
-                  <Link
-                    to={aboutCtaTo}
-                    className="ui-btn-ghost min-h-[42px] px-4 py-2"
-                  >
-                    {aboutCtaLabel}
-                  </Link>
-                </div>
-              </div>
-              {latestLiveListings.length > 0 ? (
-                <ul className="space-y-2.5 text-sm text-slate-700">
-                  {latestLiveListings.map((item) => (
-                    <li
-                      key={item.id}
-                      className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="line-clamp-2 font-semibold text-slate-900">{item.title}</p>
-                        <span className="whitespace-nowrap text-xs font-semibold text-emerald-700">
-                          {item.priceLabel}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-xs uppercase tracking-[0.12em] text-slate-500">
-                        {item.category} {item.county ? `- ${item.county}` : ""}
-                      </p>
-                      <Link
-                        to={`/listings/${item.id}`}
-                        className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 transition hover:text-emerald-800"
-                      >
-                        View details
-                        <ArrowRight className="h-3.5 w-3.5" />
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600">
-                  Listings are loading. Open the marketplace to view all live inventory.
-                </div>
-              )}
             </div>
           </div>
         </section>
