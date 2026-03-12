@@ -365,7 +365,7 @@ const Profile: React.FC = () => {
     switch (user.verificationStatus) {
       case "verified":
         return (
-          <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800">
+          <span className="rounded-full bg-forest-100 px-3 py-1 text-sm font-semibold text-forest-700">
             Verified
           </span>
         );
@@ -448,19 +448,20 @@ const Profile: React.FC = () => {
   const visibleItems = activeListingGroup.items.slice(0, 5);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div className="ui-page-shell">
       <div className="mx-auto max-w-6xl px-4 py-8 md:py-10">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+        <div className="ui-hero-panel p-6 md:p-8">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
+              <p className="ui-section-kicker">Account dashboard</p>
               <h1 className="text-3xl font-bold text-slate-900">{user.name}</h1>
               <div className="mt-3 flex flex-wrap items-center gap-3">
                 {getVerificationBadge()}
-                <span className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
+                <span className="ui-chip-soft text-sm font-medium">
                   {getUserTypeLabel()}
                 </span>
                 {isAdmin && (
-                  <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
+                  <span className="rounded-full border border-[#F3C9BE] bg-[#FDF5F3] px-3 py-1 text-sm font-semibold text-[#A0452E]">
                     Admin access
                   </span>
                 )}
@@ -484,7 +485,7 @@ const Profile: React.FC = () => {
               />
               <button
                 onClick={logout}
-                className="rounded-xl border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+                className="ui-btn-ghost border-red-200 text-red-600 hover:bg-red-50"
               >
                 Logout
               </button>
@@ -492,46 +493,46 @@ const Profile: React.FC = () => {
           </div>
 
           <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
-              <p className="text-2xl font-bold text-emerald-700">{userServices.length}</p>
+            <div className="ui-card-soft p-4 text-center">
+              <p className="text-2xl font-bold text-[#A0452E]">{userServices.length}</p>
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Services</p>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
-              <p className="text-2xl font-bold text-emerald-700">{userAgrovets.length}</p>
+            <div className="ui-card-soft p-4 text-center">
+              <p className="text-2xl font-bold text-[#A0452E]">{userAgrovets.length}</p>
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Inputs</p>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
-              <p className="text-2xl font-bold text-emerald-700">{userProducts.length}</p>
+            <div className="ui-card-soft p-4 text-center">
+              <p className="text-2xl font-bold text-[#A0452E]">{userProducts.length}</p>
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Products</p>
             </div>
           </div>
 
           <div className="mt-6 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
             <div className="space-y-6">
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="ui-card p-5">
                 <h2 className="text-lg font-bold text-slate-900">Quick Actions</h2>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
                   <Link
                     to="/browse"
-                    className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                    className="ui-btn-ghost justify-start px-4 py-3"
                   >
                     Browse listings
                   </Link>
                   <Link
                     to="/create-listing?compact=1"
-                    className="rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                    className="ui-btn-primary justify-start px-4 py-3"
                   >
                     List for sale
                   </Link>
                   <Link
                     to="/request/new"
-                    className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                    className="ui-btn-secondary justify-start px-4 py-3"
                   >
                     Post buy request
                   </Link>
                   <Link
                     to="/favorites"
-                    className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                    className="ui-btn-ghost justify-start bg-stone-50 px-4 py-3"
                   >
                     Saved listings
                   </Link>
@@ -546,9 +547,9 @@ const Profile: React.FC = () => {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="ui-card p-5">
                 <div className="flex items-start gap-3">
-                  <Shield className="mt-0.5 text-emerald-600" size={22} />
+                  <Shield className="mt-0.5 text-[#A0452E]" size={22} />
                   <div>
                     <h3 className="text-lg font-bold text-slate-900">Identity Verification</h3>
                     <p className="mt-1 text-sm text-slate-600">
@@ -562,7 +563,7 @@ const Profile: React.FC = () => {
                   {verificationItems.map((item) => (
                     <div key={item.label} className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm">
                       {item.value ? (
-                        <UserCheck size={14} className="text-emerald-600" />
+                        <UserCheck size={14} className="text-forest-600" />
                       ) : (
                         <UserX size={14} className="text-slate-400" />
                       )}
@@ -570,10 +571,10 @@ const Profile: React.FC = () => {
                     </div>
                   ))}
                 </div>
-                <div className="mt-4 flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
+                <div className="ui-accent-panel mt-4 flex items-center justify-between px-3 py-2">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Verification level</p>
-                    <p className="text-sm font-semibold text-emerald-800">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-[#A0452E]">Verification level</p>
+                    <p className="text-sm font-semibold text-[#8B3525]">
                       {verificationDetails.verificationLevel || "Not set"}
                     </p>
                   </div>
@@ -582,7 +583,7 @@ const Profile: React.FC = () => {
                     className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
                       verificationDetails.idVerified
                         ? "cursor-not-allowed bg-slate-200 text-slate-500"
-                        : "bg-emerald-600 text-white hover:bg-emerald-700"
+                        : "bg-[#A0452E] text-white hover:bg-[#8B3525]"
                     }`}
                     onClick={(event) => {
                       if (verificationDetails.idVerified) event.preventDefault();
@@ -597,9 +598,9 @@ const Profile: React.FC = () => {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="text-lg font-bold text-slate-900">Your Listings</h2>
+              <div className="ui-card p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <h2 className="text-lg font-bold text-slate-900">Your Listings</h2>
                 {loading && (
                   <span className="text-xs font-medium text-slate-500">Refreshing...</span>
                 )}
@@ -616,7 +617,7 @@ const Profile: React.FC = () => {
                       onClick={() => setActiveTab(tab)}
                       className={`rounded-xl border px-3 py-2 text-left transition ${
                         isActive
-                          ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                          ? "border-[#E8A08E] bg-[#FDF5F3] text-[#A0452E]"
                           : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
                       }`}
                     >
@@ -637,7 +638,7 @@ const Profile: React.FC = () => {
                     <p className="text-sm font-medium text-slate-600">{activeListingGroup.emptyMessage}</p>
                     <Link
                       to={activeListingGroup.emptyLink}
-                      className="mt-2 inline-block text-sm font-semibold text-emerald-700 hover:text-emerald-800"
+                      className="mt-2 inline-block text-sm font-semibold text-[#A0452E] hover:text-[#8B3525]"
                     >
                       {activeListingGroup.emptyCta}
                     </Link>
@@ -660,11 +661,11 @@ const Profile: React.FC = () => {
                     return (
                       <div
                         key={itemKey}
-                        className="rounded-xl border border-slate-200 px-4 py-3 transition hover:border-emerald-300 hover:bg-emerald-50/40"
+                        className="rounded-xl border border-slate-200 px-4 py-3 transition hover:border-[#E8A08E] hover:bg-[#FDF5F3]"
                       >
                         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                           <p className="font-semibold text-slate-900">{title}</p>
-                          <p className="text-sm font-semibold text-emerald-700">{price}</p>
+                          <p className="text-sm font-semibold text-[#A0452E]">{price}</p>
                         </div>
                         <p className="mt-1 text-xs uppercase tracking-wide text-slate-500">{category}</p>
                         <p className="mt-1 text-sm text-slate-600">{location}</p>
@@ -673,7 +674,7 @@ const Profile: React.FC = () => {
                           {listingPath ? (
                             <Link
                               to={listingPath}
-                              className="text-sm font-semibold text-emerald-700 underline decoration-dotted"
+                              className="text-sm font-semibold text-[#A0452E] underline decoration-dotted"
                             >
                               Open listing
                             </Link>
@@ -694,7 +695,7 @@ const Profile: React.FC = () => {
                                 type="button"
                                 onClick={() => listProductAgain(item)}
                                 disabled={relistingProductId === stableListingId}
-                                className="rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                className="rounded-md border border-[#F3C9BE] bg-[#FDF5F3] px-2.5 py-1 text-xs font-semibold text-[#A0452E] transition hover:bg-[#FAE9E4] disabled:cursor-not-allowed disabled:opacity-60"
                               >
                                 {relistingProductId === stableListingId ? "Listing again..." : "List again"}
                               </button>
@@ -710,13 +711,13 @@ const Profile: React.FC = () => {
               <div className="mt-5 flex flex-wrap items-center gap-3">
                 <Link
                   to="/create-listing?compact=1"
-                  className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                  className="ui-btn-primary px-4 py-2"
                 >
                   Add listing
                 </Link>
                 <Link
                   to="/request"
-                  className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                  className="ui-btn-ghost px-4 py-2"
                 >
                   View buy requests
                 </Link>
@@ -732,7 +733,7 @@ const Profile: React.FC = () => {
                 className="absolute inset-0 bg-slate-900/50"
                 aria-label="Close edit listing dialog"
               />
-              <div className="relative z-10 w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl">
+              <div className="relative z-10 w-full max-w-2xl rounded-[28px] border border-stone-200 bg-white p-5 shadow-2xl">
                 <div className="mb-4 flex items-start justify-between gap-4">
                   <div>
                     <h3 className="text-xl font-bold text-slate-900">Edit Product Listing</h3>
@@ -911,7 +912,7 @@ const Profile: React.FC = () => {
                     <button
                       type="submit"
                       disabled={savingProductEdit}
-                      className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="ui-btn-primary px-4 py-2"
                     >
                       {savingProductEdit ? "Saving..." : "Save changes"}
                     </button>
@@ -921,7 +922,7 @@ const Profile: React.FC = () => {
             </div>
           )}
 
-          <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="ui-card mt-6 p-5">
             <h3 className="text-lg font-bold text-slate-900">Account</h3>
             <p className="mt-2 text-sm text-slate-600">
               Manage your personal data and account access.

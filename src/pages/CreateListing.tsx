@@ -780,13 +780,14 @@ const CreateListing: React.FC = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#f8fbf6] flex items-center justify-center p-4">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Please Log In</h1>
-          <p className="text-gray-600 mb-6">You must be logged in to create a listing.</p>
+      <div className="ui-page-shell flex items-center justify-center p-4">
+        <div className="ui-card max-w-md p-8 text-center">
+          <p className="ui-section-kicker">Create a listing</p>
+          <h1 className="mt-2 text-2xl font-bold text-stone-900">Please log in</h1>
+          <p className="mt-3 text-stone-600">You must be logged in to create a listing.</p>
           <button
             onClick={() => navigate("/login")}
-            className="ui-btn-primary px-6 py-2"
+            className="ui-btn-primary mt-6 px-6 py-2"
           >
             Go to Login
           </button>
@@ -841,75 +842,50 @@ const CreateListing: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Source+Sans+3:wght@400;600;700&display=swap');
-        .listing-shell {
-          font-family: "Source Sans 3", "Segoe UI", "Tahoma", sans-serif;
-        }
-        .listing-title {
-          font-family: "Space Grotesk", "Segoe UI", "Tahoma", sans-serif;
-        }
-        .fade-rise {
-          animation: fadeRise 0.7s ease both;
-        }
-        @keyframes fadeRise {
-          from { opacity: 0; transform: translateY(14px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+    <div className="ui-page-shell">
+      <div className="max-w-6xl mx-auto px-4 py-8 md:py-10">
+        <section className="ui-hero-panel px-5 py-6 md:px-7 md:py-7">
+          <div className="pointer-events-none absolute -top-20 left-1/3 h-64 w-64 rounded-full bg-[#F3C9BE]/55 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 right-0 h-64 w-64 rounded-full bg-[#E5F3E8]/85 blur-3xl" />
+          <div className="relative grid gap-4 lg:grid-cols-[1.25fr_0.95fr] lg:items-start">
+            <div className="space-y-2 anim-in">
+              <p className="ui-section-kicker">Create a Listing</p>
+              <h1 className="text-3xl text-stone-900 md:text-4xl">
+                Create your listing in 2 minutes
+              </h1>
+              <p className="max-w-xl text-sm text-stone-600 md:text-base">
+                Start with the essentials now. Improve trust and visibility after publishing.
+              </p>
+            </div>
 
-      <div className="listing-shell">
-        <section className="relative overflow-hidden">
-          <div className="absolute -top-24 left-1/3 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
-          <div className="absolute -bottom-24 right-0 h-72 w-72 rounded-full bg-sky-100/70 blur-3xl" />
-
-          <div className="max-w-6xl mx-auto px-4 pt-8 pb-5 md:pt-10 md:pb-6">
-            <div className="grid gap-4 lg:grid-cols-[1.25fr_0.95fr] items-start">
-              <div className="space-y-2 fade-rise">
-                <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">Create a Listing</p>
-                <h1 className="listing-title text-3xl md:text-4xl text-slate-900">
-                  Create your listing in 2 minutes
-                </h1>
-                <p className="text-sm md:text-base text-slate-600 max-w-xl">
-                  Start with essentials, then optimize trust signals after publishing.
-                </p>
-              </div>
-
-              <div className="rounded-3xl border border-slate-200 bg-white/90 p-4 shadow-sm fade-rise">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-xs uppercase tracking-widest text-slate-500">Progress</p>
-                    <p className="mt-1 text-sm font-semibold text-slate-900">
-                      {currentProgressLabel}
-                    </p>
-                  </div>
-                  <p className="text-sm font-semibold text-emerald-700">{progressPercent}%</p>
+            <div className="ui-card anim-in-2 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-stone-500">Progress</p>
+                  <p className="mt-1 text-sm font-semibold text-stone-900">{currentProgressLabel}</p>
                 </div>
-                <div className="mt-3 h-2.5 rounded-full bg-slate-100 overflow-hidden">
-                  <div
-                    className="h-full bg-emerald-600 transition-all"
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
-                <p className="mt-2 text-xs text-slate-500">
-                  Step {progressStep} of {LISTING_PROGRESS_LABELS.length}
-                </p>
+                <p className="text-sm font-semibold text-[#A0452E]">{progressPercent}%</p>
               </div>
+              <div className="ui-progress-track mt-3">
+                <div className="ui-progress-fill" style={{ width: `${progressPercent}%` }} />
+              </div>
+              <p className="mt-2 text-xs text-stone-500">
+                Step {progressStep} of {LISTING_PROGRESS_LABELS.length}
+              </p>
             </div>
           </div>
         </section>
 
-        <div className="max-w-5xl mx-auto px-4 pb-16">
-          <p className="mb-6 text-sm text-slate-500">Drafts save automatically on this device.</p>
+        <div className="mx-auto max-w-5xl px-0 pt-6 pb-16">
+          <p className="mb-6 text-sm text-stone-500">Drafts save automatically on this device.</p>
 
           {showVerificationNudge && (
-            <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 flex flex-wrap items-center gap-3">
+            <div className="ui-accent-panel mb-6 flex flex-wrap items-center gap-3 p-4">
               <div className="flex-1">
-                <p className="text-emerald-900 font-semibold">
+                <p className="font-semibold text-[#72281A]">
                   Verification is optional for now, but it helps buyers trust your profile faster.
                 </p>
-                <p className="mt-1 text-sm text-emerald-800">
+                <p className="mt-1 text-sm text-stone-700">
                   Verification is optional. If you choose to upload your ID, Agrisoko handles that data in line with Kenya&apos;s Data Protection Act, 2019 and deletes the uploaded images promptly after admin review.
                 </p>
               </div>
@@ -924,17 +900,17 @@ const CreateListing: React.FC = () => {
           )}
 
           {isVerificationPending && (
-            <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-              <p className="font-semibold text-emerald-900">Verification submitted</p>
-              <p className="mt-1 text-sm text-emerald-800">
+            <div className="ui-success-panel mb-6 p-4">
+              <p className="font-semibold text-forest-700">Verification submitted</p>
+              <p className="mt-1 text-sm text-forest-700">
                 Your ID review is in progress. You can keep posting while the trust badge is being reviewed.
               </p>
             </div>
           )}
 
           {hasDraft && (
-            <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-              <p className="flex-1 font-semibold text-emerald-800">You have a saved draft. Want to continue?</p>
+            <div className="ui-accent-panel mb-6 flex flex-wrap items-center gap-3 p-4">
+              <p className="flex-1 font-semibold text-stone-800">You have a saved draft. Want to continue?</p>
               <button
                 type="button"
                 onClick={handleRestoreDraft}
@@ -961,9 +937,9 @@ const CreateListing: React.FC = () => {
             />
           )}
           {notice && !error && (
-            <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex gap-3">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-              <p className="text-emerald-800">{notice}</p>
+            <div className="ui-success-panel mb-6 flex gap-3 p-4">
+              <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-forest-600" />
+              <p className="text-forest-700">{notice}</p>
             </div>
           )}
 
@@ -971,8 +947,8 @@ const CreateListing: React.FC = () => {
         <form onSubmit={form.step === MAX_FLOW_STEP ? handleSubmit : (e) => e.preventDefault()}>
           {/* Step 2: Category Selection */}
           {form.step === 2 && (
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+            <div className="ui-card p-6">
+              <div className="ui-accent-panel mb-4 flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm text-[#72281A]">
                 <span className="font-semibold">
                   Listing is set to Sell. Looking to buy instead?
                 </span>
@@ -984,7 +960,7 @@ const CreateListing: React.FC = () => {
                   Post a buy request
                 </button>
               </div>
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
+              <h2 className="text-xl font-bold text-stone-900 mb-4">
                 {hasPresetCategory
                   ? "Confirm your category"
                   : useCompactCategoryStep
@@ -992,10 +968,10 @@ const CreateListing: React.FC = () => {
                   : "What are you listing?"}
               </h2>
               {useCompactCategoryStep ? (
-                <div className="mb-6 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div className="ui-card-soft mb-6 p-4">
                   <div className="grid gap-4 md:grid-cols-2">
                     <div>
-                      <label className="mb-2 block text-sm font-semibold text-gray-900">Category</label>
+                      <label className="mb-2 block text-sm font-semibold text-stone-900">Category</label>
                       <select
                         value={form.category ?? ""}
                         onChange={(e) => {
@@ -1019,7 +995,7 @@ const CreateListing: React.FC = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="mb-2 block text-sm font-semibold text-gray-900">Subcategory</label>
+                      <label className="mb-2 block text-sm font-semibold text-stone-900">Subcategory</label>
                       <select
                         value={form.subcategory ?? ""}
                         onChange={(e) => {
@@ -1043,7 +1019,7 @@ const CreateListing: React.FC = () => {
                     </div>
                   </div>
                   {form.category && (
-                    <p className="mt-3 text-sm text-gray-600">
+                    <p className="mt-3 text-sm text-stone-600">
                       {CATEGORY_DESCRIPTIONS[form.category]}
                     </p>
                   )}
@@ -1061,26 +1037,26 @@ const CreateListing: React.FC = () => {
                       }}
                       className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
                         form.category === cat
-                          ? "border-emerald-600 bg-emerald-50"
-                          : "border-gray-200 hover:border-emerald-300"
+                          ? "border-[#A0452E] bg-[#FDF5F3]"
+                          : "border-stone-200 hover:border-[#E8A08E]"
                       }`}
                     >
-                      <p className="font-bold text-gray-900">
+                      <p className="font-bold text-stone-900">
                         {cat.charAt(0).toUpperCase() + cat.slice(1)}
                       </p>
-                      <p className="text-sm text-gray-600 mt-1">{CATEGORY_DESCRIPTIONS[cat]}</p>
+                      <p className="text-sm text-stone-600 mt-1">{CATEGORY_DESCRIPTIONS[cat]}</p>
                     </button>
                   ))}
                 </div>
               )}
 
               <div className="mt-6 border-t border-slate-200 pt-6">
-                <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-gray-900">
+                <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-stone-900">
                   <MapPin className="h-5 w-5" /> Where is it located?
                 </h3>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-gray-900">County *</label>
+                    <label className="mb-2 block text-sm font-semibold text-stone-900">County *</label>
                     <select
                       value={form.county}
                       onChange={(e) => setForm((prev) => ({ ...prev, county: e.target.value }))}
@@ -1095,7 +1071,7 @@ const CreateListing: React.FC = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-gray-900">Constituency *</label>
+                    <label className="mb-2 block text-sm font-semibold text-stone-900">Constituency *</label>
                     <select
                       value={form.constituency}
                       onChange={(e) => setForm((prev) => ({ ...prev, constituency: e.target.value }))}
@@ -1111,7 +1087,7 @@ const CreateListing: React.FC = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-gray-900">Ward *</label>
+                    <label className="mb-2 block text-sm font-semibold text-stone-900">Ward *</label>
                     <select
                       value={form.ward}
                       onChange={(e) => setForm((prev) => ({ ...prev, ward: e.target.value }))}
@@ -1127,7 +1103,7 @@ const CreateListing: React.FC = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-gray-900">
+                    <label className="mb-2 block text-sm font-semibold text-stone-900">
                       Specific location (optional)
                     </label>
                     <input
@@ -1145,24 +1121,24 @@ const CreateListing: React.FC = () => {
 
           {/* Step 3: Listing Details */}
           {form.step === 3 && (
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <div className="ui-card p-6">
+              <h2 className="text-xl font-bold text-stone-900 mb-6 flex items-center gap-2">
                 <Tag className="w-5 h-5" /> Listing Details
               </h2>
 
               <div className="space-y-5">
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <div className="ui-card-soft p-3">
                   <p className="text-sm font-semibold text-slate-900">Listing mode</p>
                   <p className="mt-1 text-xs text-slate-600">
                     Single is fastest for one item. Batch lets you publish up to {MAX_BATCH_ITEMS} items in one go.
                   </p>
-                  <div className="mt-3 inline-flex rounded-lg border border-slate-200 bg-white p-1">
+                    <div className="mt-3 inline-flex rounded-lg border border-stone-200 bg-white p-1">
                     <button
                       type="button"
                       onClick={() => setEntryMode("single")}
                       className={`rounded-md px-3 py-1.5 text-sm font-semibold transition ${
                         entryMode === "single"
-                          ? "bg-emerald-600 text-white"
+                          ? "bg-[#A0452E] text-white"
                           : "text-slate-700 hover:bg-slate-100"
                       }`}
                     >
@@ -1173,7 +1149,7 @@ const CreateListing: React.FC = () => {
                       onClick={() => setEntryMode("batch")}
                       className={`rounded-md px-3 py-1.5 text-sm font-semibold transition ${
                         entryMode === "batch"
-                          ? "bg-emerald-600 text-white"
+                          ? "bg-[#A0452E] text-white"
                           : "text-slate-700 hover:bg-slate-100"
                       }`}
                     >
@@ -1182,13 +1158,13 @@ const CreateListing: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4">
-                  <p className="text-sm font-semibold text-emerald-900">
+                <div className="rounded-xl border border-[#F3C9BE] bg-[#FDF5F3] p-4">
+                  <p className="text-sm font-semibold text-[#72281A]">
                     {entryMode === "single"
                       ? "Required to publish (about 30 seconds)"
                       : "Required per item in this batch"}
                   </p>
-                  <p className="mt-1 text-xs text-emerald-800">
+                  <p className="mt-1 text-xs text-[#8B3525]">
                     {entryMode === "single"
                       ? "Add a title, price, contact number, and at least one photo. You can optimize the rest after publishing."
                       : "Each item needs a title, description, price, and at least one photo. Location, category, and contact apply to all items."}
@@ -1199,7 +1175,7 @@ const CreateListing: React.FC = () => {
                   <>
                     {/* Title */}
                     <div>
-                      <label className="block text-sm font-semibold text-gray-900 mb-2">Title *</label>
+                      <label className="block text-sm font-semibold text-stone-900 mb-2">Title *</label>
                       <input
                         type="text"
                         placeholder="e.g., Fresh Tomatoes, Dairy Cow, Tractor"
@@ -1211,8 +1187,8 @@ const CreateListing: React.FC = () => {
 
                     {/* Description */}
                     <div>
-                      <label className="block text-sm font-semibold text-gray-900 mb-2">Description *</label>
-                      <p className="mb-2 text-xs text-gray-600">{descriptionCopy.helper}</p>
+                      <label className="block text-sm font-semibold text-stone-900 mb-2">Description *</label>
+                      <p className="mb-2 text-xs text-stone-600">{descriptionCopy.helper}</p>
                       <textarea
                         placeholder={descriptionCopy.placeholder}
                         value={form.description}
@@ -1225,7 +1201,7 @@ const CreateListing: React.FC = () => {
                     {/* Price and Quantity */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-semibold text-gray-900 mb-2">Price (KSh) *</label>
+                        <label className="block text-sm font-semibold text-stone-900 mb-2">Price (KSh) *</label>
                         <input
                           type="number"
                           placeholder="0"
@@ -1233,14 +1209,14 @@ const CreateListing: React.FC = () => {
                           onChange={(e) => setForm((prev) => ({ ...prev, price: e.target.value }))}
                           className="ui-input"
                         />
-                        <p className="text-xs text-gray-600 mt-1">
+                        <p className="text-xs text-stone-600 mt-1">
                           {isFreeLaunch ? "Commission: Free for now" : `Commission: KSh ${commission.toFixed(0)}`}
                         </p>
                       </div>
 
                       {form.category !== "inputs" && (
                         <div>
-                          <label className="block text-sm font-semibold text-gray-900 mb-2">Quantity *</label>
+                          <label className="block text-sm font-semibold text-stone-900 mb-2">Quantity *</label>
                           <div className="flex gap-2">
                             <input
                               type="number"
@@ -1263,14 +1239,14 @@ const CreateListing: React.FC = () => {
                           </div>
                           {recommendedUnit && (
                             <div className="mt-2 flex flex-wrap items-center gap-2">
-                              <p className="text-xs text-gray-600">
+                              <p className="text-xs text-stone-600">
                                 Recommended unit for this category: <span className="font-semibold">{recommendedUnit}</span>
                               </p>
                               {form.unit !== recommendedUnit && (
                                 <button
                                   type="button"
                                   onClick={() => setForm((prev) => ({ ...prev, unit: recommendedUnit }))}
-                                  className="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+                                  className="rounded-full border border-[#E8A08E] bg-[#FDF5F3] px-3 py-1 text-xs font-semibold text-[#A0452E] hover:bg-[#FAE9E4]"
                                 >
                                   Use recommended
                                 </button>
@@ -1283,7 +1259,7 @@ const CreateListing: React.FC = () => {
                   </>
                 ) : (
                   <div className="space-y-4">
-                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                    <div className="ui-card-soft flex flex-wrap items-center justify-between gap-3 px-4 py-3">
                       <p className="text-sm font-semibold text-slate-900">
                         {batchReadiness.readyCount}/{batchReadiness.itemCount} items ready
                       </p>
@@ -1298,7 +1274,7 @@ const CreateListing: React.FC = () => {
                     </div>
 
                     {batchItems.map((item, index) => (
-                      <div key={item.id} className="rounded-xl border border-slate-200 p-4">
+                      <div key={item.id} className="rounded-xl border border-stone-200 bg-white p-4 shadow-sm">
                         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                           <p className="text-sm font-semibold text-slate-900">Item {index + 1}</p>
                           {batchItems.length > 1 && (
@@ -1314,7 +1290,7 @@ const CreateListing: React.FC = () => {
 
                         <div className="space-y-4">
                           <div>
-                            <label className="mb-2 block text-sm font-semibold text-gray-900">Title *</label>
+                            <label className="mb-2 block text-sm font-semibold text-stone-900">Title *</label>
                             <input
                               type="text"
                               placeholder="e.g., Urea fertilizer 50kg"
@@ -1327,7 +1303,7 @@ const CreateListing: React.FC = () => {
                           </div>
 
                           <div>
-                            <label className="mb-2 block text-sm font-semibold text-gray-900">Description *</label>
+                            <label className="mb-2 block text-sm font-semibold text-stone-900">Description *</label>
                             <textarea
                               placeholder={descriptionCopy.placeholder}
                               value={item.description}
@@ -1341,7 +1317,7 @@ const CreateListing: React.FC = () => {
 
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <label className="mb-2 block text-sm font-semibold text-gray-900">Price (KSh) *</label>
+                              <label className="mb-2 block text-sm font-semibold text-stone-900">Price (KSh) *</label>
                               <input
                                 type="number"
                                 placeholder="0"
@@ -1354,7 +1330,7 @@ const CreateListing: React.FC = () => {
                             </div>
                             {form.category !== "inputs" && (
                               <div>
-                                <label className="mb-2 block text-sm font-semibold text-gray-900">Quantity *</label>
+                                <label className="mb-2 block text-sm font-semibold text-stone-900">Quantity *</label>
                                 <div className="flex gap-2">
                                   <input
                                     type="number"
@@ -1387,7 +1363,7 @@ const CreateListing: React.FC = () => {
                           </div>
 
                           <div>
-                            <label className="mb-2 block text-sm font-semibold text-gray-900">
+                            <label className="mb-2 block text-sm font-semibold text-stone-900">
                               Delivery scope
                             </label>
                             <select
@@ -1409,10 +1385,10 @@ const CreateListing: React.FC = () => {
                           </div>
 
                           <div>
-                            <label className="mb-2 block text-sm font-semibold text-gray-900">
+                            <label className="mb-2 block text-sm font-semibold text-stone-900">
                               Upload images ({item.images.length}/5) *
                             </label>
-                            <div className="rounded-lg border-2 border-dashed border-gray-300 p-4 text-center">
+                            <div className="rounded-lg border-2 border-dashed border-stone-300 p-4 text-center">
                               <input
                                 id={`batch-image-input-${item.id}`}
                                 type="file"
@@ -1424,11 +1400,11 @@ const CreateListing: React.FC = () => {
                               />
                               <label
                                 htmlFor={`batch-image-input-${item.id}`}
-                                className="cursor-pointer text-sm font-semibold text-gray-800"
+                                className="cursor-pointer text-sm font-semibold text-stone-800"
                               >
                                 Add photos for this item
                               </label>
-                              <p className="mt-1 text-xs text-gray-600">PNG, JPG up to 5 images</p>
+                              <p className="mt-1 text-xs text-stone-600">PNG, JPG up to 5 images</p>
                             </div>
                             {item.images.length > 0 && (
                               <div className="mt-3 grid grid-cols-5 gap-2">
@@ -1459,7 +1435,7 @@ const CreateListing: React.FC = () => {
 
                 {/* Available From */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  <label className="block text-sm font-semibold text-stone-900 mb-2">
                     Delivery scope
                   </label>
                   <select
@@ -1479,7 +1455,7 @@ const CreateListing: React.FC = () => {
                       </option>
                     ))}
                   </select>
-                  <p className="mt-1 text-xs text-gray-600">
+                  <p className="mt-1 text-xs text-stone-600">
                     {
                       DELIVERY_SCOPE_OPTIONS.find((option) => option.value === form.deliveryScope)
                         ?.helper
@@ -1492,7 +1468,7 @@ const CreateListing: React.FC = () => {
 
                 {/* Available From */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  <label className="block text-sm font-semibold text-stone-900 mb-2">
                     <Calendar className="w-4 h-4 inline mr-2" />
                     Available From (Optional)
                   </label>
@@ -1506,7 +1482,7 @@ const CreateListing: React.FC = () => {
 
                 {/* Contact Number */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">Phone Number *</label>
+                  <label className="block text-sm font-semibold text-stone-900 mb-2">Phone Number *</label>
                   <input
                     type="tel"
                     placeholder="+254712345678"
@@ -1514,7 +1490,7 @@ const CreateListing: React.FC = () => {
                     onChange={(e) => setForm((prev) => ({ ...prev, contact: e.target.value }))}
                     className="ui-input"
                   />
-                  <p className="text-xs text-gray-600 mt-1">
+                  <p className="text-xs text-stone-600 mt-1">
                     Buyers contact you faster with this number.
                   </p>
                 </div>
@@ -1522,11 +1498,11 @@ const CreateListing: React.FC = () => {
                 {/* Images */}
                 {entryMode === "single" && (
                   <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    <label className="block text-sm font-semibold text-stone-900 mb-2">
                       <Camera className="w-4 h-4 inline mr-2" />
                       Upload Images ({form.images.length}/5) *
                     </label>
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <div className="border-2 border-dashed border-stone-300 rounded-lg p-6 text-center">
                       <input
                         type="file"
                         multiple
@@ -1537,9 +1513,9 @@ const CreateListing: React.FC = () => {
                         id="imageInput"
                       />
                       <label htmlFor="imageInput" className="cursor-pointer">
-                        <Camera className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-                        <p className="text-sm font-semibold text-gray-900">Upload photos</p>
-                        <p className="text-xs text-gray-600">PNG, JPG up to 5 images.</p>
+                        <Camera className="w-8 h-8 mx-auto text-stone-400 mb-2" />
+                        <p className="text-sm font-semibold text-stone-900">Upload photos</p>
+                        <p className="text-xs text-stone-600">PNG, JPG up to 5 images.</p>
                       </label>
                     </div>
 
@@ -1567,20 +1543,20 @@ const CreateListing: React.FC = () => {
                   </div>
                 )}
 
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4">
+                <div className="rounded-xl border border-[#F3C9BE] bg-[#FDF5F3] p-4">
                   <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-semibold text-emerald-900">
+                    <p className="text-sm font-semibold text-[#72281A]">
                       Listings with these details get more buyer chats
                     </p>
-                    <p className="text-sm font-bold text-emerald-800">{trustScore}%</p>
+                    <p className="text-sm font-bold text-[#8B3525]">{trustScore}%</p>
                   </div>
                   <div className="mt-2 h-2 rounded-full bg-white overflow-hidden">
                     <div
-                      className="h-full bg-emerald-600 transition-all"
+                      className="h-full bg-[#A0452E] transition-all"
                       style={{ width: `${trustScore}%` }}
                     />
                   </div>
-                  <p className="mt-3 text-xs text-emerald-800">
+                  <p className="mt-3 text-xs text-[#8B3525]">
                     {trustNextAction
                       ? `Next high-impact action: ${trustNextAction}.`
                       : "Great setup. Your listing has strong trust signals."}
@@ -1590,7 +1566,7 @@ const CreateListing: React.FC = () => {
                       <p
                         key={signal.label}
                         className={`text-xs font-semibold ${
-                          signal.done ? "text-emerald-700" : "text-slate-600"
+                          signal.done ? "text-[#A0452E]" : "text-slate-600"
                         }`}
                       >
                         [{signal.done ? "x" : " "}] {signal.label}
@@ -1599,7 +1575,7 @@ const CreateListing: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+                <div className="rounded-xl border border-[#F3C9BE] bg-[#FDF5F3] p-4 text-sm text-[#72281A]">
                   {idVerified && selfieVerified ? (
                     <p className="font-semibold">
                       Profile verified. Your listing has stronger trust and can go live faster.
@@ -1607,7 +1583,7 @@ const CreateListing: React.FC = () => {
                   ) : (
                     <>
                       <p className="font-semibold">Verification is optional, but it improves buyer trust.</p>
-                      <p className="mt-1 text-emerald-800">
+                      <p className="mt-1 text-[#8B3525]">
                         You can publish now and verify later to rank higher.
                       </p>
                     </>
@@ -1662,4 +1638,5 @@ const CreateListing: React.FC = () => {
 };
 
 export default CreateListing;
+
 

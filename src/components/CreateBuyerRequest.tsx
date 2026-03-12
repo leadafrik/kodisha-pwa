@@ -199,10 +199,10 @@ const STEPS: Array<{ id: Step; label: string; caption: string }> = [
 ];
 
 const CATEGORY_STYLES: Record<RequestCategory, string> = {
-  produce: "border-emerald-200 bg-emerald-50 text-emerald-800",
-  livestock: "border-emerald-200 bg-emerald-50 text-emerald-800",
-  inputs: "border-emerald-200 bg-emerald-50 text-emerald-800",
-  service: "border-emerald-200 bg-emerald-50 text-emerald-800",
+  produce: "border-[#F3C9BE] bg-[#FDF5F3] text-[#8B3525]",
+  livestock: "border-[#F3C9BE] bg-[#FDF5F3] text-[#8B3525]",
+  inputs: "border-[#F3C9BE] bg-[#FDF5F3] text-[#8B3525]",
+  service: "border-[#F3C9BE] bg-[#FDF5F3] text-[#8B3525]",
 };
 
 const CATEGORY_OPTIONS: Array<{
@@ -769,10 +769,10 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
   };
 
   return (
-    <div className="rounded-3xl border border-emerald-100/80 bg-white/95 p-5 shadow-lg shadow-emerald-100/30 backdrop-blur sm:p-6">
+    <div className="rounded-[28px] border border-stone-200/80 bg-white/95 p-5 shadow-[0_18px_44px_rgba(28,25,23,0.08)] backdrop-blur sm:p-6">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="max-w-2xl">
-          <div className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-emerald-700">
+          <div className="inline-flex items-center rounded-full bg-[#FAE9E4] px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-[#A0452E]">
             {isB2B ? "B2B Demand Desk" : "Demand Studio"}
           </div>
           <h2 className="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">
@@ -788,7 +788,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
         </div>
 
         {hasMeaningfulDemandInput && (
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:min-w-[220px]">
+          <div className="ui-card-soft p-4 sm:min-w-[220px]">
             <div className="flex items-end justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
@@ -796,19 +796,16 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                 </p>
                 <p className="mt-1 text-2xl font-bold text-slate-900">{qualityScore}</p>
               </div>
-              <p className="text-sm font-semibold text-emerald-700">{scoreToLabel(qualityScore)}</p>
+              <p className="text-sm font-semibold text-[#A0452E]">{scoreToLabel(qualityScore)}</p>
             </div>
-            <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200">
-              <div
-                className="h-full bg-emerald-600 transition-all"
-                style={{ width: `${qualityScore}%` }}
-              />
+            <div className="ui-progress-track mt-2">
+              <div className="ui-progress-fill" style={{ width: `${qualityScore}%` }} />
             </div>
           </div>
         )}
       </div>
 
-      <div className="mb-5 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+      <div className="ui-card mb-5 p-3">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
@@ -818,14 +815,14 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
               {STEPS[step - 1].label} - {STEPS[step - 1].caption}
             </p>
           </div>
-          <p className="shrink-0 text-sm font-bold text-emerald-700">
+          <p className="shrink-0 text-sm font-bold text-[#A0452E]">
             {Math.round((step / STEPS.length) * 100)}%
           </p>
         </div>
 
-        <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
+        <div className="ui-progress-track mt-3">
           <div
-            className="h-full bg-emerald-600 transition-all"
+            className="ui-progress-fill"
             style={{ width: `${(step / STEPS.length) * 100}%` }}
           />
         </div>
@@ -839,16 +836,16 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                 key={item.id}
                 className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold ${
                   isActive
-                    ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                    ? "border-[#E8A08E] bg-[#FDF5F3] text-[#A0452E]"
                     : isDone
-                    ? "border-emerald-200 bg-emerald-50/60 text-emerald-700"
+                    ? "border-[#F3C9BE] bg-[#FDF5F3]/60 text-[#A0452E]"
                     : "border-slate-200 bg-slate-50 text-slate-600"
                 }`}
               >
                 <span
                   className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] ${
                     isActive || isDone
-                      ? "bg-emerald-600 text-white"
+                      ? "bg-[#A0452E] text-white"
                       : "bg-white text-slate-600"
                   }`}
                 >
@@ -862,8 +859,8 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
       </div>
 
       {hasDraft && (
-        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-          <p className="flex-1 text-sm font-semibold text-emerald-800">
+        <div className="ui-accent-panel mb-6 flex flex-wrap items-center gap-3 p-4">
+          <p className="flex-1 text-sm font-semibold text-[#8B3525]">
             You have a saved draft on this device.
           </p>
           <button
@@ -891,7 +888,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
       )}
 
       {notice && !error && (
-        <div className="mb-4 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">
+        <div className="ui-success-panel mb-4 flex items-start gap-2 p-4 text-forest-700">
           <CheckCircle2 size={20} className="mt-0.5 flex-shrink-0" />
           <span>{notice}</span>
         </div>
@@ -899,7 +896,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
 
       <form onSubmit={step === 3 ? handleSubmit : (e) => e.preventDefault()} className="space-y-5">
         {step === 1 && (
-          <div className="space-y-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="ui-card space-y-5 p-5">
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
                 {isB2B ? "B2B templates" : "Quick templates"}
@@ -910,7 +907,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                     key={template.id}
                     type="button"
                     onClick={() => handleApplyTemplate(template)}
-                    className="whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-emerald-300 hover:bg-emerald-50"
+                    className="whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-[#E8A08E] hover:bg-[#FDF5F3]"
                   >
                     {template.label}
                   </button>
@@ -986,7 +983,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                   <button
                     type="button"
                     onClick={() => setTopLevelField("title", suggestedTitle)}
-                    className="mt-2 text-xs font-semibold text-emerald-700 hover:text-emerald-800"
+                    className="mt-2 text-xs font-semibold text-[#A0452E] hover:text-[#8B3525]"
                   >
                     Use suggestion: "{suggestedTitle}"
                   </button>
@@ -1016,7 +1013,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
         )}
 
         {step === 2 && (
-          <div className="space-y-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="ui-card space-y-5 p-5">
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-800">
                 Description *
@@ -1085,11 +1082,11 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                 </select>
               </div>
 
-              <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-3">
-                <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">
+              <div className="rounded-2xl border border-[#FAE9E4] bg-[#FDF5F3] p-3">
+                <p className="text-xs font-semibold uppercase tracking-widest text-[#A0452E]">
                   Better quotes
                 </p>
-                <p className="mt-1 text-sm text-emerald-800">
+                <p className="mt-1 text-sm text-[#8B3525]">
                   Quantity helps suppliers reply faster.
                 </p>
               </div>
@@ -1138,7 +1135,7 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
         )}
 
         {step === 3 && (
-          <div className="space-y-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="ui-card space-y-5 p-5">
             <div>
               <h3 className="text-base font-semibold text-slate-900">Where should suppliers deliver?</h3>
               <p className="text-sm text-slate-600">
@@ -1339,4 +1336,5 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
 };
 
 export default CreateBuyerRequest;
+
 

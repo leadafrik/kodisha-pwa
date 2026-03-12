@@ -452,7 +452,7 @@ const Login: React.FC = () => {
     <form onSubmit={handleLogin} className="space-y-6">
       {/* Social Login Section */}
       <div className="space-y-3">
-        <p className="text-center text-xs font-semibold text-gray-500 uppercase tracking-widest">
+        <p className="text-center text-xs font-semibold uppercase tracking-[0.24em] text-stone-500">
           Sign in with
         </p>
         <GoogleLoginButton
@@ -479,7 +479,7 @@ const Login: React.FC = () => {
             className="text-sm w-full"
           />
         </div>
-        <p className="text-center text-xs text-emerald-700">
+        <p className="text-center text-xs font-medium text-stone-600">
           Fastest path: continue with Google.
         </p>
       </div>
@@ -487,39 +487,39 @@ const Login: React.FC = () => {
       {/* Divider */}
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-200"></div>
+          <div className="w-full border-t border-stone-200"></div>
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-white px-2 text-gray-500">Or use email and password</span>
+          <span className="bg-white px-2 text-stone-500">Or use email and password</span>
         </div>
       </div>
 
       {/* Email */}
       <div>
-        <label className="block text-sm font-semibold text-gray-900 mb-2">Email</label>
+        <label className="ui-label">Email</label>
         <input
           type="text"
           value={loginData.emailOrPhone}
           onChange={(e) => setLoginData({ ...loginData, emailOrPhone: e.target.value })}
-          className="ui-input placeholder:text-gray-400"
+          className="ui-input placeholder:text-stone-400"
           placeholder="name@example.com"
         />
       </div>
 
       {/* Password */}
       <div>
-        <label className="block text-sm font-semibold text-gray-900 mb-2">Password</label>
+        <label className="ui-label">Password</label>
         <div className="relative">
           <input
             type={visiblePasswords.login ? "text" : "password"}
             value={loginData.password}
             onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-            className="ui-input pr-10 placeholder:text-gray-400"
+            className="ui-input pr-10 placeholder:text-stone-400"
             placeholder="Enter your password"
           />
           <button
             type="button"
-            className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+            className="absolute inset-y-0 right-3 flex items-center text-stone-500 hover:text-stone-700 focus:outline-none"
             aria-label={visiblePasswords.login ? "Hide password" : "Show password"}
             onClick={() => togglePasswordVisibility("login")}
           >
@@ -543,14 +543,14 @@ const Login: React.FC = () => {
           setMode("forgot");
           resetMessages();
         }}
-        className="block w-full text-center text-sm text-emerald-700 hover:text-emerald-800 hover:underline font-medium"
+        className="block w-full text-center text-sm font-medium text-[#A0452E] hover:text-[#8B3525] hover:underline"
       >
         Forgot password?
       </button>
 
       {/* Sign Up Prompt */}
-      <div className="border-t border-gray-200 pt-6">
-        <p className="text-sm text-gray-700 text-center">
+      <div className="border-t border-stone-200 pt-6">
+        <p className="text-center text-sm text-stone-700">
           New to Agrisoko?{" "}
           <button
             type="button"
@@ -558,7 +558,7 @@ const Login: React.FC = () => {
               setMode("signup");
               resetMessages();
             }}
-            className="font-semibold text-emerald-700 hover:text-emerald-800"
+            className="font-semibold text-[#A0452E] hover:text-[#8B3525]"
           >
             Create an account
           </button>
@@ -570,11 +570,11 @@ const Login: React.FC = () => {
   const renderSignup = () => (
     <>
     <form onSubmit={handleSignupSubmit} className="space-y-4">
-      <div className="space-y-3 rounded-2xl border border-emerald-100 bg-emerald-50/70 px-4 py-3">
-        <p className="text-center text-xs font-semibold text-emerald-700 uppercase tracking-widest">
+      <div className="ui-accent-panel space-y-3 px-4 py-3">
+        <p className="text-center text-xs font-semibold uppercase tracking-[0.24em] text-[#A0452E]">
           Quick signup
         </p>
-        <p className="text-center text-sm text-emerald-900">
+        <p className="text-center text-sm text-stone-700">
           Tap Google, Facebook, or email. Required consent is captured once.
         </p>
         <GoogleLoginButton
@@ -621,16 +621,16 @@ const Login: React.FC = () => {
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-200"></div>
+          <div className="w-full border-t border-stone-200"></div>
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-white px-2 text-gray-500">Or use email (about 10 seconds)</span>
+          <span className="bg-white px-2 text-stone-500">Or use email (about 10 seconds)</span>
         </div>
       </div>
 
       <div className="grid gap-3 md:grid-cols-2">
         <div>
-          <label className="block text-sm font-medium text-gray-700">Full name *</label>
+          <label className="ui-label">Full name *</label>
           <input
             type="text"
             value={signupData.name}
@@ -641,7 +641,7 @@ const Login: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Email *</label>
+          <label className="ui-label">Email *</label>
           <input
             type="email"
             value={signupData.emailOrPhone}
@@ -654,7 +654,7 @@ const Login: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Confirm email *</label>
+          <label className="ui-label">Confirm email *</label>
           <input
             type="email"
             value={signupData.confirmEmail}
@@ -667,7 +667,7 @@ const Login: React.FC = () => {
         </div>
 
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700">Password *</label>
+          <label className="ui-label">Password *</label>
           <div className="relative">
             <input
               type={visiblePasswords.signup ? "text" : "password"}
@@ -678,7 +678,7 @@ const Login: React.FC = () => {
             />
             <button
               type="button"
-              className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+              className="absolute inset-y-0 right-3 flex items-center text-stone-500 hover:text-stone-700 focus:outline-none"
               aria-label={visiblePasswords.signup ? "Hide password" : "Show password"}
               onClick={() => togglePasswordVisibility("signup")}
             >
@@ -693,7 +693,7 @@ const Login: React.FC = () => {
       )}
 
       {emailTypoSuggestion && emailTypoSuggestion !== normalizedSignupEmail && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm text-emerald-900">
+        <div className="ui-accent-panel px-3 py-2.5 text-sm text-stone-800">
           <p className="font-semibold">Possible typo in email domain.</p>
           <button
             type="button"
@@ -704,7 +704,7 @@ const Login: React.FC = () => {
                 confirmEmail: emailTypoSuggestion,
               }))
             }
-            className="mt-1 text-sm font-semibold text-emerald-700 hover:text-emerald-800"
+            className="mt-1 text-sm font-semibold text-[#A0452E] hover:text-[#8B3525]"
           >
             Use {emailTypoSuggestion}
           </button>
@@ -725,10 +725,10 @@ const Login: React.FC = () => {
                 termsAccepted: e.target.checked,
               }))
             }
-            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-500"
+            className="mt-0.5 h-4 w-4 rounded border-stone-300 text-[#A0452E] focus:ring-[#E8A08E]"
           />
           <span>
-            I agree to the <a href="/legal/terms" className="font-semibold text-emerald-700 hover:underline">Terms of Service</a>.
+            I agree to the <a href="/legal/terms" className="font-semibold text-[#A0452E] hover:underline">Terms of Service</a>.
           </span>
         </label>
         <label className="flex items-start gap-3 text-sm text-slate-700">
@@ -741,10 +741,10 @@ const Login: React.FC = () => {
                 privacyAccepted: e.target.checked,
               }))
             }
-            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-500"
+            className="mt-0.5 h-4 w-4 rounded border-stone-300 text-[#A0452E] focus:ring-[#E8A08E]"
           />
           <span>
-            I have read the <a href="/legal/privacy" className="font-semibold text-emerald-700 hover:underline">Privacy Policy</a>.
+            I have read the <a href="/legal/privacy" className="font-semibold text-[#A0452E] hover:underline">Privacy Policy</a>.
           </span>
         </label>
         <label className="flex items-start gap-3 text-sm text-slate-700">
@@ -757,7 +757,7 @@ const Login: React.FC = () => {
                 dataProcessingConsent: e.target.checked,
               }))
             }
-            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-500"
+            className="mt-0.5 h-4 w-4 rounded border-stone-300 text-[#A0452E] focus:ring-[#E8A08E]"
           />
           <span>
             I consent to Agrisoko processing my account and verification data to operate the marketplace and verify trust signals.
@@ -773,7 +773,7 @@ const Login: React.FC = () => {
                 marketingConsent: e.target.checked,
               }))
             }
-            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-500"
+            className="mt-0.5 h-4 w-4 rounded border-stone-300 text-[#A0452E] focus:ring-[#E8A08E]"
           />
           <span>Send me product updates and marketing messages.</span>
         </label>
@@ -829,11 +829,11 @@ const Login: React.FC = () => {
                     termsAccepted: e.target.checked,
                   }))
                 }
-                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-500"
+                className="mt-0.5 h-4 w-4 rounded border-stone-300 text-[#A0452E] focus:ring-[#E8A08E]"
               />
               <span>
                 I agree to the{" "}
-                <a href="/legal/terms" className="font-semibold text-emerald-700 hover:underline">
+                <a href="/legal/terms" className="font-semibold text-[#A0452E] hover:underline">
                   Terms of Service
                 </a>
                 .
@@ -849,11 +849,11 @@ const Login: React.FC = () => {
                     privacyAccepted: e.target.checked,
                   }))
                 }
-                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-500"
+                className="mt-0.5 h-4 w-4 rounded border-stone-300 text-[#A0452E] focus:ring-[#E8A08E]"
               />
               <span>
                 I have read the{" "}
-                <a href="/legal/privacy" className="font-semibold text-emerald-700 hover:underline">
+                <a href="/legal/privacy" className="font-semibold text-[#A0452E] hover:underline">
                   Privacy Policy
                 </a>
                 .
@@ -869,7 +869,7 @@ const Login: React.FC = () => {
                     dataProcessingConsent: e.target.checked,
                   }))
                 }
-                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-500"
+                className="mt-0.5 h-4 w-4 rounded border-stone-300 text-[#A0452E] focus:ring-[#E8A08E]"
               />
               <span>
                 I consent to Agrisoko processing my account and verification data to operate the marketplace and verify trust signals.
@@ -885,7 +885,7 @@ const Login: React.FC = () => {
                     marketingConsent: e.target.checked,
                   }))
                 }
-                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-500"
+                className="mt-0.5 h-4 w-4 rounded border-stone-300 text-[#A0452E] focus:ring-[#E8A08E]"
               />
               <span>Send me product updates and marketing messages.</span>
             </label>
@@ -917,13 +917,13 @@ const Login: React.FC = () => {
   const renderOtpVerify = () => (
     <form onSubmit={handleOtpVerify} className="space-y-4">
       <div className="text-center mb-4">
-        <p className="text-gray-700">
+        <p className="text-stone-700">
           Verification code sent to <strong>{otpEmail}</strong>
         </p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Verification Code *</label>
+        <label className="ui-label">Verification Code *</label>
         <input
           type="text"
           value={otpCode}
@@ -956,7 +956,7 @@ const Login: React.FC = () => {
   const renderForgot = () => (
     <form onSubmit={handleForgotRequest} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700">Email</label>
+        <label className="ui-label">Email</label>
         <input
           type="email"
           value={resetData.emailOrPhone}
@@ -964,7 +964,7 @@ const Login: React.FC = () => {
           className="ui-input"
           placeholder="you@example.com"
         />
-        <p className="mt-2 text-xs text-gray-500">
+        <p className="mt-2 text-xs text-stone-500">
           For now, password resets are sent by email only.
         </p>
       </div>
@@ -993,7 +993,7 @@ const Login: React.FC = () => {
   const renderOtpReset = () => (
     <form onSubmit={handleResetPassword} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700">Reset Code</label>
+        <label className="ui-label">Reset Code</label>
         <input
           type="text"
           value={resetData.code}
@@ -1005,7 +1005,7 @@ const Login: React.FC = () => {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">New Password</label>
+        <label className="ui-label">New Password</label>
         <div className="relative">
           <input
             type={visiblePasswords.resetNew ? "text" : "password"}
@@ -1016,7 +1016,7 @@ const Login: React.FC = () => {
           />
           <button
             type="button"
-            className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+            className="absolute inset-y-0 right-3 flex items-center text-stone-500 hover:text-stone-700 focus:outline-none"
             aria-label={visiblePasswords.resetNew ? "Hide password" : "Show password"}
             onClick={() => togglePasswordVisibility("resetNew")}
           >
@@ -1026,7 +1026,7 @@ const Login: React.FC = () => {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
+        <label className="ui-label">Confirm Password</label>
         <div className="relative">
           <input
             type={visiblePasswords.resetConfirm ? "text" : "password"}
@@ -1037,7 +1037,7 @@ const Login: React.FC = () => {
           />
           <button
             type="button"
-            className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+            className="absolute inset-y-0 right-3 flex items-center text-stone-500 hover:text-stone-700 focus:outline-none"
             aria-label={visiblePasswords.resetConfirm ? "Hide password" : "Show password"}
             onClick={() => togglePasswordVisibility("resetConfirm")}
           >
@@ -1090,32 +1090,32 @@ const Login: React.FC = () => {
           : "Sign in securely to continue.";
 
   return (
-    <div className="relative overflow-hidden bg-[#f8fbf6]">
-      <div className="pointer-events-none absolute -top-20 right-0 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-0 left-0 h-72 w-72 rounded-full bg-sky-100/70 blur-3xl" />
+    <div className="ui-page-shell relative overflow-hidden">
+      <div className="pointer-events-none absolute -top-20 right-0 h-72 w-72 rounded-full bg-[#F3C9BE]/60 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 left-0 h-72 w-72 rounded-full bg-[#E5F3E8]/80 blur-3xl" />
 
       <div className="px-4 py-8 md:py-12">
         <div className="mx-auto grid w-full max-w-6xl items-stretch gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10">
-          <aside className="hidden lg:flex flex-col justify-between rounded-3xl border border-emerald-200/70 bg-emerald-700 p-10 text-white shadow-sm">
+          <aside className="hidden lg:flex flex-col justify-between rounded-[28px] border border-[#B86A55] bg-gradient-to-br from-[#A0452E] via-[#8B3525] to-[#72281A] p-10 text-white shadow-[0_18px_48px_rgba(114,40,26,0.22)]">
             <div>
               <img src="/logo192.png" alt="" aria-hidden="true" className="h-12 w-12 rounded-xl bg-white/10 p-1" />
               <h1 className="mt-5 text-4xl font-bold leading-tight">Agrisoko</h1>
-              <p className="mt-2 text-sm text-[#eef5eb]">
-                Trusted agricultural marketplace across Kenya.
+              <p className="mt-2 max-w-sm text-sm text-[#FDF2EE]">
+                Trusted agricultural marketplace across Kenya. Create an account, verify when ready, and start trading directly.
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-3 text-xs font-medium text-emerald-50/95">
-              <span className="rounded-full bg-white/15 px-3 py-1">Verified profiles</span>
-              <span className="rounded-full bg-white/15 px-3 py-1">Secure login</span>
-              <span className="rounded-full bg-white/15 px-3 py-1">Direct chat</span>
-              <span className="rounded-full bg-white/15 px-3 py-1">Fast signup</span>
+            <div className="grid grid-cols-2 gap-3 text-xs font-medium text-[#FFF7F4]">
+              <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1">Verified profiles</span>
+              <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1">Secure login</span>
+              <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1">Direct chat</span>
+              <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1">Fast signup</span>
             </div>
           </aside>
 
           <section className="w-full max-w-md mx-auto lg:max-w-none">
-            <div className="mb-4 rounded-2xl border border-emerald-100 bg-white/90 p-4 backdrop-blur lg:hidden">
+            <div className="mb-4 rounded-2xl border border-stone-200 bg-white/95 p-4 shadow-sm backdrop-blur lg:hidden">
               <div className="flex items-center gap-3">
-                <img src="/logo192.png" alt="" aria-hidden="true" className="h-10 w-10 rounded-xl bg-emerald-50 p-1" />
+                <img src="/logo192.png" alt="" aria-hidden="true" className="h-10 w-10 rounded-xl bg-[#FDF5F3] p-1" />
                 <div>
                   <p className="text-sm font-semibold text-slate-900">Agrisoko</p>
                   <p className="text-xs text-slate-600">Trusted agricultural marketplace across Kenya.</p>
@@ -1123,7 +1123,7 @@ const Login: React.FC = () => {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-5 shadow-xl backdrop-blur sm:p-6 md:p-8">
+            <div className="rounded-[28px] border border-stone-200/80 bg-white/95 p-5 shadow-[0_18px_44px_rgba(28,25,23,0.08)] backdrop-blur sm:p-6 md:p-8">
               <div className="mb-6">
                 <h2 className="mt-2 text-2xl font-bold text-slate-900">{modeTitle}</h2>
                 <p className="mt-1 text-sm text-slate-600">{modeSubtitle}</p>
@@ -1136,8 +1136,8 @@ const Login: React.FC = () => {
               )}
 
               {info && (
-                <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
-                  <p className="text-sm font-medium text-emerald-700">{info}</p>
+                <div className="ui-success-panel mb-6 p-4">
+                  <p className="text-sm font-medium text-forest-700">{info}</p>
                 </div>
               )}
 
@@ -1149,9 +1149,9 @@ const Login: React.FC = () => {
             </div>
 
             {!isCompact && (
-              <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-600">
-                <span className="rounded-full border border-slate-200 bg-white/80 px-3 py-1">Secure login</span>
-                <span className="rounded-full border border-slate-200 bg-white/80 px-3 py-1">Verified profiles</span>
+              <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-stone-600">
+                <span className="ui-chip-soft">Secure login</span>
+                <span className="ui-chip-soft">Verified profiles</span>
               </div>
             )}
           </section>

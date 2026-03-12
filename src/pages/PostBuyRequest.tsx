@@ -55,16 +55,16 @@ const PostBuyRequest: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fbf6] py-10">
+    <div className="ui-page-shell py-10">
       <div className="mx-auto max-w-4xl px-4">
         {accessLoading && (
-          <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600 shadow-sm">
+          <div className="ui-card mb-4 p-4 text-sm text-slate-600">
             Checking bulk buyer access...
           </div>
         )}
 
         {!accessLoading && isB2B && !hasBulkBuyerAccess && (
-          <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-900 shadow-sm">
+          <div className="ui-accent-panel mb-4 p-4 text-[#72281A] shadow-sm">
             <p className="text-sm font-semibold">Bulk buyer approval required before posting B2B demand.</p>
             {accessError && <p className="mt-1 text-xs">{accessError}</p>}
             <button
@@ -79,14 +79,14 @@ const PostBuyRequest: React.FC = () => {
 
         {!accessLoading && (!isB2B || hasBulkBuyerAccess) && (
           <>
-        <div className="mb-4 flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
+        <div className="ui-card mb-4 flex flex-wrap gap-2 p-4">
+          <span className="ui-chip-soft">
             {isB2B ? "Institutional demand" : "Clear request"}
           </span>
-          <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
+          <span className="ui-chip-soft">
             {isB2B ? "Spec + delivery window" : "County helps matching"}
           </span>
-          <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
+          <span className="ui-chip-soft">
             {isB2B ? "Bids and comparisons" : "Budget improves quotes"}
           </span>
         </div>
