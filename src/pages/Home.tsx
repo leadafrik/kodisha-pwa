@@ -253,7 +253,7 @@ const Home: React.FC = () => {
   return (
     <main className="min-h-screen bg-slate-50 pb-28 text-slate-900 sm:pb-24">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700&family=Patrick+Hand&family=Sora:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700&family=Kalam:wght@300;400;700&family=Sora:wght@400;500;600;700&display=swap');
         .home-shell {
           font-family: "Sora", "Segoe UI", "Tahoma", sans-serif;
         }
@@ -261,7 +261,8 @@ const Home: React.FC = () => {
           font-family: "Fraunces", "Georgia", serif;
         }
         .home-handwritten {
-          font-family: "Patrick Hand", "Segoe Print", "Bradley Hand", cursive;
+          font-family: "Kalam", "Segoe Print", "Bradley Hand", cursive;
+          letter-spacing: 0.01em;
         }
       `}</style>
 
@@ -401,10 +402,10 @@ const Home: React.FC = () => {
 
           <div className="relative mt-5 max-w-4xl rotate-[-0.9deg] rounded-[2rem] border border-[#bfd0b8] bg-[#e6f0e0] px-5 py-6 text-slate-900 shadow-[0_8px_16px_rgba(92,122,99,0.08)] sm:px-7 sm:py-7">
             <div className="absolute left-1/2 top-0 h-10 w-24 -translate-x-1/2 -translate-y-1/2 rotate-[2deg] rounded-b-2xl bg-[#f1f6ee]" />
-            <p className="home-handwritten text-[1.9rem] font-semibold leading-none text-[#38503b] sm:text-[2.2rem]">
+            <p className="home-handwritten text-[2rem] font-bold leading-none text-[#38503b] sm:text-[2.3rem]">
               Why we Started Agrisoko
             </p>
-            <div className="mt-4 space-y-3 home-handwritten text-[1.34rem] leading-[1.22] text-slate-900 sm:text-[1.5rem]">
+            <div className="mt-4 space-y-3 home-handwritten text-[1.3rem] font-light leading-[1.28] text-slate-900 sm:text-[1.48rem]">
               {founderLetterParagraphs.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
               ))}
