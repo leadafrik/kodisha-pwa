@@ -119,6 +119,14 @@ const toValidDate = (value: unknown): Date | null => {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 };
 
+type HomeListingPreview = {
+  id: string;
+  title: string;
+  category: string;
+  priceLabel: string;
+  createdAt: Date | null;
+};
+
 const Home: React.FC = () => {
   const { user } = useAuth();
   const { isPhone } = useAdaptiveLayout();
@@ -184,6 +192,49 @@ const Home: React.FC = () => {
       if (county) counties.add(county.toLowerCase());
     });
     return counties.size;
+  }, [productListings, serviceListings]);
+
+  const latestListings = useMemo<HomeListingPreview[]>(() => {
+    const products = (productListings || [])
+      .filter((item: any) => isLiveStatus(item?.publishStatus || item?.status))
+      .map((item: any) => ({
+        id: String(item?._id || item?.id || ""),
+        title: String(item?.title || "Untitled listing"),
+        category:
+          item?.category === "livestock"
+            ? "Livestock"
+            : item?.category === "inputs"
+            ? "Inputs"
+            : "Produce",
+        priceLabel:
+          typeof item?.price === "number" || typeof item?.price === "string"
+            ? `KSh ${Number(item.price).toLocaleString()}`
+            : "View listing",
+        createdAt: toValidDate(item?.createdAt || item?.updatedAt),
+      }))
+      .filter((item) => item.id);
+
+    const services = (serviceListings || [])
+      .filter((item: any) => {
+        if (!isLiveStatus(item?.publishStatus || item?.status)) return false;
+        if (item?.isDeleted === true || item?.deletedAt) return false;
+        return true;
+      })
+      .map((item: any) => ({
+        id: String(item?._id || item?.id || ""),
+        title: String(item?.name || item?.title || "Untitled service"),
+        category: "Service",
+        priceLabel:
+          typeof item?.price === "number" || typeof item?.price === "string"
+            ? `KSh ${Number(item.price).toLocaleString()}`
+            : "View listing",
+        createdAt: toValidDate(item?.createdAt || item?.updatedAt),
+      }))
+      .filter((item) => item.id);
+
+    return [...products, ...services]
+      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0))
+      .slice(0, 4);
   }, [productListings, serviceListings]);
 
   const signupDate = toValidDate(user?.createdAt);
@@ -263,6 +314,11 @@ const Home: React.FC = () => {
         .home-handwritten {
           font-family: "Kalam", "Segoe Print", "Bradley Hand", cursive;
           letter-spacing: 0.01em;
+        }
+        .home-handwritten,
+        .home-handwritten p,
+        .home-handwritten span {
+          font-family: "Kalam", "Segoe Print", "Bradley Hand", cursive !important;
         }
       `}</style>
 
@@ -389,6 +445,65 @@ const Home: React.FC = () => {
             </div>
           </div>
         </section>
+
+        {latestListings.length > 0 && (
+          <section className="mx-auto max-w-7xl border-b border-slate-200 px-4 py-6 sm:py-7">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
+                  Latest listings
+                </p>
+                <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl">
+                  Live now on Agrisoko
+                </h2>
+              </div>
+              <Link
+                to="/browse"
+                onClick={() =>
+                  trackTrafficClick({
+                    action: "funnel_home_latest_listings_click",
+                    target: "/browse",
+                  })
+                }
+                className="hidden text-sm font-semibold text-emerald-700 hover:text-emerald-800 sm:inline-flex"
+              >
+                View all listings
+              </Link>
+            </div>
+
+            <div className="mt-5 divide-y divide-slate-200 border-t border-slate-200">
+              {latestListings.map((listing) => (
+                <div
+                  key={listing.id}
+                  className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-base font-semibold text-slate-900">
+                      {listing.title}
+                    </p>
+                    <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-slate-600">
+                      <span>{listing.category}</span>
+                      <span className="font-semibold text-emerald-700">{listing.priceLabel}</span>
+                    </div>
+                  </div>
+                  <Link
+                    to={`/listings/${listing.id}`}
+                    onClick={() =>
+                      trackTrafficClick({
+                        action: "funnel_home_latest_listing_detail_click",
+                        target: `/listings/${listing.id}`,
+                      })
+                    }
+                    className="inline-flex items-center text-sm font-semibold text-slate-700 hover:text-slate-900"
+                  >
+                    View details
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
           <div className="max-w-4xl">
