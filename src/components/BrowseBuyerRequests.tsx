@@ -346,18 +346,12 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
     [sortedRequests]
   );
 
-  const mainRequests = useMemo(() => {
-    if (sortedRequests.length <= 4) return sortedRequests;
-    const topIds = new Set(topRequests.map((request) => request._id));
-    return sortedRequests.filter((request) => !topIds.has(request._id));
-  }, [sortedRequests, topRequests]);
-
   const urgentCount = requests.filter((req) => req.urgency === "high").length;
   const countyCount = new Set(
     requests.map((req) => (req.location?.county || "").trim().toLowerCase()).filter(Boolean)
   ).size;
   const showTopRequests = sortedRequests.length > 4;
-  const displayRequests = showTopRequests ? mainRequests : sortedRequests;
+  const displayRequests = sortedRequests;
 
   const clearFilters = () => {
     setFilters({ category: "", county: "All Counties", urgency: "" });
