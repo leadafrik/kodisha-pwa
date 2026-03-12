@@ -353,7 +353,7 @@ const Navbar: React.FC = () => {
                         <button
                           type="button"
                           onClick={logout}
-                          className="flex w-full items-center gap-2 border-t border-slate-100 px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+                          className="flex w-full items-center gap-2 border-t border-stone-100 px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
                         >
                           <LogOut className="h-4 w-4" />
                           Logout

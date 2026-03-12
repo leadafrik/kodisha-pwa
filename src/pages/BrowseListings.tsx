@@ -523,7 +523,7 @@ const BrowseListings: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#FAF7F2] text-stone-900">
       <style>{`
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(12px); }
@@ -538,18 +538,19 @@ const BrowseListings: React.FC = () => {
       `}</style>
 
       <section className="relative overflow-hidden">
-        <div className="pointer-events-none absolute -top-24 right-0 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 left-0 h-72 w-72 rounded-full bg-emerald-100/70 blur-3xl" />
+        <div className="pointer-events-none absolute -top-24 right-0 h-72 w-72 rounded-full bg-[#F3C9BE]/45 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 left-0 h-72 w-72 rounded-full bg-[#FFF0C8]/55 blur-3xl" />
+        <div className="pointer-events-none absolute left-1/3 top-16 h-72 w-72 rounded-full bg-white/70 blur-3xl" />
 
         <div className="max-w-7xl mx-auto px-4 py-10 md:py-14 space-y-6">
           {!user && (
-            <div className="rounded-2xl border border-emerald-200 bg-white/90 px-4 py-3 shadow-sm fade-in">
+            <div className="fade-in rounded-3xl border border-stone-200 bg-white/90 px-5 py-4 shadow-sm backdrop-blur">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">
+                  <p className="text-sm font-semibold text-stone-900">
                     Sign in to call, save, and contact sellers
                   </p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-stone-500">
                     Listing details stay public. Sign in for direct contact and saved listings.
                   </p>
                 </div>
@@ -563,16 +564,16 @@ const BrowseListings: React.FC = () => {
             </div>
           )}
 
-          <div className="rounded-2xl border border-emerald-100 bg-white/90 p-4 md:p-5 shadow-md fade-up">
+          <div className="fade-up rounded-[2rem] border border-stone-200 bg-white/88 p-5 shadow-[0_16px_40px_rgba(28,25,23,0.08)] backdrop-blur">
             <div className="grid gap-4 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#A0452E]">
                   Marketplace
                 </p>
-                <h1 className="mt-2 text-2xl md:text-3xl font-serif font-semibold text-slate-900 tracking-tight">
+                <h1 className="font-display mt-2 text-2xl md:text-4xl font-semibold text-stone-900 tracking-tight">
                   Browse and buy with confidence
                 </h1>
-                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-stone-600 md:text-base">
                   Discover produce, livestock, farm inputs, and agricultural services from verified sellers across Kenya.
                 </p>
                 <div className="mt-4 flex flex-wrap gap-3">
@@ -588,57 +589,57 @@ const BrowseListings: React.FC = () => {
                   </Link>
                   <Link
                     to="/about"
-                    className="ui-btn-ghost px-4 py-2 text-sm"
+                    className="ui-btn-secondary px-4 py-2 text-sm"
                   >
                     Learn about Agrisoko
                   </Link>
                 </div>
-                <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold text-slate-500">
-                  <span className="text-emerald-700">Verified sellers</span>
-                  <span className="text-emerald-700">Boosted listings first</span>
-                  <span>Direct contact</span>
+                <div className="mt-4 flex flex-wrap items-center gap-2 text-xs font-semibold text-stone-600">
+                  <span className="rounded-full border border-[#F3C9BE] bg-[#FDF5F3] px-3 py-1 text-[#A0452E]">Verified sellers</span>
+                  <span className="rounded-full border border-[#F3C9BE] bg-[#FDF5F3] px-3 py-1 text-[#A0452E]">Boosted listings first</span>
+                  <span className="rounded-full border border-stone-200 bg-stone-50 px-3 py-1">Direct contact</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-2 lg:justify-self-end lg:min-w-[260px]">
-                <div className="rounded-xl bg-slate-50 px-3 py-2.5">
-                  <p className="text-lg font-semibold text-slate-900">
+                <div className="rounded-2xl border border-stone-200 bg-[#FAF7F2] px-3 py-3 shadow-sm">
+                  <p className="text-lg font-semibold text-stone-900 stat-num">
                     {loading ? "--" : stats.total.toLocaleString()}
                   </p>
-                  <p className="text-[11px] text-slate-500">Listings</p>
+                  <p className="text-[11px] text-stone-500">Listings</p>
                 </div>
-                <div className="rounded-xl bg-slate-50 px-3 py-2.5">
-                  <p className="text-lg font-semibold text-slate-900">
+                <div className="rounded-2xl border border-stone-200 bg-[#FAF7F2] px-3 py-3 shadow-sm">
+                  <p className="text-lg font-semibold text-stone-900 stat-num">
                     {loading ? "--" : stats.verifiedCount.toLocaleString()}
                   </p>
-                  <p className="text-[11px] text-slate-500">Verified</p>
+                  <p className="text-[11px] text-stone-500">Verified</p>
                 </div>
-                <div className="rounded-xl bg-slate-50 px-3 py-2.5">
-                  <p className="text-lg font-semibold text-slate-900">
+                <div className="rounded-2xl border border-stone-200 bg-[#FAF7F2] px-3 py-3 shadow-sm">
+                  <p className="text-lg font-semibold text-stone-900 stat-num">
                     {loading ? "--" : stats.boostedCount.toLocaleString()}
                   </p>
-                  <p className="text-[11px] text-slate-500">Boosted</p>
+                  <p className="text-[11px] text-stone-500">Boosted</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="fade-up sticky top-24 z-20 overflow-hidden rounded-2xl border border-emerald-200 bg-emerald-50/80 p-3 md:p-4 shadow-sm">
+          <div className="fade-up sticky top-24 z-20 overflow-hidden rounded-3xl border border-[#F3C9BE] bg-[#FFF8F1]/92 p-3 md:p-4 shadow-sm backdrop-blur">
             <button
               type="button"
               onClick={() => setShowRaffle((prev) => !prev)}
               className="relative flex w-full flex-col gap-3 text-left lg:flex-row lg:items-center lg:justify-between"
             >
               <div className="min-w-0">
-                <p className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-emerald-700">
+                <p className="inline-flex items-center gap-2 rounded-full border border-[#F3C9BE] bg-white/90 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-[#A0452E]">
                   <Sparkles className="h-3.5 w-3.5" />
                   Campaign live
                 </p>
                 <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <p className="text-base font-extrabold text-slate-900">
+                  <p className="text-base font-extrabold text-stone-900">
                     {showRaffle ? "Hide raffle details" : "Open raffle details"}
                   </p>
-                  <p className="text-sm text-slate-700">
+                  <p className="text-sm text-stone-600">
                     Keep browsing without interruption.
                   </p>
                 </div>
@@ -646,18 +647,18 @@ const BrowseListings: React.FC = () => {
               <div className="flex flex-wrap items-center gap-2 lg:justify-end">
                 {!showRaffle && (
                   <>
-                    <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-700">
+                    <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-stone-700">
                       KSh 20,000 top prize
                     </span>
-                    <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-700">
+                    <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-stone-700">
                       3,000 listing target
                     </span>
-                    <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-700">
+                    <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-stone-700">
                       Invite code rewards
                     </span>
                   </>
                 )}
-                <span className="inline-flex min-h-[40px] items-center justify-center rounded-xl border border-slate-900 bg-slate-900 px-4 py-2 text-xs font-bold uppercase tracking-[0.08em] text-white shadow-sm">
+                <span className="inline-flex min-h-[40px] items-center justify-center rounded-xl border border-[#8B3525] bg-[#8B3525] px-4 py-2 text-xs font-bold uppercase tracking-[0.08em] text-white shadow-sm">
                   {showRaffle ? (
                     <>
                       <ChevronUp className="mr-1 h-4 w-4" />
@@ -680,32 +681,32 @@ const BrowseListings: React.FC = () => {
             )}
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 md:p-5 shadow-sm fade-up">
+          <div className="fade-up rounded-[2rem] border border-stone-200 bg-white/92 p-4 md:p-5 shadow-sm">
             <div className="space-y-3">
               <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                <label className="text-xs font-semibold uppercase tracking-widest text-stone-500">
                   Search listings
                 </label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-3.5 h-5 w-5 text-slate-400" />
+                  <Search className="absolute left-3 top-3.5 h-5 w-5 text-stone-400" />
                   <input
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search by title, location, or description"
-                    className="w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition"
+                    className="ui-input pl-10 pr-4 py-3"
                   />
                 </div>
               </div>
 
               {isCompact ? (
                 <>
-                  <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5">
+                  <div className="flex items-center justify-between gap-3 rounded-2xl border border-stone-200 bg-[#FAF7F2] px-3 py-2.5">
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">
+                      <p className="text-sm font-semibold text-stone-900">
                         {filtered.length} listing{filtered.length === 1 ? "" : "s"} found
                       </p>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-stone-500">
                         {activeFilterCount > 0
                           ? `${activeFilterCount} filter${activeFilterCount === 1 ? "" : "s"} active`
                           : "All listings"}
@@ -714,7 +715,7 @@ const BrowseListings: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setShowMobileFilters((prev) => !prev)}
-                      className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50"
+                      className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-3 py-2 text-sm font-semibold text-stone-700 transition hover:border-[#E8A08E] hover:bg-[#FDF5F3]"
                     >
                       <Filter className="h-4 w-4" />
                       Filters
@@ -727,15 +728,15 @@ const BrowseListings: React.FC = () => {
                   </div>
 
                   {showMobileFilters && (
-                    <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <div className="space-y-4 rounded-2xl border border-stone-200 bg-[#FAF7F2] p-3">
                       <div className="space-y-2">
-                        <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                        <label className="text-xs font-semibold uppercase tracking-widest text-stone-500">
                           County
                         </label>
                         <select
                           value={county}
                           onChange={(e) => setCounty(e.target.value)}
-                          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                          className="ui-input py-3"
                         >
                           <option value="">All counties</option>
                           {[...kenyaCounties]
@@ -749,13 +750,13 @@ const BrowseListings: React.FC = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                        <label className="text-xs font-semibold uppercase tracking-widest text-stone-500">
                           Sort
                         </label>
                         <select
                           value={sortBy}
                           onChange={(e) => setSortBy(e.target.value as SortOption)}
-                          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-700 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                          className="ui-input py-3 font-semibold text-stone-700"
                         >
                           <option value="recommended">Top picks</option>
                           <option value="newest">Newest</option>
@@ -767,7 +768,7 @@ const BrowseListings: React.FC = () => {
 
                       {category === "service" && (
                         <div className="space-y-2">
-                          <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                          <label className="text-xs font-semibold uppercase tracking-widest text-stone-500">
                             Service type
                           </label>
                           <select
@@ -775,7 +776,7 @@ const BrowseListings: React.FC = () => {
                             onChange={(e) =>
                               setServiceSub(e.target.value as ServiceSubType)
                             }
-                            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                            className="ui-input py-3"
                           >
                             <option value="all">All services</option>
                             <option value="equipment">Equipment Hire</option>
@@ -785,7 +786,7 @@ const BrowseListings: React.FC = () => {
                       )}
 
                       <div className="space-y-2">
-                        <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                        <label className="text-xs font-semibold uppercase tracking-widest text-stone-500">
                           Category
                         </label>
                         <div className="flex gap-2 overflow-x-auto pb-1">
@@ -801,8 +802,8 @@ const BrowseListings: React.FC = () => {
                                 }}
                                 className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold border transition ${
                                   active
-                                    ? "border-emerald-600 bg-emerald-600 text-white shadow-sm"
-                                    : "border-slate-200 bg-white text-slate-700 hover:border-emerald-300 hover:bg-emerald-50"
+                                    ? "border-[#A0452E] bg-[#A0452E] text-white shadow-sm"
+                                    : "border-stone-200 bg-white text-stone-700 hover:border-[#E8A08E] hover:bg-[#FDF5F3]"
                                 }`}
                               >
                                 {pill.label}
@@ -812,10 +813,10 @@ const BrowseListings: React.FC = () => {
                         </div>
                       </div>
 
-                      <label className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700">
+                      <label className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-3 py-2 text-sm font-semibold text-stone-700">
                         <input
                           type="checkbox"
-                          className="h-4 w-4 accent-emerald-600"
+                          className="h-4 w-4 accent-[#A0452E]"
                           checked={verifiedOnly}
                           onChange={() => setVerifiedOnly((prev) => !prev)}
                         />
@@ -832,7 +833,7 @@ const BrowseListings: React.FC = () => {
                             setVerifiedOnly(false);
                             setSortBy("recommended");
                           }}
-                          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-white transition"
+                          className="w-full rounded-lg border border-stone-200 px-3 py-2 text-xs font-semibold text-stone-600 hover:bg-white transition"
                         >
                           Clear filters
                         </button>
@@ -847,13 +848,13 @@ const BrowseListings: React.FC = () => {
 
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div className="space-y-2">
-                        <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                        <label className="text-xs font-semibold uppercase tracking-widest text-stone-500">
                           County
                         </label>
                         <select
                           value={county}
                           onChange={(e) => setCounty(e.target.value)}
-                          className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                          className="ui-input py-3"
                         >
                           <option value="">All counties</option>
                           {[...kenyaCounties]
@@ -868,7 +869,7 @@ const BrowseListings: React.FC = () => {
 
                       {category === "service" ? (
                         <div className="space-y-2">
-                          <label className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                          <label className="text-xs font-semibold uppercase tracking-widest text-stone-500">
                             Service type
                           </label>
                           <select
@@ -876,7 +877,7 @@ const BrowseListings: React.FC = () => {
                             onChange={(e) =>
                               setServiceSub(e.target.value as ServiceSubType)
                             }
-                            className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                            className="ui-input py-3"
                           >
                             <option value="all">All services</option>
                             <option value="equipment">Equipment Hire</option>
@@ -890,7 +891,7 @@ const BrowseListings: React.FC = () => {
                   </div>
 
                   <div className="mt-5 flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+                    <span className="text-xs font-semibold uppercase tracking-widest text-stone-500">
                       Category
                     </span>
                     {categoryPills.map((pill) => {
@@ -905,8 +906,8 @@ const BrowseListings: React.FC = () => {
                           }}
                           className={`rounded-full px-4 py-2 text-sm font-semibold border transition ${
                             active
-                              ? "border-emerald-600 bg-emerald-600 text-white shadow-sm"
-                              : "border-slate-200 bg-white text-slate-700 hover:border-emerald-300 hover:bg-emerald-50"
+                              ? "border-[#A0452E] bg-[#A0452E] text-white shadow-sm"
+                              : "border-stone-200 bg-white text-stone-700 hover:border-[#E8A08E] hover:bg-[#FDF5F3]"
                           }`}
                         >
                           {pill.label}
@@ -915,11 +916,11 @@ const BrowseListings: React.FC = () => {
                     })}
                   </div>
 
-                  <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-500">
-                    <label className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700">
+                  <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-stone-500">
+                    <label className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-3 py-2 text-sm font-semibold text-stone-700">
                       <input
                         type="checkbox"
-                        className="h-4 w-4 accent-emerald-600"
+                        className="h-4 w-4 accent-[#A0452E]"
                         checked={verifiedOnly}
                         onChange={() => setVerifiedOnly((prev) => !prev)}
                       />
@@ -929,7 +930,7 @@ const BrowseListings: React.FC = () => {
 
                   {hasActiveFilters && (
                     <div className="mt-4 flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2 text-xs text-slate-500">
+                      <div className="flex items-center gap-2 text-xs text-stone-500">
                         <Filter className="h-4 w-4" />
                         Filters active
                       </div>
@@ -942,7 +943,7 @@ const BrowseListings: React.FC = () => {
                           setVerifiedOnly(false);
                           setSortBy("recommended");
                         }}
-                        className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition"
+                        className="rounded-lg border border-stone-200 px-3 py-2 text-xs font-semibold text-stone-600 hover:bg-stone-50 transition"
                       >
                         Clear filters
                       </button>
@@ -953,23 +954,23 @@ const BrowseListings: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 fade-up">
+          <div className="fade-up flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-stone-200 bg-white/92 px-4 py-3 text-sm text-stone-600 shadow-sm">
             <div>
-              <span className="font-semibold text-slate-900">
+              <span className="font-semibold text-stone-900">
                 {filtered.length} listing{filtered.length === 1 ? "" : "s"} found
               </span>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-stone-500">
                 {sortSummary}
               </p>
             </div>
             <div className={`flex items-center gap-2 ${isCompact ? "hidden" : ""}`}>
-              <label className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              <label className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
                 Sort
               </label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                className="ui-input py-2 text-sm font-semibold text-stone-700"
               >
                 <option value="recommended">Top picks</option>
                 <option value="newest">Newest</option>
@@ -985,9 +986,9 @@ const BrowseListings: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 pb-16 space-y-6">
         {loading && (
           <>
-            <div className="text-center py-6 bg-white rounded-2xl border border-dashed border-slate-200">
-              <div className="inline-flex items-center gap-2 text-slate-600 text-sm font-medium">
-                <span className="inline-flex h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-emerald-600" />
+            <div className="rounded-3xl border border-dashed border-stone-200 bg-white py-6 text-center">
+              <div className="inline-flex items-center gap-2 text-sm font-medium text-stone-600">
+                <span className="inline-flex h-5 w-5 animate-spin rounded-full border-2 border-stone-200 border-t-[#A0452E]" />
                 Loading listings...
               </div>
             </div>
@@ -995,17 +996,17 @@ const BrowseListings: React.FC = () => {
               {Array.from({ length: 6 }).map((_, index) => (
                 <div
                   key={index}
-                  className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm"
+                  className="overflow-hidden rounded-3xl border border-stone-100 bg-white shadow-sm"
                 >
-                  <div className="h-52 sm:h-56 animate-pulse bg-slate-100" />
+                  <div className="h-52 sm:h-56 animate-pulse bg-stone-100" />
                   <div className="p-4 space-y-3">
-                    <div className="h-4 w-2/5 rounded bg-slate-100 animate-pulse" />
-                    <div className="h-5 w-4/5 rounded bg-slate-100 animate-pulse" />
-                    <div className="h-4 w-full rounded bg-slate-100 animate-pulse" />
-                    <div className="h-4 w-3/4 rounded bg-slate-100 animate-pulse" />
+                    <div className="h-4 w-2/5 rounded bg-stone-100 animate-pulse" />
+                    <div className="h-5 w-4/5 rounded bg-stone-100 animate-pulse" />
+                    <div className="h-4 w-full rounded bg-stone-100 animate-pulse" />
+                    <div className="h-4 w-3/4 rounded bg-stone-100 animate-pulse" />
                     <div className="grid grid-cols-2 gap-2 pt-2">
-                      <div className="h-10 rounded-xl bg-slate-100 animate-pulse" />
-                      <div className="h-10 rounded-xl bg-slate-100 animate-pulse" />
+                      <div className="h-10 rounded-xl bg-stone-100 animate-pulse" />
+                      <div className="h-10 rounded-xl bg-stone-100 animate-pulse" />
                     </div>
                   </div>
                 </div>
@@ -1015,14 +1016,14 @@ const BrowseListings: React.FC = () => {
         )}
 
         {!loading && filtered.length === 0 && (
-          <div className="text-center py-16 bg-white rounded-3xl border border-dashed border-slate-200">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
-              <Search className="h-5 w-5 text-slate-400" />
+          <div className="rounded-3xl border border-dashed border-stone-200 bg-white py-16 text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-stone-100">
+              <Search className="h-5 w-5 text-stone-400" />
             </div>
-            <h3 className="text-2xl font-semibold text-slate-800 mb-2">
+            <h3 className="font-display mb-2 text-2xl font-semibold text-stone-800">
               {hasActiveFilters ? "No listings found" : "No listings yet"}
             </h3>
-            <p className="text-slate-600 mb-6 max-w-md mx-auto">
+            <p className="mx-auto mb-6 max-w-md text-stone-600">
               {hasActiveFilters
                 ? "Try a different search term, county, or category."
                 : "No listings are available right now. Check back soon or post your own listing."}
@@ -1055,17 +1056,17 @@ const BrowseListings: React.FC = () => {
         )}
 
         {!loading && !trendingLoading && trendingItems.length > 0 && (
-          <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+          <section className="rounded-3xl border border-stone-200 bg-white p-4 shadow-sm">
             <div className="mb-3 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#A0452E]">
                   Trending now
                 </p>
-                <h2 className="mt-1 text-xl font-semibold text-slate-900">
+                <h2 className="font-display mt-1 text-xl font-semibold text-stone-900">
                   Listings buyers are engaging with most
                 </h2>
               </div>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-stone-500">
                 Based on views, saves, and recent inquiries.
               </p>
             </div>
@@ -1075,9 +1076,9 @@ const BrowseListings: React.FC = () => {
                 <Link
                   key={`trending-${card.id}`}
                   to={`/listings/${card.id}`}
-                  className="min-w-[250px] max-w-[280px] flex-[0_0_270px] overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:shadow-md lg:flex-[0_0_255px] lg:max-w-[255px]"
+                  className="card-lift min-w-[250px] max-w-[280px] flex-[0_0_270px] overflow-hidden rounded-3xl border border-stone-200 bg-white transition lg:flex-[0_0_255px] lg:max-w-[255px]"
                 >
-                  <div className="h-36 overflow-hidden bg-slate-100">
+                  <div className="h-36 overflow-hidden bg-stone-100">
                     {card.image ? (
                       <img
                         src={getOptimizedImageUrl(card.image, {
@@ -1090,7 +1091,7 @@ const BrowseListings: React.FC = () => {
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <div className="flex h-full items-center justify-center text-sm font-medium text-slate-400">
+                      <div className="flex h-full items-center justify-center text-sm font-medium text-stone-400">
                         No image available
                       </div>
                     )}
@@ -1098,55 +1099,55 @@ const BrowseListings: React.FC = () => {
 
                   <div className="flex flex-col gap-2.5 p-3">
                     <div className="flex items-start justify-between gap-2">
-                      <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
+                        <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[11px] font-semibold text-stone-700">
                         {card.typeLabel}
                       </span>
                       {card.priceLabel && (
-                        <span className="text-xs font-semibold text-emerald-700">
+                        <span className="text-xs font-semibold text-[#A0452E]">
                           {card.priceLabel}
                         </span>
                       )}
                     </div>
 
                     <div>
-                      <h3 className="line-clamp-2 text-sm font-semibold text-slate-900">
+                      <h3 className="line-clamp-2 text-sm font-semibold text-stone-900">
                         {card.title}
                       </h3>
-                      <p className="mt-1 line-clamp-2 text-xs text-slate-500">
+                      <p className="mt-1 line-clamp-2 text-xs text-stone-500">
                         {card.description}
                       </p>
                     </div>
 
-                    <div className="space-y-1 text-[11px] text-slate-500">
+                    <div className="space-y-1 text-[11px] text-stone-500">
                       <div className="flex flex-wrap gap-2">
                         {card.verified && (
-                          <span className="rounded-full bg-emerald-50 px-2 py-1 font-semibold text-emerald-700">
+                          <span className="rounded-full bg-[#FDF5F3] px-2 py-1 font-semibold text-[#A0452E]">
                             Verified
                           </span>
                         )}
-                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 font-semibold text-slate-700">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-2 py-1 font-semibold text-stone-700">
                           <Truck className="h-3 w-3" />
                           {getDeliveryScopeLabel(card.deliveryScope)}
                         </span>
                       </div>
                       {card.ownerName && (
-                        <p className="line-clamp-1 text-[11px] text-slate-500">
+                        <p className="line-clamp-1 text-[11px] text-stone-500">
                           By {card.ownerName}
                         </p>
                       )}
                     </div>
 
-                    <div className="grid grid-cols-3 gap-1.5 border-t border-slate-100 pt-2.5 text-[10px] font-semibold text-slate-600 lg:text-[9px]">
-                      <span className="inline-flex items-center justify-center gap-1 rounded-lg bg-slate-50 px-2 py-1.5 lg:px-1.5 lg:gap-0.5 whitespace-nowrap">
-                        <Eye className="h-3.5 w-3.5 text-slate-400" />
+                    <div className="grid grid-cols-3 gap-1.5 border-t border-stone-100 pt-2.5 text-[10px] font-semibold text-stone-600 lg:text-[9px]">
+                      <span className="inline-flex items-center justify-center gap-1 rounded-lg bg-stone-50 px-2 py-1.5 lg:px-1.5 lg:gap-0.5 whitespace-nowrap">
+                        <Eye className="h-3.5 w-3.5 text-stone-400" />
                         {card.engagement.views} views
                       </span>
-                      <span className="inline-flex items-center justify-center gap-1 rounded-lg bg-slate-50 px-2 py-1.5 lg:px-1.5 lg:gap-0.5 whitespace-nowrap">
-                        <Bookmark className="h-3.5 w-3.5 text-slate-400" />
+                      <span className="inline-flex items-center justify-center gap-1 rounded-lg bg-stone-50 px-2 py-1.5 lg:px-1.5 lg:gap-0.5 whitespace-nowrap">
+                        <Bookmark className="h-3.5 w-3.5 text-stone-400" />
                         {card.engagement.saves} saves
                       </span>
-                      <span className="inline-flex items-center justify-center gap-1 rounded-lg bg-slate-50 px-2 py-1.5 lg:px-1.5 lg:gap-0.5 whitespace-nowrap text-[9px] lg:text-[8px]">
-                        <MessageCircle className="h-3.5 w-3.5 text-slate-400" />
+                      <span className="inline-flex items-center justify-center gap-1 rounded-lg bg-stone-50 px-2 py-1.5 lg:px-1.5 lg:gap-0.5 whitespace-nowrap text-[9px] lg:text-[8px]">
+                        <MessageCircle className="h-3.5 w-3.5 text-stone-400" />
                         {card.engagement.recentInquiries} reach-outs
                       </span>
                     </div>
@@ -1167,21 +1168,21 @@ const BrowseListings: React.FC = () => {
             };
             const marketTrustScore = Math.round(getMarketTrustScore(toTrustInput(card)));
             const categoryColors: Record<Category, string> = {
-              all: "bg-slate-100 text-slate-700",
-              produce: "bg-emerald-50 text-emerald-700",
-              livestock: "bg-emerald-50 text-emerald-700",
-              inputs: "bg-emerald-50 text-emerald-700",
-              service: "bg-emerald-50 text-emerald-700",
+              all: "bg-stone-100 text-stone-700",
+              produce: "bg-[#FDF5F3] text-[#A0452E]",
+              livestock: "bg-[#FDF5F3] text-[#A0452E]",
+              inputs: "bg-[#FFF9EC] text-[#8A5A12]",
+              service: "bg-[#F1F7F2] text-[#1A7A4A]",
             };
             const badgeColor = categoryColors[card.category] || categoryColors.produce;
 
             return (
               <div
                 key={card.id}
-                className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg fade-up"
+                className="card-lift group relative flex flex-col overflow-hidden rounded-[2rem] border border-stone-200 bg-white shadow-sm fade-up"
                 style={{ animationDelay: `${Math.min(index * 40, 360)}ms` }}
               >
-                <div className="relative h-52 sm:h-56 bg-slate-100">
+                <div className="relative h-52 sm:h-56 bg-stone-100">
                   {card.image ? (
                     <img
                       src={getOptimizedImageUrl(card.image, {
@@ -1194,7 +1195,7 @@ const BrowseListings: React.FC = () => {
                       className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="flex h-full items-center justify-center text-slate-400 text-sm font-medium">
+                    <div className="flex h-full items-center justify-center text-stone-400 text-sm font-medium">
                       No image available
                     </div>
                   )}
@@ -1202,84 +1203,84 @@ const BrowseListings: React.FC = () => {
 
                   <div className="absolute top-3 left-3 inline-flex items-center gap-2 flex-wrap max-w-[calc(100%-1.5rem)]">
                     {card.isDemo && (
-                      <span className="rounded-full bg-slate-900/80 text-white text-[11px] font-semibold px-2.5 py-1 whitespace-nowrap">
+                      <span className="rounded-full bg-stone-900/80 px-2.5 py-1 text-[11px] font-semibold whitespace-nowrap text-white">
                         Sample listing
                       </span>
                     )}
                     {card.boosted && (
-                      <span className="rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-semibold px-2.5 py-1 whitespace-nowrap">
+                      <span className="rounded-full bg-[#FDF5F3] text-[#A0452E] text-[11px] font-semibold px-2.5 py-1 whitespace-nowrap">
                         Boosted
                       </span>
                     )}
                     {card.verified && (
-                      <span className="rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-semibold px-2.5 py-1 whitespace-nowrap">
+                      <span className="rounded-full bg-[#FDF5F3] text-[#A0452E] text-[11px] font-semibold px-2.5 py-1 whitespace-nowrap">
                         Verified
                       </span>
                     )}
                   </div>
 
                   {card.priceLabel && (
-                    <div className="absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1 text-sm font-semibold text-emerald-700">
+                    <div className="absolute bottom-3 left-3 rounded-full bg-white/95 px-3 py-1 text-sm font-semibold text-[#A0452E] shadow-sm">
                       {card.priceLabel}
                     </div>
                   )}
                 </div>
 
                 <div className="p-4 flex flex-col gap-3 flex-1">
-                  <div className="flex items-center justify-between gap-2 text-xs font-semibold text-slate-500">
+                  <div className="flex items-center justify-between gap-2 text-xs font-semibold text-stone-500">
                     <span className={`rounded-full px-3 py-1 ${badgeColor}`}>
                       {card.typeLabel}
                     </span>
                     <div className="flex items-center gap-2">
                       {marketTrustScore > 0 && (
-                        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
+                        <span className="rounded-full bg-[#FFF9EC] px-2.5 py-1 text-[11px] font-semibold text-[#8A5A12]">
                           Trust score {marketTrustScore}
                         </span>
                       )}
-                      {card.paid && <span className="text-emerald-600">Priority</span>}
+                      {card.paid && <span className="text-[#A0452E]">Priority</span>}
                     </div>
                   </div>
 
-                  <h3 className="text-lg font-semibold text-slate-900 line-clamp-2 leading-tight">
+                  <h3 className="text-lg font-semibold text-stone-900 line-clamp-2 leading-tight">
                     {card.title}
                   </h3>
 
-                  <p className="text-sm text-slate-600 line-clamp-2">
+                  <p className="text-sm text-stone-600 line-clamp-2">
                     {card.description || "No description provided."}
                   </p>
 
-                  <div className="pt-2 border-t border-slate-100">
+                  <div className="pt-2 border-t border-stone-100">
                     {card.ownerId && card.ownerName && (
                       <Link
                         to={`/sellers/${card.ownerId}`}
-                        className="inline-flex items-center text-xs font-semibold text-emerald-700 hover:text-emerald-800"
+                        className="inline-flex items-center text-xs font-semibold text-[#A0452E] hover:text-[#8B3525]"
                       >
                         By {card.ownerName}
                       </Link>
                     )}
-                    <p className="text-xs text-slate-500 font-medium">
+                    <p className="text-xs text-stone-500 font-medium">
                       Location: {card.locationLabel || "Location pending"}
                     </p>
-                    <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
+                    <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-stone-100 px-2.5 py-1 text-[11px] font-semibold text-stone-700">
                       <Truck className="h-3.5 w-3.5" />
                       {getDeliveryScopeLabel(card.deliveryScope)}
                     </p>
                     {(card.ownerResponseTime || card.ownerLastActive) && (
-                      <p className="mt-1 text-xs text-slate-500">
-                        {[card.ownerResponseTime, card.ownerLastActive].filter(Boolean).join(" - ")}
+                      <p className="mt-1 text-xs text-stone-500">
+                        {[card.ownerResponseTime, card.ownerLastActive].filter(Boolean).join(" · ")}
                       </p>
                     )}
-                    <div className="mt-2 flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-600">
+                    <div className="mt-2 flex flex-wrap items-center gap-3 text-xs font-semibold text-stone-600">
                       <span className="inline-flex items-center gap-1">
-                        <Eye className="h-3.5 w-3.5 text-slate-400" />
+                        <Eye className="h-3.5 w-3.5 text-stone-400" />
                         {engagement.views} views
                       </span>
                       <span className="inline-flex items-center gap-1">
-                        <Bookmark className="h-3.5 w-3.5 text-slate-400" />
+                        <Bookmark className="h-3.5 w-3.5 text-stone-400" />
                         {engagement.saves} saves
                       </span>
                       <span className="inline-flex items-center gap-1 whitespace-nowrap">
-                        <MessageCircle className="h-3.5 w-3.5 text-slate-400" />
+                        <MessageCircle className="h-3.5 w-3.5 text-stone-400" />
                         {engagement.reachOuts} reach-outs
                       </span>
                     </div>
@@ -1288,7 +1289,7 @@ const BrowseListings: React.FC = () => {
                   <div className="mt-3 flex gap-2">
                     <Link
                       to={`/listings/${card.id}`}
-                      className="flex-1 min-h-[44px] inline-flex items-center justify-center text-center rounded-xl bg-emerald-600 px-3 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition shadow-sm"
+                      className="ui-btn-primary flex-1 px-3 py-2.5 text-sm"
                     >
                       View details
                     </Link>
@@ -1296,14 +1297,14 @@ const BrowseListings: React.FC = () => {
                       user ? (
                         <a
                           href={`tel:${normalizeKenyanPhone(card.contact)}`}
-                          className="flex-1 min-h-[44px] inline-flex items-center justify-center text-center rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
+                          className="ui-btn-ghost flex-1 px-3 py-2.5 text-sm"
                         >
                           Call
                         </a>
                       ) : (
                         <Link
                           to="/login"
-                          className="flex-1 min-h-[44px] inline-flex items-center justify-center text-center rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
+                          className="ui-btn-ghost flex-1 px-3 py-2.5 text-sm"
                         >
                           Call
                         </Link>
@@ -1318,25 +1319,25 @@ const BrowseListings: React.FC = () => {
         )}
 
         {!loading && filtered.length > 0 && (
-          <div className="text-center py-8 text-slate-500 text-sm">
+          <div className="py-8 text-center text-sm text-stone-500">
             Showing {filtered.length} of {cards.length} listings
           </div>
         )}
 
-        <div className="mt-16 rounded-3xl border border-emerald-100 bg-emerald-50/40 p-8 shadow-sm">
+        <div className="mt-16 rounded-3xl border border-stone-200 bg-white/88 p-8 shadow-sm">
           <div className="grid gap-6 md:grid-cols-[1.2fr_0.8fr] items-center">
             <div>
-              <h3 className="text-2xl font-serif font-semibold text-slate-900 mb-3">
+              <h3 className="font-display mb-3 text-2xl font-semibold text-stone-900">
                 Looking to sell instead?
               </h3>
-              <p className="text-slate-600">
+              <p className="text-stone-600">
                 Find buyers actively looking for what you offer. Browse requests from customers across Kenya who need your products or services.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 md:justify-end">
               <Link
                 to="/request"
-                className="inline-flex justify-center items-center rounded-xl bg-slate-900 px-6 py-3 text-white font-semibold hover:bg-slate-800 transition"
+                className="ui-btn-primary px-6 py-3"
               >
                 View buy requests
               </Link>
@@ -1346,7 +1347,7 @@ const BrowseListings: React.FC = () => {
                     ? "/create-listing?compact=1"
                     : `/login?mode=signup&next=${encodeURIComponent("/create-listing?compact=1")}`
                 }
-                className="inline-flex justify-center items-center rounded-xl border border-slate-300 px-6 py-3 text-slate-700 font-semibold hover:bg-white transition"
+                className="ui-btn-secondary px-6 py-3"
               >
                 Post your products
               </Link>

@@ -198,10 +198,14 @@ const fetchLegacyListingFallback = async (id: string) => {
 };
 
 // Type-specific detail section components
+const detailSectionClass = "mb-6 rounded-3xl border border-stone-200 bg-white p-5 shadow-sm";
+const detailHeadingClass = "mb-3 font-display text-lg font-semibold text-stone-900";
+const detailBodyClass = "space-y-2 text-sm leading-6 text-stone-700";
+
 const LandDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
-  <div className="bg-gray-100 p-4 rounded-lg mb-6">
-    <h2 className="font-semibold mb-3">Land Details</h2>
-    <div className="space-y-2">
+  <div className={detailSectionClass}>
+    <h2 className={detailHeadingClass}>Land Details</h2>
+    <div className={detailBodyClass}>
       <p><strong>Size:</strong> {listing?.size ?? '—'} {listing?.size ? 'acres' : ''}</p>
       <p><strong>Soil Type:</strong> {listing?.soilType || '—'}</p>
       <p><strong>Water Availability:</strong> {listing?.waterAvailability || '—'}</p>
@@ -216,9 +220,9 @@ const LandDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
 );
 
 const EquipmentDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
-  <div className="bg-blue-50 p-4 rounded-lg mb-6">
-    <h2 className="font-semibold mb-3 text-blue-900">Equipment & Services</h2>
-    <div className="space-y-2">
+  <div className={detailSectionClass}>
+    <h2 className={detailHeadingClass}>Equipment and Services</h2>
+    <div className={detailBodyClass}>
       <p><strong>Services Available:</strong> {Array.isArray(listing.services) ? listing.services.join(', ') : listing.services || '—'}</p>
       {(listing.pricing || listing.price) && <p><strong>Pricing:</strong> {listing.pricing || (typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : listing.price)}</p>}
       {typeof listing.operatorIncluded !== 'undefined' && <p><strong>Operator Included:</strong> {listing.operatorIncluded ? 'Yes' : 'No'}</p>}
@@ -230,9 +234,9 @@ const EquipmentDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
 );
 
 const ProfessionalDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
-  <div className="bg-purple-50 p-4 rounded-lg mb-6">
-    <h2 className="font-semibold mb-3 text-purple-900">Professional Services</h2>
-    <div className="space-y-2">
+  <div className={detailSectionClass}>
+    <h2 className={detailHeadingClass}>Professional Services</h2>
+    <div className={detailBodyClass}>
       <p><strong>Services Offered:</strong> {Array.isArray(listing.services) ? listing.services.join(', ') : listing.services || '—'}</p>
       {listing.experience && <p><strong>Years of Experience:</strong> {listing.experience}</p>}
       {listing.qualifications && <p><strong>Qualifications:</strong> {listing.qualifications}</p>}
@@ -269,9 +273,9 @@ const AgrovetDetailsSection: React.FC<{ listing: any }> = ({ listing }) => {
   };
 
   return (
-    <div className="bg-green-50 p-4 rounded-lg mb-6">
-      <h2 className="font-semibold mb-3 text-green-900">Agrovet Details</h2>
-      <div className="space-y-2">
+    <div className={detailSectionClass}>
+      <h2 className={detailHeadingClass}>Agrovet Details</h2>
+      <div className={detailBodyClass}>
         <p><strong>Products/Services:</strong> {renderServices()}</p>
         {(listing.pricing || listing.price) && <p><strong>Pricing Info:</strong> {listing.pricing || (typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : listing.price)}</p>}
         {listing.specialization && <p><strong>Specialization:</strong> {listing.specialization}</p>}
@@ -283,9 +287,9 @@ const AgrovetDetailsSection: React.FC<{ listing: any }> = ({ listing }) => {
 };
 
 const ProductDetailsSection: React.FC<{ listing: any }> = ({ listing }) => (
-  <div className="bg-orange-50 p-4 rounded-lg mb-6">
-    <h2 className="font-semibold mb-3 text-orange-900">Product Information</h2>
-    <div className="space-y-2">
+  <div className={detailSectionClass}>
+    <h2 className={detailHeadingClass}>Product Information</h2>
+    <div className={detailBodyClass}>
       <p><strong>Category:</strong> {listing.category || listing.type || '—'}</p>
       {listing.price && <p><strong>Price per Unit:</strong> {typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : listing.price}</p>}
       {listing.unit && <p><strong>Unit:</strong> {listing.unit}</p>}
@@ -892,13 +896,13 @@ const ListingDetails: React.FC = () => {
 
   if (!listing) {
     return (
-      <div className="p-4 text-center">
-        <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-bold text-red-600 mb-2">Listing Not Found</h2>
-          <p className="text-gray-600 mb-4">This listing may have been removed or is no longer available.</p>
+      <div className="bg-[#FAF7F2] p-4 text-center">
+        <div className="mx-auto max-w-md rounded-3xl border border-stone-200 bg-white p-6 shadow-sm">
+          <h2 className="mb-2 font-display text-xl font-bold text-stone-900">Listing Not Found</h2>
+          <p className="mb-4 text-stone-600">This listing may have been removed or is no longer available.</p>
           <button
             onClick={() => navigate('/browse')}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+            className="ui-btn-primary px-6 py-2"
           >
             Back to Browse
           </button>
@@ -1071,42 +1075,44 @@ const ListingDetails: React.FC = () => {
   };
 
   return (
-    <div className="p-4 max-w-5xl mx-auto">
+    <div className="mx-auto max-w-6xl bg-[#FAF7F2] px-4 py-5 text-stone-900">
       <div className="mb-4">
         <button
           type="button"
           onClick={handleBackToListings}
-          className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+          className="inline-flex items-center rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-stone-700 transition hover:border-stone-300 hover:bg-stone-50"
         >
-          ← Back to listings
+          Back to listings
         </button>
       </div>
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           {/* Title + price row - improved layout */}
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+          <div className="mb-4 rounded-[2rem] border border-stone-200 bg-white p-5 shadow-sm sm:p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              <h1 className="mb-2 font-display text-3xl font-semibold text-stone-900">
                 {listing.title || listing.name}
               </h1>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-stone-600">
                 {[listing.location?.county, listing.location?.constituency, listing.location?.ward].filter(Boolean).join(', ') || 'Location not specified'}
               </p>
             </div>
-            <div className="text-right">
-              <p className="text-xs text-gray-500 mb-1">Price</p>
-              <p className="text-2xl font-extrabold text-green-700">
+            <div className="rounded-2xl border border-[#F3C9BE] bg-[#FFF8F1] px-4 py-3 text-left sm:text-right">
+              <p className="mb-1 text-xs uppercase tracking-[0.18em] text-stone-500">Price</p>
+              <p className="text-2xl font-extrabold text-[#A0452E]">
                 {listing.price || listing.pricing ? (
                   typeof listing.price === 'number' ? `KES ${listing.price.toLocaleString()}` : (listing.price || listing.pricing)
                 ) : 'Contact for price'}
               </p>
             </div>
           </div>
+          </div>
 
           {/* Image gallery with main image and selectable thumbnails */}
           {Array.isArray(listing.images) && listing.images.length > 0 && (
-            <div className="mb-6">
-              <div className="rounded-lg overflow-hidden bg-gray-100 mb-3">
+            <div className="mb-6 rounded-[2rem] border border-stone-200 bg-white p-4 shadow-sm">
+              <div className="mb-3 overflow-hidden rounded-[1.5rem] bg-stone-100">
                 <img
                   src={getOptimizedImageUrl(mainImage || listing.images[0], {
                     width: 1600,
@@ -1114,7 +1120,7 @@ const ListingDetails: React.FC = () => {
                     fit: "limit",
                   })}
                   alt="Listing main"
-                  className="w-full h-96 object-cover"
+                  className="h-96 w-full object-cover"
                   onError={handleImageError}
                 />
               </div>
@@ -1123,8 +1129,8 @@ const ListingDetails: React.FC = () => {
                   <button
                     key={i}
                     onClick={() => setMainImage(img)}
-                    className={`h-20 rounded overflow-hidden border-2 transition ${
-                      mainImage === img ? 'border-green-600' : 'border-gray-200 hover:border-gray-400'
+                    className={`h-20 overflow-hidden rounded-2xl border-2 transition ${
+                      mainImage === img ? 'border-[#A0452E]' : 'border-stone-200 hover:border-[#E8A08E]'
                     }`}
                     >
                       <img 
@@ -1144,10 +1150,10 @@ const ListingDetails: React.FC = () => {
           )}
 
           {/* Quick action CTAs */}
-          <div className="flex flex-wrap gap-3 mb-6">
+          <div className="mb-6 flex flex-wrap gap-3">
             <button
               onClick={() => void handleShare()}
-              className="px-5 py-2 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition"
+              className="ui-btn-ghost px-5 py-2"
             >
               Share
             </button>
@@ -1175,7 +1181,7 @@ const ListingDetails: React.FC = () => {
                   // Handle toggle error
                 }
               }}
-              className="px-5 py-2 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition"
+              className="ui-btn-ghost px-5 py-2"
             >
               {saved ? 'Saved' : 'Save'}
             </button>
@@ -1183,41 +1189,43 @@ const ListingDetails: React.FC = () => {
               <button
                 onClick={handleMarkSold}
                 disabled={markingSold}
-                className="px-5 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 disabled:opacity-60 transition"
+                className="rounded-xl bg-red-600 px-5 py-2 font-semibold text-white transition hover:bg-red-700 disabled:opacity-60"
               >
                 {markingSold ? 'Marking...' : 'Mark as Sold'}
               </button>
             )}
             {listing.sold && (
-              <span className="px-4 py-2 bg-red-100 text-red-700 rounded-lg font-semibold text-sm">
+              <span className="rounded-xl bg-red-100 px-4 py-2 text-sm font-semibold text-red-700">
                 Sold {hoursUntilHide !== null && hoursUntilHide > 0 && `- hides in ${Math.ceil(hoursUntilHide)}h`}
               </span>
             )}
           </div>
           {shareFeedback && (
-            <p className="mb-4 text-sm font-medium text-emerald-700">{shareFeedback}</p>
+            <p className="mb-4 text-sm font-medium text-[#A0452E]">{shareFeedback}</p>
           )}
           {soldMessage && (
             <p className={`text-sm mb-4 ${soldMessage.startsWith('Marked') ? 'text-green-700' : 'text-red-600'}`}>{soldMessage}</p>
           )}
 
-          <p className="text-gray-700 mb-6">{listing.description}</p>
+          <div className="mb-6 rounded-3xl border border-stone-200 bg-white p-5 shadow-sm">
+            <p className="text-stone-700">{listing.description}</p>
+          </div>
 
           {/* Type-specific details section */}
           {renderDetailsSection(listingType, listing)}
 
           {userRatings?.aggregate?.count > 0 && (
-            <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
+            <div className="mb-6 rounded-3xl border border-[#F4D89E] bg-[#FFF9EC] p-5 shadow-sm">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#8A5A12]">
                     Buyer reviews
                   </p>
-                  <h2 className="mt-1 text-lg font-semibold text-slate-900">
+                  <h2 className="mt-1 font-display text-lg font-semibold text-stone-900">
                     {userRatings.aggregate.average.toFixed(1)} stars from {userRatings.aggregate.count} review
                     {userRatings.aggregate.count === 1 ? "" : "s"}
                   </h2>
-                  <p className="mt-1 text-sm text-slate-600">
+                  <p className="mt-1 text-sm text-stone-600">
                     Recent feedback for {owner.fullName || owner.name || "this seller"}.
                   </p>
                 </div>
@@ -1225,14 +1233,14 @@ const ListingDetails: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setShowReviewsModal(true)}
-                    className="rounded-lg border border-amber-300 bg-white px-4 py-2 text-sm font-semibold text-amber-800 hover:bg-amber-100"
+                    className="ui-btn-secondary px-4 py-2 text-sm"
                   >
                     Read all reviews
                   </button>
                   {owner._id && (
                     <Link
                       to={`/sellers/${owner._id}`}
-                      className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                      className="ui-btn-primary px-4 py-2 text-sm"
                     >
                       Seller profile
                     </Link>
@@ -1244,13 +1252,13 @@ const ListingDetails: React.FC = () => {
                 {sellerReviews.slice(0, 2).map((review, index) => (
                   <div
                     key={review._id || `review-preview-${index}`}
-                    className="rounded-lg border border-white bg-white/80 p-3"
+                    className="rounded-2xl border border-white/80 bg-white/90 p-3"
                   >
                     <div className="mb-2 flex items-center justify-between gap-2">
-                      <p className="text-sm font-semibold text-slate-900">
+                      <p className="text-sm font-semibold text-stone-900">
                         {review.raterId?.fullName || review.raterId?.name || "Buyer"}
                       </p>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-stone-500">
                         {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : ""}
                       </p>
                     </div>
@@ -1261,14 +1269,14 @@ const ListingDetails: React.FC = () => {
                           className={`h-4 w-4 ${
                             star <= Math.round(review.score || 0)
                               ? "fill-yellow-400 text-yellow-500"
-                              : "fill-transparent text-gray-300"
+                              : "fill-transparent text-stone-300"
                           }`}
                           strokeWidth={2}
                           aria-hidden="true"
                         />
                       ))}
                     </div>
-                    <p className="text-sm text-slate-700">
+                    <p className="text-sm text-stone-700">
                       {review.review || "Rated the seller without a written review."}
                     </p>
                   </div>
@@ -1281,20 +1289,20 @@ const ListingDetails: React.FC = () => {
           {isAdmin && <AdminControlsSection listing={listing} onUpdate={fetchListing} />}
 
           {moreFromSeller.length > 0 && (
-            <div className="mb-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="mb-6 rounded-3xl border border-stone-200 bg-white p-5 shadow-sm">
               <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
                     More from this seller
                   </p>
-                  <h2 className="mt-1 text-lg font-semibold text-slate-900">
+                  <h2 className="mt-1 font-display text-lg font-semibold text-stone-900">
                     More active listings from {owner.fullName || owner.name || "this seller"}
                   </h2>
                 </div>
                 {owner._id && (
                   <Link
                     to={`/sellers/${owner._id}`}
-                    className="text-sm font-semibold text-emerald-700 hover:text-emerald-800"
+                    className="text-sm font-semibold text-[#A0452E] hover:text-[#8B3525]"
                   >
                     View full seller profile
                   </Link>
@@ -1306,9 +1314,9 @@ const ListingDetails: React.FC = () => {
                   <Link
                     key={item.id}
                     to={`/listings/${item.id}`}
-                    className="overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:shadow-md"
+                    className="card-lift overflow-hidden rounded-3xl border border-stone-200 bg-white transition"
                   >
-                    <div className="h-32 overflow-hidden bg-slate-100">
+                    <div className="h-32 overflow-hidden bg-stone-100">
                       {item.image ? (
                         <img
                           src={getOptimizedImageUrl(item.image, {
@@ -1321,22 +1329,22 @@ const ListingDetails: React.FC = () => {
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <div className="flex h-full items-center justify-center text-xs font-medium text-slate-400">
+                        <div className="flex h-full items-center justify-center text-xs font-medium text-stone-400">
                           No image
                         </div>
                       )}
                     </div>
                     <div className="space-y-2 p-3">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
+                        <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[11px] font-semibold text-stone-700">
                           {item.typeLabel}
                         </span>
                         {item.priceLabel && (
-                          <span className="text-xs font-semibold text-emerald-700">{item.priceLabel}</span>
+                          <span className="text-xs font-semibold text-[#A0452E]">{item.priceLabel}</span>
                         )}
                       </div>
-                      <h3 className="line-clamp-2 text-sm font-semibold text-slate-900">{item.title}</h3>
-                      <p className="line-clamp-2 text-xs text-slate-500">
+                      <h3 className="line-clamp-2 text-sm font-semibold text-stone-900">{item.title}</h3>
+                      <p className="line-clamp-2 text-xs text-stone-500">
                         {item.locationLabel || item.county || "Location pending"}
                       </p>
                     </div>
@@ -1351,14 +1359,14 @@ const ListingDetails: React.FC = () => {
               <h2 className="font-semibold mb-2">Map Location</h2>
 
               {!showMap ? (
-              <div className="rounded-lg border border-gray-200 bg-white p-4">
-                <p className="text-sm text-gray-600">
+              <div className="rounded-3xl border border-stone-200 bg-white p-4">
+                <p className="text-sm text-stone-600">
                   Load the map only when you need directions.
                 </p>
                 <button
                   type="button"
                   onClick={() => setShowMap(true)}
-                  className="mt-3 inline-flex items-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
+                  className="ui-btn-primary mt-3 px-4 py-2 text-sm"
                 >
                   Load map
                 </button>
@@ -1366,18 +1374,18 @@ const ListingDetails: React.FC = () => {
             ) : (
               <Suspense
                 fallback={
-                  <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-600">
+                  <div className="rounded-3xl border border-stone-200 bg-white p-4 text-sm text-stone-600">
                     Loading map...
                   </div>
                 }
               >
                 <GoogleMapsLoader>
-                  <div className="rounded-lg overflow-hidden shadow-md border">
+                  <div className="overflow-hidden rounded-3xl border border-stone-200 shadow-sm">
                     <ListingMap lat={coords.lat} lng={coords.lng} />
                   </div>
                 </GoogleMapsLoader>
 
-                <p className="text-gray-500 text-xs mt-2">
+                <p className="mt-2 text-xs text-stone-500">
                   Coordinates: {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
                 </p>
 
@@ -1385,7 +1393,7 @@ const ListingDetails: React.FC = () => {
                   href={`https://www.google.com/maps?q=${coords.lat},${coords.lng}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block mt-3 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
+                  className="ui-btn-primary mt-3 inline-flex px-4 py-2 text-sm"
                 >
                   Open in Google Maps
                 </a>
@@ -1398,9 +1406,9 @@ const ListingDetails: React.FC = () => {
         {/* Sidebar with seller + chat */}
         <div className="space-y-4">
           {/* Seller card - improved with avatar and verification */}
-          <div className="bg-white p-4 rounded-lg border shadow-sm">
+          <div className="rounded-[2rem] border border-stone-200 bg-white p-5 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-lg font-bold text-gray-700 overflow-hidden">
+              <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-stone-200 text-lg font-bold text-stone-700">
                 {owner.profilePicture ? (
                   <img
                     src={getOptimizedImageUrl(owner.profilePicture, {
@@ -1420,15 +1428,15 @@ const ListingDetails: React.FC = () => {
                 {owner._id ? (
                   <Link
                     to={`/sellers/${owner._id}`}
-                    className="font-semibold text-gray-900 hover:text-emerald-700"
+                    className="font-semibold text-stone-900 hover:text-[#A0452E]"
                   >
                     {owner.fullName || owner.name || 'Seller'}
                   </Link>
                 ) : (
-                  <h3 className="font-semibold text-gray-900">{owner.fullName || owner.name || 'Seller'}</h3>
+                  <h3 className="font-semibold text-stone-900">{owner.fullName || owner.name || 'Seller'}</h3>
                 )}
                 {owner.isVerified && (
-                  <span className="inline-block text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded">
+                  <span className="inline-block rounded-full bg-[#F1F7F2] px-2.5 py-1 text-xs text-[#1A7A4A]">
                     Verified
                   </span>
                 )}
@@ -1436,30 +1444,30 @@ const ListingDetails: React.FC = () => {
             </div>
 
             <div className="mb-3 flex flex-wrap gap-2 text-xs font-semibold">
-              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-700">
+              <span className="rounded-full bg-stone-100 px-2.5 py-1 text-stone-700">
                 {responseTimeLabel}
               </span>
-              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">
+              <span className="rounded-full bg-stone-100 px-2.5 py-1 text-stone-600">
                 {lastActiveLabel}
               </span>
-              <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700">
+              <span className="rounded-full bg-[#FFF9EC] px-2.5 py-1 text-[#8A5A12]">
                 Trust score {sellerTrustScore}
               </span>
-              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">
+              <span className="rounded-full bg-stone-100 px-2.5 py-1 text-stone-600">
                 {sellerFollowState.followerCount} follower{sellerFollowState.followerCount === 1 ? "" : "s"}
               </span>
               <span
                 className={`rounded-full px-2.5 py-1 ${
                   owner.isVerified
-                    ? "bg-emerald-50 text-emerald-700"
-                    : "bg-amber-50 text-amber-700"
+                    ? "bg-[#F1F7F2] text-[#1A7A4A]"
+                    : "bg-[#FFF9EC] text-[#8A5A12]"
                 }`}
               >
                 {owner.isVerified ? "ID & phone verified" : "Unverified seller"}
               </span>
             </div>
             {!owner.isVerified && (
-              <p className="mb-3 text-xs font-medium text-amber-700">
+              <p className="mb-3 text-xs font-medium text-[#8A5A12]">
                 Verification boosts seller trust score and buyer confidence.
               </p>
             )}
@@ -1474,7 +1482,7 @@ const ListingDetails: React.FC = () => {
                   }
                   setShowReviewsModal(true);
                 }}
-                className="mb-3 flex w-full items-center justify-between rounded-lg border border-yellow-200 bg-yellow-50 px-3 py-2 text-left hover:bg-yellow-100"
+                className="mb-3 flex w-full items-center justify-between rounded-2xl border border-[#F4D89E] bg-[#FFF9EC] px-3 py-2 text-left hover:bg-[#FFF4D6]"
               >
                 <div className="min-w-0">
                   <div
@@ -1487,19 +1495,19 @@ const ListingDetails: React.FC = () => {
                         className={`h-4 w-4 ${
                           star <= Math.round(userRatings.aggregate.average)
                             ? "fill-yellow-400 text-yellow-500"
-                            : "fill-transparent text-gray-300"
+                            : "fill-transparent text-stone-300"
                         }`}
                         strokeWidth={2}
                         aria-hidden="true"
                       />
                     ))}
                   </div>
-                  <p className="mt-1 text-sm font-semibold text-slate-900">
+                  <p className="mt-1 text-sm font-semibold text-stone-900">
                     {userRatings.aggregate.average.toFixed(1)} ({userRatings.aggregate.count} review
                     {userRatings.aggregate.count === 1 ? "" : "s"})
                   </p>
                 </div>
-                <span className="text-xs font-semibold text-yellow-800">Read reviews</span>
+                <span className="text-xs font-semibold text-[#8A5A12]">Read reviews</span>
               </button>
             )}
 
@@ -1508,20 +1516,20 @@ const ListingDetails: React.FC = () => {
                 getAuthToken() ? (
                   <a
                     href={`tel:${sellerPhone}`}
-                    className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 text-center"
+                    className="ui-btn-primary flex-1 px-3 py-2 text-sm"
                   >
                     Call
                   </a>
                 ) : (
                   <Link
                     to={`/login?next=${encodeURIComponent(`/listings/${id}`)}`}
-                    className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 text-center"
+                    className="ui-btn-primary flex-1 px-3 py-2 text-sm"
                   >
                     Call
                   </Link>
                 )
               ) : (
-                <div className="flex-1 px-3 py-2 bg-gray-300 text-gray-600 rounded-lg text-sm font-semibold text-center cursor-not-allowed">
+                <div className="flex-1 cursor-not-allowed rounded-lg bg-stone-200 px-3 py-2 text-center text-sm font-semibold text-stone-600">
                   Call Unavailable
                 </div>
               )}
@@ -1533,7 +1541,7 @@ const ListingDetails: React.FC = () => {
                   }
                   openChatPanel();
                 }}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-50"
+                className="ui-btn-ghost flex-1 px-3 py-2 text-sm"
               >
                 Message
               </button>
@@ -1545,7 +1553,7 @@ const ListingDetails: React.FC = () => {
                   type="button"
                   onClick={handleToggleFollowSeller}
                   disabled={followLoading}
-                  className="inline-flex w-full items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 disabled:opacity-60"
+                  className="inline-flex w-full items-center justify-center rounded-xl border border-[#F3C9BE] bg-[#FDF5F3] px-3 py-2 text-sm font-semibold text-[#A0452E] hover:bg-[#FAE9E4] disabled:opacity-60"
                 >
                   {followLoading
                     ? "Updating..."
@@ -1558,7 +1566,7 @@ const ListingDetails: React.FC = () => {
               {owner._id && (
                 <Link
                   to={`/sellers/${owner._id}`}
-                  className="inline-flex w-full items-center justify-center rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                  className="ui-btn-ghost w-full px-3 py-2 text-sm"
                 >
                   View seller profile
                 </Link>
@@ -1573,7 +1581,7 @@ const ListingDetails: React.FC = () => {
                   setShowRatingModal(true);
                 }
               }}
-              className="w-full mt-2 px-3 py-2 border border-yellow-400 bg-yellow-50 text-yellow-700 rounded-lg text-sm font-semibold hover:bg-yellow-100"
+              className="mt-2 w-full rounded-xl border border-[#F4D89E] bg-[#FFF9EC] px-3 py-2 text-sm font-semibold text-[#8A5A12] hover:bg-[#FFF4D6]"
             >
               Rate Seller
             </button>
@@ -1594,41 +1602,41 @@ const ListingDetails: React.FC = () => {
             </button>
           </div>
           {chatReady && (
-            <div ref={chatSectionRef} className="bg-white p-4 rounded-lg border">
+            <div ref={chatSectionRef} className="rounded-[2rem] border border-stone-200 bg-white p-5 shadow-sm">
               <div className="mb-3 flex items-center justify-between gap-3">
-                <h3 className="font-semibold">Message the Seller</h3>
+                <h3 className="font-display text-lg font-semibold text-stone-900">Message the Seller</h3>
                 <button
                   type="button"
                   onClick={() => setChatReady(false)}
-                  className="text-xs font-semibold text-slate-500 hover:text-slate-700"
+                  className="text-xs font-semibold text-stone-500 hover:text-stone-700"
                 >
                   Close chat
                 </button>
               </div>
 
-              <div className="max-h-64 overflow-y-auto border rounded-lg p-3 mb-3 bg-gray-50">
+              <div className="mb-3 max-h-64 overflow-y-auto rounded-2xl border border-stone-200 bg-stone-50 p-3">
                 {chatLoading ? (
-                  <p className="text-gray-500 text-center text-xs py-4">
+                  <p className="py-4 text-center text-xs text-stone-500">
                     Loading conversation...
                   </p>
                 ) : messages.length === 0 ? (
-                  <p className="text-gray-500 text-center text-xs py-4">
+                  <p className="py-4 text-center text-xs text-stone-500">
                     No messages yet. Ask about availability, pricing, or arrange a viewing.
                   </p>
                 ) : (
                   messages.map((msg, idx) => (
-                    <div key={idx} className={`rounded p-2 mb-2 ${msg.from === owner._id ? 'bg-white border' : 'bg-green-50'}`}>
-                      <p className="text-xs text-gray-600 font-semibold mb-1">
+                    <div key={idx} className={`mb-2 rounded-2xl p-2 ${msg.from === owner._id ? 'border border-stone-200 bg-white' : 'bg-[#FDF5F3]'}`}>
+                      <p className="mb-1 text-xs font-semibold text-stone-600">
                         {msg.from === owner._id ? 'Seller' : 'You'} {msg.read && msg.from === owner._id ? '(seen)' : ''}
                       </p>
-                      <p className="text-gray-800 text-sm">{msg.body}</p>
-                      <p className="text-[10px] text-gray-500 mt-1">
+                      <p className="text-sm text-stone-800">{msg.body}</p>
+                      <p className="mt-1 text-[10px] text-stone-500">
                         {msg.createdAt ? new Date(msg.createdAt).toLocaleString() : ''}
                       </p>
                     </div>
                   ))
                 )}
-                {typing && <p className="text-xs text-gray-500 italic">Seller is typing...</p>}
+                {typing && <p className="text-xs italic text-stone-500">Seller is typing...</p>}
               </div>
 
               <textarea
@@ -1638,7 +1646,7 @@ const ListingDetails: React.FC = () => {
                   setNewMessage(e.target.value);
                   sendTyping();
                 }}
-                className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
+                className="ui-input w-full resize-none px-3 py-2 text-sm"
                 placeholder="Type your message..."
                 rows={3}
               />
@@ -1646,12 +1654,12 @@ const ListingDetails: React.FC = () => {
               <button
                 onClick={sendMessage}
                 disabled={sending || !newMessage.trim()}
-                className="w-full mt-2 bg-blue-600 text-white rounded-lg py-2 text-sm font-semibold hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition"
+                className="ui-btn-primary mt-2 w-full py-2 text-sm disabled:cursor-not-allowed"
               >
                 {sending ? 'Sending...' : 'Send Message'}
               </button>
 
-              <p className="text-xs text-gray-500 mt-2 text-center">
+              <p className="mt-2 text-center text-xs text-stone-500">
                 {getAuthToken() ? 'Messages are private and secure.' : 'Log in to send and receive messages.'}
               </p>
             </div>
@@ -1661,11 +1669,11 @@ const ListingDetails: React.FC = () => {
 
       {/* Rating Modal */}
       {showRatingModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h3 className="text-xl font-bold mb-4">Rate {owner.fullName || 'Seller'}</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/55 p-4">
+          <div className="w-full max-w-md rounded-[2rem] border border-stone-200 bg-white p-6 shadow-xl">
+            <h3 className="mb-4 font-display text-xl font-bold text-stone-900">Rate {owner.fullName || 'Seller'}</h3>
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">Rating (1-5 stars)</label>
+              <label className="mb-2 block text-sm font-medium text-stone-700">Rating (1-5 stars)</label>
               <div className="flex gap-2">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
@@ -1679,7 +1687,7 @@ const ListingDetails: React.FC = () => {
                       className={`w-8 h-8 ${
                         star <= ratingScore
                           ? "text-yellow-500 fill-yellow-400"
-                          : "text-gray-300 fill-transparent"
+                          : "text-stone-300 fill-transparent"
                       }`}
                       strokeWidth={2}
                       aria-hidden="true"
@@ -1689,11 +1697,11 @@ const ListingDetails: React.FC = () => {
               </div>
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">Review (optional)</label>
+              <label className="mb-2 block text-sm font-medium text-stone-700">Review (optional)</label>
               <textarea
                 value={ratingReview}
                 onChange={(e) => setRatingReview(e.target.value)}
-                className="w-full border rounded-lg px-3 py-2 text-sm resize-none"
+                className="ui-input w-full resize-none px-3 py-2 text-sm"
                 rows={4}
                 placeholder="Share your experience..."
               />
@@ -1705,14 +1713,14 @@ const ListingDetails: React.FC = () => {
                   setRatingScore(0);
                   setRatingReview('');
                 }}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50"
+                className="ui-btn-ghost flex-1 px-4 py-2"
               >
                 Cancel
               </button>
               <button
                 onClick={handleRatingSubmit}
                 disabled={submittingRating || ratingScore === 0}
-                className="flex-1 px-4 py-2 bg-yellow-500 text-white rounded-lg font-semibold hover:bg-yellow-600 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="flex-1 rounded-xl bg-[#A0452E] px-4 py-2 font-semibold text-white hover:bg-[#8B3525] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {submittingRating ? 'Submitting...' : 'Submit Rating'}
               </button>
@@ -1723,16 +1731,16 @@ const ListingDetails: React.FC = () => {
 
       {/* Reviews Modal */}
       {showReviewsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="w-full max-w-lg rounded-lg bg-white p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/55 p-4">
+          <div className="w-full max-w-lg rounded-[2rem] border border-stone-200 bg-white p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between gap-3">
-              <h3 className="text-xl font-bold">
+              <h3 className="font-display text-xl font-bold text-stone-900">
                 Seller Reviews
               </h3>
               <button
                 type="button"
                 onClick={() => setShowReviewsModal(false)}
-                className="rounded border border-gray-300 px-2 py-1 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                className="rounded-xl border border-stone-200 px-3 py-1.5 text-sm font-semibold text-stone-700 hover:bg-stone-50"
               >
                 Close
               </button>
@@ -1741,12 +1749,12 @@ const ListingDetails: React.FC = () => {
             <div className="max-h-[60vh] space-y-3 overflow-y-auto pr-1">
               {sellerReviews.length > 0 ? (
                 sellerReviews.map((review, index) => (
-                  <div key={review._id || `review-${index}`} className="rounded-lg border border-gray-200 p-3">
+                  <div key={review._id || `review-${index}`} className="rounded-2xl border border-stone-200 p-3">
                     <div className="mb-1 flex items-center justify-between gap-2">
-                      <p className="text-sm font-semibold text-gray-900">
+                      <p className="text-sm font-semibold text-stone-900">
                         {review.raterId?.fullName || review.raterId?.name || "Buyer"}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-stone-500">
                         {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : ""}
                       </p>
                     </div>
@@ -1757,7 +1765,7 @@ const ListingDetails: React.FC = () => {
                           className={`h-4 w-4 ${
                             star <= Math.round(review.score || 0)
                               ? "fill-yellow-400 text-yellow-500"
-                              : "fill-transparent text-gray-300"
+                              : "fill-transparent text-stone-300"
                           }`}
                           strokeWidth={2}
                           aria-hidden="true"
@@ -1765,14 +1773,14 @@ const ListingDetails: React.FC = () => {
                       ))}
                     </div>
                     {review.review ? (
-                      <p className="text-sm text-gray-700">{review.review}</p>
+                      <p className="text-sm text-stone-700">{review.review}</p>
                     ) : (
-                      <p className="text-sm italic text-gray-500">No written review.</p>
+                      <p className="text-sm italic text-stone-500">No written review.</p>
                     )}
                   </div>
                 ))
               ) : (
-                <p className="rounded-lg bg-gray-50 p-3 text-sm text-gray-600">
+                <p className="rounded-2xl bg-stone-50 p-3 text-sm text-stone-600">
                   No reviews available yet.
                 </p>
               )}
@@ -1791,7 +1799,7 @@ const ListingDetails: React.FC = () => {
         onClose={() => setShowReportModal(false)}
         onSubmitSuccess={() => {
           setShowReportModal(false);
-          alert('Report submitted successfully. Thank you for helping keep Kodisha safe.');
+          alert('Report submitted successfully. Thank you for helping keep Agrisoko safe.');
         }}
       />
     </div>
@@ -1799,3 +1807,4 @@ const ListingDetails: React.FC = () => {
 };
 
 export default ListingDetails;
+
