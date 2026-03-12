@@ -1,95 +1,149 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=Sora:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ── Design tokens ───────────────────────────────────── */
 :root {
-  --brand-primary: #059669;
-  --brand-primary-strong: #047857;
-  --brand-accent: #10b981;
-  --surface-default: #ffffff;
-  --surface-soft: #f8fafc;
-  --text-strong: #0f172a;
-  --text-muted: #475569;
+  --brand-primary:        #A0452E;
+  --brand-primary-strong: #8B3525;
+  --brand-accent:         #E8973A;
+  --surface-default:      #ffffff;
+  --surface-soft:         #FAF7F2;
+  --text-strong:          #1C1917;
+  --text-muted:           #78716C;
+  --shadow-card:          0 4px 24px rgba(160,69,46,.08);
+  --shadow-card-hover:    0 12px 40px rgba(160,69,46,.14);
 }
 
+/* ── Reusable component classes ─────────────────────── */
 @layer components {
   .ui-card {
-    @apply rounded-2xl border border-slate-200 bg-white shadow-sm;
+    @apply rounded-2xl border border-stone-200 bg-white shadow-sm;
   }
 
   .ui-card-soft {
-    @apply rounded-2xl border border-slate-200 bg-slate-50;
+    @apply rounded-2xl border border-stone-200 bg-[#FAF7F2];
   }
 
   .ui-section-kicker {
-    @apply text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700;
+    @apply text-xs font-semibold uppercase tracking-[0.2em] text-[#A0452E];
   }
 
   .ui-section-title {
-    @apply mt-2 text-2xl font-semibold text-slate-900 tracking-tight;
+    @apply mt-2 text-2xl font-semibold text-stone-900 tracking-tight;
   }
 
   .ui-label {
-    @apply mb-2 block text-sm font-semibold text-slate-800;
+    @apply mb-2 block text-sm font-semibold text-stone-800;
   }
 
   .ui-helper {
-    @apply mt-1 text-xs text-slate-500;
+    @apply mt-1 text-xs text-stone-500;
   }
 
   .ui-input {
-    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200;
+    @apply w-full rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm text-stone-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE];
   }
 
   .ui-input-muted {
-    @apply w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-200;
+    @apply w-full rounded-xl border border-stone-200 bg-stone-50/70 px-4 py-3 text-sm text-stone-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:bg-white focus:ring-2 focus:ring-[#F3C9BE];
   }
 
   .ui-btn-primary {
-    @apply inline-flex min-h-[44px] items-center justify-center rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex min-h-[44px] items-center justify-center rounded-xl bg-[#A0452E] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#8B3525] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E8A08E] disabled:cursor-not-allowed disabled:opacity-60;
   }
 
   .ui-btn-secondary {
-    @apply inline-flex min-h-[44px] items-center justify-center rounded-xl border border-emerald-200 bg-white px-4 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex min-h-[44px] items-center justify-center rounded-xl border border-[#F3C9BE] bg-white px-4 py-2.5 text-sm font-semibold text-[#A0452E] transition hover:bg-[#FDF5F3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F3C9BE] disabled:cursor-not-allowed disabled:opacity-60;
   }
 
   .ui-btn-ghost {
-    @apply inline-flex min-h-[44px] items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-200 disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex min-h-[44px] items-center justify-center rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm font-semibold text-stone-700 transition hover:bg-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-200 disabled:cursor-not-allowed disabled:opacity-60;
   }
 }
 
+/* ── Global resets ───────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
 body {
   margin: 0;
-  font-family: 'Inter', 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-family: 'Sora', 'Segoe UI', Tahoma, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--surface-soft);
   color: var(--text-strong);
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Inter', sans-serif;
-  font-weight: 700;
+h1, h2, h3 {
+  font-family: 'Fraunces', Georgia, serif;
+  letter-spacing: -0.025em;
   color: var(--text-strong);
-  letter-spacing: -0.01em;
+  line-height: 1.15;
 }
 
-p, span, li {
-  font-family: 'Inter', sans-serif;
-  font-weight: 400;
-  color: #1f2937;
-  line-height: 1.6;
+h4, h5, h6 {
+  font-family: 'Sora', sans-serif;
+  font-weight: 600;
+  color: var(--text-strong);
 }
 
-a {
-  color: var(--brand-primary);
-  text-decoration: none;
-}
-
-a:hover {
-  color: var(--brand-primary-strong);
-}
+p { line-height: 1.65; }
+a { text-decoration: none; }
+a:hover { color: var(--brand-primary-strong); }
 
 code {
-  font-family: 'Fira Code', 'source-code-pro', Menlo, Monaco, Consolas, 'Courier New', monospace;
+  font-family: 'Fira Code', Menlo, Monaco, Consolas, monospace;
 }
+
+/* ── Card hover lift ─────────────────────────────────── */
+.card-lift {
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.18s ease;
+}
+.card-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* ── Shimmer on verified badge ───────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+.shimmer-badge {
+  background: linear-gradient(90deg, #1A7A4A 0%, #27AE60 45%, #1A7A4A 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2.8s ease-in-out infinite;
+}
+
+/* ── Activity ticker ─────────────────────────────────── */
+.ticker-wrap  { overflow: hidden; white-space: nowrap; }
+.ticker-track {
+  display: inline-flex;
+  gap: 3rem;
+  animation: ticker 38s linear infinite;
+  will-change: transform;
+}
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ── Fade-in-up entrance ─────────────────────────────── */
+@keyframes fadeInUp {
+  0%   { opacity: 0; transform: translateY(22px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.anim-in   { animation: fadeInUp 0.55s ease-out forwards; }
+.anim-in-2 { animation: fadeInUp 0.55s 0.14s ease-out both; }
+.anim-in-3 { animation: fadeInUp 0.55s 0.28s ease-out both; }
+.anim-in-4 { animation: fadeInUp 0.55s 0.42s ease-out both; }
+
+/* ── Number tabular ──────────────────────────────────── */
+.stat-num { font-variant-numeric: tabular-nums; }
+
+/* ── Mobile safe area ────────────────────────────────── */
+.pb-safe { padding-bottom: env(safe-area-inset-bottom, 8px); }

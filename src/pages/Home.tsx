@@ -19,6 +19,18 @@ import {
 import { trackGoogleEvent } from "../utils/cookieConsent";
 import { trackTrafficClick } from "../utils/trafficAnalytics";
 
+const ACTIVITY_FEED = [
+  "🌽 Kamau from Eldoret listed 5 bags of maize",
+  "🥛 Achieng from Kisumu listed 20 L fresh milk daily",
+  "🐄 Mwangi from Nakuru listed 3 dairy heifers",
+  "✅ Fatuma from Mombasa became a verified seller",
+  "🌿 Ochieng from Nyanza posted demand for 10 bags of beans",
+  "🚜 Njoroge from Thika listed tractor hire services",
+  "🐓 Wanjiru from Muranga listed 200 free-range hens",
+  "🥑 Kipchoge from Kericho listed premium avocados — 3 ton",
+];
+const TICKER_ITEMS = [...ACTIVITY_FEED, ...ACTIVITY_FEED];
+
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
 const FREE_WINDOW_DAYS = 10;
 const HERO_VARIANT_KEY = "agrisoko_home_hero_variant_v2";
@@ -302,7 +314,7 @@ const Home: React.FC = () => {
     : `Free listing for your first ${FREE_WINDOW_DAYS} days after signup`;
 
   return (
-    <main className="min-h-screen bg-slate-50 pb-28 text-slate-900 sm:pb-24">
+    <main className="min-h-screen bg-[#FAF7F2] pb-28 text-stone-900 sm:pb-24">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700&family=Kalam:wght@300;400;700&family=Sora:wght@400;500;600;700&display=swap');
         .home-shell {
@@ -323,17 +335,28 @@ const Home: React.FC = () => {
       `}</style>
 
       <div className="home-shell">
-        <section className="relative overflow-hidden border-b border-slate-200 bg-white">
-          <div className="pointer-events-none absolute -top-16 left-1/3 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-12 right-0 h-72 w-72 rounded-full bg-sky-100/70 blur-3xl" />
+        <section
+          className="relative overflow-hidden border-b border-stone-200"
+          style={{ background: 'linear-gradient(150deg,#FAF7F2 0%,#F5EFE6 45%,#FAF7F2 100%)' }}
+        >
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -top-16 -right-16 h-72 w-72 rounded-full opacity-20"
+            style={{ background: 'radial-gradient(circle,#A0452E 0%,transparent 70%)' }}
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-12 left-1/4 h-64 w-64 rounded-full opacity-15"
+            style={{ background: 'radial-gradient(circle,#E8973A 0%,transparent 70%)' }}
+          />
 
           <div className="relative mx-auto max-w-7xl px-4 pb-10 pt-10 sm:pb-12 sm:pt-14 md:pb-16 md:pt-20">
             <div className="max-w-4xl">
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800">
+                <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-amber-800">
                   <Sparkles className="h-3.5 w-3.5" />
                   Free Listing Window
-                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] tracking-[0.12em] text-emerald-800">
+                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] tracking-[0.12em] text-amber-800">
                     {launchWindowLabel}
                   </span>
                 </div>
@@ -433,10 +456,10 @@ const Home: React.FC = () => {
                     </div>
                   )}
                   <div className="flex flex-wrap gap-2 text-[11px] font-semibold text-slate-700 sm:text-xs">
-                    <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-800">
+                    <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-amber-800">
                       {liveListingCount.toLocaleString()} listings live
                     </span>
-                    <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-800">
+                    <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-amber-800">
                       {countyCoverageLabel}
                     </span>
                   </div>
@@ -447,13 +470,13 @@ const Home: React.FC = () => {
         </section>
 
         {latestListings.length > 0 && (
-          <section className="mx-auto max-w-7xl border-b border-slate-200 px-4 py-6 sm:py-7">
+          <section className="mx-auto max-w-7xl border-b border-stone-200 px-4 py-6 sm:py-7">
             <div className="flex items-end justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
+                <p className="ui-section-kicker">
                   Latest listings
                 </p>
-                <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl">
+                <h2 className="home-title mt-2 text-2xl text-stone-900 sm:text-3xl">
                   Live now on Agrisoko
                 </h2>
               </div>
@@ -465,7 +488,7 @@ const Home: React.FC = () => {
                     target: "/browse",
                   })
                 }
-                className="hidden text-sm font-semibold text-emerald-700 hover:text-emerald-800 sm:inline-flex"
+                className="hidden text-sm font-semibold text-[#A0452E] hover:text-[#8B3525] sm:inline-flex"
               >
                 View all listings
               </Link>
@@ -481,9 +504,9 @@ const Home: React.FC = () => {
                     <p className="truncate text-base font-semibold text-slate-900">
                       {listing.title}
                     </p>
-                    <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-slate-600">
+                    <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-stone-600">
                       <span>{listing.category}</span>
-                      <span className="font-semibold text-emerald-700">{listing.priceLabel}</span>
+                      <span className="font-semibold text-[#A0452E]">{listing.priceLabel}</span>
                     </div>
                   </div>
                   <Link
@@ -505,9 +528,21 @@ const Home: React.FC = () => {
           </section>
         )}
 
+        {/* ── ACTIVITY TICKER ── */}
+        <div className="border-b border-stone-200 bg-[#FAF7F2] py-3 ticker-wrap">
+          <div className="ticker-track">
+            {TICKER_ITEMS.map((item, i) => (
+              <span key={i} className="inline-flex items-center gap-3 text-sm font-medium text-stone-600 whitespace-nowrap">
+                {item}
+                <span className="h-1 w-1 rounded-full bg-stone-300" />
+              </span>
+            ))}
+          </div>
+        </div>
+
         <section className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
           <div className="max-w-4xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
               Founder note
             </p>
             <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl">
@@ -654,7 +689,7 @@ const Home: React.FC = () => {
         </section>
 
         <section className="mx-auto max-w-7xl px-4 pb-14 pt-6 sm:pb-16 sm:pt-8">
-          <div className="rounded-3xl bg-emerald-600 p-5 text-white shadow-sm sm:p-8 md:p-10">
+          <div className="rounded-3xl p-5 text-white shadow-sm sm:p-8 md:p-10" style={{ background: 'linear-gradient(135deg,#A0452E 0%,#72281A 100%)', boxShadow: '0 16px 48px rgba(160,69,46,.3)' }}>
             <h2 className="home-title text-2xl sm:text-3xl md:text-4xl">Ready to start?</h2>
             <p className="mt-3 max-w-2xl text-sm text-emerald-100 md:text-base">
               {finalCallCopy}
@@ -668,7 +703,7 @@ const Home: React.FC = () => {
                     target: "/create-listing",
                   })
                 }
-                className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50 sm:w-auto"
+                className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-semibold text-[#A0452E] transition hover:bg-[#FDF5F3] sm:w-auto"
               >
                 {primaryCtaLabel}
               </Link>
