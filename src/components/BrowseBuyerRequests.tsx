@@ -64,7 +64,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 const CATEGORY_PILL_STYLES: Record<string, string> = {
   produce: "bg-orange-100 text-orange-800",
-  livestock: "bg-[#e6f0e0] text-[#586f58]",
+  livestock: "bg-emerald-100 text-emerald-800",
   inputs: "bg-sky-100 text-sky-800",
   service: "bg-emerald-100 text-emerald-800",
 };
@@ -338,8 +338,8 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
         :root {
           --ink: #0f172a;
           --muted: #64748b;
-          --accent: #586f58;
-          --accent-soft: #edf4e9;
+          --accent: #0f766e;
+          --accent-soft: #ccfbf1;
         }
         .buy-requests-shell {
           font-family: "Manrope", "Segoe UI", "Tahoma", sans-serif;
@@ -357,8 +357,8 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
       `}</style>
 
       <div className="relative overflow-hidden buy-requests-shell">
-        <div className="absolute -top-24 left-1/3 h-72 w-72 rounded-full bg-[#d8e8d4]/55 blur-3xl" />
-        <div className="absolute -bottom-16 right-0 h-72 w-72 rounded-full bg-[#e8f0e3]/75 blur-3xl" />
+        <div className="absolute -top-24 left-1/3 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
+        <div className="absolute -bottom-16 right-0 h-72 w-72 rounded-full bg-sky-100/70 blur-3xl" />
 
         <div className="max-w-6xl mx-auto px-4 pt-10 md:pt-12 pb-8">
           {!user && (
@@ -374,7 +374,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                 </div>
                 <Link
                   to="/login"
-                  className="inline-flex items-center rounded-lg bg-[#6b856b] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#586f58]"
+                  className="inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
                 >
                   Sign In
                 </Link>
@@ -406,14 +406,14 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                           )}`
                     )
                   }
-                  className="inline-flex w-full sm:w-auto justify-center items-center gap-2 rounded-xl bg-[#6b856b] px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#586f58] transition"
+                  className="inline-flex w-full sm:w-auto justify-center items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 transition"
                 >
                   <Plus size={18} />
                   {isB2B ? "Post B2B Demand" : "Post Demand"}
                 </button>
                 <Link
                   to="/browse"
-                  className="inline-flex w-full sm:w-auto justify-center items-center gap-2 rounded-xl border border-[#c9d7c4] bg-white px-5 py-3 text-sm font-semibold text-[#586f58] hover:bg-[#f2f7ef] transition"
+                  className="inline-flex w-full sm:w-auto justify-center items-center gap-2 rounded-xl border border-emerald-200 bg-white px-5 py-3 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 transition"
                 >
                   Browse Listings
                 </Link>
@@ -583,7 +583,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
         )}
 
         {bulkAccessRequired && isB2B && (
-          <div className="mb-6 rounded-2xl border border-[#c9d7c4] bg-[#edf4e9] px-4 py-4 text-[#4d6250]">
+          <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-emerald-900">
             <p className="text-sm font-semibold">
               Bulk demand access requires approval first.
             </p>
@@ -593,7 +593,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
             <div className="mt-3">
               <Link
                 to={user ? "/bulk" : "/login?mode=signup&next=/bulk"}
-                className="inline-flex rounded-lg bg-[#6b856b] px-4 py-2 text-sm font-semibold text-white hover:bg-[#586f58]"
+                className="inline-flex rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
               >
                 Open bulk application
               </Link>
@@ -683,7 +683,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
 
                       <div className="mt-3 flex items-center gap-3 text-[11px] font-semibold text-slate-600">
                         <span className="inline-flex items-center gap-1">
-                          <TrendingUp size={13} className="text-[#6b856b]" />
+                          <TrendingUp size={13} className="text-emerald-600" />
                           {formatBudget(request.budget)}
                         </span>
                       </div>
@@ -710,7 +710,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                   onClick={() => onSelectRequest?.(request)}
                   className="group bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-lg transition overflow-hidden cursor-pointer"
                 >
-                  <div className="bg-[#f3f8f0] p-4 border-b border-slate-200">
+                  <div className="bg-emerald-50/60 p-4 border-b border-slate-200">
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div className="flex gap-2 flex-wrap">
                         <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full capitalize ${CATEGORY_PILL_STYLES[request.category]}`}>
@@ -775,7 +775,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                       </div>
                       {request.userId?.ratings && typeof request.userId.ratings === 'number' && (
                         <div className="flex items-center gap-1">
-                          <TrendingUp size={14} className="text-[#6b856b]" />
+                          <TrendingUp size={14} className="text-emerald-600" />
                           <span className="text-sm font-semibold">
                             {request.userId.ratings.toFixed(1)}
                           </span>
@@ -784,11 +784,11 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                     </div>
                   </div>
 
-                  <div className="bg-[#edf4e9] px-4 py-3 border-t border-slate-200">
+                  <div className="bg-emerald-50 px-4 py-3 border-t border-slate-200">
                     <Link
                       to={`/request/${request._id}`}
                       state={{ request }}
-                      className="block text-center bg-[#6b856b] hover:bg-[#586f58] text-white font-semibold py-2 rounded-lg transition text-sm"
+                      className="block text-center bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-lg transition text-sm"
                       aria-label={`View details for ${request.title}`}
                     >
                       View Details
@@ -822,7 +822,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
           </>
         )}
 
-        <div className="mt-16 rounded-3xl border border-[#d6e2d1] bg-[#f7faf5] p-8">
+        <div className="mt-16 rounded-3xl border border-emerald-100 bg-emerald-50/40 p-8">
           <div className="max-w-4xl mx-auto text-center">
             <h3 className="text-2xl font-bold text-slate-900 mb-3">
               {isB2B ? "Need open marketplace offers instead?" : "Need products instead?"}
@@ -835,7 +835,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 to="/browse"
-                className="inline-flex justify-center items-center px-6 py-3 rounded-xl bg-[#6b856b] text-white font-semibold transition hover:bg-[#586f58]"
+                className="inline-flex justify-center items-center px-6 py-3 rounded-xl bg-emerald-600 text-white font-semibold transition hover:bg-emerald-700"
               >
                 Browse Listings
               </Link>
@@ -845,7 +845,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                     ? "/create-listing?compact=1"
                     : `/login?mode=signup&next=${encodeURIComponent("/create-listing?compact=1")}`
                 }
-                className="inline-flex justify-center items-center px-6 py-3 rounded-xl border-2 border-[#6b856b] text-[#586f58] font-semibold transition hover:bg-[#f2f7ef]"
+                className="inline-flex justify-center items-center px-6 py-3 rounded-xl border-2 border-emerald-600 text-emerald-700 font-semibold transition hover:bg-emerald-50"
               >
                 Create Listing
               </Link>

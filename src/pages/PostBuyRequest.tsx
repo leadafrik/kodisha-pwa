@@ -64,7 +64,7 @@ const PostBuyRequest: React.FC = () => {
         )}
 
         {!accessLoading && isB2B && !hasBulkBuyerAccess && (
-          <div className="mb-4 rounded-2xl border border-[#c9d7c4] bg-[#edf4e9] p-4 text-[#435846] shadow-sm">
+          <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-900 shadow-sm">
             <p className="text-sm font-semibold">Bulk buyer approval required before posting B2B demand.</p>
             {accessError && <p className="mt-1 text-xs">{accessError}</p>}
             <button

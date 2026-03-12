@@ -14,12 +14,12 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: #6b856b;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   border: none;
   color: white;
   font-size: 24px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(88, 111, 88, 0.24);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -30,7 +30,7 @@
 
 .chatbot-floating-btn:hover {
   transform: scale(1.1);
-  box-shadow: 0 6px 16px rgba(88, 111, 88, 0.28);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.6);
 }
 
 .chatbot-floating-btn:active {
@@ -55,10 +55,10 @@
 
 @keyframes pulse-button {
   0%, 100% {
-    box-shadow: 0 4px 12px rgba(88, 111, 88, 0.24);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
   }
   50% {
-    box-shadow: 0 4px 20px rgba(88, 111, 88, 0.3);
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.8);
   }
 }
 
@@ -102,7 +102,7 @@
 
 /* Header */
 .chatbot-header {
-  background: #6b856b;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
   padding: 16px;
   border-radius: 12px 12px 0 0;

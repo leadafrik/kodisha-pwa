@@ -267,16 +267,16 @@ const Home: React.FC = () => {
 
       <div className="home-shell">
         <section className="relative overflow-hidden border-b border-slate-200 bg-white">
-          <div className="pointer-events-none absolute -top-16 left-1/3 h-72 w-72 rounded-full bg-[#d8e8d4]/50 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-12 right-0 h-72 w-72 rounded-full bg-[#e8f0e3]/70 blur-3xl" />
+          <div className="pointer-events-none absolute -top-16 left-1/3 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-12 right-0 h-72 w-72 rounded-full bg-sky-100/70 blur-3xl" />
 
           <div className="relative mx-auto max-w-7xl px-4 pb-10 pt-10 sm:pb-12 sm:pt-14 md:pb-16 md:pt-20">
             <div className="max-w-4xl">
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-[#c8d7c3] bg-[#edf4e9] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-[#5b705d]">
+                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800">
                   <Sparkles className="h-3.5 w-3.5" />
                   Free Listing Window
-                  <span className="rounded-full bg-[#dce8d7] px-2 py-0.5 text-[10px] tracking-[0.12em] text-[#4d6250]">
+                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] tracking-[0.12em] text-emerald-800">
                     {launchWindowLabel}
                   </span>
                 </div>
@@ -340,7 +340,7 @@ const Home: React.FC = () => {
                         }
                         className={`ui-btn-ghost w-full px-6 sm:w-auto ${
                           user
-                            ? "border-[#c9d7c4] text-[#586f58] hover:bg-[#f2f7ef]"
+                            ? "border-emerald-300 text-emerald-700 hover:bg-emerald-50"
                             : ""
                         }`}
                       >
@@ -369,17 +369,17 @@ const Home: React.FC = () => {
                     <div>
                       <Link
                         to="/bulk"
-                        className="text-sm font-semibold text-[#5b705d] underline decoration-[#c8d7c3] underline-offset-4 transition hover:text-[#4d6250]"
+                        className="text-sm font-semibold text-emerald-700 underline decoration-emerald-200 underline-offset-4 transition hover:text-emerald-800"
                       >
                         Explore bulk buying customers
                       </Link>
                     </div>
                   )}
                   <div className="flex flex-wrap gap-2 text-[11px] font-semibold text-slate-700 sm:text-xs">
-                    <span className="rounded-full border border-[#c8d7c3] bg-[#edf4e9] px-3 py-1 text-[#4d6250]">
+                    <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-800">
                       {liveListingCount.toLocaleString()} listings live
                     </span>
-                    <span className="rounded-full border border-[#c8d7c3] bg-[#edf4e9] px-3 py-1 text-[#4d6250]">
+                    <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-800">
                       {countyCoverageLabel}
                     </span>
                   </div>
@@ -391,7 +391,7 @@ const Home: React.FC = () => {
 
         <section className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
           <div className="max-w-4xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#5b705d]">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
               Founder note
             </p>
             <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl">
@@ -418,7 +418,7 @@ const Home: React.FC = () => {
         <section className="mx-auto max-w-7xl border-y border-slate-200 px-4 py-8 sm:py-10">
           <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:gap-10">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#5b705d]">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
                 Why join
               </p>
               <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl">
@@ -438,7 +438,7 @@ const Home: React.FC = () => {
             </div>
 
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#5b705d]">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
                 How it works
               </p>
               <div className="mt-4 space-y-3">
@@ -447,7 +447,7 @@ const Home: React.FC = () => {
                     key={step.title}
                     className="flex items-start gap-3 border-b border-slate-200 pb-3 last:border-b-0 last:pb-0"
                   >
-                    <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#6b856b] text-sm font-semibold text-white">
+                    <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-700 text-sm font-semibold text-white">
                       {index + 1}
                     </span>
                     <div>
@@ -463,7 +463,7 @@ const Home: React.FC = () => {
 
         <section className="mx-auto max-w-7xl px-4 pb-10 sm:pb-14">
           <div className="mb-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#5b705d]">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
               Live market
             </p>
             <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl md:text-4xl">
@@ -482,7 +482,7 @@ const Home: React.FC = () => {
               <ul className="mt-4 space-y-2 text-sm text-slate-700">
                 {buyerDemandSignals.map((signal) => (
                   <li key={signal} className="flex items-center gap-2 border-b border-slate-200 pb-2 last:border-b-0">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#6b856b]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
                     {signal}
                   </li>
                 ))}
@@ -516,7 +516,7 @@ const Home: React.FC = () => {
             </div>
 
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#5b705d]">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-emerald-700">
                 Trust
               </p>
               <h3 className="mt-3 text-xl font-semibold text-slate-900 sm:text-2xl">
@@ -525,7 +525,7 @@ const Home: React.FC = () => {
               <div className="mt-4 space-y-3">
                 {trustFeatures.map((feature) => (
                   <div key={feature.title} className="flex items-start gap-3 border-b border-slate-200 pb-3 last:border-b-0">
-                    <feature.icon className="mt-0.5 h-5 w-5 shrink-0 text-[#5b705d]" />
+                    <feature.icon className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
                     <div>
                       <p className="text-sm font-semibold text-slate-900">{feature.title}</p>
                       <p className="mt-0.5 text-sm text-slate-600">{feature.copy}</p>
@@ -538,9 +538,9 @@ const Home: React.FC = () => {
         </section>
 
         <section className="mx-auto max-w-7xl px-4 pb-14 pt-6 sm:pb-16 sm:pt-8">
-          <div className="rounded-3xl bg-[#6b856b] p-5 text-white shadow-sm sm:p-8 md:p-10">
+          <div className="rounded-3xl bg-emerald-600 p-5 text-white shadow-sm sm:p-8 md:p-10">
             <h2 className="home-title text-2xl sm:text-3xl md:text-4xl">Ready to start?</h2>
-            <p className="mt-3 max-w-2xl text-sm text-[#eef5eb] md:text-base">
+            <p className="mt-3 max-w-2xl text-sm text-emerald-100 md:text-base">
               {finalCallCopy}
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
@@ -552,7 +552,7 @@ const Home: React.FC = () => {
                     target: "/create-listing",
                   })
                 }
-                className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-semibold text-[#586f58] transition hover:bg-[#f2f7ef] sm:w-auto"
+                className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50 sm:w-auto"
               >
                 {primaryCtaLabel}
               </Link>

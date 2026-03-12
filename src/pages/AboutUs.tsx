@@ -107,9 +107,9 @@ const AboutUs: React.FC = () => {
         :root {
           --ink: #0f172a;
           --muted: #475569;
-          --accent: #586f58;
-          --accent-soft: #edf4e9;
-          --accent-border: #c9d7c4;
+          --accent: #0f766e;
+          --accent-soft: #ecfdf5;
+          --accent-border: #a7f3d0;
           --note: #e6f0e0;
         }
         .about-shell {
@@ -306,13 +306,13 @@ const AboutUs: React.FC = () => {
           )}
         </script>
         <section className="relative overflow-hidden">
-          <div className="absolute -top-24 left-1/3 h-72 w-72 rounded-full bg-[#d8e8d4]/55 blur-3xl" />
-          <div className="absolute -bottom-24 right-0 h-72 w-72 rounded-full bg-[#e8f0e3]/75 blur-3xl" />
+          <div className="absolute -top-24 left-1/3 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
+          <div className="absolute -bottom-24 right-0 h-72 w-72 rounded-full bg-sky-100/70 blur-3xl" />
 
           <div className="max-w-6xl mx-auto px-4 pt-16 pb-12">
             <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] items-center">
               <div className="space-y-5 fade-rise">
-                <p className="text-xs uppercase tracking-[0.3em] text-[#5b705d] font-semibold">
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">
                   About Agrisoko
                 </p>
                 <h1 className="about-title text-4xl md:text-5xl text-slate-900">
@@ -325,21 +325,21 @@ const AboutUs: React.FC = () => {
                 <p className="text-sm text-slate-500 max-w-xl">
                   Agrisoko is operated by {legalEntityName}.
                 </p>
-                <div className="rounded-2xl border border-[#c9d7c4] bg-[#edf4e9] px-4 py-3 text-sm text-[#4d6250]">
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
                   Karibuni. Biashara bila middlemen - direct to farm, direct to buyer.
                 </div>
                 <div className="flex flex-wrap gap-3">
                   {!user && (
                     <Link
                       to="/login?mode=signup&next=/browse"
-                      className="inline-flex items-center rounded-xl bg-[#6b856b] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#586f58]"
+                      className="inline-flex items-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
                     >
                       Create account / Sign in
                     </Link>
                   )}
                   <Link
                     to="/browse"
-                    className="inline-flex items-center rounded-xl border border-[#c9d7c4] bg-white px-5 py-2.5 text-sm font-semibold text-[#586f58] transition hover:bg-[#f2f7ef]"
+                    className="inline-flex items-center rounded-xl border border-emerald-200 bg-white px-5 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50"
                   >
                     Explore Listings
                   </Link>
@@ -370,14 +370,14 @@ const AboutUs: React.FC = () => {
         <section id="ceo-message" className="max-w-6xl mx-auto px-4 py-12">
           <div className="grid gap-6 md:grid-cols-2">
             <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-              <p className="text-xs uppercase tracking-[0.3em] text-[#5b705d] font-semibold">Our Mission</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">Our Mission</p>
               <h2 className="about-title text-3xl text-slate-900 mt-3">Make direct trade normal</h2>
               <p className="text-slate-600 mt-3 leading-relaxed">
                 Help Kenyan farmers and agribusinesses sell and buy directly, without broker pressure, with clear pricing and trusted profiles.
               </p>
             </div>
             <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-              <p className="text-xs uppercase tracking-[0.3em] text-[#5b705d] font-semibold">Our Vision</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">Our Vision</p>
               <h2 className="about-title text-3xl text-slate-900 mt-3">A trusted Kenyan marketplace</h2>
               <p className="text-slate-600 mt-3 leading-relaxed">
                 A platform where every farmer, buyer, agrovet, and service provider can trade with confidence, backed by verification and accountability.
@@ -387,7 +387,7 @@ const AboutUs: React.FC = () => {
         </section>
 
         <section id="founder-story" className="max-w-6xl mx-auto scroll-mt-24 px-4 py-12">
-          <div className="about-handwritten rounded-3xl border border-[#c9d7c4] bg-[#f6faf3] p-6 md:p-8 shadow-sm">
+          <div className="about-handwritten rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
             <div className="grid gap-8 md:grid-cols-[0.8fr_1.2fr] items-start">
               <div>
                 <img
@@ -400,7 +400,7 @@ const AboutUs: React.FC = () => {
                 />
               </div>
               <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-[#5b705d] font-semibold">
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">
                   Founder Story
                 </p>
                 <h2 className="about-handwritten text-4xl leading-tight text-slate-900 mt-3">
@@ -420,8 +420,8 @@ const AboutUs: React.FC = () => {
                   This is the long game: make Kenya fully ready for 21st-century agricultural commerce,
                   where reputation is earned, prices are transparent, and every county can compete in one trusted market.
                 </p>
-                <div className="mt-5 rounded-xl border border-[#c9d7c4] bg-[#e6f0e0] px-4 py-3">
-                  <p className="text-lg font-semibold text-[#405640]">
+                <div className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                  <p className="text-lg font-semibold text-emerald-900">
                     "Your verified Agrisoko profile is your trading reputation."
                   </p>
                 </div>
@@ -430,7 +430,7 @@ const AboutUs: React.FC = () => {
                     href={`https://wa.me/${founderWhatsapp}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center rounded-xl bg-[#6b856b] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#586f58]"
+                    className="inline-flex items-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
                   >
                     WhatsApp {founderWhatsappDisplay}
                   </a>
@@ -449,10 +449,10 @@ const AboutUs: React.FC = () => {
         </section>
 
         <section id="team" className="max-w-6xl mx-auto scroll-mt-24 px-4 py-12">
-          <div className="about-handwritten rounded-3xl border border-[#c9d7c4] bg-[#f6faf3] p-6 md:p-8 shadow-sm">
+          <div className="about-handwritten rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
             <div className="flex flex-col gap-5">
               <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-[#5b705d] font-semibold">
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">
                   Message from the CEO
                 </p>
                 <h2 className="about-handwritten text-4xl text-slate-900 mt-3">
@@ -483,7 +483,7 @@ const AboutUs: React.FC = () => {
                   href={ceoVideoWatchUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center rounded-xl border border-[#c9d7c4] bg-white px-4 py-2 text-sm font-semibold text-[#586f58] transition hover:bg-[#f2f7ef]"
+                  className="inline-flex items-center rounded-xl border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50"
                 >
                   Watch on YouTube
                 </a>
@@ -493,7 +493,7 @@ const AboutUs: React.FC = () => {
         </section>
 
         <section className="max-w-6xl mx-auto px-4 py-12">
-          <div className="about-handwritten rounded-3xl border border-[#c9d7c4] bg-[#f6faf3] p-6 md:p-8 shadow-sm">
+          <div className="about-handwritten rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
             <div className="grid gap-8 md:grid-cols-[0.8fr_1.2fr] items-start">
               <div>
                 <img
@@ -506,7 +506,7 @@ const AboutUs: React.FC = () => {
                 />
               </div>
               <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-[#5b705d] font-semibold">
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">
                   Leadership
                 </p>
                 <h2 className="about-handwritten text-4xl text-slate-900 mt-3">
@@ -532,7 +532,7 @@ const AboutUs: React.FC = () => {
                     href={cooLinkedIn}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center rounded-xl border border-[#c9d7c4] bg-white px-4 py-2 text-sm font-semibold text-[#586f58] transition hover:bg-[#f2f7ef]"
+                    className="inline-flex items-center rounded-xl border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50"
                   >
                     View LinkedIn Profile
                   </a>
@@ -543,7 +543,7 @@ const AboutUs: React.FC = () => {
         </section>
 
         <section className="max-w-6xl mx-auto px-4 py-12">
-          <div className="about-handwritten rounded-3xl border border-[#c9d7c4] bg-[#f6faf3] p-6 md:p-8 shadow-sm">
+          <div className="about-handwritten rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
             <div className="grid gap-8 md:grid-cols-[0.8fr_1.2fr] items-start">
               <div>
                 <img
@@ -556,7 +556,7 @@ const AboutUs: React.FC = () => {
                 />
               </div>
               <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-[#5b705d] font-semibold">
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">
                   Leadership
                 </p>
                 <h2 className="about-handwritten text-4xl text-slate-900 mt-3">
@@ -582,7 +582,7 @@ const AboutUs: React.FC = () => {
                     href={chiefOfStaffLinkedIn}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center rounded-xl border border-[#c9d7c4] bg-white px-4 py-2 text-sm font-semibold text-[#586f58] transition hover:bg-[#f2f7ef]"
+                    className="inline-flex items-center rounded-xl border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50"
                   >
                     View LinkedIn Profile
                   </a>
@@ -593,7 +593,7 @@ const AboutUs: React.FC = () => {
         </section>
 
         <section className="max-w-6xl mx-auto px-4 py-12">
-          <div className="about-handwritten rounded-3xl border border-[#c9d7c4] bg-[#f6faf3] p-6 md:p-8 shadow-sm">
+          <div className="about-handwritten rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
             <div className="grid gap-8 md:grid-cols-[0.8fr_1.2fr] items-start">
               <div>
                 <img
@@ -606,7 +606,7 @@ const AboutUs: React.FC = () => {
                 />
               </div>
               <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-[#5b705d] font-semibold">
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">
                   Leadership
                 </p>
                 <h2 className="about-handwritten text-4xl text-slate-900 mt-3">
@@ -632,7 +632,7 @@ const AboutUs: React.FC = () => {
                     href={cmoLinkedIn}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center rounded-xl border border-[#c9d7c4] bg-white px-4 py-2 text-sm font-semibold text-[#586f58] transition hover:bg-[#f2f7ef]"
+                    className="inline-flex items-center rounded-xl border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50"
                   >
                     View LinkedIn Profile
                   </a>
@@ -643,7 +643,7 @@ const AboutUs: React.FC = () => {
         </section>
 
         <section className="max-w-6xl mx-auto px-4 py-12">
-          <div className="about-handwritten rounded-3xl border border-[#c9d7c4] bg-[#f6faf3] p-6 md:p-8 shadow-sm">
+          <div className="about-handwritten rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
             <div className="grid gap-8 md:grid-cols-[0.8fr_1.2fr] items-start">
               <div>
                 <img
@@ -656,7 +656,7 @@ const AboutUs: React.FC = () => {
                 />
               </div>
               <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-[#5b705d] font-semibold">
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">
                   Leadership
                 </p>
                 <h2 className="about-handwritten text-4xl text-slate-900 mt-3">
@@ -686,7 +686,7 @@ const AboutUs: React.FC = () => {
           <div className="flex flex-col gap-8">
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-[#5b705d] font-semibold">What we offer</p>
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">What we offer</p>
                 <h2 className="about-title text-3xl text-slate-900 mt-2">Everything for your farm and agribusiness</h2>
               </div>
               <Link
@@ -700,7 +700,7 @@ const AboutUs: React.FC = () => {
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
               <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-2xl bg-[#e6f0e0] text-[#586f58] flex items-center justify-center font-bold">PR</div>
+                  <div className="h-12 w-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">PR</div>
                   <h3 className="text-xl font-semibold text-slate-900">Produce</h3>
                 </div>
                 <p className="text-sm text-slate-600 mt-3">High-quality maize, onions, potatoes, fruits, and vegetables listed by farmers.</p>
@@ -726,7 +726,7 @@ const AboutUs: React.FC = () => {
 
               <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-2xl bg-[#e6f0e0] text-[#586f58] flex items-center justify-center font-bold">IN</div>
+                  <div className="h-12 w-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">IN</div>
                   <h3 className="text-xl font-semibold text-slate-900">Inputs</h3>
                 </div>
                 <p className="text-sm text-slate-600 mt-3">Certified seeds, fertilizer, and tools from verified suppliers.</p>
@@ -780,7 +780,7 @@ const AboutUs: React.FC = () => {
         <section className="max-w-6xl mx-auto px-4 py-12">
           <div className="grid gap-6 md:grid-cols-2">
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <p className="text-xs uppercase tracking-[0.3em] text-[#5b705d] font-semibold">
+              <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">
                 Privacy and trust
               </p>
               <h3 className="mt-2 text-xl font-semibold text-slate-900">Compliance-first operations</h3>
@@ -801,7 +801,7 @@ const AboutUs: React.FC = () => {
             </div>
 
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <p className="text-xs uppercase tracking-[0.3em] text-[#5b705d] font-semibold">
+              <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">
                 FAQ
               </p>
               <h3 className="mt-2 text-xl font-semibold text-slate-900">Common questions</h3>
@@ -818,16 +818,16 @@ const AboutUs: React.FC = () => {
         </section>
 
         <section className="max-w-6xl mx-auto px-4 py-12">
-          <div className="rounded-3xl bg-[#6b856b] text-white p-10 text-center shadow-sm">
+          <div className="rounded-3xl bg-emerald-600 text-white p-10 text-center shadow-sm">
             <h2 className="about-title text-3xl mb-3">Ready to get started?</h2>
-            <p className="text-[#eef5eb] mb-6">
+            <p className="mb-6 text-emerald-100">
               Join thousands of farmers, producers, buyers, and service providers building a stronger agricultural economy.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {!user && (
                 <Link
                   to="/login?mode=signup&next=/browse"
-                  className="inline-flex justify-center items-center px-6 py-3 rounded-xl bg-white text-[#586f58] font-semibold transition hover:bg-[#f2f7ef]"
+                  className="inline-flex justify-center items-center px-6 py-3 rounded-xl bg-white text-emerald-700 font-semibold transition hover:bg-emerald-50"
                 >
                   Create account / Sign in
                 </Link>
@@ -861,7 +861,7 @@ const AboutUs: React.FC = () => {
                   href={`https://wa.me/${founderWhatsapp}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex justify-center items-center rounded-xl border border-[#c9d7c4] bg-[#edf4e9] text-[#586f58] px-4 py-2 text-sm font-semibold transition hover:bg-[#e6f0e0]"
+                  className="inline-flex justify-center items-center rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 px-4 py-2 text-sm font-semibold transition hover:bg-emerald-100"
                 >
                   WhatsApp {founderWhatsappDisplay}
                 </a>
@@ -890,7 +890,7 @@ const AboutUs: React.FC = () => {
               <p className="text-sm text-slate-600 mt-3">Profiles are verified and ratings keep the marketplace honest.</p>
               <Link
                 to={verificationLink}
-                className="mt-4 inline-flex items-center text-sm font-semibold text-[#586f58] hover:text-[#4d6250]"
+                className="mt-4 inline-flex items-center text-sm font-semibold text-emerald-700 hover:text-emerald-800"
               >
                 {verificationCta}
               </Link>

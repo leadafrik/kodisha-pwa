@@ -539,7 +539,7 @@ const BrowseListings: React.FC = () => {
 
       <section className="relative overflow-hidden">
         <div className="pointer-events-none absolute -top-24 right-0 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 left-0 h-72 w-72 rounded-full bg-[#e6f0e0]/70 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 left-0 h-72 w-72 rounded-full bg-emerald-100/70 blur-3xl" />
 
         <div className="max-w-7xl mx-auto px-4 py-10 md:py-14 space-y-6">
           {!user && (
@@ -595,7 +595,7 @@ const BrowseListings: React.FC = () => {
                 </div>
                 <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold text-slate-500">
                   <span className="text-emerald-700">Verified sellers</span>
-                  <span className="text-[#5b705d]">Boosted listings first</span>
+                  <span className="text-emerald-700">Boosted listings first</span>
                   <span>Direct contact</span>
                 </div>
               </div>
@@ -623,7 +623,7 @@ const BrowseListings: React.FC = () => {
             </div>
           </div>
 
-          <div className="fade-up sticky top-24 z-20 overflow-hidden rounded-2xl border border-[#c9d7c4] bg-[#f3f8f0] p-3 md:p-4 shadow-sm">
+          <div className="fade-up sticky top-24 z-20 overflow-hidden rounded-2xl border border-emerald-200 bg-emerald-50/80 p-3 md:p-4 shadow-sm">
             <button
               type="button"
               onClick={() => setShowRaffle((prev) => !prev)}
@@ -1207,7 +1207,7 @@ const BrowseListings: React.FC = () => {
                       </span>
                     )}
                     {card.boosted && (
-                      <span className="rounded-full bg-[#e6f0e0] text-[#586f58] text-[11px] font-semibold px-2.5 py-1 whitespace-nowrap">
+                      <span className="rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-semibold px-2.5 py-1 whitespace-nowrap">
                         Boosted
                       </span>
                     )}
@@ -1323,7 +1323,7 @@ const BrowseListings: React.FC = () => {
           </div>
         )}
 
-        <div className="mt-16 rounded-3xl border border-[#d6e2d1] bg-[#f7faf5] p-8 shadow-sm">
+        <div className="mt-16 rounded-3xl border border-emerald-100 bg-emerald-50/40 p-8 shadow-sm">
           <div className="grid gap-6 md:grid-cols-[1.2fr_0.8fr] items-center">
             <div>
               <h3 className="text-2xl font-serif font-semibold text-slate-900 mb-3">
