@@ -329,7 +329,7 @@ const Home: React.FC = () => {
   return (
     <main className="min-h-screen bg-slate-50 pb-28 text-slate-900 sm:pb-24">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:wght@500;700&family=Sora:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700&family=Patrick+Hand&family=Sora:wght@400;500;600;700&display=swap');
         .home-shell {
           font-family: "Sora", "Segoe UI", "Tahoma", sans-serif;
         }
@@ -337,7 +337,7 @@ const Home: React.FC = () => {
           font-family: "Fraunces", "Georgia", serif;
         }
         .home-handwritten {
-          font-family: "Caveat", "Segoe Script", "Bradley Hand", cursive;
+          font-family: "Patrick Hand", "Segoe Print", "Bradley Hand", cursive;
         }
       `}</style>
 
@@ -574,19 +574,17 @@ const Home: React.FC = () => {
               </p>
             </div>
 
-            <div className="relative mt-5 max-w-4xl rotate-[-1.2deg] rounded-[2rem] border border-emerald-300 bg-[linear-gradient(160deg,#d9f99d_0%,#bbf7d0_55%,#86efac_100%)] px-5 py-6 text-slate-900 shadow-[0_20px_45px_rgba(21,128,61,0.16)] sm:px-7 sm:py-7">
-              <div className="absolute left-1/2 top-0 h-10 w-24 -translate-x-1/2 -translate-y-1/2 rotate-[3deg] rounded-b-2xl bg-white/55 shadow-sm backdrop-blur-sm" />
-              <div className="absolute -right-3 top-6 h-14 w-14 rounded-full bg-white/18 blur-xl" />
-              <div className="absolute bottom-4 left-4 h-10 w-10 rounded-full bg-emerald-200/60 blur-lg" />
-              <p className="home-handwritten text-[2rem] font-bold leading-none text-emerald-950 sm:text-[2.35rem]">
+            <div className="relative mt-5 max-w-4xl rotate-[-0.9deg] rounded-[2rem] border border-emerald-200 bg-[#dff5da] px-5 py-6 text-slate-900 shadow-[0_14px_28px_rgba(22,101,52,0.12)] sm:px-7 sm:py-7">
+              <div className="absolute left-1/2 top-0 h-10 w-24 -translate-x-1/2 -translate-y-1/2 rotate-[2deg] rounded-b-2xl bg-[#edf7ea] shadow-sm" />
+              <p className="home-handwritten text-[1.9rem] font-semibold leading-none text-emerald-950 sm:text-[2.2rem]">
                 Why we Started Agrisoko
               </p>
-              <div className="mt-4 space-y-3 home-handwritten text-[1.42rem] leading-[1.18] text-slate-900 sm:text-[1.62rem]">
+              <div className="mt-4 space-y-3 home-handwritten text-[1.34rem] leading-[1.22] text-slate-900 sm:text-[1.5rem]">
                 {founderLetterParagraphs.map((paragraph) => (
                   <p key={paragraph}>{paragraph}</p>
                 ))}
               </div>
-              <p className="home-handwritten mt-5 text-[1.7rem] font-bold text-emerald-950 sm:text-[1.9rem]">
+              <p className="home-handwritten mt-5 text-[1.55rem] font-semibold text-emerald-950 sm:text-[1.75rem]">
                 Stephen
               </p>
             </div>
@@ -603,11 +601,11 @@ const Home: React.FC = () => {
                 <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl">
                   Clear value, simple start.
                 </h2>
-                <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <div className="mt-5 space-y-4">
                   {conversionPillars.map((pillar) => (
                     <div
                       key={pillar.title}
-                      className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5"
+                      className="border-b border-slate-200 pb-4 last:border-b-0 last:pb-0"
                     >
                       <p className="text-sm font-semibold text-slate-900">{pillar.title}</p>
                       <p className="mt-1 text-sm text-slate-600">{pillar.copy}</p>
@@ -616,7 +614,7 @@ const Home: React.FC = () => {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 sm:p-5">
+              <div className="lg:border-l lg:border-slate-200 lg:pl-6">
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
                   How it works
                 </p>
@@ -624,9 +622,9 @@ const Home: React.FC = () => {
                   {tradeSteps.map((step, index) => (
                     <div
                       key={step.title}
-                      className="flex items-start gap-3 rounded-2xl border border-white/80 bg-white/90 px-3.5 py-3"
+                      className="flex items-start gap-3 border-b border-slate-200 pb-3 last:border-b-0 last:pb-0"
                     >
-                      <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">
+                      <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-700 text-sm font-semibold text-white">
                         {index + 1}
                       </span>
                       <div>
