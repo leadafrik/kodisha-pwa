@@ -96,13 +96,13 @@ const getSignupTarget = (nextPath: string) =>
 const getNavLinkClass = (active: boolean, accent = false) => {
   if (accent) {
     return active
-      ? "inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white shadow-sm"
-      : "inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700";
+      ? "inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-xl bg-[#8B3525] px-4 py-2 text-sm font-semibold text-white shadow-sm"
+      : "inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-xl bg-[#A0452E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#8B3525]";
   }
 
   return active
-    ? "inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-xl bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900"
-    : "inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-xl px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900";
+    ? "inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-xl bg-[#FDF5F3] px-4 py-2 text-sm font-semibold text-[#A0452E]"
+    : "inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-xl px-4 py-2 text-sm font-semibold text-stone-600 transition hover:bg-[#FDF5F3] hover:text-[#A0452E]";
 };
 
 const Navbar: React.FC = () => {
@@ -220,13 +220,13 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
+      <nav className="sticky top-0 z-40 border-b border-stone-200 bg-white/95 backdrop-blur-md">
         <div className="h-1 w-full bg-[#A0452E]" />
         <div className="mx-auto max-w-7xl px-4">
           <div className="flex items-center justify-between py-4">
             <Link to="/" className="flex items-center gap-3">
               <img src="/logo192.png" alt="Agrisoko" className="h-10 w-10" />
-              <span className="text-2xl font-extrabold tracking-tight text-slate-900">Agrisoko</span>
+              <span className="font-display text-2xl font-bold tracking-tight text-stone-900">Agrisoko</span>
             </Link>
 
             <div ref={desktopNavRef} className="hidden lg:flex lg:items-center lg:gap-2">
@@ -242,13 +242,13 @@ const Navbar: React.FC = () => {
                   <ChevronDown className={`ml-2 h-4 w-4 transition ${openNavMenu === "browse" ? "rotate-180" : ""}`} />
                 </button>
                 {openNavMenu === "browse" && (
-                  <div className="absolute left-0 mt-2 w-60 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+                  <div className="absolute left-0 mt-2 w-60 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-xl">
                     {browseMenuItems.map((item, index) => (
                       <Link
                         key={item.to}
                         to={item.to}
-                        className={`block px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 ${
-                          index > 0 ? "border-t border-slate-100" : ""
+                        className={`block px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3] ${
+                          index > 0 ? "border-t border-stone-100" : ""
                         }`}
                       >
                         {item.label}
@@ -281,13 +281,13 @@ const Navbar: React.FC = () => {
                   <ChevronDown className={`ml-2 h-4 w-4 transition ${openNavMenu === "sell" ? "rotate-180" : ""}`} />
                 </button>
                 {openNavMenu === "sell" && (
-                  <div className="absolute left-0 mt-2 w-64 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+                  <div className="absolute left-0 mt-2 w-64 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-xl">
                     {sellMenuItems.map((item, index) => (
                       <Link
                         key={item.to}
                         to={item.to}
-                        className={`block px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 ${
-                          index > 0 ? "border-t border-slate-100" : ""
+                        className={`block px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3] ${
+                          index > 0 ? "border-t border-stone-100" : ""
                         }`}
                       >
                         {item.label}
@@ -321,11 +321,11 @@ const Navbar: React.FC = () => {
                       aria-expanded={accountOpen}
                       aria-haspopup="menu"
                     >
-                      <span className="mr-2 inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-slate-200">
+                      <span className="mr-2 inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-stone-200">
                         {user.profilePicture ? (
                           <img src={user.profilePicture} alt={user.name} className="h-full w-full object-cover" />
                         ) : (
-                          <span className="font-semibold text-slate-700">
+                          <span className="font-semibold text-stone-700">
                             {user.name ? user.name[0].toUpperCase() : "U"}
                           </span>
                         )}
@@ -334,19 +334,19 @@ const Navbar: React.FC = () => {
                     </button>
 
                     {accountOpen && (
-                      <div className="absolute right-0 mt-2 w-64 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
-                        <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
-                          <p className="truncate text-sm font-semibold text-slate-900">{user.name || "User"}</p>
-                          <p className="truncate text-xs text-slate-500">{user.email}</p>
+                      <div className="absolute right-0 mt-2 w-64 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-xl">
+                        <div className="border-b border-stone-200 bg-[#FAF7F2] px-4 py-3">
+                          <p className="truncate text-sm font-semibold text-stone-900">{user.name || "User"}</p>
+                          <p className="truncate text-xs text-stone-500">{user.email}</p>
                         </div>
-                        <Link to="/profile" className="block px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                        <Link to="/profile" className="block px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
                           Account
                         </Link>
-                        <Link to="/favorites" className="block border-t border-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                        <Link to="/favorites" className="block border-t border-stone-100 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
                           Saved Listings
                         </Link>
                         {isAdmin && (
-                          <Link to="/admin" className="block border-t border-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                          <Link to="/admin" className="block border-t border-stone-100 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
                             Admin Console
                           </Link>
                         )}
@@ -376,7 +376,7 @@ const Navbar: React.FC = () => {
 
             <button
               type="button"
-              className="inline-flex min-h-[48px] min-w-[48px] items-center justify-center rounded-xl border border-slate-200 text-slate-900 transition hover:bg-slate-50 lg:hidden"
+              className="inline-flex min-h-[48px] min-w-[48px] items-center justify-center rounded-xl border border-stone-200 text-stone-900 transition hover:bg-[#FDF5F3] lg:hidden"
               onClick={() => setMobileOpen(true)}
               aria-label="Open menu"
               aria-expanded={mobileOpen}
@@ -388,33 +388,33 @@ const Navbar: React.FC = () => {
       </nav>
 
       {mobileOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/45 lg:hidden" onClick={() => setMobileOpen(false)}>
+        <div className="fixed inset-0 z-50 bg-stone-950/40 lg:hidden" onClick={() => setMobileOpen(false)}>
           <div
             className="absolute left-0 top-0 h-full w-80 max-w-[88vw] overflow-y-auto bg-white p-5 shadow-2xl"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="mb-6 flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">Menu</p>
-                <p className="mt-1 text-lg font-bold text-slate-900">Agrisoko</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#A0452E]">Menu</p>
+                <p className="mt-1 font-display text-lg font-bold text-stone-900">Agrisoko</p>
               </div>
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
                 aria-label="Close menu"
-                className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border border-slate-200 text-slate-900"
+                className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border border-stone-200 text-stone-900"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <div className="space-y-2">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/70">
+              <div className="rounded-2xl border border-stone-200 bg-[#FAF7F2]">
                 <button
                   type="button"
                   onClick={() => setMobileExpandedMenu((prev) => (prev === "browse" ? null : "browse"))}
                   className={`flex min-h-[52px] w-full items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-                    pathMatches(location.pathname, "/browse") ? "bg-slate-100 text-slate-900" : "text-slate-700 hover:bg-slate-50"
+                    pathMatches(location.pathname, "/browse") ? "bg-[#FDF5F3] text-[#A0452E]" : "text-stone-700 hover:bg-[#FDF5F3]"
                   }`}
                 >
                   <span className="flex items-center gap-3">
@@ -424,12 +424,12 @@ const Navbar: React.FC = () => {
                   <ChevronDown className={`h-4 w-4 transition ${mobileExpandedMenu === "browse" ? "rotate-180" : ""}`} />
                 </button>
                 {mobileExpandedMenu === "browse" && (
-                  <div className="border-t border-slate-200 px-3 py-2">
+                  <div className="border-t border-stone-200 px-3 py-2">
                     {browseMenuItems.map((item) => (
                       <Link
                         key={item.to}
                         to={item.to}
-                        className="block rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white"
+                        className="block rounded-xl px-3 py-2 text-sm font-semibold text-stone-700 transition hover:bg-white"
                       >
                         {item.label}
                       </Link>
@@ -456,7 +456,7 @@ const Navbar: React.FC = () => {
                     key={item.label}
                     to={item.to}
                     className={`flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-                      active ? "bg-slate-100 text-slate-900" : "text-slate-700 hover:bg-slate-50"
+                      active ? "bg-[#FDF5F3] text-[#A0452E]" : "text-stone-700 hover:bg-[#FDF5F3]"
                     }`}
                   >
                     <Icon className="h-5 w-5" />
@@ -465,12 +465,12 @@ const Navbar: React.FC = () => {
                 );
               })}
 
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/70">
+              <div className="rounded-2xl border border-stone-200 bg-[#FAF7F2]">
                 <button
                   type="button"
                   onClick={() => setMobileExpandedMenu((prev) => (prev === "sell" ? null : "sell"))}
                   className={`flex min-h-[52px] w-full items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-                    pathMatches(location.pathname, "/create-listing") ? "bg-slate-100 text-slate-900" : "text-slate-700 hover:bg-slate-50"
+                    pathMatches(location.pathname, "/create-listing") ? "bg-[#FDF5F3] text-[#A0452E]" : "text-stone-700 hover:bg-[#FDF5F3]"
                   }`}
                 >
                   <span className="flex items-center gap-3">
@@ -480,12 +480,12 @@ const Navbar: React.FC = () => {
                   <ChevronDown className={`h-4 w-4 transition ${mobileExpandedMenu === "sell" ? "rotate-180" : ""}`} />
                 </button>
                 {mobileExpandedMenu === "sell" && (
-                  <div className="border-t border-slate-200 px-3 py-2">
+                  <div className="border-t border-stone-200 px-3 py-2">
                     {sellMenuItems.map((item) => (
                       <Link
                         key={item.to}
                         to={item.to}
-                        className="block rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white"
+                        className="block rounded-xl px-3 py-2 text-sm font-semibold text-stone-700 transition hover:bg-white"
                       >
                         {item.label}
                       </Link>
@@ -510,7 +510,7 @@ const Navbar: React.FC = () => {
                       key={item.label}
                       to={item.to}
                       className={`flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-                        active ? "bg-slate-100 text-slate-900" : "text-slate-700 hover:bg-slate-50"
+                      active ? "bg-[#FDF5F3] text-[#A0452E]" : "text-stone-700 hover:bg-[#FDF5F3]"
                       }`}
                     >
                       <Icon className="h-5 w-5" />
@@ -520,24 +520,24 @@ const Navbar: React.FC = () => {
                 })}
             </div>
 
-            <div className="my-6 border-t border-slate-200" />
+            <div className="my-6 border-t border-stone-200" />
 
             {user ? (
               <div className="space-y-2">
-                <div className="rounded-2xl bg-slate-50 px-4 py-3">
-                  <p className="truncate text-sm font-semibold text-slate-900">{user.name || "User"}</p>
-                  <p className="truncate text-xs text-slate-500">{user.email}</p>
+                <div className="rounded-2xl bg-[#FAF7F2] px-4 py-3">
+                  <p className="truncate text-sm font-semibold text-stone-900">{user.name || "User"}</p>
+                  <p className="truncate text-xs text-stone-500">{user.email}</p>
                 </div>
-                <Link to="/profile" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                <Link to="/profile" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
                   <User className="h-5 w-5" />
                   Account
                 </Link>
-                <Link to="/favorites" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                <Link to="/favorites" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
                   <Heart className="h-5 w-5" />
                   Saved Listings
                 </Link>
                 {isAdmin && (
-                  <Link to="/admin" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                  <Link to="/admin" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
                     <Shield className="h-5 w-5" />
                     Admin Console
                   </Link>
@@ -556,10 +556,10 @@ const Navbar: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-2">
-                <Link to={signupTarget} className="flex min-h-[52px] items-center justify-center rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700">
+                <Link to={signupTarget} className="flex min-h-[52px] items-center justify-center rounded-2xl bg-[#A0452E] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#8B3525]">
                   Create Free Account
                 </Link>
-                <Link to="/login" className="flex min-h-[52px] items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                <Link to="/login" className="flex min-h-[52px] items-center justify-center rounded-2xl border border-stone-200 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
                   Login
                 </Link>
               </div>
@@ -571,19 +571,19 @@ const Navbar: React.FC = () => {
       {showMobileBottomNav && (
         <>
           {mobileSellSheetOpen && (
-            <div className="fixed inset-0 z-40 bg-slate-900/35 lg:hidden" onClick={() => setMobileSellSheetOpen(false)} />
+            <div className="fixed inset-0 z-40 bg-stone-950/30 lg:hidden" onClick={() => setMobileSellSheetOpen(false)} />
           )}
           {mobileSellSheetOpen && (
-            <div className="fixed inset-x-0 bottom-20 z-50 mx-auto w-[calc(100%-1rem)] max-w-md rounded-3xl border border-slate-200 bg-white p-4 shadow-2xl lg:hidden">
+            <div className="fixed inset-x-0 bottom-20 z-50 mx-auto w-[calc(100%-1rem)] max-w-md rounded-3xl border border-stone-200 bg-white p-4 shadow-2xl lg:hidden">
               <div className="mb-3 flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Sell</p>
-                  <p className="text-sm font-semibold text-slate-900">Choose what you are listing</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#A0452E]">Sell</p>
+                  <p className="text-sm font-semibold text-stone-900">Choose what you are listing</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setMobileSellSheetOpen(false)}
-                  className="inline-flex min-h-[40px] min-w-[40px] items-center justify-center rounded-xl border border-slate-200 text-slate-700"
+                  className="inline-flex min-h-[40px] min-w-[40px] items-center justify-center rounded-xl border border-stone-200 text-stone-700"
                   aria-label="Close sell options"
                 >
                   <X className="h-4 w-4" />
@@ -598,7 +598,7 @@ const Navbar: React.FC = () => {
                       setMobileSellSheetOpen(false);
                       navigate(item.to);
                     }}
-                    className="flex min-h-[48px] items-center rounded-2xl border border-slate-200 px-4 py-3 text-left text-sm font-semibold text-slate-800 transition hover:border-emerald-300 hover:bg-emerald-50"
+                    className="flex min-h-[48px] items-center rounded-2xl border border-stone-200 px-4 py-3 text-left text-sm font-semibold text-stone-800 transition hover:border-[#E8A08E] hover:bg-[#FDF5F3]"
                   >
                     {item.label}
                   </button>
@@ -606,7 +606,7 @@ const Navbar: React.FC = () => {
               </div>
             </div>
           )}
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 shadow-[0_-12px_28px_-24px_rgba(15,23,42,0.5)] backdrop-blur lg:hidden">
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-white/95 shadow-[0_-12px_28px_-24px_rgba(28,25,23,0.4)] backdrop-blur-md lg:hidden">
           <div className="mx-auto grid max-w-md grid-cols-5 px-2 py-2">
             {mobileBottomItems.map((item) => {
               const Icon = item.icon || LayoutGrid;
@@ -619,10 +619,10 @@ const Navbar: React.FC = () => {
                     type="button"
                     onClick={() => setMobileSellSheetOpen((prev) => !prev)}
                     className={`flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-xl px-1 text-[11px] font-semibold transition ${
-                      active ? "text-emerald-700" : "text-slate-500"
+                      active ? "text-[#A0452E]" : "text-stone-500"
                     }`}
                   >
-                    <Icon className={`h-5 w-5 ${active ? "text-emerald-700" : "text-slate-400"}`} />
+                    <Icon className={`h-5 w-5 ${active ? "text-[#A0452E]" : "text-stone-400"}`} />
                     <span>{item.label}</span>
                   </button>
                 );
@@ -632,10 +632,10 @@ const Navbar: React.FC = () => {
                   key={item.label}
                   to={item.to}
                   className={`flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-xl px-1 text-[11px] font-semibold transition ${
-                    active ? "text-emerald-700" : "text-slate-500"
+                    active ? "text-[#A0452E]" : "text-stone-500"
                   }`}
                 >
-                  <Icon className={`h-5 w-5 ${active ? "text-emerald-700" : "text-slate-400"}`} />
+                  <Icon className={`h-5 w-5 ${active ? "text-[#A0452E]" : "text-stone-400"}`} />
                   <span>{item.label}</span>
                 </Link>
               );

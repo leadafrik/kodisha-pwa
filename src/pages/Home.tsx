@@ -65,6 +65,16 @@ const buyerDemandSignals = [
   "Farm inputs - Nakuru",
 ];
 
+const featuredCounties = [
+  "Nairobi",
+  "Nakuru",
+  "Kisumu",
+  "Machakos",
+  "Meru",
+  "Kiambu",
+  "Uasin Gishu",
+];
+
 const trustFeatures = [
   {
     title: "Verified traders",
@@ -124,6 +134,7 @@ const Home: React.FC = () => {
   const { isPhone } = useAdaptiveLayout();
   const { productListings, serviceListings } = useProperties();
   const [heroVariant, setHeroVariant] = useState<HeroVariant>("sell_first");
+  const [countyIndex, setCountyIndex] = useState(0);
 
   const { content: heroHeadline } = usePageContent("home.hero.headline");
   const { content: heroDescription } = usePageContent("home.hero.description");
@@ -158,6 +169,14 @@ const Home: React.FC = () => {
     });
   }, [heroVariant, user]);
 
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setCountyIndex((current) => (current + 1) % featuredCounties.length);
+    }, 2400);
+
+    return () => window.clearInterval(interval);
+  }, []);
+
   const liveListingCount = useMemo(() => {
     const liveProducts = (productListings || []).filter((item: any) =>
       isLiveStatus(item?.publishStatus || item?.status)
@@ -184,6 +203,27 @@ const Home: React.FC = () => {
       if (county) counties.add(county.toLowerCase());
     });
     return counties.size;
+  }, [productListings, serviceListings]);
+
+  const latestListings = useMemo(() => {
+    const products = (productListings || [])
+      .filter((item: any) => isLiveStatus(item?.publishStatus || item?.status))
+      .map((item: any) => ({ ...item, _kind: "product" }));
+    const services = (serviceListings || [])
+      .filter((item: any) => {
+        if (!isLiveStatus(item?.publishStatus || item?.status)) return false;
+        if (item?.isDeleted === true || item?.deletedAt) return false;
+        return true;
+      })
+      .map((item: any) => ({ ...item, _kind: "service" }));
+
+    return [...products, ...services]
+      .sort((a: any, b: any) => {
+        const aDate = toValidDate(a?.updatedAt || a?.createdAt)?.getTime() || 0;
+        const bDate = toValidDate(b?.updatedAt || b?.createdAt)?.getTime() || 0;
+        return bDate - aDate;
+      })
+      .slice(0, 3);
   }, [productListings, serviceListings]);
 
   const signupDate = toValidDate(user?.createdAt);
@@ -249,46 +289,41 @@ const Home: React.FC = () => {
         : `Your free listing window: ${daysLeft} day${daysLeft === 1 ? "" : "s"} left`
       : "Your free listing window has ended"
     : `Free listing for your first ${FREE_WINDOW_DAYS} days after signup`;
+  const activeCountyLabel = featuredCounties[countyIndex];
 
   return (
-    <main className="min-h-screen bg-slate-50 pb-28 text-slate-900 sm:pb-24">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700&family=Patrick+Hand&family=Sora:wght@400;500;600;700&display=swap');
-        .home-shell {
-          font-family: "Sora", "Segoe UI", "Tahoma", sans-serif;
-        }
-        .home-title {
-          font-family: "Fraunces", "Georgia", serif;
-        }
-        .home-handwritten {
-          font-family: "Patrick Hand", "Segoe Print", "Bradley Hand", cursive;
-        }
-      `}</style>
-
-      <div className="home-shell">
-        <section className="relative overflow-hidden border-b border-slate-200 bg-white">
-          <div className="pointer-events-none absolute -top-16 left-1/3 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-12 right-0 h-72 w-72 rounded-full bg-sky-100/70 blur-3xl" />
+    <main className="min-h-screen bg-[#FAF7F2] pb-28 text-stone-900 sm:pb-24">
+      <div className="font-body">
+        <section className="relative overflow-hidden border-b border-stone-200 bg-gradient-to-br from-[#FAF7F2] via-[#F8F2EA] to-[#F5EFE6]">
+          <div className="pointer-events-none absolute -top-20 left-[18%] h-72 w-72 rounded-full bg-[#F3C9BE]/40 blur-3xl" />
+          <div className="pointer-events-none absolute right-0 top-20 h-80 w-80 rounded-full bg-[#FFF0C8]/55 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-16 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-white/70 blur-3xl" />
 
           <div className="relative mx-auto max-w-7xl px-4 pb-10 pt-10 sm:pb-12 sm:pt-14 md:pb-16 md:pt-20">
             <div className="max-w-4xl">
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800">
+                <div className="anim-in inline-flex items-center gap-2 rounded-full border border-[#F4D89E] bg-[#FFF9EC] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-[#8A5A12]">
                   <Sparkles className="h-3.5 w-3.5" />
                   Free Listing Window
-                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] tracking-[0.12em] text-emerald-800">
+                  <span className="rounded-full bg-[#FFF0C8] px-2 py-0.5 text-[10px] tracking-[0.12em] text-[#8A5A12]">
                     {launchWindowLabel}
                   </span>
                 </div>
 
-                <h1 className="home-title mt-4 text-3xl leading-[1.05] text-slate-900 sm:mt-5 sm:text-4xl md:text-6xl">
+                <h1 className="anim-in-2 font-display mt-4 text-3xl leading-[1.02] text-stone-900 sm:mt-5 sm:text-4xl md:text-6xl">
                   {displayHeadline}
                 </h1>
-                <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-700 sm:mt-4 sm:text-base md:text-lg">
+                <p className="anim-in-2 mt-3 max-w-3xl text-sm leading-relaxed text-stone-700 sm:mt-4 sm:text-base md:text-lg">
                   {displayDescription}
                 </p>
+                <div className="anim-in-3 mt-4 flex flex-wrap items-center gap-3 text-sm text-stone-700">
+                  <span className="rounded-full border border-[#E8A08E] bg-white/75 px-3 py-1.5 font-semibold text-[#8B3525] shadow-sm">
+                    Now active in {activeCountyLabel}
+                  </span>
+                  <span className="text-stone-500">Verified profiles. Direct chat. No broker layer.</span>
+                </div>
 
-                <div className="mt-6 flex flex-col gap-3 sm:mt-7 sm:flex-row">
+                <div className="anim-in-3 mt-6 flex flex-col gap-3 sm:mt-7 sm:flex-row">
                   {heroVariant === "find_first" && !user ? (
                     <>
                       <Link
@@ -340,7 +375,7 @@ const Home: React.FC = () => {
                         }
                         className={`ui-btn-ghost w-full px-6 sm:w-auto ${
                           user
-                            ? "border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+                            ? "border-[#E8A08E] text-[#A0452E] hover:bg-[#FDF5F3]"
                             : ""
                         }`}
                       >
@@ -349,7 +384,7 @@ const Home: React.FC = () => {
                     </>
                   )}
                 </div>
-                <div className="mt-4 space-y-3">
+                <div className="anim-in-3 mt-4 space-y-3">
                   {!isPhone && (
                   <div>
                     <Link
@@ -359,7 +394,7 @@ const Home: React.FC = () => {
                           source: "home_hero",
                         })
                       }
-                      className="text-sm font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4 transition hover:text-slate-900"
+                      className="text-sm font-semibold text-stone-700 underline decoration-stone-300 underline-offset-4 transition hover:text-stone-900"
                     >
                       Why we built Agrisoko
                     </Link>
@@ -369,18 +404,21 @@ const Home: React.FC = () => {
                     <div>
                       <Link
                         to="/bulk"
-                        className="text-sm font-semibold text-emerald-700 underline decoration-emerald-200 underline-offset-4 transition hover:text-emerald-800"
+                        className="text-sm font-semibold text-[#A0452E] underline decoration-[#E8A08E] underline-offset-4 transition hover:text-[#8B3525]"
                       >
                         Explore bulk buying customers
                       </Link>
                     </div>
                   )}
-                  <div className="flex flex-wrap gap-2 text-[11px] font-semibold text-slate-700 sm:text-xs">
-                    <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-800">
+                  <div className="flex flex-wrap gap-2 text-[11px] font-semibold text-stone-700 sm:text-xs">
+                    <span className="rounded-full border border-[#F3C9BE] bg-white/80 px-3 py-1 text-[#8B3525] shadow-sm">
                       {liveListingCount.toLocaleString()} listings live
                     </span>
-                    <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-800">
+                    <span className="rounded-full border border-[#F3C9BE] bg-white/80 px-3 py-1 text-[#8B3525] shadow-sm">
                       {countyCoverageLabel}
+                    </span>
+                    <span className="rounded-full border border-[#F3C9BE] bg-white/80 px-3 py-1 text-[#8B3525] shadow-sm">
+                      Direct buyer contact
                     </span>
                   </div>
                 </div>
@@ -389,12 +427,67 @@ const Home: React.FC = () => {
           </div>
         </section>
 
+        {latestListings.length > 0 && (
+          <section className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#A0452E]">
+                  Latest listings
+                </p>
+                <h2 className="font-display mt-2 text-2xl text-stone-900 sm:text-3xl">
+                  Fresh supply coming onto the market
+                </h2>
+              </div>
+              <Link to="/browse" className="hidden text-sm font-semibold text-[#A0452E] md:inline-flex">
+                View all listings
+              </Link>
+            </div>
+
+            <div className="mt-5 grid gap-3 md:grid-cols-3">
+              {latestListings.map((listing: any) => {
+                const listingId = listing?._id || listing?.id;
+                const priceValue = Number(listing?.price);
+                const priceLabel =
+                  Number.isFinite(priceValue) && priceValue > 0
+                    ? `KSh ${priceValue.toLocaleString()}`
+                    : listing?._kind === "service"
+                    ? "Quote on request"
+                    : "Price on request";
+                const categoryLabel = String(listing?.category || listing?.propertyType || listing?._kind || "listing")
+                  .replace(/_/g, " ");
+
+                return (
+                  <Link
+                    key={listingId}
+                    to={listingId ? `/listings/${listingId}` : "/browse"}
+                    className="card-lift rounded-3xl border border-stone-200 bg-white/90 p-4 shadow-sm"
+                  >
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#A0452E]">
+                      {categoryLabel}
+                    </p>
+                    <h3 className="mt-2 line-clamp-2 text-lg font-semibold text-stone-900">
+                      {listing?.title || listing?.name || "Fresh listing"}
+                    </h3>
+                    <p className="mt-2 text-sm text-stone-600 line-clamp-2">
+                      {listing?.description || listing?.summary || "Open the listing to view more details."}
+                    </p>
+                    <div className="mt-4 flex items-center justify-between gap-3">
+                      <span className="text-sm font-semibold text-stone-900">{priceLabel}</span>
+                      <span className="text-sm font-semibold text-[#A0452E]">View details</span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
         <section className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
           <div className="max-w-4xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#A0452E]">
               Founder note
             </p>
-            <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl">
+            <h2 className="font-display mt-2 text-2xl text-stone-900 sm:text-3xl">
               Why we started Agrisoko
             </h2>
           </div>
@@ -415,88 +508,90 @@ const Home: React.FC = () => {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl border-y border-slate-200 px-4 py-8 sm:py-10">
+        <section className="mx-auto max-w-7xl px-4 py-8 sm:py-10">
+          <div className="rounded-[2rem] border border-stone-200 bg-white/85 px-5 py-6 shadow-sm sm:px-7 sm:py-7">
           <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:gap-10">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#A0452E]">
                 Why join
               </p>
-              <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl">
+              <h2 className="font-display mt-2 text-2xl text-stone-900 sm:text-3xl">
                 Clear value, simple start.
               </h2>
               <div className="mt-5 space-y-4">
                 {conversionPillars.map((pillar) => (
                   <div
                     key={pillar.title}
-                    className="border-b border-slate-200 pb-4 last:border-b-0 last:pb-0"
+                    className="border-b border-stone-200 pb-4 last:border-b-0 last:pb-0"
                   >
-                    <p className="text-sm font-semibold text-slate-900">{pillar.title}</p>
-                    <p className="mt-1 text-sm text-slate-600">{pillar.copy}</p>
+                    <p className="text-sm font-semibold text-stone-900">{pillar.title}</p>
+                    <p className="mt-1 text-sm text-stone-600">{pillar.copy}</p>
                   </div>
                 ))}
               </div>
             </div>
 
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#A0452E]">
                 How it works
               </p>
               <div className="mt-4 space-y-3">
                 {tradeSteps.map((step, index) => (
                   <div
                     key={step.title}
-                    className="flex items-start gap-3 border-b border-slate-200 pb-3 last:border-b-0 last:pb-0"
+                    className="flex items-start gap-3 border-b border-stone-200 pb-3 last:border-b-0 last:pb-0"
                   >
-                    <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-700 text-sm font-semibold text-white">
+                    <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#A0452E] text-sm font-semibold text-white">
                       {index + 1}
                     </span>
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">{step.title}</p>
-                      <p className="mt-0.5 text-sm text-slate-600">{step.copy}</p>
+                      <p className="text-sm font-semibold text-stone-900">{step.title}</p>
+                      <p className="mt-0.5 text-sm text-stone-600">{step.copy}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
           </div>
+          </div>
         </section>
 
         <section className="mx-auto max-w-7xl px-4 pb-10 sm:pb-14">
           <div className="mb-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#A0452E]">
               Live market
             </p>
-            <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl md:text-4xl">
+            <h2 className="font-display mt-2 text-2xl text-stone-900 sm:text-3xl md:text-4xl">
               Buyers are searching.
             </h2>
           </div>
 
           <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:gap-10">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-700">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-stone-700">
                 Buyer demand
               </p>
-              <h3 className="mt-3 text-xl font-semibold text-slate-900 sm:text-2xl">
+              <h3 className="mt-3 text-xl font-semibold text-stone-900 sm:text-2xl">
                 Buyers are searching for
               </h3>
-              <ul className="mt-4 space-y-2 text-sm text-slate-700">
+              <ul className="mt-4 space-y-2 text-sm text-stone-700">
                 {buyerDemandSignals.map((signal) => (
-                  <li key={signal} className="flex items-center gap-2 border-b border-slate-200 pb-2 last:border-b-0">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
+                  <li key={signal} className="flex items-center gap-2 border-b border-stone-200 pb-2 last:border-b-0">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#A0452E]" />
                     {signal}
                   </li>
                 ))}
               </ul>
 
-              <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-600">
+              <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm text-stone-600">
                 <span>
-                  <span className="font-semibold text-slate-900">{liveListingCount.toLocaleString()}</span> listings live
+                  <span className="font-semibold text-stone-900">{liveListingCount.toLocaleString()}</span> listings live
                 </span>
                 <span>
-                  <span className="font-semibold text-slate-900">{countyCoverageLabel}</span>
+                  <span className="font-semibold text-stone-900">{countyCoverageLabel}</span>
                 </span>
                 <span>
-                  <span className="font-semibold text-slate-900">Direct deal</span>
+                  <span className="font-semibold text-stone-900">Direct deal</span>
                 </span>
               </div>
 
@@ -516,19 +611,19 @@ const Home: React.FC = () => {
             </div>
 
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-emerald-700">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#A0452E]">
                 Trust
               </p>
-              <h3 className="mt-3 text-xl font-semibold text-slate-900 sm:text-2xl">
+              <h3 className="mt-3 text-xl font-semibold text-stone-900 sm:text-2xl">
                 Trust built in
               </h3>
               <div className="mt-4 space-y-3">
                 {trustFeatures.map((feature) => (
-                  <div key={feature.title} className="flex items-start gap-3 border-b border-slate-200 pb-3 last:border-b-0">
-                    <feature.icon className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
+                  <div key={feature.title} className="flex items-start gap-3 border-b border-stone-200 pb-3 last:border-b-0">
+                    <feature.icon className="mt-0.5 h-5 w-5 shrink-0 text-[#A0452E]" />
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">{feature.title}</p>
-                      <p className="mt-0.5 text-sm text-slate-600">{feature.copy}</p>
+                      <p className="text-sm font-semibold text-stone-900">{feature.title}</p>
+                      <p className="mt-0.5 text-sm text-stone-600">{feature.copy}</p>
                     </div>
                   </div>
                 ))}
@@ -538,9 +633,9 @@ const Home: React.FC = () => {
         </section>
 
         <section className="mx-auto max-w-7xl px-4 pb-14 pt-6 sm:pb-16 sm:pt-8">
-          <div className="rounded-3xl bg-emerald-600 p-5 text-white shadow-sm sm:p-8 md:p-10">
-            <h2 className="home-title text-2xl sm:text-3xl md:text-4xl">Ready to start?</h2>
-            <p className="mt-3 max-w-2xl text-sm text-emerald-100 md:text-base">
+          <div className="rounded-3xl bg-gradient-to-br from-[#A0452E] via-[#8B3525] to-[#72281A] p-5 text-white shadow-[0_16px_36px_rgba(114,40,26,0.24)] sm:p-8 md:p-10">
+            <h2 className="font-display text-2xl sm:text-3xl md:text-4xl">Ready to start?</h2>
+            <p className="mt-3 max-w-2xl text-sm text-white/82 md:text-base">
               {finalCallCopy}
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
@@ -552,7 +647,7 @@ const Home: React.FC = () => {
                     target: "/create-listing",
                   })
                 }
-                className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50 sm:w-auto"
+                className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-semibold text-[#A0452E] transition hover:bg-[#FFF7F4] sm:w-auto"
               >
                 {primaryCtaLabel}
               </Link>
@@ -564,7 +659,7 @@ const Home: React.FC = () => {
                     target: browseTo,
                   })
                 }
-                className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl border border-white/80 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10 sm:w-auto"
+                className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl border border-white/75 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10 sm:w-auto"
               >
                 {browseCtaLabel}
               </Link>
@@ -574,9 +669,9 @@ const Home: React.FC = () => {
       </div>
 
       {isPhone && (
-        <div className="fixed bottom-3 left-1/2 z-30 w-[calc(100%-1rem)] max-w-3xl -translate-x-1/2 rounded-2xl border border-[#c8d7c3] bg-white/95 px-3 py-3 shadow-lg backdrop-blur sm:px-4">
+        <div className="fixed bottom-3 left-1/2 z-30 w-[calc(100%-1rem)] max-w-3xl -translate-x-1/2 rounded-2xl border border-stone-200 bg-white/95 px-3 py-3 shadow-lg backdrop-blur-md sm:px-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs font-semibold text-slate-900 sm:text-sm">
+            <p className="text-xs font-semibold text-stone-900 sm:text-sm">
               {stickyWindowText}
             </p>
             <Link

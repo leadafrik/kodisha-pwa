@@ -61,8 +61,8 @@ const AdminBulkOrders = lazy(() => import('./pages/admin/BulkOrders'));
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen">
     <div className="text-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-      <p className="text-gray-600">Loading...</p>
+      <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-[#A0452E]"></div>
+      <p className="text-stone-500">Loading...</p>
     </div>
   </div>
 );
@@ -160,7 +160,7 @@ const AppShell = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-[#FAF7F2] flex flex-col">
       <Navbar />
       <div className={`flex-1 py-4 ${shouldPadForMobileNav(location.pathname, !!user) ? "pb-24 lg:pb-4" : ""}`}>
         <Suspense fallback={<LoadingFallback />}>
