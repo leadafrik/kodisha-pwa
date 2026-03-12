@@ -780,7 +780,7 @@ const CreateListing: React.FC = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#f8fbf6] flex items-center justify-center p-4">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Please Log In</h1>
           <p className="text-gray-600 mb-6">You must be logged in to create a listing.</p>
@@ -861,13 +861,13 @@ const CreateListing: React.FC = () => {
 
       <div className="listing-shell">
         <section className="relative overflow-hidden">
-          <div className="absolute -top-24 left-1/3 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
-          <div className="absolute -bottom-24 right-0 h-72 w-72 rounded-full bg-amber-200/40 blur-3xl" />
+          <div className="absolute -top-24 left-1/3 h-72 w-72 rounded-full bg-[#d8e8d4]/55 blur-3xl" />
+          <div className="absolute -bottom-24 right-0 h-72 w-72 rounded-full bg-[#e8f0e3]/75 blur-3xl" />
 
           <div className="max-w-6xl mx-auto px-4 pt-8 pb-5 md:pt-10 md:pb-6">
             <div className="grid gap-4 lg:grid-cols-[1.25fr_0.95fr] items-start">
               <div className="space-y-2 fade-rise">
-                <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">Create a Listing</p>
+                <p className="text-xs uppercase tracking-[0.3em] text-[#5b705d] font-semibold">Create a Listing</p>
                 <h1 className="listing-title text-3xl md:text-4xl text-slate-900">
                   Create your listing in 2 minutes
                 </h1>
@@ -884,11 +884,11 @@ const CreateListing: React.FC = () => {
                       {currentProgressLabel}
                     </p>
                   </div>
-                  <p className="text-sm font-semibold text-emerald-700">{progressPercent}%</p>
+                  <p className="text-sm font-semibold text-[#586f58]">{progressPercent}%</p>
                 </div>
                 <div className="mt-3 h-2.5 rounded-full bg-slate-100 overflow-hidden">
                   <div
-                    className="h-full bg-emerald-600 transition-all"
+                    className="h-full bg-[#6b856b] transition-all"
                     style={{ width: `${progressPercent}%` }}
                   />
                 </div>
@@ -904,12 +904,12 @@ const CreateListing: React.FC = () => {
           <p className="mb-6 text-sm text-slate-500">Drafts save automatically on this device.</p>
 
           {showVerificationNudge && (
-            <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 flex flex-wrap items-center gap-3">
+            <div className="mb-6 rounded-2xl border border-[#c9d7c4] bg-[#edf4e9] p-4 flex flex-wrap items-center gap-3">
               <div className="flex-1">
-                <p className="text-amber-900 font-semibold">
+                <p className="text-[#435846] font-semibold">
                   Verification is optional for now, but it helps buyers trust your profile faster.
                 </p>
-                <p className="mt-1 text-sm text-amber-800">
+                <p className="mt-1 text-sm text-[#586f58]">
                   Verification is optional. If you choose to upload your ID, Agrisoko handles that data in line with Kenya&apos;s Data Protection Act, 2019 and deletes the uploaded images promptly after admin review.
                 </p>
               </div>
@@ -924,17 +924,17 @@ const CreateListing: React.FC = () => {
           )}
 
           {isVerificationPending && (
-            <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-              <p className="text-emerald-900 font-semibold">Verification submitted</p>
-              <p className="text-emerald-800 text-sm mt-1">
+            <div className="mb-6 rounded-2xl border border-[#c9d7c4] bg-[#edf4e9] p-4">
+              <p className="font-semibold text-[#435846]">Verification submitted</p>
+              <p className="mt-1 text-sm text-[#586f58]">
                 Your ID review is in progress. You can keep posting while the trust badge is being reviewed.
               </p>
             </div>
           )}
 
           {hasDraft && (
-            <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex flex-wrap items-center gap-3">
-              <p className="text-emerald-800 font-semibold flex-1">You have a saved draft. Want to continue?</p>
+            <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-[#c9d7c4] bg-[#edf4e9] p-4">
+              <p className="flex-1 font-semibold text-[#586f58]">You have a saved draft. Want to continue?</p>
               <button
                 type="button"
                 onClick={handleRestoreDraft}
@@ -1599,7 +1599,7 @@ const CreateListing: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                <div className="rounded-xl border border-[#c9d7c4] bg-[#edf4e9] p-4 text-sm text-[#435846]">
                   {idVerified && selfieVerified ? (
                     <p className="font-semibold">
                       Profile verified. Your listing has stronger trust and can go live faster.
@@ -1607,7 +1607,7 @@ const CreateListing: React.FC = () => {
                   ) : (
                     <>
                       <p className="font-semibold">Verification is optional, but it improves buyer trust.</p>
-                      <p className="mt-1 text-amber-800">
+                      <p className="mt-1 text-[#586f58]">
                         You can publish now and verify later to rank higher.
                       </p>
                     </>

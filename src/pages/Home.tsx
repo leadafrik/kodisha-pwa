@@ -89,25 +89,13 @@ const trustFeatures = [
 ];
 
 const founderLetterParagraphs = [
-  "When I first started Agrisoko, almost everyone told me the same thing:",
-  "\"Kenyans do not trust digital platforms. There are too many scammers.\"",
-  "Others told me marketplaces never work. They said buyers would come and find no sellers. Sellers would come and find no buyers. And eventually everyone would leave.",
-  "Some advised me to start small, just one county instead of all 47. Others said I should sell only one product instead of many.",
-  "And many warned me of something else: \"If you connect farmers and buyers, they will eventually leave the platform and trade on the side.\"",
-  "In many ways, they were right. These are real challenges.",
-  "But there was something they failed to see.",
-  "They underestimated the power of Kenyans when we believe in something together.",
-  "Because at the heart of this country are people of goodwill, people who support each other, uplift each other, and stand together when there is a vision worth building.",
-  "So I chose to trust something simple but powerful: people.",
-  "I chose to trust farmers who wake up before sunrise and work tirelessly to feed our nation. I chose to trust buyers who want better access to quality food and fair prices. And I chose to trust Kenyans like you, the person reading this.",
-  "I believe a day will come when Kenyan farmers will finally enjoy the full fruits of their labour without losing a big portion of their hard-earned income to brokers.",
-  "I believe a day will come when agriculture will connect us in new ways, where from the comfort of our homes we can access high-quality agricultural products from farmers across the country.",
-  "And I believe that one day, what is now a fragmented agricultural market will become a unified marketplace, where farmers list their produce with pride and buyers shop with confidence.",
-  "That future is what Agrisoko is trying to build.",
-  "And that is why I will not take this marketplace down.",
-  "Because building something meaningful is never easy. But it becomes possible when people believe in it together.",
-  "If this vision speaks to you, then join us.",
-  "Sign up today. Tell a friend to tell a friend.",
+  "When I started Agrisoko, many people told me it would not work.",
+  "They said Kenyans do not trust digital platforms because of scammers. They said marketplaces fail because buyers find no sellers and sellers find no buyers. Others advised me to start with just one county, or sell only one product.",
+  "And some warned me that even if farmers and buyers met on the platform, they would eventually leave and trade outside it.",
+  "In many ways, they were right. These are real challenges. But they underestimated something powerful, what Kenyans can achieve when we believe in something together.",
+  "I chose to trust farmers who wake up before sunrise to feed our nation. I chose to trust buyers who want fair prices and reliable supply. And most of all, I chose to trust people like you.",
+  "Agrisoko is building a future where farmers keep more of what they earn, buyers trade with confidence, and agriculture in Kenya becomes more direct, more trusted, and more connected.",
+  "If you believe in this vision too, join us. Sign up today. Tell a friend to tell a friend.",
   "And together, let us build the future of agriculture in Kenya.",
 ];
 
@@ -279,16 +267,16 @@ const Home: React.FC = () => {
 
       <div className="home-shell">
         <section className="relative overflow-hidden border-b border-slate-200 bg-white">
-          <div className="pointer-events-none absolute -top-16 left-1/3 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-12 right-0 h-72 w-72 rounded-full bg-amber-200/35 blur-3xl" />
+          <div className="pointer-events-none absolute -top-16 left-1/3 h-72 w-72 rounded-full bg-[#d8e8d4]/50 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-12 right-0 h-72 w-72 rounded-full bg-[#e8f0e3]/70 blur-3xl" />
 
           <div className="relative mx-auto max-w-7xl px-4 pb-10 pt-10 sm:pb-12 sm:pt-14 md:pb-16 md:pt-20">
             <div className="max-w-4xl">
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-amber-800">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[#c8d7c3] bg-[#edf4e9] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-[#5b705d]">
                   <Sparkles className="h-3.5 w-3.5" />
                   Free Listing Window
-                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] tracking-[0.12em]">
+                  <span className="rounded-full bg-[#dce8d7] px-2 py-0.5 text-[10px] tracking-[0.12em] text-[#4d6250]">
                     {launchWindowLabel}
                   </span>
                 </div>
@@ -352,7 +340,7 @@ const Home: React.FC = () => {
                         }
                         className={`ui-btn-ghost w-full px-6 sm:w-auto ${
                           user
-                            ? "border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+                            ? "border-[#c9d7c4] text-[#586f58] hover:bg-[#f2f7ef]"
                             : ""
                         }`}
                       >
@@ -381,17 +369,17 @@ const Home: React.FC = () => {
                     <div>
                       <Link
                         to="/bulk"
-                        className="text-sm font-semibold text-emerald-700 underline decoration-emerald-200 underline-offset-4 transition hover:text-emerald-800"
+                        className="text-sm font-semibold text-[#5b705d] underline decoration-[#c8d7c3] underline-offset-4 transition hover:text-[#4d6250]"
                       >
                         Explore bulk buying customers
                       </Link>
                     </div>
                   )}
                   <div className="flex flex-wrap gap-2 text-[11px] font-semibold text-slate-700 sm:text-xs">
-                    <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1">
+                    <span className="rounded-full border border-[#c8d7c3] bg-[#edf4e9] px-3 py-1 text-[#4d6250]">
                       {liveListingCount.toLocaleString()} listings live
                     </span>
-                    <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1">
+                    <span className="rounded-full border border-[#c8d7c3] bg-[#edf4e9] px-3 py-1 text-[#4d6250]">
                       {countyCoverageLabel}
                     </span>
                   </div>
@@ -402,79 +390,72 @@ const Home: React.FC = () => {
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-            <div className="max-w-4xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
-                Founder note
-              </p>
-              <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl">
-                Why we started Agrisoko
-              </h2>
-              <p className="mt-2 max-w-2xl text-sm text-slate-600">
-                A direct note from Stephen on trust, middlemen, and the future of agriculture in Kenya.
-              </p>
-            </div>
+          <div className="max-w-4xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#5b705d]">
+              Founder note
+            </p>
+            <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl">
+              Why we started Agrisoko
+            </h2>
+          </div>
 
-            <div className="relative mt-5 max-w-4xl rotate-[-0.9deg] rounded-[2rem] border border-emerald-200 bg-[#dff5da] px-5 py-6 text-slate-900 shadow-[0_14px_28px_rgba(22,101,52,0.12)] sm:px-7 sm:py-7">
-              <div className="absolute left-1/2 top-0 h-10 w-24 -translate-x-1/2 -translate-y-1/2 rotate-[2deg] rounded-b-2xl bg-[#edf7ea] shadow-sm" />
-              <p className="home-handwritten text-[1.9rem] font-semibold leading-none text-emerald-950 sm:text-[2.2rem]">
-                Why we Started Agrisoko
-              </p>
-              <div className="mt-4 space-y-3 home-handwritten text-[1.34rem] leading-[1.22] text-slate-900 sm:text-[1.5rem]">
-                {founderLetterParagraphs.map((paragraph) => (
-                  <p key={paragraph}>{paragraph}</p>
-                ))}
-              </div>
-              <p className="home-handwritten mt-5 text-[1.55rem] font-semibold text-emerald-950 sm:text-[1.75rem]">
-                Stephen
-              </p>
+          <div className="relative mt-5 max-w-4xl rotate-[-0.9deg] rounded-[2rem] border border-[#bfd0b8] bg-[#e6f0e0] px-5 py-6 text-slate-900 shadow-[0_8px_16px_rgba(92,122,99,0.08)] sm:px-7 sm:py-7">
+            <div className="absolute left-1/2 top-0 h-10 w-24 -translate-x-1/2 -translate-y-1/2 rotate-[2deg] rounded-b-2xl bg-[#f1f6ee]" />
+            <p className="home-handwritten text-[1.9rem] font-semibold leading-none text-[#38503b] sm:text-[2.2rem]">
+              Why we Started Agrisoko
+            </p>
+            <div className="mt-4 space-y-3 home-handwritten text-[1.34rem] leading-[1.22] text-slate-900 sm:text-[1.5rem]">
+              {founderLetterParagraphs.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
             </div>
+            <p className="home-handwritten mt-5 text-[1.55rem] font-semibold text-[#38503b] sm:text-[1.75rem]">
+              Stephen
+            </p>
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 py-8 sm:py-10">
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-            <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
-                  Why join
-                </p>
-                <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl">
-                  Clear value, simple start.
-                </h2>
-                <div className="mt-5 space-y-4">
-                  {conversionPillars.map((pillar) => (
-                    <div
-                      key={pillar.title}
-                      className="border-b border-slate-200 pb-4 last:border-b-0 last:pb-0"
-                    >
-                      <p className="text-sm font-semibold text-slate-900">{pillar.title}</p>
-                      <p className="mt-1 text-sm text-slate-600">{pillar.copy}</p>
-                    </div>
-                  ))}
-                </div>
+        <section className="mx-auto max-w-7xl border-y border-slate-200 px-4 py-8 sm:py-10">
+          <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:gap-10">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#5b705d]">
+                Why join
+              </p>
+              <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl">
+                Clear value, simple start.
+              </h2>
+              <div className="mt-5 space-y-4">
+                {conversionPillars.map((pillar) => (
+                  <div
+                    key={pillar.title}
+                    className="border-b border-slate-200 pb-4 last:border-b-0 last:pb-0"
+                  >
+                    <p className="text-sm font-semibold text-slate-900">{pillar.title}</p>
+                    <p className="mt-1 text-sm text-slate-600">{pillar.copy}</p>
+                  </div>
+                ))}
               </div>
+            </div>
 
-              <div className="lg:border-l lg:border-slate-200 lg:pl-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
-                  How it works
-                </p>
-                <div className="mt-4 space-y-3">
-                  {tradeSteps.map((step, index) => (
-                    <div
-                      key={step.title}
-                      className="flex items-start gap-3 border-b border-slate-200 pb-3 last:border-b-0 last:pb-0"
-                    >
-                      <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-700 text-sm font-semibold text-white">
-                        {index + 1}
-                      </span>
-                      <div>
-                        <p className="text-sm font-semibold text-slate-900">{step.title}</p>
-                        <p className="mt-0.5 text-sm text-slate-600">{step.copy}</p>
-                      </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#5b705d]">
+                How it works
+              </p>
+              <div className="mt-4 space-y-3">
+                {tradeSteps.map((step, index) => (
+                  <div
+                    key={step.title}
+                    className="flex items-start gap-3 border-b border-slate-200 pb-3 last:border-b-0 last:pb-0"
+                  >
+                    <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#6b856b] text-sm font-semibold text-white">
+                      {index + 1}
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">{step.title}</p>
+                      <p className="mt-0.5 text-sm text-slate-600">{step.copy}</p>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -482,7 +463,7 @@ const Home: React.FC = () => {
 
         <section className="mx-auto max-w-7xl px-4 pb-10 sm:pb-14">
           <div className="mb-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#5b705d]">
               Live market
             </p>
             <h2 className="home-title mt-2 text-2xl text-slate-900 sm:text-3xl md:text-4xl">
@@ -490,9 +471,9 @@ const Home: React.FC = () => {
             </h2>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-            <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-              <p className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-700">
+          <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:gap-10">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-700">
                 Buyer demand
               </p>
               <h3 className="mt-3 text-xl font-semibold text-slate-900 sm:text-2xl">
@@ -500,36 +481,25 @@ const Home: React.FC = () => {
               </h3>
               <ul className="mt-4 space-y-2 text-sm text-slate-700">
                 {buyerDemandSignals.map((signal) => (
-                  <li key={signal} className="flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
+                  <li key={signal} className="flex items-center gap-2 border-b border-slate-200 pb-2 last:border-b-0">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#6b856b]" />
                     {signal}
                   </li>
                 ))}
               </ul>
-              <div className="mt-5 grid grid-cols-3 gap-2 sm:gap-3">
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-                    Live now
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-slate-900 sm:text-lg">
-                    {liveListingCount.toLocaleString()} listings
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-                    Coverage
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-slate-900 sm:text-lg">
-                    {countyCoverageLabel}
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-                    Model
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-slate-900 sm:text-lg">Direct deal</p>
-                </div>
+
+              <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-600">
+                <span>
+                  <span className="font-semibold text-slate-900">{liveListingCount.toLocaleString()}</span> listings live
+                </span>
+                <span>
+                  <span className="font-semibold text-slate-900">{countyCoverageLabel}</span>
+                </span>
+                <span>
+                  <span className="font-semibold text-slate-900">Direct deal</span>
+                </span>
               </div>
+
               <Link
                 to={demandCtaTo}
                 onClick={() =>
@@ -543,32 +513,34 @@ const Home: React.FC = () => {
                 {demandCtaLabel}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
-            </article>
+            </div>
 
-            <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-              <p className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-emerald-800">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#5b705d]">
                 Trust
               </p>
               <h3 className="mt-3 text-xl font-semibold text-slate-900 sm:text-2xl">
                 Trust built in
               </h3>
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <div className="mt-4 space-y-3">
                 {trustFeatures.map((feature) => (
-                  <div key={feature.title} className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 sm:p-4">
-                    <feature.icon className="h-5 w-5 text-emerald-700" />
-                    <p className="mt-3 text-sm font-semibold text-slate-900">{feature.title}</p>
-                    <p className="mt-1 text-sm text-slate-600">{feature.copy}</p>
+                  <div key={feature.title} className="flex items-start gap-3 border-b border-slate-200 pb-3 last:border-b-0">
+                    <feature.icon className="mt-0.5 h-5 w-5 shrink-0 text-[#5b705d]" />
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">{feature.title}</p>
+                      <p className="mt-0.5 text-sm text-slate-600">{feature.copy}</p>
+                    </div>
                   </div>
                 ))}
               </div>
-            </article>
+            </div>
           </div>
         </section>
 
         <section className="mx-auto max-w-7xl px-4 pb-14 pt-6 sm:pb-16 sm:pt-8">
-          <div className="rounded-3xl bg-gradient-to-r from-emerald-700 to-teal-700 p-5 text-white shadow-lg sm:p-8 md:p-10">
+          <div className="rounded-3xl bg-[#6b856b] p-5 text-white shadow-sm sm:p-8 md:p-10">
             <h2 className="home-title text-2xl sm:text-3xl md:text-4xl">Ready to start?</h2>
-            <p className="mt-3 max-w-2xl text-sm text-emerald-100 md:text-base">
+            <p className="mt-3 max-w-2xl text-sm text-[#eef5eb] md:text-base">
               {finalCallCopy}
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
@@ -580,7 +552,7 @@ const Home: React.FC = () => {
                     target: "/create-listing",
                   })
                 }
-                className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50 sm:w-auto"
+                className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-semibold text-[#586f58] transition hover:bg-[#f2f7ef] sm:w-auto"
               >
                 {primaryCtaLabel}
               </Link>
@@ -602,7 +574,7 @@ const Home: React.FC = () => {
       </div>
 
       {isPhone && (
-        <div className="fixed bottom-3 left-1/2 z-30 w-[calc(100%-1rem)] max-w-3xl -translate-x-1/2 rounded-2xl border border-emerald-300 bg-white/95 px-3 py-3 shadow-xl backdrop-blur sm:px-4">
+        <div className="fixed bottom-3 left-1/2 z-30 w-[calc(100%-1rem)] max-w-3xl -translate-x-1/2 rounded-2xl border border-[#c8d7c3] bg-white/95 px-3 py-3 shadow-lg backdrop-blur sm:px-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs font-semibold text-slate-900 sm:text-sm">
               {stickyWindowText}

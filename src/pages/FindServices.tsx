@@ -282,20 +282,20 @@ const FindServices: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
-      <div className="bg-gradient-to-r from-green-600 via-green-500 to-emerald-500 rounded-2xl px-6 py-8 md:px-10 md:py-10 text-white shadow-lg">
+      <div className="rounded-2xl bg-[#6b856b] px-6 py-8 text-white shadow-sm md:px-10 md:py-10">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div className="space-y-3 md:max-w-xl">
             <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">
               Find Equipment, Inputs, and Farm Services Across Kenya
             </h1>
-            <p className="text-green-50 text-sm md:text-base">
+            <p className="text-[#eef5eb] text-sm md:text-base">
               Connect with trusted equipment owners, agrovets, and professionals
               to power your farm from land preparation to harvest.
             </p>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 md:p-4 w-full md:max-w-md">
-            <label className="block text-xs font-semibold text-green-100 mb-1">
+          <div className="w-full rounded-xl bg-white/12 p-3 md:max-w-md md:p-4">
+            <label className="mb-1 block text-xs font-semibold text-[#eef5eb]">
               Quick search
             </label>
             <input
@@ -591,18 +591,18 @@ const FindServices: React.FC = () => {
         )}
       </div>
 
-      <div className="bg-gradient-to-r from-emerald-600 to-green-600 rounded-2xl p-8 text-center text-white shadow-md">
+      <div className="rounded-2xl bg-[#6b856b] p-8 text-center text-white shadow-sm">
         <h2 className="text-2xl font-bold mb-3">
           Have Equipment or Services to Offer?
         </h2>
-        <p className="text-sm md:text-base text-emerald-50 mb-5 max-w-2xl mx-auto">
+        <p className="mx-auto mb-5 max-w-2xl text-sm text-[#eef5eb] md:text-base">
           Join other service providers connecting with farmers across Kenya.
           List your tractor, agrovet, or professional services and start getting
           bookings through Kodisha.
         </p>
         <Link
           to="/create-listing"
-          className="inline-flex items-center bg-white text-emerald-700 px-7 py-2.5 rounded-lg font-semibold text-sm hover:bg-emerald-50 transition-colors"
+          className="inline-flex items-center rounded-lg bg-white px-7 py-2.5 text-sm font-semibold text-[#586f58] transition-colors hover:bg-[#f2f7ef]"
         >
           List Your Service/Equipment
         </Link>

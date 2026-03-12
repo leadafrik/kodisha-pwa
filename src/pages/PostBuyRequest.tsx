@@ -55,7 +55,7 @@ const PostBuyRequest: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-slate-50 py-10">
+    <div className="min-h-screen bg-[#f8fbf6] py-10">
       <div className="mx-auto max-w-4xl px-4">
         {accessLoading && (
           <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600 shadow-sm">
@@ -64,7 +64,7 @@ const PostBuyRequest: React.FC = () => {
         )}
 
         {!accessLoading && isB2B && !hasBulkBuyerAccess && (
-          <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-900 shadow-sm">
+          <div className="mb-4 rounded-2xl border border-[#c9d7c4] bg-[#edf4e9] p-4 text-[#435846] shadow-sm">
             <p className="text-sm font-semibold">Bulk buyer approval required before posting B2B demand.</p>
             {accessError && <p className="mt-1 text-xs">{accessError}</p>}
             <button

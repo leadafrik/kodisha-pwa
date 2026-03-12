@@ -693,7 +693,7 @@ const Login: React.FC = () => {
       )}
 
       {emailTypoSuggestion && emailTypoSuggestion !== normalizedSignupEmail && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-900">
+        <div className="rounded-xl border border-[#c9d7c4] bg-[#edf4e9] px-3 py-2.5 text-sm text-[#435846]">
           <p className="font-semibold">Possible typo in email domain.</p>
           <button
             type="button"
@@ -704,7 +704,7 @@ const Login: React.FC = () => {
                 confirmEmail: emailTypoSuggestion,
               }))
             }
-            className="mt-1 text-sm font-semibold text-emerald-700 hover:text-emerald-800"
+            className="mt-1 text-sm font-semibold text-[#586f58] hover:text-[#4d6250]"
           >
             Use {emailTypoSuggestion}
           </button>
@@ -1090,17 +1090,17 @@ const Login: React.FC = () => {
           : "Sign in securely to continue.";
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-emerald-50">
-      <div className="pointer-events-none absolute -top-20 right-0 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-0 left-0 h-72 w-72 rounded-full bg-amber-200/30 blur-3xl" />
+    <div className="relative overflow-hidden bg-[#f8fbf6]">
+      <div className="pointer-events-none absolute -top-20 right-0 h-72 w-72 rounded-full bg-[#d8e8d4]/50 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 left-0 h-72 w-72 rounded-full bg-[#e8f0e3]/70 blur-3xl" />
 
       <div className="px-4 py-8 md:py-12">
         <div className="mx-auto grid w-full max-w-6xl items-stretch gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10">
-          <aside className="hidden lg:flex flex-col justify-between rounded-3xl border border-emerald-200/70 bg-gradient-to-br from-emerald-600 via-emerald-700 to-emerald-800 p-10 text-white shadow-2xl">
+          <aside className="hidden lg:flex flex-col justify-between rounded-3xl border border-[#c9d7c4] bg-[#6b856b] p-10 text-white shadow-sm">
             <div>
               <img src="/logo192.png" alt="" aria-hidden="true" className="h-12 w-12 rounded-xl bg-white/10 p-1" />
               <h1 className="mt-5 text-4xl font-bold leading-tight">Agrisoko</h1>
-              <p className="mt-2 text-sm text-emerald-100">
+              <p className="mt-2 text-sm text-[#eef5eb]">
                 Trusted agricultural marketplace across Kenya.
               </p>
             </div>
