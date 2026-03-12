@@ -1,6 +1,15 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { MapPin, TrendingUp, AlertCircle, Plus, Clock3 } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowRight,
+  Clock3,
+  Filter,
+  MapPin,
+  Plus,
+  ShieldCheck,
+  TrendingUp,
+} from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { API_BASE_URL, ensureValidAccessToken } from "../config/api";
 import { kenyaCounties } from "../data/kenyaCounties";
@@ -39,19 +48,18 @@ interface BuyerRequestCache {
 
 type SortOption = "recommended" | "newest" | "urgent" | "budget_high";
 
-// Use all 47 Kenyan counties from data source
-const COUNTIES = ["All Counties", ...kenyaCounties.map(c => c.name)];
+const COUNTIES = ["All Counties", ...kenyaCounties.map((c) => c.name)];
 const REQUEST_CACHE_KEY = "agrisoko_buyer_requests_cache_v1";
 
 const URGENCY_COLORS: Record<string, string> = {
-  low: "bg-blue-100 text-blue-800",
-  medium: "bg-yellow-100 text-yellow-800",
+  low: "bg-sky-100 text-sky-800",
+  medium: "bg-amber-100 text-amber-800",
   high: "bg-red-100 text-red-800",
 };
 
 const URGENCY_LABELS: Record<string, string> = {
-  low: "Can Wait",
-  medium: "Within a Week",
+  low: "Can wait",
+  medium: "Within a week",
   high: "Urgent",
 };
 
@@ -63,10 +71,42 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 const CATEGORY_PILL_STYLES: Record<string, string> = {
-  produce: "bg-orange-100 text-orange-800",
-  livestock: "bg-emerald-100 text-emerald-800",
+  produce: "bg-[#FDF5F3] text-[#A0452E]",
+  livestock: "bg-forest-100 text-forest-700",
   inputs: "bg-sky-100 text-sky-800",
-  service: "bg-emerald-100 text-emerald-800",
+  service: "bg-stone-100 text-stone-700",
+};
+
+const getBudgetScore = (request: BuyerRequest) => {
+  const max = typeof request.budget?.max === "number" ? request.budget.max : 0;
+  const min = typeof request.budget?.min === "number" ? request.budget.min : 0;
+  return Math.max(max, min);
+};
+
+const getUrgencyScore = (request: BuyerRequest) => {
+  if (request.urgency === "high") return 3;
+  if (request.urgency === "medium") return 2;
+  return 1;
+};
+
+const getRecencyScore = (request: BuyerRequest) => {
+  const createdAt = new Date(request.createdAt).getTime();
+  if (!Number.isFinite(createdAt)) return 0;
+  const ageHours = (Date.now() - createdAt) / (1000 * 60 * 60);
+  if (ageHours <= 24) return 4;
+  if (ageHours <= 72) return 3;
+  if (ageHours <= 24 * 7) return 2;
+  return 1;
+};
+
+const getRequestScore = (request: BuyerRequest) => {
+  const urgencyScore = getUrgencyScore(request) * 4;
+  const budgetScore = Math.min(getBudgetScore(request), 500000) / 100000;
+  const detailScore =
+    (request.productType ? 1 : 0) +
+    (request.quantity ? 1 : 0) +
+    (request.location?.constituency ? 0.5 : 0);
+  return urgencyScore + budgetScore + getRecencyScore(request) + detailScore;
 };
 
 export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
@@ -275,582 +315,546 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
     activeFilters.push(`Urgency: ${URGENCY_LABELS[filters.urgency] || filters.urgency}`);
   }
 
-  const getBudgetScore = (request: BuyerRequest) => {
-    const max = typeof request.budget?.max === "number" ? request.budget.max : 0;
-    const min = typeof request.budget?.min === "number" ? request.budget.min : 0;
-    return Math.max(max, min);
-  };
+  const focusLabel = activeFilters.length ? activeFilters.join(" | ") : "All requests";
 
-  const getUrgencyScore = (request: BuyerRequest) => {
-    if (request.urgency === "high") return 3;
-    if (request.urgency === "medium") return 2;
-    return 1;
-  };
+  const sortedRequests = useMemo(() => {
+    return [...requests].sort((a, b) => {
+      if (sortBy === "newest") {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
 
-  const getRecencyScore = (request: BuyerRequest) => {
-    const createdAt = new Date(request.createdAt).getTime();
-    if (!Number.isFinite(createdAt)) return 0;
-    const ageHours = (Date.now() - createdAt) / (1000 * 60 * 60);
-    if (ageHours <= 24) return 4;
-    if (ageHours <= 72) return 3;
-    if (ageHours <= 24 * 7) return 2;
-    return 1;
-  };
+      if (sortBy === "urgent") {
+        const urgencyDiff = getUrgencyScore(b) - getUrgencyScore(a);
+        if (urgencyDiff !== 0) return urgencyDiff;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
 
-  const getRequestScore = (request: BuyerRequest) => {
-    const urgencyScore = getUrgencyScore(request) * 4;
-    const budgetScore = Math.min(getBudgetScore(request), 500000) / 100000;
-    const detailScore =
-      (request.productType ? 1 : 0) +
-      (request.quantity ? 1 : 0) +
-      (request.location?.constituency ? 0.5 : 0);
-    return urgencyScore + budgetScore + getRecencyScore(request) + detailScore;
-  };
+      if (sortBy === "budget_high") {
+        const budgetDiff = getBudgetScore(b) - getBudgetScore(a);
+        if (budgetDiff !== 0) return budgetDiff;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
 
-  const sortedRequests = [...requests].sort((a, b) => {
-    if (sortBy === "newest") {
+      const scoreDiff = getRequestScore(b) - getRequestScore(a);
+      if (scoreDiff !== 0) return scoreDiff;
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    }
+    });
+  }, [requests, sortBy]);
 
-    if (sortBy === "urgent") {
-      const urgencyDiff = getUrgencyScore(b) - getUrgencyScore(a);
-      if (urgencyDiff !== 0) return urgencyDiff;
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    }
+  const topRequests = useMemo(
+    () => sortedRequests.slice(0, Math.min(4, sortedRequests.length)),
+    [sortedRequests]
+  );
 
-    if (sortBy === "budget_high") {
-      const budgetDiff = getBudgetScore(b) - getBudgetScore(a);
-      if (budgetDiff !== 0) return budgetDiff;
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    }
+  const mainRequests = useMemo(() => {
+    if (sortedRequests.length <= 4) return sortedRequests;
+    const topIds = new Set(topRequests.map((request) => request._id));
+    return sortedRequests.filter((request) => !topIds.has(request._id));
+  }, [sortedRequests, topRequests]);
 
-    const scoreDiff = getRequestScore(b) - getRequestScore(a);
-    if (scoreDiff !== 0) return scoreDiff;
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-  });
+  const urgentCount = requests.filter((req) => req.urgency === "high").length;
+  const countyCount = new Set(
+    requests.map((req) => (req.location?.county || "").trim().toLowerCase()).filter(Boolean)
+  ).size;
+  const showTopRequests = sortedRequests.length > 4;
+  const displayRequests = showTopRequests ? mainRequests : sortedRequests;
 
-  const topRequests = sortedRequests.slice(0, 4);
+  const clearFilters = () => {
+    setFilters({ category: "", county: "All Counties", urgency: "" });
+    setPage(1);
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Manrope:wght@400;600;700&display=swap');
-        :root {
-          --ink: #0f172a;
-          --muted: #64748b;
-          --accent: #0f766e;
-          --accent-soft: #ccfbf1;
-        }
-        .buy-requests-shell {
-          font-family: "Manrope", "Segoe UI", "Tahoma", sans-serif;
-        }
-        .buy-hero-title {
-          font-family: "DM Serif Display", "Georgia", serif;
-        }
-        .fade-rise {
-          animation: fadeRise 0.7s ease both;
-        }
-        @keyframes fadeRise {
-          from { opacity: 0; transform: translateY(14px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+    <div className="ui-page-shell">
+      <div className="relative overflow-hidden">
+        <div className="pointer-events-none absolute -top-24 right-0 h-72 w-72 rounded-full bg-[#F3C9BE]/40 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 left-0 h-72 w-72 rounded-full bg-[#FFF0C8]/50 blur-3xl" />
+        <div className="pointer-events-none absolute left-1/3 top-20 h-72 w-72 rounded-full bg-white/80 blur-3xl" />
 
-      <div className="relative overflow-hidden buy-requests-shell">
-        <div className="absolute -top-24 left-1/3 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
-        <div className="absolute -bottom-16 right-0 h-72 w-72 rounded-full bg-sky-100/70 blur-3xl" />
-
-        <div className="max-w-6xl mx-auto px-4 pt-10 md:pt-12 pb-8">
+        <div className="mx-auto max-w-7xl space-y-6 px-4 py-10 md:py-14">
           {!user && (
-            <div className="mb-6 rounded-2xl border border-emerald-200 bg-white/90 px-4 py-3 shadow-sm">
+            <div className="ui-card px-5 py-4 backdrop-blur">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">
-                    Sign in to reply and contact buyers
+                  <p className="text-sm font-semibold text-stone-900">
+                    Sign in only when you are ready to reply to buyers
                   </p>
-                  <p className="text-xs text-slate-500">
-                    Buy request details stay public. Sign in only when you want to respond.
+                  <p className="text-xs text-stone-500">
+                    Demand details stay public. Sign in for direct replies and contact access.
                   </p>
                 </div>
-                <Link
-                  to="/login"
-                  className="inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
-                >
+                <Link to="/login" className="ui-btn-primary px-4 py-2 text-sm">
                   Sign In
                 </Link>
               </div>
             </div>
           )}
 
-          <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] items-center">
-            <div className="space-y-4 fade-rise">
-              <p className="text-xs uppercase tracking-[0.3em] text-emerald-700 font-semibold">
-                {isB2B ? "Agrisoko B2B Demand Board" : "Agrisoko Demand Board"}
-              </p>
-              <h1 className="buy-hero-title text-3xl sm:text-4xl md:text-5xl text-slate-900">
-                {isB2B ? "Institutional demand from active buyers" : "Find buyers ready to buy"}
-              </h1>
-              <p className="text-base text-slate-600 max-w-xl">
-                {isB2B
-                  ? "Demand-first procurement for restaurants, schools, processors, and distributors."
-                  : "Browse live demand and respond quickly."}
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <button
-                  onClick={() =>
-                    navigate(
-                      user
-                        ? `/request/new?marketType=${activeMarketType}`
-                        : `/login?mode=signup&next=${encodeURIComponent(
-                            `/request/new?marketType=${activeMarketType}`
-                          )}`
-                    )
-                  }
-                  className="inline-flex w-full sm:w-auto justify-center items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 transition"
+          <section className="ui-hero-panel p-5 md:p-7">
+            <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
+              <div>
+                <p className="ui-section-kicker">
+                  {isB2B ? "Agrisoko B2B demand board" : "Agrisoko demand board"}
+                </p>
+                <h1 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900 md:text-4xl">
+                  {isB2B ? "Institutional demand from active buyers" : "Find buyers ready to buy across Kenya"}
+                </h1>
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-stone-600 md:text-base">
+                  {isB2B
+                    ? "Demand-first procurement for restaurants, schools, processors, and distributors that need reliable supply."
+                    : "Browse active demand, respond quickly, and close direct deals without extra broker friction."}
+                </p>
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                  <button
+                    onClick={() =>
+                      navigate(
+                        user
+                          ? `/request/new?marketType=${activeMarketType}`
+                          : `/login?mode=signup&next=${encodeURIComponent(
+                              `/request/new?marketType=${activeMarketType}`
+                            )}`
+                      )
+                    }
+                    className="ui-btn-primary gap-2 px-5 py-3 text-sm"
+                  >
+                    <Plus size={18} />
+                    {isB2B ? "Post bulk demand" : "Post demand"}
+                  </button>
+                  <Link to="/browse" className="ui-btn-secondary px-5 py-3 text-sm">
+                    Browse listings
+                  </Link>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-stone-600">
+                  <span className="ui-chip-soft">{pagination.total} active requests</span>
+                  <span className="ui-chip-soft">{urgentCount} urgent</span>
+                  <span className="ui-chip-soft">{countyCount || 1} counties active</span>
+                </div>
+              </div>
+
+              <div className="ui-card-soft p-4 md:p-5">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#A0452E]">
+                  <TrendingUp className="h-4 w-4" />
+                  Demand focus
+                </div>
+                <p className="mt-3 text-lg font-semibold text-stone-900">
+                  Where buyers need supply now
+                </p>
+                <p className="mt-1 text-sm text-stone-600">
+                  Ranked by urgency, budget, request detail, and freshness so you can respond faster.
+                </p>
+                <div className="mt-4 space-y-3 text-sm text-stone-700">
+                  <div className="flex items-center justify-between gap-3 border-b border-stone-200 pb-3">
+                    <span className="text-stone-500">Current focus</span>
+                    <span className="font-semibold text-stone-900">{focusLabel}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3 border-b border-stone-200 pb-3">
+                    <span className="text-stone-500">Sort order</span>
+                    <span className="font-semibold text-stone-900">
+                      {sortBy === "recommended"
+                        ? "Top picks"
+                        : sortBy === "newest"
+                          ? "Newest first"
+                          : sortBy === "urgent"
+                            ? "Urgent first"
+                            : "Highest budget"}
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-2 rounded-2xl border border-[#F3C9BE] bg-white px-3 py-3 text-xs text-stone-600">
+                    <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#A0452E]" />
+                    Reply only when ready. Buyers can review your offer after you sign in and open the request.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="ui-card p-4 md:p-5">
+            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p className="ui-section-kicker">Filter and sort</p>
+                <h2 className="mt-2 text-xl font-semibold tracking-tight text-stone-900">
+                  Find the best demand to respond to
+                </h2>
+                <p className="mt-1 text-sm text-stone-500">
+                  Narrow by category, county, urgency, or budget priority.
+                </p>
+              </div>
+              <div className="inline-flex items-center gap-2 self-start rounded-full border border-stone-200 bg-[#FAF7F2] px-3 py-1.5 text-xs font-semibold text-stone-700">
+                <Filter className="h-4 w-4 text-[#A0452E]" />
+                {requests.length} on this page | {pagination.total} total active
+              </div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
+              <div>
+                <label className="ui-label">Category</label>
+                <select
+                  value={filters.category}
+                  onChange={(e) => handleFilterChange("category", e.target.value)}
+                  className="ui-input"
                 >
-                  <Plus size={18} />
-                  {isB2B ? "Post B2B Demand" : "Post Demand"}
+                  <option value="">All categories</option>
+                  <option value="produce">Produce</option>
+                  <option value="livestock">Livestock</option>
+                  <option value="inputs">Inputs</option>
+                  <option value="service">Services</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="ui-label">County</label>
+                <select
+                  value={filters.county}
+                  onChange={(e) => handleFilterChange("county", e.target.value)}
+                  className="ui-input"
+                >
+                  {COUNTIES.map((county) => (
+                    <option key={county} value={county}>
+                      {county}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="ui-label">Urgency</label>
+                <select
+                  value={filters.urgency}
+                  onChange={(e) => handleFilterChange("urgency", e.target.value)}
+                  className="ui-input"
+                >
+                  <option value="">All urgency levels</option>
+                  <option value="low">Can wait</option>
+                  <option value="medium">Within a week</option>
+                  <option value="high">Urgent</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="ui-label">Sort</label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as SortOption)}
+                  className="ui-input"
+                >
+                  <option value="recommended">Top picks</option>
+                  <option value="newest">Newest</option>
+                  <option value="urgent">Urgent first</option>
+                  <option value="budget_high">Highest budget</option>
+                </select>
+              </div>
+
+              <div className="flex items-end">
+                <button type="button" onClick={clearFilters} className="ui-btn-ghost w-full">
+                  Clear filters
                 </button>
+              </div>
+            </div>
+
+            {activeFilters.length > 0 && (
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                {activeFilters.map((filter) => (
+                  <span key={filter} className="ui-chip-soft">
+                    {filter}
+                  </span>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {error && (
+            <div className="ui-card border-red-200 bg-red-50 px-4 py-4 text-red-700">
+              <div className="flex flex-wrap items-start gap-3">
+                <AlertCircle size={20} className="mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold">{error}</p>
+                  {cachedAt && (
+                    <p className="mt-1 text-xs text-red-600">
+                      Cached at: {new Date(cachedAt).toLocaleString("en-KE")}
+                    </p>
+                  )}
+                </div>
+                <button type="button" onClick={fetchRequests} className="ui-btn-primary px-4 py-2 text-sm">
+                  Retry
+                </button>
+              </div>
+            </div>
+          )}
+
+          {bulkAccessRequired && isB2B && (
+            <div className="ui-accent-panel px-4 py-4 text-stone-800">
+              <p className="text-sm font-semibold">Bulk demand access requires approval first.</p>
+              <p className="mt-1 text-xs text-stone-600">
+                Apply as a bulk buyer or seller, then return after admin approval.
+              </p>
+              <div className="mt-3">
                 <Link
-                  to="/browse"
-                  className="inline-flex w-full sm:w-auto justify-center items-center gap-2 rounded-xl border border-emerald-200 bg-white px-5 py-3 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 transition"
+                  to={user ? "/bulk" : "/login?mode=signup&next=/bulk"}
+                  className="ui-btn-primary px-4 py-2 text-sm"
                 >
-                  Browse Listings
+                  Open bulk application
                 </Link>
               </div>
             </div>
-
-            <div className="fade-rise rounded-2xl border border-slate-200 bg-white/90 p-3 shadow-sm">
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                <div className="rounded-xl bg-slate-50 px-3 py-2">
-                  <p className="text-[11px] uppercase tracking-wider text-slate-500">Active</p>
-                  <div className="mt-1 flex items-baseline gap-2">
-                    <p className="text-lg font-semibold text-slate-900">{pagination.total}</p>
-                    <p className="text-[11px] text-slate-500">Nationwide</p>
-                  </div>
-                </div>
-                <div className="rounded-xl bg-slate-50 px-3 py-2">
-                  <p className="text-[11px] uppercase tracking-wider text-slate-500">Urgent</p>
-                  <div className="mt-1 flex items-baseline gap-2">
-                    <p className="text-lg font-semibold text-slate-900">
-                      {requests.filter((req) => req.urgency === "high").length}
-                    </p>
-                    <p className="text-[11px] text-slate-500">High priority</p>
-                  </div>
-                </div>
-                <div className="col-span-2 rounded-xl bg-slate-50 px-3 py-2 sm:col-span-1">
-                  <p className="text-[11px] uppercase tracking-wider text-slate-500">Focus</p>
-                  <p className="mt-1 truncate text-sm font-medium text-slate-700">
-                    {activeFilters.length ? activeFilters.join(" - ") : "All requests"}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-6xl mx-auto px-4 pb-16">
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm -mt-6 relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">
-                Category
-              </label>
-              <select
-                value={filters.category}
-                onChange={(e) =>
-                  handleFilterChange("category", e.target.value)
-                }
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
-              >
-                <option value="">All Categories</option>
-                <option value="produce">Produce</option>
-                <option value="livestock">Livestock</option>
-                <option value="inputs">Inputs</option>
-                <option value="service">Services</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">
-                County
-              </label>
-              <select
-                value={filters.county}
-                onChange={(e) =>
-                  handleFilterChange("county", e.target.value)
-                }
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
-              >
-                {COUNTIES.map((county) => (
-                  <option key={county} value={county}>
-                    {county}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">
-                Urgency
-              </label>
-              <select
-                value={filters.urgency}
-                onChange={(e) =>
-                  handleFilterChange("urgency", e.target.value)
-                }
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
-              >
-                <option value="">All Urgency Levels</option>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">
-                Sort
-              </label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
-              >
-                <option value="recommended">Top picks</option>
-                <option value="newest">Newest</option>
-                <option value="urgent">Urgent first</option>
-                <option value="budget_high">Highest budget</option>
-              </select>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 md:block">
-              <div className="flex items-center justify-between gap-3 md:block">
-                <p className="text-xs uppercase tracking-widest text-slate-500">Showing</p>
-                <p className="text-sm font-semibold text-slate-900 md:mt-1 md:text-lg">
-                  {requests.length} on this page
-                </p>
-              </div>
-              <p className="mt-1 text-xs text-slate-500">{pagination.total} total active</p>
-            </div>
-          </div>
-
-          {activeFilters.length > 0 && (
-            <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-600">
-              <span className="font-semibold uppercase tracking-widest text-slate-400">Filters</span>
-              {activeFilters.map((filter) => (
-                <span
-                  key={filter}
-                  className="rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-emerald-700 font-semibold"
-                >
-                  {filter}
-                </span>
-              ))}
-              <button
-                type="button"
-                onClick={() => {
-                  setFilters({ category: "", county: "All Counties", urgency: "" });
-                  setPage(1);
-                }}
-                className="text-emerald-700 font-semibold hover:text-emerald-800"
-              >
-                Clear filters
-              </button>
-            </div>
           )}
-        </div>
 
-        {error && (
-          <div className="mb-6 mt-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded flex flex-wrap items-center gap-3">
-            <AlertCircle size={20} />
-            <span className="flex-1">
-              {error}
-              {cachedAt && (
-                <span className="block text-xs text-red-600 mt-1">
-                  Cached at: {new Date(cachedAt).toLocaleString("en-KE")}
-                </span>
-              )}
-            </span>
-            <button
-              type="button"
-              onClick={fetchRequests}
-              className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700"
-            >
-              Retry
-            </button>
-          </div>
-        )}
-
-        {bulkAccessRequired && isB2B && (
-          <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-emerald-900">
-            <p className="text-sm font-semibold">
-              Bulk demand access requires approval first.
-            </p>
-            <p className="mt-1 text-xs">
-              Apply as a bulk buyer or seller, then return after admin approval.
-            </p>
-            <div className="mt-3">
-              <Link
-                to={user ? "/bulk" : "/login?mode=signup&next=/bulk"}
-                className="inline-flex rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
-              >
-                Open bulk application
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {loading ? (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 mb-10">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <div
-                key={`request-skeleton-${index}`}
-                className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
-              >
-                <div className="h-20 animate-pulse bg-slate-100" />
-                <div className="space-y-4 p-4">
-                  <div className="h-5 w-3/4 animate-pulse rounded bg-slate-100" />
-                  <div className="h-4 w-full animate-pulse rounded bg-slate-100" />
-                  <div className="h-4 w-5/6 animate-pulse rounded bg-slate-100" />
-                  <div className="rounded-2xl bg-slate-50 p-3 space-y-2">
-                    <div className="h-4 w-1/2 animate-pulse rounded bg-slate-100" />
-                    <div className="h-4 w-2/3 animate-pulse rounded bg-slate-100" />
-                  </div>
-                  <div className="flex gap-2">
-                    <div className="h-10 flex-1 animate-pulse rounded-xl bg-slate-100" />
-                    <div className="h-10 flex-1 animate-pulse rounded-xl bg-slate-100" />
+          {loading ? (
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div key={`request-skeleton-${index}`} className="ui-card overflow-hidden">
+                  <div className="h-24 animate-pulse bg-[#FAF7F2]" />
+                  <div className="space-y-4 p-5">
+                    <div className="h-5 w-3/4 animate-pulse rounded bg-stone-100" />
+                    <div className="h-4 w-full animate-pulse rounded bg-stone-100" />
+                    <div className="h-4 w-5/6 animate-pulse rounded bg-stone-100" />
+                    <div className="ui-card-soft space-y-2 p-3">
+                      <div className="h-4 w-1/2 animate-pulse rounded bg-stone-100" />
+                      <div className="h-4 w-2/3 animate-pulse rounded bg-stone-100" />
+                    </div>
+                    <div className="h-11 animate-pulse rounded-xl bg-stone-100" />
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : requests.length === 0 ? (
-          <div className="text-center py-16">
-            <p className="text-slate-600 text-lg">No matching requests.</p>
-            <p className="text-slate-500">Try different filters.</p>
-          </div>
-        ) : !Array.isArray(requests) ? (
-          <div className="text-center py-16">
-            <p className="text-red-600 text-lg">
-              Error: Invalid data format received from server
-            </p>
-            <p className="text-slate-500">
-              Please refresh the page or contact support
-            </p>
-          </div>
-        ) : (
-          <>
-            {topRequests.length > 0 && (
-              <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
-                <div className="mb-3 flex flex-col gap-2 sm:mb-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
-                      Top requests
+              ))}
+            </div>
+          ) : requests.length === 0 ? (
+            <div className="ui-card px-6 py-14 text-center">
+              <p className="text-lg font-semibold text-stone-900">
+                {activeFilters.length > 0 ? "No requests match these filters" : "No active requests yet"}
+              </p>
+              <p className="mt-2 text-sm text-stone-500">
+                {activeFilters.length > 0
+                  ? "Try a broader county, category, or urgency setting."
+                  : "Check back soon or post demand to start the market."}
+              </p>
+            </div>
+          ) : !Array.isArray(requests) ? (
+            <div className="ui-card px-6 py-14 text-center">
+              <p className="text-lg font-semibold text-red-700">
+                Invalid data format received from the server
+              </p>
+              <p className="mt-2 text-sm text-stone-500">
+                Refresh the page or contact support if the issue continues.
+              </p>
+            </div>
+          ) : (
+            <>
+              {showTopRequests && (
+                <section className="ui-card p-4 md:p-5">
+                  <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <p className="ui-section-kicker">Top requests</p>
+                      <h2 className="mt-2 text-xl font-semibold tracking-tight text-stone-900">
+                        Best demand opportunities right now
+                      </h2>
+                    </div>
+                    <p className="text-sm text-stone-500">
+                      Ranked by urgency, detail, budget, and freshness.
                     </p>
-                    <h2 className="mt-1 text-lg font-semibold text-slate-900 sm:text-xl">
-                      Best demand opportunities right now
+                  </div>
+
+                  <div className="mt-5 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 xl:grid xl:grid-cols-4 xl:overflow-visible">
+                    {topRequests.map((request) => (
+                      <Link
+                        key={`top-request-${request._id}`}
+                        to={`/request/${request._id}`}
+                        state={{ request }}
+                        className="ui-card min-w-[260px] max-w-[300px] flex-1 p-4 transition hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(28,25,23,0.08)] xl:min-w-0 xl:max-w-none"
+                      >
+                        <div className="flex flex-wrap gap-2">
+                          <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${CATEGORY_PILL_STYLES[request.category]}`}>
+                            {CATEGORY_LABELS[request.category]}
+                          </span>
+                          <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${URGENCY_COLORS[request.urgency]}`}>
+                            {URGENCY_LABELS[request.urgency]}
+                          </span>
+                        </div>
+                        <h3 className="mt-3 line-clamp-2 text-base font-semibold text-stone-900">
+                          {request.title}
+                        </h3>
+                        <p className="mt-2 line-clamp-3 text-sm text-stone-600">
+                          {request.description}
+                        </p>
+                        <div className="mt-4 flex flex-wrap gap-3 text-xs font-semibold text-stone-700">
+                          <span className="inline-flex items-center gap-1">
+                            <TrendingUp size={14} className="text-[#A0452E]" />
+                            {formatBudget(request.budget)}
+                          </span>
+                          <span className="inline-flex items-center gap-1">
+                            <MapPin size={14} className="text-stone-400" />
+                            {request.location.county}
+                          </span>
+                          <span className="inline-flex items-center gap-1">
+                            <Clock3 size={14} className="text-stone-400" />
+                            {formatDate(request.createdAt)}
+                          </span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              <section className="space-y-4">
+                <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                  <div>
+                    <p className="ui-section-kicker">Demand buyers can respond to now</p>
+                    <h2 className="mt-2 text-xl font-semibold tracking-tight text-stone-900">
+                      Active requests across the marketplace
                     </h2>
                   </div>
-                  <p className="text-xs text-slate-500 sm:text-sm">
-                    Ranked by urgency, detail, budget, and freshness.
+                  <p className="text-sm text-stone-500">
+                    {displayRequests.length} request{displayRequests.length === 1 ? "" : "s"} on this page
                   </p>
                 </div>
 
-                <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 xl:grid-cols-4">
-                  {topRequests.map((request) => (
-                    <Link
-                      key={`top-request-${request._id}`}
-                      to={`/request/${request._id}`}
-                      state={{ request }}
-                      className="min-w-[250px] max-w-[280px] flex-1 snap-start rounded-2xl border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-md md:min-w-0 md:max-w-none"
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                  {displayRequests.map((request) => (
+                    <div
+                      key={request._id}
+                      className="ui-card overflow-hidden transition hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(28,25,23,0.08)]"
                     >
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${CATEGORY_PILL_STYLES[request.category]}`}>
-                          {CATEGORY_LABELS[request.category]}
-                        </span>
-                        <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${URGENCY_COLORS[request.urgency]}`}>
-                          {URGENCY_LABELS[request.urgency]}
-                        </span>
+                      <div className="border-b border-stone-200 bg-[#FAF7F2] px-5 py-4">
+                        <div className="flex flex-wrap gap-2">
+                          <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${CATEGORY_PILL_STYLES[request.category]}`}>
+                            {CATEGORY_LABELS[request.category]}
+                          </span>
+                          <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${URGENCY_COLORS[request.urgency]}`}>
+                            {URGENCY_LABELS[request.urgency]}
+                          </span>
+                        </div>
+                        <h3 className="mt-3 line-clamp-2 text-xl font-semibold tracking-tight text-stone-900">
+                          {request.title}
+                        </h3>
+                        {request.productType && (
+                          <p className="mt-1 text-sm font-medium text-stone-600">
+                            {request.productType}
+                          </p>
+                        )}
                       </div>
 
-                      <h3 className="mt-3 line-clamp-2 text-sm font-semibold text-slate-900">
-                        {request.title}
-                      </h3>
-                      <p className="mt-1 line-clamp-2 text-xs text-slate-500">
-                        {request.description}
-                      </p>
+                      <div
+                        className="flex h-full flex-col gap-4 px-5 py-5"
+                        onClick={() => onSelectRequest?.(request)}
+                      >
+                        <p className="line-clamp-3 text-sm leading-relaxed text-stone-600">
+                          {request.description}
+                        </p>
 
-                      <div className="mt-3 flex items-center gap-3 text-[11px] font-semibold text-slate-600">
-                        <span className="inline-flex items-center gap-1">
-                          <TrendingUp size={13} className="text-emerald-600" />
-                          {formatBudget(request.budget)}
-                        </span>
+                        <div className="flex items-start gap-2 text-sm text-stone-700">
+                          <MapPin size={16} className="mt-0.5 flex-shrink-0 text-[#A0452E]" />
+                          <span>
+                            {request.location.county}
+                            {request.location.constituency ? `, ${request.location.constituency}` : ""}
+                            {request.location.ward ? `, ${request.location.ward}` : ""}
+                          </span>
+                        </div>
+
+                        <div className="ui-card-soft space-y-2 p-3">
+                          {request.quantity && (
+                            <div className="flex items-center justify-between gap-3 text-sm">
+                              <span className="text-stone-500">Quantity</span>
+                              <span className="font-semibold text-stone-900">
+                                {request.quantity} {request.unit}
+                              </span>
+                            </div>
+                          )}
+                          <div className="flex items-center justify-between gap-3 text-sm">
+                            <span className="text-stone-500">Budget</span>
+                            <span className="font-semibold text-[#A0452E]">
+                              {formatBudget(request.budget)}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 border-t border-stone-200 pt-4">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FAE9E4] text-sm font-semibold uppercase text-[#A0452E]">
+                            {(request.userId?.fullName || "U").charAt(0)}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-semibold text-stone-900">
+                              {request.userId?.fullName || "Anonymous"}
+                            </p>
+                            <p className="text-xs text-stone-500">Posted {formatDate(request.createdAt)}</p>
+                          </div>
+                          {typeof request.userId?.ratings === "number" && (
+                            <div className="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-white px-2.5 py-1 text-xs font-semibold text-stone-700">
+                              <TrendingUp size={13} className="text-[#A0452E]" />
+                              {request.userId.ratings.toFixed(1)}
+                            </div>
+                          )}
+                        </div>
+
+                        <Link
+                          to={`/request/${request._id}`}
+                          state={{ request }}
+                          className="ui-btn-primary mt-auto w-full justify-between px-4 py-3 text-sm"
+                          aria-label={`View details for ${request.title}`}
+                        >
+                          View details
+                          <ArrowRight size={16} />
+                        </Link>
                       </div>
-                      <div className="mt-2 flex items-center gap-3 text-[11px] text-slate-500">
-                        <span className="inline-flex items-center gap-1">
-                          <MapPin size={13} className="text-slate-400" />
-                          {request.location.county}
-                        </span>
-                        <span className="inline-flex items-center gap-1">
-                          <Clock3 size={13} className="text-slate-400" />
-                          {formatDate(request.createdAt)}
-                        </span>
-                      </div>
-                    </Link>
+                    </div>
                   ))}
                 </div>
               </section>
-            )}
 
-            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-              {sortedRequests.map((request) => (
-                <div
-                  key={request._id}
-                  onClick={() => onSelectRequest?.(request)}
-                  className="group bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-lg transition overflow-hidden cursor-pointer"
-                >
-                  <div className="bg-emerald-50/60 p-4 border-b border-slate-200">
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <div className="flex gap-2 flex-wrap">
-                        <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full capitalize ${CATEGORY_PILL_STYLES[request.category]}`}>
-                          {CATEGORY_LABELS[request.category]}
-                        </span>
-                        <span
-                          className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${URGENCY_COLORS[request.urgency]}`}
-                        >
-                          {URGENCY_LABELS[request.urgency]}
-                        </span>
-                      </div>
-                    </div>
-                    <h3 className="text-lg font-bold text-slate-900 line-clamp-2">
-                      {request.title}
-                    </h3>
-                  </div>
-
-                  <div className="p-4 space-y-4">
-                    <p className="text-slate-600 text-sm line-clamp-2">
-                      {request.description}
-                    </p>
-
-                    {request.location && (
-                      <div className="flex items-center gap-2 text-slate-700">
-                        <MapPin size={16} className="text-emerald-600 flex-shrink-0" />
-                        <span className="text-sm font-medium">
-                          {request.location.county}
-                          {request.location.constituency &&
-                            `, ${request.location.constituency}`}
-                        </span>
-                      </div>
-                    )}
-
-                    <div className="rounded-2xl bg-slate-50 p-3 space-y-2">
-                      {request.quantity && (
-                        <div className="flex justify-between text-sm">
-                          <span className="text-slate-500">Quantity</span>
-                          <span className="font-semibold text-slate-900">
-                            {request.quantity} {request.unit}
-                          </span>
-                        </div>
-                      )}
-                      <div className="flex justify-between text-sm">
-                        <span className="text-slate-500">Budget</span>
-                        <span className="font-semibold text-emerald-700">
-                          {formatBudget(request.budget)}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 pt-2 border-t border-slate-200">
-                      <div className="w-9 h-9 bg-emerald-200 rounded-full flex items-center justify-center text-sm font-bold text-emerald-800">
-                        {(request.userId && request.userId.fullName?.charAt(0)) || "U"}
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900">
-                          {request.userId?.fullName || "Anonymous"}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          Posted {formatDate(request.createdAt)}
-                        </p>
-                      </div>
-                      {request.userId?.ratings && typeof request.userId.ratings === 'number' && (
-                        <div className="flex items-center gap-1">
-                          <TrendingUp size={14} className="text-emerald-600" />
-                          <span className="text-sm font-semibold">
-                            {request.userId.ratings.toFixed(1)}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="bg-emerald-50 px-4 py-3 border-t border-slate-200">
-                    <Link
-                      to={`/request/${request._id}`}
-                      state={{ request }}
-                      className="block text-center bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-lg transition text-sm"
-                      aria-label={`View details for ${request.title}`}
-                    >
-                      View Details
-                    </Link>
-                  </div>
+              {pagination.pages > 1 && (
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <button
+                    onClick={() => setPage(Math.max(1, page - 1))}
+                    disabled={page === 1}
+                    className="ui-btn-ghost px-4 py-2 text-sm"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-sm font-semibold text-stone-700">
+                    Page {page} of {pagination.pages}
+                  </span>
+                  <button
+                    onClick={() => setPage(Math.min(pagination.pages, page + 1))}
+                    disabled={page === pagination.pages}
+                    className="ui-btn-ghost px-4 py-2 text-sm"
+                  >
+                    Next
+                  </button>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
+          )}
 
-            {pagination.pages > 1 && (
-              <div className="flex justify-center items-center gap-2">
-                <button
-                  onClick={() => setPage(Math.max(1, page - 1))}
-                  disabled={page === 1}
-                  className="px-4 py-2 border border-slate-300 rounded-lg disabled:opacity-50 hover:bg-slate-100 transition"
-                >
-                  Previous
-                </button>
-                <span className="text-slate-700 font-medium">
-                  Page {page} of {pagination.pages}
-                </span>
-                <button
-                  onClick={() => setPage(Math.min(pagination.pages, page + 1))}
-                  disabled={page === pagination.pages}
-                  className="px-4 py-2 border border-slate-300 rounded-lg disabled:opacity-50 hover:bg-slate-100 transition"
-                >
-                  Next
-                </button>
+          <section className="overflow-hidden rounded-[2rem] border border-[#F3C9BE] bg-gradient-to-r from-[#A0452E] to-[#72281A] px-6 py-8 text-white shadow-[0_18px_40px_rgba(160,69,46,0.2)]">
+            <div className="mx-auto flex max-w-5xl flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/75">
+                  Need products instead?
+                </p>
+                <h3 className="mt-2 text-2xl font-semibold tracking-tight">
+                  {isB2B ? "Switch to open marketplace supply" : "Browse live listings and contact sellers directly"}
+                </h3>
+                <p className="mt-2 max-w-2xl text-sm text-white/80">
+                  {isB2B
+                    ? "Use open listings when you want to compare live supply before posting bulk procurement needs."
+                    : "Move from demand to supply in one click, or post your own listing if you want buyers to come to you."}
+                </p>
               </div>
-            )}
-          </>
-        )}
-
-        <div className="mt-16 rounded-3xl border border-emerald-100 bg-emerald-50/40 p-8">
-          <div className="max-w-4xl mx-auto text-center">
-            <h3 className="text-2xl font-bold text-slate-900 mb-3">
-              {isB2B ? "Need open marketplace offers instead?" : "Need products instead?"}
-            </h3>
-            <p className="text-slate-600 mb-6">
-              {isB2B
-                ? "Switch to live listings and contact verified sellers directly."
-                : "Switch to marketplace listings and contact sellers directly."}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                to="/browse"
-                className="inline-flex justify-center items-center px-6 py-3 rounded-xl bg-emerald-600 text-white font-semibold transition hover:bg-emerald-700"
-              >
-                Browse Listings
-              </Link>
-              <Link
-                to={
-                  user
-                    ? "/create-listing?compact=1"
-                    : `/login?mode=signup&next=${encodeURIComponent("/create-listing?compact=1")}`
-                }
-                className="inline-flex justify-center items-center px-6 py-3 rounded-xl border-2 border-emerald-600 text-emerald-700 font-semibold transition hover:bg-emerald-50"
-              >
-                Create Listing
-              </Link>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Link to="/browse" className="ui-btn-secondary border-white/30 bg-white text-[#A0452E] hover:bg-[#FDF5F3]">
+                  Browse listings
+                </Link>
+                <Link
+                  to={
+                    user
+                      ? "/create-listing?compact=1"
+                      : `/login?mode=signup&next=${encodeURIComponent("/create-listing?compact=1")}`
+                  }
+                  className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-white/40 bg-transparent px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
+                >
+                  Create listing
+                </Link>
+              </div>
             </div>
-          </div>
+          </section>
         </div>
       </div>
     </div>
