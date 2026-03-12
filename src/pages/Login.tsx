@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import GoogleLoginButton from "../components/GoogleLoginButtonV2";
 import FacebookLoginButton from "../components/FacebookLoginButtonV2";
 import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
@@ -137,7 +137,7 @@ const Login: React.FC = () => {
     newPassword: "",
     confirmPassword: "",
   });
-  const signupDefaultNext = "/create-listing?compact=1";
+  const signupDefaultNext = "/browse";
   const redirectTo =
     searchParams.get("next") ||
     (mode === "signup" || mode === "otp-verify" ? signupDefaultNext : "/profile");
@@ -1081,8 +1081,8 @@ const Login: React.FC = () => {
   const modeSubtitle =
     mode === "signup"
       ? isPhone
-        ? "About 10 seconds."
-        : "Create your account in about 10 seconds."
+        ? "About 10 seconds, then browse live listings."
+        : "Create your account in about 10 seconds, then browse live listings."
       : mode === "forgot" || mode === "otp-reset"
         ? "Use your email address to regain secure access."
         : mode === "otp-verify"
@@ -1101,14 +1101,14 @@ const Login: React.FC = () => {
               <img src="/logo192.png" alt="" aria-hidden="true" className="h-12 w-12 rounded-xl bg-white/10 p-1" />
               <h1 className="mt-5 text-4xl font-bold leading-tight">Agrisoko</h1>
               <p className="mt-2 max-w-sm text-sm text-[#FDF2EE]">
-                Trusted agricultural marketplace across Kenya. Create an account, verify when ready, and start trading directly.
+                Trusted agricultural marketplace across Kenya. Create an account, browse live supply immediately, and verify when you are ready to trade.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-3 text-xs font-medium text-[#FFF7F4]">
               <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1">Verified profiles</span>
               <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1">Secure login</span>
               <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1">Direct chat</span>
-              <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1">Fast signup</span>
+              <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1">Browse first</span>
             </div>
           </aside>
 
@@ -1127,6 +1127,14 @@ const Login: React.FC = () => {
               <div className="mb-6">
                 <h2 className="mt-2 text-2xl font-bold text-slate-900">{modeTitle}</h2>
                 <p className="mt-1 text-sm text-slate-600">{modeSubtitle}</p>
+                {(mode === "login" || mode === "signup") && (
+                  <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold text-stone-600">
+                    <span className="ui-chip-soft">Public browsing available</span>
+                    <Link to="/browse" className="text-[#A0452E] transition hover:text-[#8B3525]">
+                      Browse listings first
+                    </Link>
+                  </div>
+                )}
               </div>
 
               {error && (
