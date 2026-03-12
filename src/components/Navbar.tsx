@@ -96,8 +96,9 @@ const getSignupTarget = (nextPath: string) =>
 const getNavLinkClass = (active: boolean, accent = false) => {
   if (accent) {
     return active
-      ? "inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-xl bg-[#8B3525] px-4 py-2 text-sm font-semibold text-white shadow-sm"
-      : "inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-xl bg-[#A0452E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#8B3525]";}
+      ? "inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white shadow-sm"
+      : "inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700";
+  }
 
   return active
     ? "inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-xl bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900"
@@ -219,8 +220,8 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <nav className="sticky top-0 z-40 border-b border-stone-200 bg-white/95 backdrop-blur">
-        <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg,#A0452E,#E8973A,#A0452E)' }} />
+      <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
+        <div className="h-1 w-full bg-[#A0452E]" />
         <div className="mx-auto max-w-7xl px-4">
           <div className="flex items-center justify-between py-4">
             <Link to="/" className="flex items-center gap-3">
@@ -413,7 +414,7 @@ const Navbar: React.FC = () => {
                   type="button"
                   onClick={() => setMobileExpandedMenu((prev) => (prev === "browse" ? null : "browse"))}
                   className={`flex min-h-[52px] w-full items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-                    pathMatches(location.pathname, "/browse") ? "bg-[#FDF5F3] text-[#A0452E]" : "text-slate-700 hover:bg-slate-50"
+                    pathMatches(location.pathname, "/browse") ? "bg-slate-100 text-slate-900" : "text-slate-700 hover:bg-slate-50"
                   }`}
                 >
                   <span className="flex items-center gap-3">
@@ -455,7 +456,7 @@ const Navbar: React.FC = () => {
                     key={item.label}
                     to={item.to}
                     className={`flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-                      active ? "bg-[#FDF5F3] text-[#A0452E]" : "text-slate-700 hover:bg-slate-50"
+                      active ? "bg-slate-100 text-slate-900" : "text-slate-700 hover:bg-slate-50"
                     }`}
                   >
                     <Icon className="h-5 w-5" />
@@ -469,7 +470,7 @@ const Navbar: React.FC = () => {
                   type="button"
                   onClick={() => setMobileExpandedMenu((prev) => (prev === "sell" ? null : "sell"))}
                   className={`flex min-h-[52px] w-full items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-                    pathMatches(location.pathname, "/create-listing") ? "bg-[#FDF5F3] text-[#A0452E]" : "text-slate-700 hover:bg-slate-50"
+                    pathMatches(location.pathname, "/create-listing") ? "bg-slate-100 text-slate-900" : "text-slate-700 hover:bg-slate-50"
                   }`}
                 >
                   <span className="flex items-center gap-3">
@@ -509,7 +510,7 @@ const Navbar: React.FC = () => {
                       key={item.label}
                       to={item.to}
                       className={`flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-                        active ? "bg-[#FDF5F3] text-[#A0452E]" : "text-slate-700 hover:bg-slate-50"
+                        active ? "bg-slate-100 text-slate-900" : "text-slate-700 hover:bg-slate-50"
                       }`}
                     >
                       <Icon className="h-5 w-5" />
@@ -555,7 +556,7 @@ const Navbar: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-2">
-                <Link to={signupTarget} className="flex min-h-[52px] items-center justify-center rounded-2xl bg-[#A0452E] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#8B3525]">
+                <Link to={signupTarget} className="flex min-h-[52px] items-center justify-center rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700">
                   Create Free Account
                 </Link>
                 <Link to="/login" className="flex min-h-[52px] items-center justify-center rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
@@ -597,7 +598,7 @@ const Navbar: React.FC = () => {
                       setMobileSellSheetOpen(false);
                       navigate(item.to);
                     }}
-                    className="flex min-h-[48px] items-center rounded-2xl border border-slate-200 px-4 py-3 text-left text-sm font-semibold text-slate-800 transition hover:border-[#F3C9BE] hover:bg-[#FDF5F3]"
+                    className="flex min-h-[48px] items-center rounded-2xl border border-slate-200 px-4 py-3 text-left text-sm font-semibold text-slate-800 transition hover:border-emerald-300 hover:bg-emerald-50"
                   >
                     {item.label}
                   </button>
@@ -618,10 +619,10 @@ const Navbar: React.FC = () => {
                     type="button"
                     onClick={() => setMobileSellSheetOpen((prev) => !prev)}
                     className={`flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-xl px-1 text-[11px] font-semibold transition ${
-                      active ? "text-[#A0452E]" : "text-slate-500"
+                      active ? "text-emerald-700" : "text-slate-500"
                     }`}
                   >
-                    <Icon className={`h-5 w-5 ${active ? "text-[#A0452E]" : "text-slate-400"}`} />
+                    <Icon className={`h-5 w-5 ${active ? "text-emerald-700" : "text-slate-400"}`} />
                     <span>{item.label}</span>
                   </button>
                 );
@@ -631,10 +632,10 @@ const Navbar: React.FC = () => {
                   key={item.label}
                   to={item.to}
                   className={`flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-xl px-1 text-[11px] font-semibold transition ${
-                    active ? "text-[#A0452E]" : "text-slate-500"
+                    active ? "text-emerald-700" : "text-slate-500"
                   }`}
                 >
-                  <Icon className={`h-5 w-5 ${active ? "text-[#A0452E]" : "text-slate-400"}`} />
+                  <Icon className={`h-5 w-5 ${active ? "text-emerald-700" : "text-slate-400"}`} />
                   <span>{item.label}</span>
                 </Link>
               );
