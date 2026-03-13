@@ -197,13 +197,14 @@ const BulkSellerOrders: React.FC = () => {
 
   if (!user) {
     return (
-      <main className="min-h-screen bg-slate-50 px-4 py-10">
-        <div className="mx-auto max-w-2xl rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h1 className="text-2xl font-semibold text-slate-900">Bulk seller orders</h1>
-          <p className="mt-2 text-sm text-slate-600">Sign in first to continue.</p>
+      <main className="ui-page-shell px-4 py-10">
+        <div className="ui-card mx-auto max-w-2xl p-8">
+          <p className="ui-section-kicker">Bulk seller portal</p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900">Bulk seller orders</h1>
+          <p className="mt-2 text-sm text-stone-600">Sign in first to continue.</p>
           <Link
             to="/login?mode=signup&next=/bulk/seller/orders"
-            className="mt-5 inline-flex rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
+            className="ui-btn-primary mt-5 px-5 py-3 text-sm"
           >
             Sign in
           </Link>
@@ -214,7 +215,7 @@ const BulkSellerOrders: React.FC = () => {
 
   if (!accessLoading && !canRespond) {
     return (
-      <main className="min-h-screen bg-slate-50 px-4 py-10">
+      <main className="ui-page-shell px-4 py-10">
         <div className="mx-auto max-w-2xl rounded-3xl border border-amber-200 bg-amber-50 p-8 shadow-sm">
           <h1 className="text-2xl font-semibold text-amber-900">Bulk seller approval required</h1>
           <p className="mt-2 text-sm text-amber-800">
@@ -232,30 +233,30 @@ const BulkSellerOrders: React.FC = () => {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8">
+    <main className="ui-page-shell px-4 py-8">
       <div className="mx-auto max-w-6xl space-y-4">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="ui-hero-panel p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
+              <p className="ui-section-kicker">
                 Seller portal
               </p>
-              <h1 className="mt-1 text-2xl font-semibold text-slate-900">Bulk seller workflow</h1>
-              <p className="mt-1 text-sm text-slate-600">
+              <h1 className="mt-1 text-2xl font-semibold tracking-tight text-stone-900">Bulk seller workflow</h1>
+              <p className="mt-1 text-sm text-stone-600">
                 Review awarded orders, accept fast, and issue invoices cleanly.
               </p>
             </div>
             <div className="flex gap-2">
               <Link
                 to="/bulk/orders"
-                className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                className="ui-btn-secondary px-4 py-2 text-sm"
               >
                 Open demand board
               </Link>
               <button
                 type="button"
                 onClick={loadOrders}
-                className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                className="ui-btn-ghost px-4 py-2 text-sm"
               >
                 Refresh
               </button>
@@ -263,9 +264,9 @@ const BulkSellerOrders: React.FC = () => {
           </div>
 
           <div className="mt-4 grid gap-2 sm:grid-cols-4">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-              <p className="text-[11px] uppercase tracking-[0.12em] text-slate-500">Total</p>
-              <p className="text-lg font-semibold text-slate-900">{orderStats.total}</p>
+            <div className="ui-card-soft px-3 py-2">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-stone-500">Total</p>
+              <p className="text-lg font-semibold text-stone-900">{orderStats.total}</p>
             </div>
             <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
               <p className="text-[11px] uppercase tracking-[0.12em] text-amber-700">Needs action</p>
@@ -282,17 +283,17 @@ const BulkSellerOrders: React.FC = () => {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+        <section className="ui-card p-3">
           <div className="flex flex-wrap gap-2">
             {(Object.keys(VIEW_LABELS) as SellerView[]).map((option) => (
               <button
                 key={option}
                 type="button"
                 onClick={() => setView(option)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition ${
                   view === option
-                    ? "bg-emerald-600 text-white"
-                    : "border border-slate-300 text-slate-700 hover:bg-slate-50"
+                    ? "bg-[#A0452E] text-white"
+                    : "border border-stone-200 bg-white text-stone-700 hover:bg-[#FDF5F3]"
                 }`}
               >
                 {VIEW_LABELS[option]}
@@ -307,7 +308,7 @@ const BulkSellerOrders: React.FC = () => {
           </div>
         )}
         {notice && (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          <div className="rounded-xl border border-forest-100 bg-forest-50 px-4 py-3 text-sm text-forest-700">
             {notice}
           </div>
         )}
@@ -317,7 +318,7 @@ const BulkSellerOrders: React.FC = () => {
             {Array.from({ length: 4 }).map((_, index) => (
               <article
                 key={`seller-order-skeleton-${index}`}
-                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                className="ui-card p-5"
               >
                 <div className="h-4 w-20 animate-pulse rounded bg-slate-100" />
                 <div className="mt-3 h-5 w-3/4 animate-pulse rounded bg-slate-100" />
@@ -331,7 +332,7 @@ const BulkSellerOrders: React.FC = () => {
             ))}
           </section>
         ) : filteredOrders.length === 0 ? (
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-500 shadow-sm">
+          <div className="ui-card p-6 text-sm text-stone-500">
             {view === "all"
               ? "No awarded orders yet."
               : `No orders in "${VIEW_LABELS[view]}" right now.`}
@@ -357,11 +358,11 @@ const BulkSellerOrders: React.FC = () => {
               return (
                 <article
                   key={order._id}
-                  className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                  className="ui-card p-5 transition hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(28,25,23,0.08)]"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                      <span className="rounded-full bg-[#FAF7F2] px-2.5 py-1 text-xs font-semibold text-stone-700">
                         {CATEGORY_LABELS[order.category] || order.category}
                       </span>
                       <span
@@ -377,10 +378,10 @@ const BulkSellerOrders: React.FC = () => {
                     </span>
                   </div>
 
-                  <h2 className="mt-3 text-lg font-semibold text-slate-900">{order.title}</h2>
-                  <p className="mt-1 text-sm text-slate-600">{order.itemName}</p>
+                  <h2 className="mt-3 text-lg font-semibold text-stone-900">{order.title}</h2>
+                  <p className="mt-1 text-sm text-stone-600">{order.itemName}</p>
 
-                  <div className="mt-4 grid gap-2 text-sm text-slate-700">
+                  <div className="mt-4 grid gap-2 rounded-2xl bg-[#FAF7F2] p-3 text-sm text-stone-700">
                     <p>
                       <strong>Buyer:</strong> {order.buyerId?.fullName || "Buyer"}
                     </p>
@@ -416,7 +417,7 @@ const BulkSellerOrders: React.FC = () => {
                   </div>
 
                   {invoice && (
-                    <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+                    <div className="mt-4 rounded-xl border border-forest-100 bg-forest-50 p-3 text-sm text-forest-900">
                       <p>
                         <strong>Invoice:</strong> {invoice.invoiceNumber}
                       </p>
@@ -441,7 +442,7 @@ const BulkSellerOrders: React.FC = () => {
                   <div className="mt-4 flex flex-wrap gap-2">
                     <Link
                       to={`/bulk/orders/${order._id}`}
-                      className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                      className="ui-btn-ghost px-3 py-1.5 text-xs"
                     >
                       View details
                     </Link>
@@ -449,7 +450,7 @@ const BulkSellerOrders: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleAcceptOrder(order._id)}
-                        className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
+                        className="ui-btn-primary px-3 py-1.5 text-xs"
                       >
                         Accept + issue invoice
                       </button>

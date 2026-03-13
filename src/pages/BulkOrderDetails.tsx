@@ -234,13 +234,14 @@ const BulkOrderDetails: React.FC = () => {
 
   if (!user) {
     return (
-      <main className="min-h-screen bg-slate-50 px-4 py-10">
-        <div className="mx-auto max-w-2xl rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h1 className="text-2xl font-semibold text-slate-900">Bulk order details</h1>
-          <p className="mt-2 text-sm text-slate-600">Sign in to continue.</p>
+      <main className="ui-page-shell px-4 py-10">
+        <div className="ui-card mx-auto max-w-2xl p-8">
+          <p className="ui-section-kicker">Bulk order</p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900">Bulk order details</h1>
+          <p className="mt-2 text-sm text-stone-600">Sign in to continue.</p>
           <Link
             to={`/login?mode=signup&next=${encodeURIComponent(`/bulk/orders/${id || ""}`)}`}
-            className="mt-5 inline-flex rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
+            className="ui-btn-primary mt-5 px-5 py-3 text-sm"
           >
             Sign in
           </Link>
@@ -250,18 +251,18 @@ const BulkOrderDetails: React.FC = () => {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8">
+    <main className="ui-page-shell px-4 py-8">
       <div className="mx-auto max-w-5xl space-y-4">
         <div className="flex flex-wrap items-center gap-2">
           <Link
             to="/bulk/orders"
-            className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            className="ui-btn-ghost px-3 py-1.5 text-xs"
           >
             Back to bulk board
           </Link>
           <Link
             to="/bulk"
-            className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            className="ui-btn-ghost px-3 py-1.5 text-xs"
           >
             Bulk access
           </Link>
@@ -273,29 +274,29 @@ const BulkOrderDetails: React.FC = () => {
           </div>
         )}
         {notice && (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          <div className="rounded-xl border border-forest-100 bg-forest-50 px-4 py-3 text-sm text-forest-700">
             {notice}
           </div>
         )}
 
         {loading ? (
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-500 shadow-sm">
+          <div className="ui-card p-6 text-sm text-stone-500">
             Loading bulk order details...
           </div>
         ) : !order ? (
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-500 shadow-sm">
+          <div className="ui-card p-6 text-sm text-stone-500">
             Bulk order not found.
           </div>
         ) : (
           <>
-            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section className="ui-hero-panel p-6">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
+                  <p className="ui-section-kicker">
                     Bulk order
                   </p>
-                  <h1 className="mt-1 text-2xl font-semibold text-slate-900">{order.title}</h1>
-                  <p className="mt-1 text-sm text-slate-600">{order.itemName}</p>
+                  <h1 className="mt-1 text-2xl font-semibold tracking-tight text-stone-900">{order.title}</h1>
+                  <p className="mt-1 text-sm text-stone-600">{order.itemName}</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <span
@@ -318,12 +319,12 @@ const BulkOrderDetails: React.FC = () => {
               </div>
 
               <div className="mt-4 grid gap-3 md:grid-cols-2">
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm">
+                <div className="ui-card-soft p-3 text-sm text-stone-700">
                   <p><strong>Category:</strong> {order.category}</p>
                   <p><strong>Quantity:</strong> {order.quantity} {order.unit}</p>
                   <p><strong>Budget:</strong> {budgetLabel}</p>
                 </div>
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm">
+                <div className="ui-card-soft p-3 text-sm text-stone-700">
                   <p><strong>County:</strong> {order.deliveryLocation?.county}</p>
                   <p><strong>Constituency:</strong> {order.deliveryLocation?.constituency || "-"}</p>
                   <p><strong>Ward:</strong> {order.deliveryLocation?.ward || "-"}</p>
@@ -338,17 +339,17 @@ const BulkOrderDetails: React.FC = () => {
               </div>
 
               {order.description && (
-                <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
+                <div className="mt-4 rounded-xl border border-stone-200 bg-white/80 p-3 text-sm text-stone-700">
                   {order.description}
                 </div>
               )}
 
-              <div className="mt-4 text-sm text-slate-700">
+              <div className="mt-4 text-sm text-stone-700">
                 <p><strong>Total bids:</strong> {payload?.bidCount || 0}</p>
               </div>
 
               {invoice && (
-                <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+                <div className="mt-4 rounded-xl border border-forest-100 bg-forest-50 p-3 text-sm text-forest-900">
                   <p><strong>Invoice:</strong> {invoice.invoiceNumber}</p>
                   <p>
                     <strong>Buyer total:</strong> {formatCurrency(invoice.totalBuyerAmount)}{" "}
@@ -364,7 +365,7 @@ const BulkOrderDetails: React.FC = () => {
                 </div>
               )}
 
-              <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
+              <div className="mt-4 rounded-xl border border-stone-200 bg-[#FAF7F2] p-3 text-sm text-stone-700">
                 <p>
                   <strong>Buyer confirmation:</strong>{" "}
                   {buyerConfirmed
@@ -397,7 +398,7 @@ const BulkOrderDetails: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleMarkComplete}
-                      className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                      className="ui-btn-primary px-4 py-2 text-sm"
                     >
                       Mark complete
                     </button>
@@ -416,9 +417,9 @@ const BulkOrderDetails: React.FC = () => {
             </section>
 
             {canBid && (
-              <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h2 className="text-lg font-semibold text-slate-900">Place your bid</h2>
-                <p className="mt-1 text-sm text-slate-600">
+              <section className="ui-card p-6">
+                <h2 className="text-lg font-semibold text-stone-900">Place your bid</h2>
+                <p className="mt-1 text-sm text-stone-600">
                   Quote total amount (include delivery) and proposed delivery date.
                 </p>
                 <form onSubmit={handlePlaceBid} className="mt-4 grid gap-3 md:grid-cols-3">
@@ -428,18 +429,18 @@ const BulkOrderDetails: React.FC = () => {
                     value={quoteAmount}
                     onChange={(event) => setQuoteAmount(event.target.value)}
                     placeholder="Quote amount (KES)"
-                    className="rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                    className="ui-input"
                   />
                   <input
                     type="date"
                     value={deliveryDate}
                     onChange={(event) => setDeliveryDate(event.target.value)}
-                    className="rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                    className="ui-input"
                   />
                   <button
                     type="submit"
                     disabled={submittingBid}
-                    className="rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700 disabled:bg-slate-300"
+                    className="ui-btn-primary px-4 py-3 text-sm disabled:bg-stone-300"
                   >
                     {submittingBid ? "Submitting..." : "Submit bid"}
                   </button>
@@ -447,7 +448,7 @@ const BulkOrderDetails: React.FC = () => {
                     value={note}
                     onChange={(event) => setNote(event.target.value)}
                     placeholder="Optional note"
-                    className="md:col-span-3 rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                    className="ui-input md:col-span-3"
                     rows={3}
                   />
                 </form>
@@ -455,9 +456,9 @@ const BulkOrderDetails: React.FC = () => {
             )}
 
             {payload?.myBid && !isOwner && (
-              <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h2 className="text-lg font-semibold text-slate-900">Your bid</h2>
-                <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm">
+              <section className="ui-card p-6">
+                <h2 className="text-lg font-semibold text-stone-900">Your bid</h2>
+                <div className="mt-3 rounded-xl border border-stone-200 bg-[#FAF7F2] p-3 text-sm text-stone-700">
                   <p><strong>Quote:</strong> {formatCurrency(payload.myBid.quoteAmount)}</p>
                   <p>
                     <strong>Delivery date:</strong>{" "}
@@ -473,7 +474,7 @@ const BulkOrderDetails: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleAcceptAwardedOrder}
-                      className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                      className="ui-btn-primary px-4 py-2 text-sm"
                     >
                       Accept order and issue invoice
                     </button>
@@ -484,7 +485,7 @@ const BulkOrderDetails: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleMarkComplete}
-                      className="rounded-lg border border-emerald-300 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50"
+                      className="ui-btn-secondary px-4 py-2 text-sm"
                     >
                       Mark complete
                     </button>
@@ -494,17 +495,17 @@ const BulkOrderDetails: React.FC = () => {
             )}
 
             {isOwner && (
-              <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h2 className="text-lg font-semibold text-slate-900">Incoming bids</h2>
+              <section className="ui-card p-6">
+                <h2 className="text-lg font-semibold text-stone-900">Incoming bids</h2>
                 {payload?.bids?.length ? (
                   <div className="mt-4 space-y-3">
                     {payload.bids.map((bid) => (
                       <article
                         key={bid._id}
-                        className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm"
+                        className="rounded-xl border border-stone-200 bg-[#FAF7F2] p-4 text-sm text-stone-700"
                       >
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <p className="font-semibold text-slate-900">
+                          <p className="font-semibold text-stone-900">
                             {bid.sellerId?.fullName || "Seller"}
                           </p>
                           <span
@@ -534,7 +535,7 @@ const BulkOrderDetails: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => handleAcceptBid(bid._id)}
-                              className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
+                              className="ui-btn-primary px-3 py-1.5 text-xs"
                             >
                               Accept bid
                             </button>
@@ -551,7 +552,7 @@ const BulkOrderDetails: React.FC = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="mt-3 text-sm text-slate-500">No bids yet.</p>
+                  <p className="mt-3 text-sm text-stone-500">No bids yet.</p>
                 )}
               </section>
             )}
