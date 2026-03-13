@@ -44,7 +44,7 @@ const completionMeta = (status?: string) => {
     case "completed":
       return {
         label: "Completed by both parties",
-        className: "bg-emerald-100 text-emerald-700",
+        className: "bg-[#FDF5F3] text-[#A0452E]",
       };
     case "presumed_complete":
       return {
@@ -302,7 +302,7 @@ const BulkOrderDetails: React.FC = () => {
                   <span
                     className={`rounded-full px-3 py-1 text-xs font-semibold ${
                       order.status === "open"
-                        ? "bg-emerald-100 text-emerald-700"
+                        ? "bg-[#FDF5F3] text-[#A0452E]"
                         : order.status === "awarded"
                         ? "bg-amber-100 text-amber-700"
                         : "bg-slate-100 text-slate-700"
@@ -511,7 +511,7 @@ const BulkOrderDetails: React.FC = () => {
                           <span
                             className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                               bid.status === "accepted"
-                                ? "bg-emerald-100 text-emerald-700"
+                                ? "bg-[#FDF5F3] text-[#A0452E]"
                                 : bid.status === "rejected"
                                 ? "bg-rose-100 text-rose-700"
                                 : "bg-slate-100 text-slate-700"

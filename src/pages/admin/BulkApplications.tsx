@@ -194,7 +194,7 @@ const BulkApplications: React.FC = () => {
                         <span
                           className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                             item.status === "approved"
-                              ? "bg-emerald-100 text-emerald-700"
+                              ? "bg-[#FDF5F3] text-[#A0452E]"
                               : item.status === "rejected"
                               ? "bg-rose-100 text-rose-700"
                               : "bg-amber-100 text-amber-700"

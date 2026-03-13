@@ -1,6 +1,17 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { AlertTriangle, ArrowLeft, CheckCircle, ExternalLink, Flag, Lock, Mail, Phone, ShieldCheck, Star } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  CheckCircle,
+  ExternalLink,
+  Flag,
+  Lock,
+  Mail,
+  Phone,
+  ShieldCheck,
+  Star,
+} from "lucide-react";
 import { API_BASE_URL, API_ENDPOINTS, adminApiRequest, apiRequest } from "../../config/api";
 import { buildMarketplaceCards, MarketplaceCard } from "../../utils/marketplaceCards";
 import { normalizeKenyanPhone } from "../../utils/phone";
@@ -46,12 +57,12 @@ type ActivityItem = {
   createdAt: Date;
 };
 
-const toArray = (value: any) => (Array.isArray(value) ? value : []);
+const toArray = (value: unknown) => (Array.isArray(value) ? value : []);
 
 const formatDate = (value?: string) => {
-  if (!value) return "—";
+  if (!value) return "-";
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "—";
+  if (Number.isNaN(date.getTime())) return "-";
   return date.toLocaleDateString();
 };
 
@@ -105,12 +116,12 @@ const AdminUserProfile: React.FC = () => {
         if (cancelled) return;
 
         const adminUser = adminUserResponse?.data || null;
-        const reportsData = toArray(reportsResponse?.data);
-        const buyerRequestData = toArray(buyerRequestsResponse?.data);
+        const reportsData = toArray(reportsResponse?.data) as ReportRecord[];
+        const buyerRequestData = toArray(buyerRequestsResponse?.data) as BuyerRequestRecord[];
         const productData = toArray(productsResponse?.data);
         const equipmentData = toArray(equipmentResponse?.data);
         const professionalData = toArray(professionalResponse?.data);
-        const inputData = toArray(inputsResponse?.data).map((item: any) => ({ ...item, type: "agrovet" }));
+        const inputData = (toArray(inputsResponse?.data) as any[]).map((item) => ({ ...item, type: "agrovet" }));
         const ratingAggregate = ratingsResponse?.data?.aggregate || {};
 
         const sellerListings = buildMarketplaceCards(productData, [
@@ -151,7 +162,7 @@ const AdminUserProfile: React.FC = () => {
       id: `listing-${listing.id}`,
       type: "listing" as const,
       title: listing.title,
-      meta: `Listing • ${listing.typeLabel}${listing.county ? ` • ${listing.county}` : ""}`,
+      meta: `Listing - ${listing.typeLabel}${listing.county ? ` - ${listing.county}` : ""}`,
       createdAt: listing.createdAt || new Date(0),
     }));
 
@@ -159,7 +170,7 @@ const AdminUserProfile: React.FC = () => {
       id: `request-${request._id}`,
       type: "request" as const,
       title: request.title || request.productType || "Buyer request",
-      meta: `Buy request • ${request.category || "Uncategorized"}${request.county ? ` • ${request.county}` : ""}`,
+      meta: `Buy request - ${request.category || "Uncategorized"}${request.county ? ` - ${request.county}` : ""}`,
       createdAt: request.createdAt ? new Date(request.createdAt) : new Date(0),
     }));
 
@@ -167,7 +178,7 @@ const AdminUserProfile: React.FC = () => {
       id: `report-${report._id}`,
       type: "report" as const,
       title: report.reason || "User report",
-      meta: `Report • ${report.status || "pending"}`,
+      meta: `Report - ${report.status || "pending"}`,
       createdAt: report.createdAt ? new Date(report.createdAt) : new Date(0),
     }));
 
@@ -179,9 +190,9 @@ const AdminUserProfile: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 p-6">
-        <div className="mx-auto max-w-6xl">
-          <p className="text-sm font-medium text-slate-600">Loading user profile...</p>
+      <div className="ui-page-shell py-10">
+        <div className="mx-auto max-w-6xl px-4">
+          <p className="text-sm font-medium text-stone-600">Loading user profile...</p>
         </div>
       </div>
     );
@@ -189,15 +200,11 @@ const AdminUserProfile: React.FC = () => {
 
   if (error || !user) {
     return (
-      <div className="min-h-screen bg-slate-50 p-6">
-        <div className="mx-auto max-w-4xl rounded-3xl border border-red-200 bg-white p-6 shadow-sm">
+      <div className="ui-page-shell py-10">
+        <div className="ui-card mx-auto max-w-4xl border-red-200 px-6 py-6">
           <p className="text-lg font-semibold text-red-700">Unable to load user profile</p>
-          <p className="mt-2 text-sm text-slate-600">{error || "User not found."}</p>
-          <button
-            type="button"
-            onClick={() => navigate("/admin/users")}
-            className="mt-4 inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
-          >
+          <p className="mt-2 text-sm text-stone-600">{error || "User not found."}</p>
+          <button type="button" onClick={() => navigate("/admin/users")} className="ui-btn-primary mt-4 gap-2 px-4 py-2 text-sm">
             <ArrowLeft className="h-4 w-4" />
             Back to user management
           </button>
@@ -211,52 +218,41 @@ const AdminUserProfile: React.FC = () => {
   const normalizedPhone = normalizeKenyanPhone(user.phone || publicProfile?.phone || "");
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
-      <div className="mx-auto max-w-6xl space-y-6">
+    <div className="ui-page-shell py-10">
+      <div className="mx-auto max-w-6xl space-y-6 px-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={() => navigate("/admin/users")}
-            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-50"
-          >
+          <button type="button" onClick={() => navigate("/admin/users")} className="ui-btn-ghost gap-2 px-4 py-2 text-sm">
             <ArrowLeft className="h-4 w-4" />
             Back to user management
           </button>
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              to={`/sellers/${user._id}`}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800 hover:bg-emerald-100"
-            >
-              View public seller profile
-              <ExternalLink className="h-4 w-4" />
-            </Link>
-          </div>
+          <Link to={`/sellers/${user._id}`} target="_blank" rel="noreferrer" className="ui-btn-secondary gap-2 px-4 py-2 text-sm">
+            View public seller profile
+            <ExternalLink className="h-4 w-4" />
+          </Link>
         </div>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="ui-card p-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">User profile</p>
-              <h1 className="mt-2 text-3xl font-semibold text-slate-900">{user.fullName}</h1>
+              <p className="ui-section-kicker">User profile</p>
+              <h1 className="mt-2 text-3xl font-semibold text-stone-900">{user.fullName}</h1>
               <div className="mt-3 flex flex-wrap gap-2 text-sm">
-                <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 font-semibold ${isVerified ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}>
+                <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 font-semibold ${isVerified ? "bg-[#FDF5F3] text-[#A0452E]" : "bg-amber-100 text-amber-800"}`}>
                   {isVerified ? <ShieldCheck className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
                   {isVerified ? "Verified" : "Unverified"}
                 </span>
-                <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 font-semibold ${user.accountStatus === "suspended" ? "bg-red-100 text-red-800" : "bg-blue-100 text-blue-800"}`}>
+                <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 font-semibold ${user.accountStatus === "suspended" ? "bg-red-100 text-red-800" : "bg-stone-100 text-stone-700"}`}>
                   {user.accountStatus === "suspended" ? <Lock className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
                   {user.accountStatus === "suspended" ? "Suspended" : "Active"}
                 </span>
-                <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-700">
+                <span className="inline-flex items-center gap-2 rounded-full bg-stone-100 px-3 py-1 font-semibold text-stone-700">
                   <Flag className="h-4 w-4" />
                   {user.fraudFlags || 0} fraud flags
                 </span>
               </div>
             </div>
 
-            <div className="grid gap-3 text-sm text-slate-600 sm:text-right">
+            <div className="grid gap-3 text-sm text-stone-600 sm:text-right">
               <p className="inline-flex items-center gap-2 sm:justify-end">
                 <Mail className="h-4 w-4" />
                 {user.email || "No email"}
@@ -272,25 +268,25 @@ const AdminUserProfile: React.FC = () => {
         </section>
 
         <section className="grid gap-4 md:grid-cols-4">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Active listings</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-900">{listingCards.length}</p>
+          <div className="ui-card-soft p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">Active listings</p>
+            <p className="mt-2 text-2xl font-semibold text-stone-900">{listingCards.length}</p>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Buy requests</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-900">{buyerRequests.length}</p>
+          <div className="ui-card-soft p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">Buy requests</p>
+            <p className="mt-2 text-2xl font-semibold text-stone-900">{buyerRequests.length}</p>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Reports</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-900">{reports.length}</p>
+          <div className="ui-card-soft p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">Reports</p>
+            <p className="mt-2 text-2xl font-semibold text-stone-900">{reports.length}</p>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Rating</p>
-            <p className="mt-2 inline-flex items-center gap-2 text-2xl font-semibold text-slate-900">
+          <div className="ui-card-soft p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">Rating</p>
+            <p className="mt-2 inline-flex items-center gap-2 text-2xl font-semibold text-stone-900">
               <Star className="h-5 w-5 text-amber-500" />
-              {typeof ratingsSummary?.average === "number" ? ratingsSummary.average.toFixed(1) : "—"}
+              {typeof ratingsSummary?.average === "number" ? ratingsSummary.average.toFixed(1) : "-"}
             </p>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-stone-500">
               {ratingsSummary?.count || 0} review{ratingsSummary?.count === 1 ? "" : "s"}
             </p>
           </div>
@@ -298,36 +294,29 @@ const AdminUserProfile: React.FC = () => {
 
         <section className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
           <div className="space-y-6">
-            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="ui-card p-5">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Listings</p>
-                  <h2 className="mt-1 text-xl font-semibold text-slate-900">Current public inventory</h2>
+                  <p className="ui-section-kicker">Listings</p>
+                  <h2 className="mt-2 text-xl font-semibold text-stone-900">Current public inventory</h2>
                 </div>
               </div>
 
               <div className="mt-4 space-y-3">
                 {listingCards.length === 0 ? (
-                  <p className="text-sm text-slate-500">No public listings found for this user.</p>
+                  <p className="text-sm text-stone-500">No public listings found for this user.</p>
                 ) : (
                   listingCards.map((listing) => (
-                    <div key={listing.id} className="rounded-2xl border border-slate-200 p-4">
+                    <div key={listing.id} className="ui-card-soft p-4">
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
-                          <p className="text-base font-semibold text-slate-900">{listing.title}</p>
-                          <p className="mt-1 text-sm text-slate-500">
-                            {listing.typeLabel}{listing.county ? ` • ${listing.county}` : ""}
+                          <p className="text-base font-semibold text-stone-900">{listing.title}</p>
+                          <p className="mt-1 text-sm text-stone-500">
+                            {listing.typeLabel}{listing.county ? ` - ${listing.county}` : ""}
                           </p>
-                          {listing.priceLabel && (
-                            <p className="mt-2 text-sm font-semibold text-emerald-700">{listing.priceLabel}</p>
-                          )}
+                          {listing.priceLabel && <p className="mt-2 text-sm font-semibold text-[#A0452E]">{listing.priceLabel}</p>}
                         </div>
-                        <Link
-                          to={`/listings/${listing.id}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-50"
-                        >
+                        <Link to={`/listings/${listing.id}`} target="_blank" rel="noreferrer" className="ui-btn-ghost gap-2 px-3 py-2 text-sm">
                           Open listing
                           <ExternalLink className="h-4 w-4" />
                         </Link>
@@ -338,31 +327,26 @@ const AdminUserProfile: React.FC = () => {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Buyer requests</p>
-              <h2 className="mt-1 text-xl font-semibold text-slate-900">Requests posted by this user</h2>
+            <div className="ui-card p-5">
+              <p className="ui-section-kicker">Buyer requests</p>
+              <h2 className="mt-2 text-xl font-semibold text-stone-900">Requests posted by this user</h2>
 
               <div className="mt-4 space-y-3">
                 {buyerRequests.length === 0 ? (
-                  <p className="text-sm text-slate-500">No buyer requests found.</p>
+                  <p className="text-sm text-stone-500">No buyer requests found.</p>
                 ) : (
                   buyerRequests.map((request) => (
-                    <div key={request._id} className="rounded-2xl border border-slate-200 p-4">
+                    <div key={request._id} className="ui-card-soft p-4">
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
-                          <p className="text-base font-semibold text-slate-900">
-                            {request.title || request.productType || "Buyer request"}
-                          </p>
-                          <p className="mt-1 text-sm text-slate-500">
-                            {request.category || "Uncategorized"}{request.county ? ` • ${request.county}` : ""}{request.status ? ` • ${request.status}` : ""}
+                          <p className="text-base font-semibold text-stone-900">{request.title || request.productType || "Buyer request"}</p>
+                          <p className="mt-1 text-sm text-stone-500">
+                            {request.category || "Uncategorized"}
+                            {request.county ? ` - ${request.county}` : ""}
+                            {request.status ? ` - ${request.status}` : ""}
                           </p>
                         </div>
-                        <Link
-                          to={`/request/${request._id}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-50"
-                        >
+                        <Link to={`/request/${request._id}`} target="_blank" rel="noreferrer" className="ui-btn-ghost gap-2 px-3 py-2 text-sm">
                           Open request
                           <ExternalLink className="h-4 w-4" />
                         </Link>
@@ -375,43 +359,41 @@ const AdminUserProfile: React.FC = () => {
           </div>
 
           <div className="space-y-6">
-            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Activity</p>
-              <h2 className="mt-1 text-xl font-semibold text-slate-900">Recent account activity</h2>
+            <div className="ui-card p-5">
+              <p className="ui-section-kicker">Activity</p>
+              <h2 className="mt-2 text-xl font-semibold text-stone-900">Recent account activity</h2>
 
               <div className="mt-4 space-y-3">
                 {activity.length === 0 ? (
-                  <p className="text-sm text-slate-500">No recent activity found.</p>
+                  <p className="text-sm text-stone-500">No recent activity found.</p>
                 ) : (
                   activity.map((item) => (
-                    <div key={item.id} className="rounded-2xl border border-slate-200 p-4">
-                      <p className="text-sm font-semibold text-slate-900">{item.title}</p>
-                      <p className="mt-1 text-xs text-slate-500">{item.meta}</p>
-                      <p className="mt-2 text-xs text-slate-400">{item.createdAt.toLocaleString()}</p>
+                    <div key={item.id} className="ui-card-soft p-4">
+                      <p className="text-sm font-semibold text-stone-900">{item.title}</p>
+                      <p className="mt-1 text-xs text-stone-500">{item.meta}</p>
+                      <p className="mt-2 text-xs text-stone-400">{item.createdAt.toLocaleString()}</p>
                     </div>
                   ))
                 )}
               </div>
             </div>
 
-            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Reports</p>
-              <h2 className="mt-1 text-xl font-semibold text-slate-900">Fraud and moderation history</h2>
+            <div className="ui-card p-5">
+              <p className="ui-section-kicker">Reports</p>
+              <h2 className="mt-2 text-xl font-semibold text-stone-900">Fraud and moderation history</h2>
 
               <div className="mt-4 space-y-3">
                 {reports.length === 0 ? (
-                  <p className="text-sm text-slate-500">No reports found for this user.</p>
+                  <p className="text-sm text-stone-500">No reports found for this user.</p>
                 ) : (
                   reports.slice(0, 10).map((report) => (
-                    <div key={report._id} className="rounded-2xl border border-slate-200 p-4">
-                      <p className="text-sm font-semibold text-slate-900">{report.reason || "User report"}</p>
-                      <p className="mt-1 text-xs text-slate-500">
-                        Status: {report.status || "pending"}
-                      </p>
-                      <p className="mt-1 text-xs text-slate-500">
+                    <div key={report._id} className="ui-card-soft p-4">
+                      <p className="text-sm font-semibold text-stone-900">{report.reason || "User report"}</p>
+                      <p className="mt-1 text-xs text-stone-500">Status: {report.status || "pending"}</p>
+                      <p className="mt-1 text-xs text-stone-500">
                         Reporter: {report.reportingUser?.fullName || report.reportingUser?.email || "Unknown"}
                       </p>
-                      <p className="mt-2 text-xs text-slate-400">{formatDate(report.createdAt)}</p>
+                      <p className="mt-2 text-xs text-stone-400">{formatDate(report.createdAt)}</p>
                     </div>
                   ))
                 )}

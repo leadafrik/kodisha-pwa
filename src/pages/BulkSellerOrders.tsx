@@ -64,7 +64,7 @@ const COMPLETION_META: Record<string, { label: string; className: string }> = {
   pending: { label: "Pending completion", className: "bg-slate-100 text-slate-700" },
   buyer_marked: { label: "Buyer confirmed", className: "bg-sky-100 text-sky-700" },
   seller_marked: { label: "Seller confirmed", className: "bg-violet-100 text-violet-700" },
-  completed: { label: "Completed", className: "bg-emerald-100 text-emerald-700" },
+  completed: { label: "Completed", className: "bg-[#FDF5F3] text-[#A0452E]" },
   presumed_complete: { label: "Presumed complete", className: "bg-amber-100 text-amber-700" },
 };
 
@@ -276,9 +276,9 @@ const BulkSellerOrders: React.FC = () => {
               <p className="text-[11px] uppercase tracking-[0.12em] text-sky-700">Accepted</p>
               <p className="text-lg font-semibold text-sky-900">{orderStats.accepted}</p>
             </div>
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
-              <p className="text-[11px] uppercase tracking-[0.12em] text-emerald-700">Invoiced</p>
-              <p className="text-lg font-semibold text-emerald-900">{orderStats.invoiced}</p>
+            <div className="rounded-xl border border-[#F3C9BE] bg-[#FDF5F3] px-3 py-2">
+              <p className="text-[11px] uppercase tracking-[0.12em] text-[#A0452E]">Invoiced</p>
+              <p className="text-lg font-semibold text-[#7A2F21]">{orderStats.invoiced}</p>
             </div>
           </div>
         </section>

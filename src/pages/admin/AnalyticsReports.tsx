@@ -185,7 +185,7 @@ const AnalyticsReports: React.FC = () => {
     traffic?.topActions?.filter((action) => !action.action.startsWith("funnel_")) || [];
 
   return (
-    <div className="min-h-screen bg-slate-50 px-6 py-10">
+    <div className="ui-page-shell px-6 py-10">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
@@ -197,7 +197,7 @@ const AnalyticsReports: React.FC = () => {
           </div>
           <Link
             to="/admin"
-            className="text-sm font-semibold text-emerald-700 hover:text-emerald-800"
+            className="text-sm font-semibold text-[#A0452E] hover:text-[#8B3525]"
           >
             Back to dashboard
           </Link>
@@ -214,78 +214,78 @@ const AnalyticsReports: React.FC = () => {
         ) : (
           <>
             <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="ui-card p-5">
                 <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Users</p>
                 <p className="text-3xl font-semibold mt-3">{stats?.totalUsers ?? 0}</p>
               </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="ui-card p-5">
                 <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Listings</p>
                 <p className="text-3xl font-semibold mt-3">{stats?.totalListings ?? 0}</p>
               </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="ui-card p-5">
                 <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Pending reviews</p>
                 <p className="text-3xl font-semibold mt-3">{stats?.pendingListings ?? 0}</p>
               </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="ui-card p-5">
                 <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Verified listings</p>
                 <p className="text-3xl font-semibold mt-3">{stats?.verifiedListings ?? 0}</p>
               </div>
             </div>
 
             <div className="mt-6 grid gap-4 md:grid-cols-4">
-              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="ui-card p-5">
                 <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Unique devices today</p>
                 <p className="text-3xl font-semibold mt-3">{traffic?.overview?.uniqueVisitorsToday ?? 0}</p>
               </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="ui-card p-5">
                 <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Unique devices this week</p>
                 <p className="text-3xl font-semibold mt-3">{traffic?.overview?.uniqueVisitorsWeek ?? 0}</p>
               </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="ui-card p-5">
                 <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Unique devices this month</p>
                 <p className="text-3xl font-semibold mt-3">{traffic?.overview?.uniqueVisitorsMonth ?? 0}</p>
               </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="ui-card p-5">
                 <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Unique devices total</p>
                 <p className="text-3xl font-semibold mt-3">{traffic?.overview?.uniqueVisitorsTotal ?? 0}</p>
               </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="ui-card p-5">
                 <p className="text-xs uppercase tracking-[0.25em] text-slate-500">New devices today</p>
                 <p className="text-3xl font-semibold mt-3">{traffic?.overview?.newVisitorsToday ?? 0}</p>
               </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="ui-card p-5">
                 <p className="text-xs uppercase tracking-[0.25em] text-slate-500">New devices this week</p>
                 <p className="text-3xl font-semibold mt-3">{traffic?.overview?.newVisitorsWeek ?? 0}</p>
               </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="ui-card p-5">
                 <p className="text-xs uppercase tracking-[0.25em] text-slate-500">New devices this month</p>
                 <p className="text-3xl font-semibold mt-3">{traffic?.overview?.newVisitorsMonth ?? 0}</p>
               </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="ui-card p-5">
                 <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Live listings now</p>
                 <p className="text-3xl font-semibold mt-3">{traffic?.overview?.liveListingsNow ?? 0}</p>
               </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="ui-card p-5">
                 <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Pending reports</p>
                 <p className="text-3xl font-semibold mt-3">{pendingReports.length}</p>
               </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="ui-card p-5">
                 <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Flagged users</p>
                 <p className="text-3xl font-semibold mt-3">{flaggedCount}</p>
               </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <div className="ui-card p-5">
                 <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Pending verifications</p>
                 <p className="text-3xl font-semibold mt-3">{pendingVerificationCount}</p>
               </div>
             </div>
 
-            <div className="mt-8 rounded-2xl border border-emerald-200 bg-emerald-50/50 p-6">
+            <div className="mt-8 rounded-2xl border border-[#F3C9BE] bg-[#FDF5F3]/50 p-6">
               <h2 className="text-xl font-semibold text-slate-900">Conversion focus (account to list to browse)</h2>
               <p className="text-sm text-slate-600 mt-1">
                 Signals showing how users move from discovery into account creation and listing intent.
               </p>
               <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <div className="rounded-xl border border-emerald-200 bg-white p-4">
+                <div className="ui-card p-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Home to sign up rate</p>
                   <p className="mt-2 text-2xl font-semibold text-slate-900">
                     {formatPercent(funnel?.homeToSignupRate)}
@@ -294,7 +294,7 @@ const AnalyticsReports: React.FC = () => {
                     {funnel?.signupUniqueVisitors || 0} signup visitors from {funnel?.homeUniqueVisitors || 0} home visitors
                   </p>
                 </div>
-                <div className="rounded-xl border border-emerald-200 bg-white p-4">
+                <div className="ui-card p-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Home to browse rate</p>
                   <p className="mt-2 text-2xl font-semibold text-slate-900">
                     {formatPercent(funnel?.homeToBrowseRate)}
@@ -303,7 +303,7 @@ const AnalyticsReports: React.FC = () => {
                     {funnel?.browseUniqueVisitors || 0} browse visitors
                   </p>
                 </div>
-                <div className="rounded-xl border border-emerald-200 bg-white p-4">
+                <div className="ui-card p-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Signup to create listing</p>
                   <p className="mt-2 text-2xl font-semibold text-slate-900">
                     {formatPercent(funnel?.signupToCreateListingRate)}
@@ -312,7 +312,7 @@ const AnalyticsReports: React.FC = () => {
                     {funnel?.createListingUniqueVisitors || 0} reached listing page
                   </p>
                 </div>
-                <div className="rounded-xl border border-emerald-200 bg-white p-4">
+                <div className="ui-card p-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Browse to listing details</p>
                   <p className="mt-2 text-2xl font-semibold text-slate-900">
                     {formatPercent(funnel?.browseToDetailsRate)}
@@ -333,7 +333,7 @@ const AnalyticsReports: React.FC = () => {
                     {acquisitionChannels.map((channel, index) => (
                       <div
                         key={`${channel.source}-${channel.medium}-${index}`}
-                        className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-2"
+                        className="flex items-center justify-between rounded-xl bg-[#FAF7F2] px-4 py-2"
                       >
                         <span className="font-medium text-slate-800">
                           {channel.source} / {channel.medium}
@@ -357,7 +357,7 @@ const AnalyticsReports: React.FC = () => {
                     {acquisitionCampaigns.map((campaign, index) => (
                       <div
                         key={`${campaign.source}-${campaign.medium}-${campaign.campaign}-${index}`}
-                        className="rounded-xl bg-slate-50 px-4 py-2"
+                        className="rounded-xl bg-[#FAF7F2] px-4 py-2"
                       >
                         <div className="flex items-center justify-between gap-3">
                           <span className="font-medium text-slate-800 truncate">{campaign.campaign}</span>
@@ -386,7 +386,7 @@ const AnalyticsReports: React.FC = () => {
                     {traffic.trends.daily.map((point) => (
                       <div
                         key={point.date}
-                        className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-2"
+                        className="flex items-center justify-between rounded-xl bg-[#FAF7F2] px-4 py-2"
                       >
                         <span>{point.date}</span>
                         <span className="font-semibold text-slate-800">
@@ -408,7 +408,7 @@ const AnalyticsReports: React.FC = () => {
                     {traffic.topPages.slice(0, 8).map((page) => (
                       <div
                         key={page.pagePath}
-                        className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-2"
+                        className="flex items-center justify-between rounded-xl bg-[#FAF7F2] px-4 py-2"
                       >
                         <span className="truncate pr-3 font-medium text-slate-800">{page.pagePath}</span>
                         <span className="whitespace-nowrap text-xs text-slate-500">
@@ -432,7 +432,7 @@ const AnalyticsReports: React.FC = () => {
                     {nonZeroBreakdownItems.map((item) => (
                       <div
                         key={item.key}
-                        className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-2"
+                        className="flex items-center justify-between rounded-xl bg-[#FAF7F2] px-4 py-2"
                       >
                         <span className="capitalize">{item.key.replace("_", " ")}</span>
                         <span>Total {item.total} | Pending {item.pending} | Verified {item.verified}</span>
@@ -456,7 +456,7 @@ const AnalyticsReports: React.FC = () => {
                           {conversionTargets.slice(0, 6).map((target) => (
                             <div
                               key={target.target}
-                              className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm"
+                              className="rounded-xl border border-stone-200 bg-[#FAF7F2] px-4 py-3 text-sm"
                             >
                               <p className="font-semibold text-slate-900">{target.target}</p>
                               <p className="text-xs text-slate-500 mt-1">
@@ -476,7 +476,7 @@ const AnalyticsReports: React.FC = () => {
                           {funnelActions.slice(0, 8).map((action, index) => (
                             <div
                               key={`${action.action}-${action.target || "none"}-${index}`}
-                              className="rounded-xl border border-emerald-100 bg-emerald-50/40 px-4 py-3 text-sm"
+                              className="rounded-xl border border-[#F3C9BE] bg-[#FDF5F3] px-4 py-3 text-sm"
                             >
                               <p className="font-semibold text-slate-900">
                                 {humanizeAction(action.action)}
@@ -499,7 +499,7 @@ const AnalyticsReports: React.FC = () => {
                           {genericActions.slice(0, 6).map((action, index) => (
                             <div
                               key={`${action.action}-${action.target || "none"}-${index}`}
-                              className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm"
+                              className="rounded-xl border border-stone-200 bg-[#FAF7F2] px-4 py-3 text-sm"
                             >
                               <p className="font-semibold text-slate-900">
                                 {humanizeAction(action.action)}
@@ -527,19 +527,19 @@ const AnalyticsReports: React.FC = () => {
                   Click totals for the core growth actions.
                 </p>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-xl bg-slate-50 px-4 py-3">
+                  <div className="rounded-xl bg-[#FAF7F2] px-4 py-3">
                     <p className="text-xs uppercase tracking-[0.14em] text-slate-500">Sign up clicks</p>
                     <p className="mt-2 text-xl font-semibold text-slate-900">{primarySignals?.signUpClicks ?? 0}</p>
                   </div>
-                  <div className="rounded-xl bg-slate-50 px-4 py-3">
+                  <div className="rounded-xl bg-[#FAF7F2] px-4 py-3">
                     <p className="text-xs uppercase tracking-[0.14em] text-slate-500">Browse clicks</p>
                     <p className="mt-2 text-xl font-semibold text-slate-900">{primarySignals?.browseClicks ?? 0}</p>
                   </div>
-                  <div className="rounded-xl bg-slate-50 px-4 py-3">
+                  <div className="rounded-xl bg-[#FAF7F2] px-4 py-3">
                     <p className="text-xs uppercase tracking-[0.14em] text-slate-500">List CTA clicks</p>
                     <p className="mt-2 text-xl font-semibold text-slate-900">{primarySignals?.listNowClicks ?? 0}</p>
                   </div>
-                  <div className="rounded-xl bg-slate-50 px-4 py-3">
+                  <div className="rounded-xl bg-[#FAF7F2] px-4 py-3">
                     <p className="text-xs uppercase tracking-[0.14em] text-slate-500">Buy request clicks</p>
                     <p className="mt-2 text-xl font-semibold text-slate-900">{primarySignals?.buyRequestClicks ?? 0}</p>
                   </div>
@@ -556,7 +556,7 @@ const AnalyticsReports: React.FC = () => {
                     {conversionRoutes.map((route) => (
                       <div
                         key={route.key}
-                        className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-2"
+                        className="flex items-center justify-between rounded-xl bg-[#FAF7F2] px-4 py-2"
                       >
                         <span className="font-medium text-slate-800">{route.label}</span>
                         <span className="text-xs text-slate-500">
@@ -580,7 +580,7 @@ const AnalyticsReports: React.FC = () => {
                     {traffic.trends.weekly.map((point) => (
                       <div
                         key={point.week}
-                        className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-2"
+                        className="flex items-center justify-between rounded-xl bg-[#FAF7F2] px-4 py-2"
                       >
                         <span>{point.week}</span>
                         <span className="font-semibold text-slate-800">{point.uniqueVisitors} unique</span>
@@ -600,7 +600,7 @@ const AnalyticsReports: React.FC = () => {
                     {traffic.trends.monthly.map((point) => (
                       <div
                         key={point.month}
-                        className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-2"
+                        className="flex items-center justify-between rounded-xl bg-[#FAF7F2] px-4 py-2"
                       >
                         <span>{point.month}</span>
                         <span className="font-semibold text-slate-800">{point.uniqueVisitors} unique</span>
@@ -623,13 +623,13 @@ const AnalyticsReports: React.FC = () => {
                   {traffic.listingEngagement.topListings.map((listing, index) => (
                     <div
                       key={`${listing.id}-${index}`}
-                      className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm"
+                      className="rounded-xl border border-stone-200 bg-[#FAF7F2] px-4 py-3 text-sm"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <p className="font-semibold text-slate-900">{listing.title}</p>
                         <Link
                           to={listing.listingPath}
-                          className="text-xs font-semibold text-emerald-700 hover:text-emerald-800"
+                          className="text-xs font-semibold text-[#A0452E] hover:text-[#8B3525]"
                         >
                           Open listing
                         </Link>
@@ -658,7 +658,7 @@ const AnalyticsReports: React.FC = () => {
                   {pendingReports.map((report) => (
                     <div
                       key={report._id}
-                      className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm"
+                      className="rounded-xl border border-stone-200 bg-[#FAF7F2] px-4 py-3 text-sm"
                     >
                       <p className="font-semibold text-slate-900">{report.reason}</p>
                       <p className="text-xs text-slate-500 mt-1">

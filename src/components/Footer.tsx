@@ -47,41 +47,39 @@ const Footer: React.FC = () => {
     };
   }, []);
   return (
-    <footer className="bg-gray-50 border-t border-gray-200 mt-auto">
-      <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
+    <footer className="mt-auto border-t border-stone-200 bg-[#F8F4EE]">
+      <div className="mx-auto max-w-7xl px-4 py-6 md:py-8">
         <div className="flex flex-col md:flex-row justify-between items-center gap-5">
-          {/* Logo and Tagline */}
           <div className="text-center md:text-left">
-            <h3 className="text-lg font-bold text-green-700">Agrisoko</h3>
-            <p className="text-xs text-gray-600">Trusted agricultural marketplace across Kenya</p>
-            <p className="text-[11px] text-gray-500">Operated by {legalEntityName}</p>
+            <h3 className="text-lg font-semibold text-[#A0452E]">Agrisoko</h3>
+            <p className="text-xs text-stone-600">Trusted agricultural marketplace across Kenya</p>
+            <p className="text-[11px] text-stone-500">Operated by {legalEntityName}</p>
           </div>
 
-          {/* Legal Links */}
           <div className="flex flex-wrap justify-center gap-5 text-sm">
             <Link
               to="/legal/terms"
-              className="text-gray-600 hover:text-green-700 hover:underline transition"
+              className="text-stone-600 transition hover:text-[#A0452E] hover:underline"
             >
               Terms of Service
             </Link>
             <Link
               to="/legal/privacy"
-              className="text-gray-600 hover:text-green-700 hover:underline transition"
+              className="text-stone-600 transition hover:text-[#A0452E] hover:underline"
             >
               Privacy Policy
             </Link>
             {BULK_FOOTER_LINK_VISIBLE && (
               <Link
                 to="/bulk"
-                className="text-gray-600 hover:text-green-700 hover:underline transition"
+                className="text-stone-600 transition hover:text-[#A0452E] hover:underline"
               >
                 Bulk buying customers
               </Link>
             )}
             <a
               href="mailto:info@leadafrik.com"
-              className="text-gray-600 hover:text-green-700 hover:underline transition"
+              className="text-stone-600 transition hover:text-[#A0452E] hover:underline"
             >
               Contact Support
             </a>
@@ -89,43 +87,46 @@ const Footer: React.FC = () => {
               href="https://www.odpc.go.ke"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-600 hover:text-green-700 hover:underline transition"
+              className="text-stone-600 transition hover:text-[#A0452E] hover:underline"
             >
               ODPC
             </a>
           </div>
 
-          {/* Copyright */}
-          <div className="text-xs text-gray-500 text-center md:text-right whitespace-nowrap">
+          <div className="text-center text-xs text-stone-500 md:text-right whitespace-nowrap">
             <p>&copy; {new Date().getFullYear()} Agrisoko. All rights reserved.</p>
           </div>
 
-          {/* Download App Button */}
           {!isInstalled && (
             <button
               onClick={() => setShowInstall(true)}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition text-sm"
+              className="ui-btn-primary px-4 py-2 text-sm"
             >
               Download App
             </button>
           )}
         </div>
 
-        {/* Mobile-Optimized Secondary Info */}
-        <div className="mt-5 pt-4 border-t border-gray-200 text-xs text-gray-500 text-center">
+        <div className="mt-5 border-t border-stone-200 pt-4 text-center text-xs text-stone-500">
           <p>
-            Using Agrisoko means you agree to our <Link to="/legal/terms" className="text-green-700 hover:underline">Terms</Link> and <Link to="/legal/privacy" className="text-green-700 hover:underline">Privacy Policy</Link>.
+            Using Agrisoko means you agree to our{" "}
+            <Link to="/legal/terms" className="font-semibold text-[#A0452E] hover:underline">
+              Terms
+            </Link>{" "}
+            and{" "}
+            <Link to="/legal/privacy" className="font-semibold text-[#A0452E] hover:underline">
+              Privacy Policy
+            </Link>.
           </p>
           <p className="mt-2">
-            Data protection inquiries:{' '}
-            <a href="mailto:info@leadafrik.com" className="text-green-700 hover:underline">
+            Data protection inquiries:{" "}
+            <a href="mailto:info@leadafrik.com" className="font-semibold text-[#A0452E] hover:underline">
               info@leadafrik.com
             </a>
           </p>
         </div>
       </div>
 
-      {/* Install Prompt Modal */}
       <InstallPrompt isOpen={showInstall} onClose={() => setShowInstall(false)} />
     </footer>
   );
