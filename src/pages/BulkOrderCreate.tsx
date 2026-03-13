@@ -171,13 +171,14 @@ const BulkOrderCreate: React.FC = () => {
 
   if (!user) {
     return (
-      <main className="min-h-screen bg-slate-50 px-4 py-10">
-        <div className="mx-auto max-w-2xl rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h1 className="text-2xl font-semibold text-slate-900">Post a bulk order</h1>
-          <p className="mt-2 text-sm text-slate-600">Sign in first to continue.</p>
+      <main className="ui-page-shell px-4 py-10">
+        <div className="ui-card mx-auto max-w-2xl p-8">
+          <p className="ui-section-kicker">Bulk buying</p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900">Post a bulk order</h1>
+          <p className="mt-2 text-sm text-stone-600">Sign in first to continue.</p>
           <Link
             to="/login?mode=signup&next=/bulk/orders/new"
-            className="mt-5 inline-flex rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
+            className="ui-btn-primary mt-5 px-5 py-3 text-sm"
           >
             Sign in to continue
           </Link>
@@ -188,7 +189,7 @@ const BulkOrderCreate: React.FC = () => {
 
   if (!accessLoading && !canPost) {
     return (
-      <main className="min-h-screen bg-slate-50 px-4 py-10">
+      <main className="ui-page-shell px-4 py-10">
         <div className="mx-auto max-w-2xl rounded-3xl border border-amber-200 bg-amber-50 p-8 shadow-sm">
           <h1 className="text-2xl font-semibold text-amber-900">Bulk buyer approval required</h1>
           <p className="mt-2 text-sm text-amber-800">
@@ -206,39 +207,40 @@ const BulkOrderCreate: React.FC = () => {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8">
+    <main className="ui-page-shell px-4 py-8">
       <div className="mx-auto max-w-3xl space-y-4">
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h1 className="text-2xl font-semibold text-slate-900">Post institutional demand</h1>
-          <p className="mt-1 text-sm text-slate-600">
+        <section className="ui-hero-panel p-6">
+          <p className="ui-section-kicker">Bulk buying</p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900">Post institutional demand</h1>
+          <p className="mt-1 text-sm text-stone-600">
             Add quantity, budget, and delivery details so suppliers can bid clearly.
           </p>
         </section>
 
         <form
           onSubmit={handleSubmit}
-          className="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+          className="ui-card space-y-4 p-6"
         >
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+              <label className="ui-label">
                 Order title *
               </label>
               <input
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                className="ui-input"
                 placeholder="Need tomatoes for weekly supply"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+              <label className="ui-label">
                 Item *
               </label>
               <input
                 value={itemName}
                 onChange={(event) => setItemName(event.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                className="ui-input"
                 placeholder="Tomatoes"
               />
             </div>
@@ -246,13 +248,13 @@ const BulkOrderCreate: React.FC = () => {
 
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+              <label className="ui-label">
                 Category *
               </label>
               <select
                 value={category}
                 onChange={(event) => setCategory(event.target.value as BulkOrderCategory)}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                className="ui-input"
               >
                 {CATEGORY_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -262,7 +264,7 @@ const BulkOrderCreate: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+              <label className="ui-label">
                 Delivery scope
               </label>
               <select
@@ -270,7 +272,7 @@ const BulkOrderCreate: React.FC = () => {
                 onChange={(event) =>
                   setDeliveryScope(event.target.value as "countrywide" | "within_county" | "negotiable")
                 }
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                className="ui-input"
               >
                 <option value="within_county">Within county</option>
                 <option value="countrywide">Countrywide</option>
@@ -280,13 +282,13 @@ const BulkOrderCreate: React.FC = () => {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+            <label className="ui-label">
               Description
             </label>
             <textarea
               value={description}
               onChange={(event) => setDescription(event.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+              className="ui-input"
               rows={4}
               placeholder="Quality requirements, packaging, and supplier expectations."
             />
@@ -294,7 +296,7 @@ const BulkOrderCreate: React.FC = () => {
 
           <div className="grid gap-4 md:grid-cols-4">
             <div>
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+              <label className="ui-label">
                 Quantity *
               </label>
               <input
@@ -303,22 +305,22 @@ const BulkOrderCreate: React.FC = () => {
                 step="any"
                 value={quantity}
                 onChange={(event) => setQuantity(event.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                className="ui-input"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+              <label className="ui-label">
                 Unit *
               </label>
               <input
                 value={unit}
                 onChange={(event) => setUnit(event.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                className="ui-input"
                 placeholder="kg"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+              <label className="ui-label">
                 Min budget (KES)
               </label>
               <input
@@ -326,11 +328,11 @@ const BulkOrderCreate: React.FC = () => {
                 min={0}
                 value={budgetMin}
                 onChange={(event) => setBudgetMin(event.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                className="ui-input"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+              <label className="ui-label">
                 Max budget (KES)
               </label>
               <input
@@ -338,20 +340,20 @@ const BulkOrderCreate: React.FC = () => {
                 min={0}
                 value={budgetMax}
                 onChange={(event) => setBudgetMax(event.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                className="ui-input"
               />
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+              <label className="ui-label">
                 County *
               </label>
               <select
                 value={county}
                 onChange={(event) => setCounty(event.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                className="ui-input"
               >
                 <option value="">Select county</option>
                 {counties.map((countyName) => (
@@ -362,13 +364,13 @@ const BulkOrderCreate: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+              <label className="ui-label">
                 Constituency
               </label>
               <select
                 value={constituency}
                 onChange={(event) => setConstituency(event.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                className="ui-input"
                 disabled={!county}
               >
                 <option value="">Select constituency</option>
@@ -383,13 +385,13 @@ const BulkOrderCreate: React.FC = () => {
 
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+              <label className="ui-label">
                 Ward
               </label>
               <select
                 value={ward}
                 onChange={(event) => setWard(event.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                className="ui-input"
                 disabled={!county || !constituency}
               >
                 <option value="">Select ward</option>
@@ -401,38 +403,38 @@ const BulkOrderCreate: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+              <label className="ui-label">
                 Delivery deadline
               </label>
               <input
                 type="date"
                 value={deliveryDeadline}
                 onChange={(event) => setDeliveryDeadline(event.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                className="ui-input"
               />
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+              <label className="ui-label">
                 Address
               </label>
               <input
                 value={addressLine}
                 onChange={(event) => setAddressLine(event.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                className="ui-input"
                 placeholder="Area, estate, or institution location"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+              <label className="ui-label">
                 Contact phone
               </label>
               <input
                 value={contactPhone}
                 onChange={(event) => setContactPhone(event.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                className="ui-input"
                 placeholder="+2547..."
               />
             </div>
@@ -448,13 +450,13 @@ const BulkOrderCreate: React.FC = () => {
             <button
               type="submit"
               disabled={submitting}
-              className="rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700 disabled:bg-slate-300"
+              className="ui-btn-primary px-5 py-3 text-sm disabled:bg-stone-300"
             >
               {submitting ? "Posting..." : "Post bulk order"}
             </button>
             <Link
               to="/bulk/orders"
-              className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="ui-btn-ghost px-5 py-3 text-sm"
             >
               Cancel
             </Link>

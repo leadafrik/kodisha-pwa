@@ -155,7 +155,7 @@ const Navbar: React.FC = () => {
     const items: NavItem[] = [{ label: "Buy Requests", to: "/request" }];
 
     if (BULK_NAV_LINK_VISIBLE) {
-      items.push({ label: "Bulk Buyer/Seller", to: "/bulk" });
+      items.push({ label: "Bulk Buying", to: "/bulk" });
     }
 
     if (user) {

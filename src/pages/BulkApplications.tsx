@@ -243,16 +243,19 @@ const BulkApplications: React.FC = () => {
 
   if (!user) {
     return (
-      <main className="min-h-screen bg-slate-50 px-4 py-12">
-        <div className="mx-auto max-w-2xl rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h1 className="text-2xl font-semibold text-slate-900">Bulk buyers & sellers</h1>
-          <p className="mt-2 text-sm text-slate-600">
+      <main className="ui-page-shell px-4 py-12">
+        <div className="ui-card mx-auto max-w-2xl p-8">
+          <p className="ui-section-kicker">Bulk buying</p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900">
+            Buyer approval starts after sign in
+          </h1>
+          <p className="mt-2 text-sm text-stone-600">
             Sign in first to submit a bulk access application.
           </p>
           <div className="mt-6">
             <Link
               to={`/login?mode=signup&next=${encodeURIComponent("/bulk")}`}
-              className="inline-flex items-center rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
+              className="ui-btn-primary px-5 py-3 text-sm"
             >
               Sign in to continue
             </Link>
@@ -263,21 +266,23 @@ const BulkApplications: React.FC = () => {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-10 text-slate-900">
+    <main className="ui-page-shell px-4 py-10 text-stone-900">
       <div className="mx-auto max-w-5xl space-y-6">
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-700">
+        <section className="ui-hero-panel p-5 md:p-6">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#F3C9BE] bg-[#FDF5F3] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#A0452E]">
             <Building2 className="h-4 w-4" />
-            Bulk buyers & sellers
+            Bulk buying access
           </div>
-          <h1 className="mt-3 text-xl font-semibold sm:text-2xl">Bulk buyer/seller access</h1>
-          <p className="mt-2 text-sm text-slate-600">
-            We review each bulk account manually so institutional demand stays trusted.
+          <h1 className="mt-3 text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
+            Apply once, then post institutional demand with confidence
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm text-stone-600">
+            Agrisoko reviews bulk accounts manually so restaurants, schools, processors, and distributors can source from a trusted order board.
           </p>
 
           <div className="mt-4 grid gap-3 lg:grid-cols-3">
             <div>
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+              <label className="ui-label">
                 Application role
               </label>
               <select
@@ -287,7 +292,7 @@ const BulkApplications: React.FC = () => {
                   setRole(nextRole);
                   updateField("role", nextRole);
                 }}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                className="ui-input"
               >
                 {ROLE_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -296,21 +301,21 @@ const BulkApplications: React.FC = () => {
                 ))}
               </select>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+            <div className="ui-card-soft p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-stone-500">
                 Bulk buyer portal
               </p>
-              <p className="mt-1 text-sm font-semibold text-slate-900">{statusLabel(buyerStatus)}</p>
-              <p className="mt-1 text-xs text-slate-600">
-                Post institutional demand and manage incoming bids.
+              <p className="mt-1 text-sm font-semibold text-stone-900">{statusLabel(buyerStatus)}</p>
+              <p className="mt-1 text-xs text-stone-600">
+                Post procurement needs, compare bids, and move buyers to decision faster.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <Link
                   to={canPostB2B ? "/bulk/orders/new" : "/bulk?role=buyer"}
-                  className={`inline-flex rounded-lg px-3 py-2 text-xs font-semibold ${
+                  className={`inline-flex rounded-xl px-3 py-2 text-xs font-semibold ${
                     canPostB2B
-                      ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                      : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
+                      ? "bg-[#A0452E] text-white hover:bg-[#8B3525]"
+                      : "border border-stone-200 bg-white text-stone-700 hover:bg-[#FDF5F3]"
                   }`}
                 >
                   {canPostB2B ? "Post bulk order" : "Apply as buyer"}
@@ -318,7 +323,7 @@ const BulkApplications: React.FC = () => {
                 {canPostB2B && (
                   <Link
                     to="/bulk/orders?mine=true"
-                    className="inline-flex rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                    className="ui-btn-secondary px-3 py-2 text-xs"
                   >
                     Open buyer portal
                   </Link>
@@ -326,21 +331,21 @@ const BulkApplications: React.FC = () => {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+            <div className="ui-card-soft p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-stone-500">
                 Bulk seller portal
               </p>
-              <p className="mt-1 text-sm font-semibold text-slate-900">{statusLabel(sellerStatus)}</p>
-              <p className="mt-1 text-xs text-slate-600">
+              <p className="mt-1 text-sm font-semibold text-stone-900">{statusLabel(sellerStatus)}</p>
+              <p className="mt-1 text-xs text-stone-600">
                 View awarded jobs, issue invoices, and track completion.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <Link
                   to={canRespondB2B ? "/bulk/seller/orders" : "/bulk?role=seller"}
-                  className={`inline-flex rounded-lg px-3 py-2 text-xs font-semibold ${
+                  className={`inline-flex rounded-xl px-3 py-2 text-xs font-semibold ${
                     canRespondB2B
-                      ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                      : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
+                      ? "bg-[#A0452E] text-white hover:bg-[#8B3525]"
+                      : "border border-stone-200 bg-white text-stone-700 hover:bg-[#FDF5F3]"
                   }`}
                 >
                   {canRespondB2B ? "Open seller portal" : "Apply as seller"}
@@ -348,7 +353,7 @@ const BulkApplications: React.FC = () => {
                 {canRespondB2B && (
                   <Link
                     to="/bulk/orders"
-                    className="inline-flex rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                    className="ui-btn-secondary px-3 py-2 text-xs"
                   >
                     Browse open demand
                   </Link>
@@ -360,33 +365,33 @@ const BulkApplications: React.FC = () => {
           <div className="mt-4 flex flex-wrap gap-2">
             <Link
               to="/bulk/orders"
-              className="inline-flex rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+              className="ui-btn-secondary px-3 py-2 text-xs"
             >
               Open demand board
             </Link>
             <Link
               to="/bulk/orders/new"
-              className="inline-flex rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+              className="ui-btn-secondary px-3 py-2 text-xs"
             >
               New order form
             </Link>
           </div>
         </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <section className="ui-card p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">
+              <h2 className="text-lg font-semibold text-stone-900">
                 {role === "buyer" ? "Bulk buyer application" : "Bulk seller application"}
               </h2>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="mt-1 text-sm text-stone-600">
                 Open the form only when you are ready to apply.
               </p>
             </div>
             <button
               type="button"
               onClick={() => setShowForm((prev) => !prev)}
-              className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="ui-btn-ghost gap-1 px-3 py-2 text-sm"
             >
               {showForm ? "Hide application form" : "Open application form"}
               {showForm ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -394,7 +399,7 @@ const BulkApplications: React.FC = () => {
           </div>
 
           {loadingStatus && (
-            <p className="mt-4 text-sm text-slate-500">Loading your current access status...</p>
+            <p className="mt-4 text-sm text-stone-500">Loading your current access status...</p>
           )}
 
           {roleReviewNote && activeRoleStatus === "rejected" && (
@@ -409,13 +414,13 @@ const BulkApplications: React.FC = () => {
             </div>
           )}
           {notice && (
-            <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            <div className="mt-4 rounded-xl border border-forest-100 bg-forest-50 px-4 py-3 text-sm text-forest-700">
               {notice}
             </div>
           )}
 
           {!showForm && (
-            <p className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+            <p className="mt-4 rounded-xl border border-stone-200 bg-[#FAF7F2] px-4 py-3 text-sm text-stone-600">
               Form is hidden to keep this page clean. Use <strong>Open application form</strong> when ready.
             </p>
           )}
@@ -424,24 +429,24 @@ const BulkApplications: React.FC = () => {
             <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                  <label className="ui-label">
                     Contact person
                   </label>
                   <input
                     value={form.contactName}
                     onChange={(e) => updateField("contactName", e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                    className="ui-input"
                     placeholder="Name of contact person"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                  <label className="ui-label">
                     Farm or institution name
                   </label>
                   <input
                     value={form.organizationName}
                     onChange={(e) => updateField("organizationName", e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                    className="ui-input"
                     placeholder="Farm / institution"
                   />
                 </div>
@@ -449,7 +454,7 @@ const BulkApplications: React.FC = () => {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                  <label className="ui-label">
                     Institution type
                   </label>
                   <select
@@ -457,7 +462,7 @@ const BulkApplications: React.FC = () => {
                     onChange={(e) =>
                       updateField("institutionType", e.target.value as BulkApplicationInput["institutionType"])
                     }
-                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                    className="ui-input"
                   >
                     {INSTITUTION_TYPES.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -467,7 +472,7 @@ const BulkApplications: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                  <label className="ui-label">
                     Delivery coverage
                   </label>
                   <select
@@ -478,7 +483,7 @@ const BulkApplications: React.FC = () => {
                         e.target.value as BulkApplicationInput["deliveryCoverage"]
                       )
                     }
-                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                    className="ui-input"
                   >
                     {DELIVERY_COVERAGE.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -491,13 +496,13 @@ const BulkApplications: React.FC = () => {
 
               <div className="grid gap-4 sm:grid-cols-3">
                 <div>
-                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                  <label className="ui-label">
                     County
                   </label>
                   <select
                     value={form.address.county}
                     onChange={(e) => updateAddress("county", e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                    className="ui-input"
                   >
                     <option value="">Select county</option>
                     {kenyaCounties.map((county) => (
@@ -508,13 +513,13 @@ const BulkApplications: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                  <label className="ui-label">
                     Constituency
                   </label>
                   <select
                     value={form.address.constituency || ""}
                     onChange={(e) => updateAddress("constituency", e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                    className="ui-input"
                     disabled={!form.address.county}
                   >
                     <option value="">Select constituency</option>
@@ -526,13 +531,13 @@ const BulkApplications: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                  <label className="ui-label">
                     Ward
                   </label>
                   <select
                     value={form.address.ward || ""}
                     onChange={(e) => updateAddress("ward", e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                    className="ui-input"
                     disabled={!form.address.county || !form.address.constituency}
                   >
                     <option value="">Select ward</option>
@@ -546,51 +551,51 @@ const BulkApplications: React.FC = () => {
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                <label className="ui-label">
                   Street address
                 </label>
                 <input
                   value={form.address.streetAddress || ""}
                   onChange={(e) => updateAddress("streetAddress", e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                  className="ui-input"
                   placeholder="Street / area"
                 />
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                  <label className="ui-label">
                     Phone number
                   </label>
                   <input
                     value={form.phone}
                     onChange={(e) => updateField("phone", e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                    className="ui-input"
                     placeholder="+2547..."
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                  <label className="ui-label">
                     Email
                   </label>
                   <input
                     type="email"
                     value={form.email}
                     onChange={(e) => updateField("email", e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                    className="ui-input"
                     placeholder="you@example.com"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                <label className="ui-label">
                   {role === "buyer" ? "Products you need" : "Products you sell"}
                 </label>
                 <textarea
                   value={productsInput}
                   onChange={(e) => setProductsInput(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                  className="ui-input"
                   rows={3}
                   placeholder="Example: maize, onions, certified seeds"
                 />
@@ -598,7 +603,7 @@ const BulkApplications: React.FC = () => {
 
               <div className="grid gap-4 sm:grid-cols-3">
                 <div>
-                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                  <label className="ui-label">
                     Frequency
                   </label>
                   <select
@@ -609,7 +614,7 @@ const BulkApplications: React.FC = () => {
                         e.target.value as BulkApplicationInput["procurementFrequency"]
                       )
                     }
-                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                    className="ui-input"
                   >
                     {FREQUENCY_OPTIONS.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -619,24 +624,24 @@ const BulkApplications: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                  <label className="ui-label">
                     Monthly volume
                   </label>
                   <input
                     value={form.monthlyVolume || ""}
                     onChange={(e) => updateField("monthlyVolume", e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                    className="ui-input"
                     placeholder="e.g. 20 tonnes"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                  <label className="ui-label">
                     Budget per order
                   </label>
                   <input
                     value={form.estimatedBudgetPerOrder || ""}
                     onChange={(e) => updateField("estimatedBudgetPerOrder", e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                    className="ui-input"
                     placeholder="e.g. KES 250,000"
                   />
                 </div>
@@ -644,7 +649,7 @@ const BulkApplications: React.FC = () => {
 
               {role === "seller" && (
                 <div>
-                  <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                  <label className="ui-label">
                     Years in agriculture
                   </label>
                   <input
@@ -657,40 +662,40 @@ const BulkApplications: React.FC = () => {
                         e.target.value === "" ? undefined : Number(e.target.value)
                       )
                     }
-                    className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                    className="ui-input"
                   />
                 </div>
               )}
 
               <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-slate-500">
+                <label className="ui-label">
                   Additional notes
                 </label>
                 <textarea
                   value={form.notes || ""}
                   onChange={(e) => updateField("notes", e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
+                  className="ui-input"
                   rows={3}
                   placeholder="Anything your onboarding team should know"
                 />
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                <div className="flex items-start gap-2 text-sm text-slate-600">
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-stone-200 bg-[#FAF7F2] px-4 py-3">
+                <div className="flex items-start gap-2 text-sm text-stone-600">
                   {activeRoleStatus === "approved" ? (
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-600" />
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 text-forest-600" />
                   ) : (
                     <ShieldAlert className="mt-0.5 h-4 w-4 text-amber-600" />
                   )}
                   <span>
                     Current status for this role:{" "}
-                    <strong className="text-slate-900">{statusLabel(activeRoleStatus)}</strong>
+                    <strong className="text-stone-900">{statusLabel(activeRoleStatus)}</strong>
                   </span>
                 </div>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="rounded-xl bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:bg-slate-300"
+                  className="ui-btn-primary px-5 py-2 text-sm disabled:bg-stone-300"
                 >
                   {submitting ? "Submitting..." : "Submit application"}
                 </button>
