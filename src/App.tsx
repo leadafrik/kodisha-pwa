@@ -56,6 +56,7 @@ const BulkOrderCreate = lazy(() => import('./pages/BulkOrderCreate'));
 const BulkOrderDetails = lazy(() => import('./pages/BulkOrderDetails'));
 const BulkSellerOrders = lazy(() => import('./pages/BulkSellerOrders'));
 const AdminBulkOrders = lazy(() => import('./pages/admin/BulkOrders'));
+const AdminInviteSetup = lazy(() => import('./pages/AdminInviteSetup'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -240,6 +241,7 @@ const AppShell = () => {
             <Route path="/status" element={<Navigate to="/" replace />} />
             <Route path="/feedback" element={<Navigate to="/" replace />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/welcome/setup-password/:token" element={<AdminInviteSetup />} />
             <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route

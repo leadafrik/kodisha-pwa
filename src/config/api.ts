@@ -52,6 +52,7 @@ export const API_ENDPOINTS = {
     csrfToken: `${API_BASE_URL}/auth/csrf-token`,
     register: `${API_BASE_URL}/auth/register`,
     login: `${API_BASE_URL}/auth/login`,
+    adminInviteComplete: `${API_BASE_URL}/auth/admin-invite/complete`,
     facebookLogin: `${API_BASE_URL}/auth/facebook/login`,
     googleLogin: `${API_BASE_URL}/auth/google/login`,
     checkExists: `${API_BASE_URL}/auth/check-exists`,
@@ -192,6 +193,8 @@ export const API_ENDPOINTS = {
     },
     users: {
       getAll: `${API_BASE_URL}/admin/users`,
+      search: `${API_BASE_URL}/admin/users/search`,
+      create: `${API_BASE_URL}/admin/users/create`,
       getById: (id: string) => `${API_BASE_URL}/admin/users/${id}`,
       updateRole: (id: string) => `${API_BASE_URL}/admin/users/${id}/role`,
       toggleActive: (id: string) => `${API_BASE_URL}/admin/users/${id}/active`,

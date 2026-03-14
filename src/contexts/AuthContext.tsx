@@ -315,6 +315,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const completeAdminInviteSetup = async ({
+    token,
+    password,
+    legalConsents,
+  }: {
+    token: string;
+    password: string;
+    legalConsents: LegalConsents;
+  }) => {
+    setLoading(true);
+    try {
+      const res: any = await apiRequest(API_ENDPOINTS.auth.adminInviteComplete, {
+        method: "POST",
+        body: JSON.stringify({ token, password, legalConsents }),
+      });
+
+      if (!res.success || !res.user || !(res.accessToken || res.token)) {
+        throw new Error(res.message || "Account setup failed.");
+      }
+
+      persistUser(res.user);
+      persistSession(res);
+      await refreshUser();
+    } catch (error) {
+      console.error("Admin invite setup error:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const requestEmailOtp = async (email: string) => {
     setLoading(true);
     try {
@@ -574,6 +605,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         updateProfile,
         refreshUser,
         register,
+        completeAdminInviteSetup,
         loading: loading || isBootstrapping,
       }}
     >

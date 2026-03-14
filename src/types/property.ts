@@ -220,7 +220,7 @@ export interface User {
 
   _id?: string;
   fullName?: string;
-  userType?: "farmer" | "landowner" | "buyer" | "service provider";
+  userType?: "farmer" | "landowner" | "buyer" | "seller" | "service" | "service provider";
   county?: string;
   isVerified?: boolean;
   role?: "user" | "admin" | "moderator" | "super_admin";
@@ -272,6 +272,11 @@ export interface AuthContextType {
   logout: () => void;
   updateProfile: (userData: Partial<User>) => void;
   register: (userData: UserFormData) => Promise<User | null>;
+  completeAdminInviteSetup: (params: {
+    token: string;
+    password: string;
+    legalConsents: LegalConsents;
+  }) => Promise<void>;
   refreshUser: () => Promise<User | null>;
   loading: boolean;
 }
