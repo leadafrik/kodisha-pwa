@@ -76,7 +76,7 @@ const AdminBroadcast: React.FC = () => {
     try {
       const data = await adminApiRequest("/admin/broadcast", {
         method: "POST",
-        body: JSON.stringify({ subject, body, audience, extraEmails }),
+        body: JSON.stringify({ subject, body, audience, extraEmails: extraEmails.join('\n') }),
       });
       const { jobId, total } = data.data;
       setJob({ jobId, total, sent: 0, failed: 0, status: "running" });
