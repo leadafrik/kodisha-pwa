@@ -172,7 +172,7 @@ const categoryMeta: Record<
 
 const Home: React.FC = () => {
   const { user } = useAuth();
-  const { isPhone } = useAdaptiveLayout();
+  useAdaptiveLayout();
   const { productListings, serviceListings } = useProperties();
   const [heroVariant, setHeroVariant] = useState<HeroVariant>("sell_first");
 
@@ -420,15 +420,6 @@ const Home: React.FC = () => {
   const findClickAction = user
     ? "funnel_home_find_click_logged_in"
     : `funnel_home_find_click_${heroVariant}`;
-  const stickyWindowText = isGlobalFreeListing
-    ? isPhone
-      ? "Free to list"
-      : "Listings are free right now"
-    : user
-    ? daysLeft > 0
-      ? `${daysLeft} day${daysLeft === 1 ? "" : "s"} left at KSh 0`
-      : "Free launch window ended"
-    : `Free for your first ${FREE_WINDOW_DAYS} days`;
 
   const formatBlogDate = (value?: string) => {
     if (!value) return "Draft";
@@ -872,25 +863,7 @@ const Home: React.FC = () => {
         </section>
       </div>
 
-      {isPhone && (
-        <div className="fixed bottom-3 left-1/2 z-30 w-[calc(100%-1rem)] max-w-3xl -translate-x-1/2 rounded-2xl border border-stone-200 bg-white/95 px-3 py-3 shadow-lg backdrop-blur-md sm:px-4">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs font-semibold text-stone-900 sm:text-sm">{stickyWindowText}</p>
-            <Link
-              to={primaryCtaTo}
-              onClick={() =>
-                trackTrafficClick({
-                  action: "funnel_home_sticky_sell_click",
-                  target: "/create-listing",
-                })
-              }
-              className="ui-btn-primary w-full sm:w-auto"
-            >
-              {primaryCtaLabel}
-            </Link>
-          </div>
-        </div>
-      )}
+
     </main>
   );
 };
