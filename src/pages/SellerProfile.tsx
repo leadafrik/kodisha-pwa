@@ -19,6 +19,7 @@ import {
   toggleSellerFollow,
 } from "../services/sellerFollowService";
 import { getMarketTrustScore } from "../utils/trustScore";
+import { TRUST_SCORE_VISIBLE } from "../config/featureFlags";
 
 const SellerProfile: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -236,12 +237,14 @@ const SellerProfile: React.FC = () => {
               <p className="mt-3 text-sm font-semibold text-slate-500">
                 {followState.followerCount} follower{followState.followerCount === 1 ? "" : "s"}
               </p>
-              <p className="mt-1 text-sm font-semibold text-emerald-700">
-                Trust score: {sellerTrustScore}
-              </p>
+              {TRUST_SCORE_VISIBLE ? (
+                <p className="mt-1 text-sm font-semibold text-emerald-700">
+                  Trust score: {sellerTrustScore}
+                </p>
+              ) : null}
               {!seller.isVerified && (
                 <p className="mt-1 text-xs font-medium text-amber-700">
-                  Verification boosts your trust score and buyer confidence.
+                  Verification helps buyers trust your profile faster.
                 </p>
               )}
             </div>

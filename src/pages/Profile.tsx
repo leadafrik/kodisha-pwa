@@ -6,6 +6,7 @@ import { useProperties } from "../contexts/PropertyContext";
 import ProfilePictureUpload from "../components/ProfilePictureUpload";
 import { scheduleAccountDeletion } from "../services/userService";
 import { API_ENDPOINTS, ensureValidAccessToken } from "../config/api";
+import { TRUST_SCORE_VISIBLE } from "../config/featureFlags";
 
 type ListingsTab = "services" | "agrovets" | "products";
 
@@ -592,9 +593,11 @@ const Profile: React.FC = () => {
                     {verificationDetails.idVerified ? "Verified" : "Get verified"}
                   </Link>
                 </div>
-                <p className="mt-3 text-xs text-slate-500">
-                  Trust score: {verificationDetails.trustScore ?? "N/A"}
-                </p>
+                {TRUST_SCORE_VISIBLE ? (
+                  <p className="mt-3 text-xs text-slate-500">
+                    Trust score: {verificationDetails.trustScore ?? "N/A"}
+                  </p>
+                ) : null}
               </div>
             </div>
 

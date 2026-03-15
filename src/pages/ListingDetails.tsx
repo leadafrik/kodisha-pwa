@@ -23,6 +23,7 @@ import {
 } from "../services/sellerFollowService";
 import { normalizeKenyanPhone } from "../utils/phone";
 import { getMarketTrustScore } from "../utils/trustScore";
+import { TRUST_SCORE_VISIBLE } from "../config/featureFlags";
 
 const GoogleMapsLoader = lazy(() => import("../components/GoogleMapsLoader"));
 const ListingMap = lazy(() => import("../components/ListingMap"));
@@ -1450,9 +1451,11 @@ const ListingDetails: React.FC = () => {
               <span className="rounded-full bg-stone-100 px-2.5 py-1 text-stone-600">
                 {lastActiveLabel}
               </span>
-              <span className="rounded-full bg-[#FFF9EC] px-2.5 py-1 text-[#8A5A12]">
-                Trust score {sellerTrustScore}
-              </span>
+              {TRUST_SCORE_VISIBLE ? (
+                <span className="rounded-full bg-[#FFF9EC] px-2.5 py-1 text-[#8A5A12]">
+                  Trust score {sellerTrustScore}
+                </span>
+              ) : null}
               <span className="rounded-full bg-stone-100 px-2.5 py-1 text-stone-600">
                 {sellerFollowState.followerCount} follower{sellerFollowState.followerCount === 1 ? "" : "s"}
               </span>
@@ -1468,7 +1471,7 @@ const ListingDetails: React.FC = () => {
             </div>
             {!owner.isVerified && (
               <p className="mb-3 text-xs font-medium text-[#8A5A12]">
-                Verification boosts seller trust score and buyer confidence.
+                Verification boosts buyer confidence.
               </p>
             )}
 

@@ -7,3 +7,6 @@ export const PAYMENTS_ENABLED = false;
 export const BULK_NAV_LINK_VISIBLE = true;
 export const BULK_HOME_LINK_VISIBLE = false;
 export const BULK_FOOTER_LINK_VISIBLE = true;
+
+// Trust score remains active in ranking logic but hidden from the UI for now.
+export const TRUST_SCORE_VISIBLE = false;

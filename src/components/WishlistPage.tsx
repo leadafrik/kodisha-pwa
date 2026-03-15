@@ -3,6 +3,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { Heart, X } from 'lucide-react';
 import { handleImageError } from "../utils/imageFallback";
+import { TRUST_SCORE_VISIBLE } from "../config/featureFlags";
 
 const WishlistPage: React.FC = () => {
   // Fetch wishlist
@@ -88,7 +89,7 @@ const WishlistPage: React.FC = () => {
                 </div>
 
                 {/* Seller Info */}
-                {item.listing.ownerTrustScore !== undefined && (
+                {TRUST_SCORE_VISIBLE && item.listing.ownerTrustScore !== undefined && (
                   <div className="mb-3 pb-3 border-b">
                     <p className="text-sm text-gray-600">
                       Seller Trust Score:{' '}

@@ -73,7 +73,7 @@ const trustHighlights = [
   },
   {
     title: "Reputation built in",
-    copy: "Trust score and listing activity help buyers decide faster.",
+    copy: "Verification and listing activity help buyers decide faster.",
     icon: BadgeCheck,
   },
 ];

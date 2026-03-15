@@ -9,6 +9,7 @@ import { getOptimizedImageUrl } from "../utils/imageOptimization";
 import { normalizeKenyanPhone } from "../utils/phone";
 import { getMarketTrustScore } from "../utils/trustScore";
 import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
+import { TRUST_SCORE_VISIBLE } from "../config/featureFlags";
 import {
   Search,
   Filter,
@@ -1232,7 +1233,7 @@ const BrowseListings: React.FC = () => {
                       {card.typeLabel}
                     </span>
                     <div className="flex items-center gap-2">
-                      {marketTrustScore > 0 && (
+                      {TRUST_SCORE_VISIBLE && marketTrustScore > 0 && (
                         <span className="rounded-full bg-[#FFF9EC] px-2.5 py-1 text-[11px] font-semibold text-[#8A5A12]">
                           Trust score {marketTrustScore}
                         </span>

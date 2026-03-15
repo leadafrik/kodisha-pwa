@@ -109,7 +109,6 @@ const Login: React.FC = () => {
   const [signupData, setSignupData] = useState({
     name: "",
     emailOrPhone: "",
-    confirmEmail: "",
     password: "",
     inviteCode: inviteCodeFromQuery,
   });
@@ -145,14 +144,19 @@ const Login: React.FC = () => {
     signupConsents.termsAccepted &&
     signupConsents.privacyAccepted &&
     signupConsents.dataProcessingConsent;
+  const setRequiredSignupConsents = (checked: boolean) => {
+    setSignupConsents((prev) => ({
+      ...prev,
+      termsAccepted: checked,
+      privacyAccepted: checked,
+      dataProcessingConsent: checked,
+    }));
+  };
   const normalizedSignupEmail = signupData.emailOrPhone.trim().toLowerCase();
-  const normalizedSignupConfirmEmail = signupData.confirmEmail.trim().toLowerCase();
   const emailTypoSuggestion = useMemo(
     () => getEmailTypoSuggestion(normalizedSignupEmail),
     [normalizedSignupEmail]
   );
-  const emailMismatch =
-    !!normalizedSignupConfirmEmail && normalizedSignupEmail !== normalizedSignupConfirmEmail;
 
   const promptConsentBeforeSocialSignup = (message: string) => {
     setError(null);
@@ -284,7 +288,7 @@ const Login: React.FC = () => {
     }
 
     if (!requiredSignupConsentsAccepted) {
-      setError("Accept the Terms, Privacy Policy, and Data Processing Consent to continue.");
+      setError("Accept the Agrisoko signup terms to continue.");
       return;
     }
 
@@ -294,17 +298,6 @@ const Login: React.FC = () => {
       return;
     }
     const email = input.toLowerCase();
-    const confirmEmail = signupData.confirmEmail.trim().toLowerCase();
-
-    if (!confirmEmail) {
-      setError("Please confirm your email address.");
-      return;
-    }
-
-    if (confirmEmail !== email) {
-      setError("Email and confirm email do not match.");
-      return;
-    }
 
     if (emailTypoSuggestion && emailTypoSuggestion !== email) {
       setError(`Possible typo detected. Did you mean ${emailTypoSuggestion}?`);
@@ -575,7 +568,7 @@ const Login: React.FC = () => {
           Quick signup
         </p>
         <p className="text-center text-sm text-stone-700">
-          Tap Google, Facebook, or email. Required consent is captured once.
+          Spend more time finding buyers and less time managing account setup.
         </p>
         <GoogleLoginButton
           legalConsents={signupConsents}
@@ -592,7 +585,7 @@ const Login: React.FC = () => {
           blockedReason={
             requiredSignupConsentsAccepted
               ? undefined
-              : "Tick the 3 required consent boxes below. Google signup will continue automatically."
+              : "Accept the signup terms below. Google signup will continue automatically."
           }
           startSignal={socialStartSignals.google}
           className="text-sm w-full"
@@ -612,7 +605,7 @@ const Login: React.FC = () => {
           blockedReason={
             requiredSignupConsentsAccepted
               ? undefined
-              : "Tick the 3 required consent boxes below. Facebook signup will continue automatically."
+              : "Accept the signup terms below. Facebook signup will continue automatically."
           }
           startSignal={socialStartSignals.facebook}
           className="text-sm w-full"
@@ -653,19 +646,6 @@ const Login: React.FC = () => {
           />
         </div>
 
-        <div>
-          <label className="ui-label">Confirm email *</label>
-          <input
-            type="email"
-            value={signupData.confirmEmail}
-            onChange={(e) =>
-              setSignupData({ ...signupData, confirmEmail: e.target.value })
-            }
-            className="ui-input"
-            placeholder="Re-enter your email"
-          />
-        </div>
-
         <div className="md:col-span-2">
           <label className="ui-label">Password *</label>
           <div className="relative">
@@ -688,10 +668,6 @@ const Login: React.FC = () => {
         </div>
       </div>
 
-      {emailMismatch && (
-        <p className="text-xs text-red-600">Email and confirm email do not match.</p>
-      )}
-
       {emailTypoSuggestion && emailTypoSuggestion !== normalizedSignupEmail && (
         <div className="ui-accent-panel px-3 py-2.5 text-sm text-stone-800">
           <p className="font-semibold">Possible typo in email domain.</p>
@@ -701,7 +677,6 @@ const Login: React.FC = () => {
               setSignupData((prev) => ({
                 ...prev,
                 emailOrPhone: emailTypoSuggestion,
-                confirmEmail: emailTypoSuggestion,
               }))
             }
             className="mt-1 text-sm font-semibold text-[#A0452E] hover:text-[#8B3525]"
@@ -712,55 +687,23 @@ const Login: React.FC = () => {
       )}
 
       <div ref={signupConsentRef} className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-        <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
-          Required before signup
-        </p>
         <label className="flex items-start gap-3 text-sm text-slate-700">
           <input
             type="checkbox"
-            checked={signupConsents.termsAccepted}
-            onChange={(e) =>
-              setSignupConsents((prev) => ({
-                ...prev,
-                termsAccepted: e.target.checked,
-              }))
-            }
+            checked={requiredSignupConsentsAccepted}
+            onChange={(e) => setRequiredSignupConsents(e.target.checked)}
             className="mt-0.5 h-4 w-4 rounded border-stone-300 text-[#A0452E] focus:ring-[#E8A08E]"
           />
           <span>
-            I agree to the <a href="/legal/terms" className="font-semibold text-[#A0452E] hover:underline">Terms of Service</a>.
-          </span>
-        </label>
-        <label className="flex items-start gap-3 text-sm text-slate-700">
-          <input
-            type="checkbox"
-            checked={signupConsents.privacyAccepted}
-            onChange={(e) =>
-              setSignupConsents((prev) => ({
-                ...prev,
-                privacyAccepted: e.target.checked,
-              }))
-            }
-            className="mt-0.5 h-4 w-4 rounded border-stone-300 text-[#A0452E] focus:ring-[#E8A08E]"
-          />
-          <span>
-            I have read the <a href="/legal/privacy" className="font-semibold text-[#A0452E] hover:underline">Privacy Policy</a>.
-          </span>
-        </label>
-        <label className="flex items-start gap-3 text-sm text-slate-700">
-          <input
-            type="checkbox"
-            checked={signupConsents.dataProcessingConsent}
-            onChange={(e) =>
-              setSignupConsents((prev) => ({
-                ...prev,
-                dataProcessingConsent: e.target.checked,
-              }))
-            }
-            className="mt-0.5 h-4 w-4 rounded border-stone-300 text-[#A0452E] focus:ring-[#E8A08E]"
-          />
-          <span>
-            I consent to Agrisoko processing my account and verification data to operate the marketplace and verify trust signals.
+            By signing up, I agree to the{" "}
+            <a href="/legal/terms" className="font-semibold text-[#A0452E] hover:underline">
+              Terms of Service
+            </a>{" "}
+            and{" "}
+            <a href="/legal/privacy" className="font-semibold text-[#A0452E] hover:underline">
+              Privacy Policy
+            </a>
+            , and I consent to Agrisoko processing my account and verification data to operate the marketplace.
           </span>
         </label>
         <label className="flex items-start gap-3 text-sm text-slate-600">
@@ -781,7 +724,7 @@ const Login: React.FC = () => {
 
       <button
         type="submit"
-        disabled={loading || !requiredSignupConsentsAccepted}
+        disabled={loading}
         className="ui-btn-primary w-full"
       >
         {loading ? "Creating account..." : "Create Free Account"}
@@ -810,10 +753,10 @@ const Login: React.FC = () => {
               Complete once
             </p>
             <h3 className="text-xl font-semibold text-slate-900">
-              Finish the required consent boxes
+              Complete signup consent
             </h3>
             <p className="text-sm text-slate-600">
-              Tick the required boxes, optionally choose marketing updates, then continue with{" "}
+              Accept the signup terms, optionally choose marketing updates, then continue with{" "}
               {pendingSocialProvider === "facebook" ? "Facebook" : "Google"}.
             </p>
           </div>
@@ -822,57 +765,20 @@ const Login: React.FC = () => {
             <label className="flex items-start gap-3 text-sm text-slate-700">
               <input
                 type="checkbox"
-                checked={signupConsents.termsAccepted}
-                onChange={(e) =>
-                  setSignupConsents((prev) => ({
-                    ...prev,
-                    termsAccepted: e.target.checked,
-                  }))
-                }
+                checked={requiredSignupConsentsAccepted}
+                onChange={(e) => setRequiredSignupConsents(e.target.checked)}
                 className="mt-0.5 h-4 w-4 rounded border-stone-300 text-[#A0452E] focus:ring-[#E8A08E]"
               />
               <span>
-                I agree to the{" "}
+                By signing up, I agree to the{" "}
                 <a href="/legal/terms" className="font-semibold text-[#A0452E] hover:underline">
                   Terms of Service
-                </a>
-                .
-              </span>
-            </label>
-            <label className="flex items-start gap-3 text-sm text-slate-700">
-              <input
-                type="checkbox"
-                checked={signupConsents.privacyAccepted}
-                onChange={(e) =>
-                  setSignupConsents((prev) => ({
-                    ...prev,
-                    privacyAccepted: e.target.checked,
-                  }))
-                }
-                className="mt-0.5 h-4 w-4 rounded border-stone-300 text-[#A0452E] focus:ring-[#E8A08E]"
-              />
-              <span>
-                I have read the{" "}
+                </a>{" "}
+                and{" "}
                 <a href="/legal/privacy" className="font-semibold text-[#A0452E] hover:underline">
                   Privacy Policy
                 </a>
-                .
-              </span>
-            </label>
-            <label className="flex items-start gap-3 text-sm text-slate-700">
-              <input
-                type="checkbox"
-                checked={signupConsents.dataProcessingConsent}
-                onChange={(e) =>
-                  setSignupConsents((prev) => ({
-                    ...prev,
-                    dataProcessingConsent: e.target.checked,
-                  }))
-                }
-                className="mt-0.5 h-4 w-4 rounded border-stone-300 text-[#A0452E] focus:ring-[#E8A08E]"
-              />
-              <span>
-                I consent to Agrisoko processing my account and verification data to operate the marketplace and verify trust signals.
+                , and I consent to Agrisoko processing my account and verification data to operate the marketplace.
               </span>
             </label>
             <label className="flex items-start gap-3 text-sm text-slate-600">

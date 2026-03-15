@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { API_BASE_URL } from "../config/api";
+import { TRUST_SCORE_VISIBLE } from "../config/featureFlags";
 
 /**
  * Simple, mobile-friendly verification wizard.
@@ -297,10 +298,12 @@ const VerificationWizard: React.FC = () => {
             Level:{" "}
             <span className="font-semibold capitalize">{level}</span>
           </p>
-          <p className="text-sm text-gray-700">
-            Trust score:{" "}
-            <span className="font-semibold">{trustScore}/100</span>
-          </p>
+          {TRUST_SCORE_VISIBLE ? (
+            <p className="text-sm text-gray-700">
+              Trust score:{" "}
+              <span className="font-semibold">{trustScore}/100</span>
+            </p>
+          ) : null}
           {v?.status && (
             <p className="text-xs text-gray-500 mt-1">
               Review status:{" "}
