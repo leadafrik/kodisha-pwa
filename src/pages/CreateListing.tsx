@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
@@ -8,6 +8,11 @@ import { PAYMENTS_ENABLED, TRUST_SCORE_VISIBLE } from "../config/featureFlags";
 import { CheckCircle2, MapPin, Tag, Calendar, Camera } from "lucide-react";
 import { ErrorAlert } from "../components/ui";
 import { trackTrafficClick } from "../utils/trafficAnalytics";
+import GooglePlacesInput from "../components/GooglePlacesInput";
+import {
+  matchLocationCandidate,
+  type GooglePlaceSelection,
+} from "../utils/googleMaps";
 
 type ListingCategory = "produce" | "livestock" | "inputs" | "service";
 type ListingType = "sell" | "buy";
@@ -29,6 +34,8 @@ interface ListingFormData {
   constituency: string;
   ward: string;
   approximateLocation: string;
+  latitude?: number;
+  longitude?: number;
   price: string;
   quantity: string;
   unit: string;
@@ -130,6 +137,8 @@ const CreateListing: React.FC = () => {
     constituency: "",
     ward: "",
     approximateLocation: "",
+    latitude: undefined,
+    longitude: undefined,
     price: "",
     quantity: "",
     unit: "kg",
@@ -311,24 +320,75 @@ const CreateListing: React.FC = () => {
     if (form.county) {
       const data = getConstituenciesByCounty(form.county);
       setConstituencies(data);
-      setForm((prev) => ({ ...prev, constituency: "", ward: "" }));
-      setWards([]);
+      setForm((prev) => {
+        const hasMatchingConstituency = data.some(
+          (item) => item.value === prev.constituency
+        );
+        if (hasMatchingConstituency) return prev;
+        return { ...prev, constituency: "", ward: "" };
+      });
+      if (!data.some((item) => item.value === form.constituency)) {
+        setWards([]);
+      }
     } else {
       setConstituencies([]);
       setWards([]);
     }
-  }, [form.county]);
+  }, [form.county, form.constituency]);
 
   // Update wards when constituency changes
   useEffect(() => {
     if (form.county && form.constituency) {
       const data = getWardsByConstituency(form.county, form.constituency);
       setWards(data);
-      setForm((prev) => ({ ...prev, ward: "" }));
+      setForm((prev) => {
+        const hasMatchingWard = data.some((item) => item.value === prev.ward);
+        if (hasMatchingWard) return prev;
+        return { ...prev, ward: "" };
+      });
     } else {
       setWards([]);
     }
   }, [form.county, form.constituency]);
+
+  const handlePlaceSelected = useCallback(
+    (selection: GooglePlaceSelection) => {
+      const matchedCounty = matchLocationCandidate(
+        selection.county,
+        kenyaCounties.map((county) => county.name)
+      );
+
+      const resolvedCounty = matchedCounty || form.county;
+      const constituencyOptions = resolvedCounty
+        ? getConstituenciesByCounty(resolvedCounty)
+        : [];
+      const matchedConstituency = matchLocationCandidate(
+        selection.constituency,
+        constituencyOptions
+      );
+      const wardOptions =
+        resolvedCounty && matchedConstituency
+          ? getWardsByConstituency(resolvedCounty, matchedConstituency)
+          : [];
+      const matchedWard = matchLocationCandidate(selection.ward, wardOptions);
+
+      setForm((prev) => ({
+        ...prev,
+        county: resolvedCounty || prev.county,
+        constituency: matchedConstituency || prev.constituency,
+        ward: matchedWard || prev.ward,
+        approximateLocation:
+          selection.formattedAddress || selection.approximateLocation || prev.approximateLocation,
+        latitude: selection.coordinates?.lat ?? prev.latitude,
+        longitude: selection.coordinates?.lng ?? prev.longitude,
+      }));
+      setError("");
+      setNotice(
+        "Location auto-filled from Google Maps. Review county, constituency, and ward before publishing."
+      );
+    },
+    [form.county]
+  );
 
   const subcategoryOptions = useMemo(() => {
     switch (form.category) {
@@ -627,6 +687,10 @@ const CreateListing: React.FC = () => {
         formData.append("constituency", form.constituency);
         formData.append("ward", form.ward);
         formData.append("approximateLocation", form.approximateLocation.trim());
+        if (typeof form.latitude === "number" && typeof form.longitude === "number") {
+          formData.append("latitude", String(form.latitude));
+          formData.append("longitude", String(form.longitude));
+        }
         formData.append("availableFrom", form.availableFrom);
         formData.append("deliveryScope", payload.deliveryScope);
         formData.append("contact", form.contact.trim());
@@ -1054,6 +1118,16 @@ const CreateListing: React.FC = () => {
                 <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-stone-900">
                   <MapPin className="h-5 w-5" /> Where is it located?
                 </h3>
+                <GooglePlacesInput
+                  label="Search exact place"
+                  value={form.approximateLocation}
+                  onChange={(value) =>
+                    setForm((prev) => ({ ...prev, approximateLocation: value }))
+                  }
+                  onPlaceSelected={handlePlaceSelected}
+                  helperText="Search a market, landmark, or address to auto-fill location, then confirm the county, constituency, and ward."
+                  className="mb-4"
+                />
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
                     <label className="mb-2 block text-sm font-semibold text-stone-900">County *</label>

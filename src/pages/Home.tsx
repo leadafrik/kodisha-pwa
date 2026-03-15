@@ -17,9 +17,11 @@ import { useProperties } from "../contexts/PropertyContext";
 import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
 import { usePageContent } from "../hooks/usePageContent";
 import { PAYMENTS_ENABLED } from "../config/featureFlags";
+import { API_BASE_URL } from "../config/api";
 import { trackTrafficClick } from "../utils/trafficAnalytics";
 import { handleImageError } from "../utils/imageFallback";
 import { getOptimizedImageUrl } from "../utils/imageOptimization";
+import MarketplaceSupportStrip from "../components/MarketplaceSupportStrip";
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
 const FREE_WINDOW_DAYS = 10;
@@ -38,11 +40,36 @@ const founderLetterParagraphs = [
   "If you believe in that vision, join us. Sign up today. Tell a friend to tell a friend. And together, let us build the future of agriculture in Kenya.",
 ];
 
-const buyerDemandSignals = [
-  "Maize suppliers in Uasin Gishu",
-  "Poultry suppliers in Kisumu",
-  "Onion suppliers in Machakos",
-  "Farm inputs in Nakuru",
+type BuyerDemandSignal = {
+  id: string;
+  title: string;
+  county: string;
+  urgencyLabel: string;
+  budgetLabel?: string;
+};
+
+const buyerDemandFallback: BuyerDemandSignal[] = [
+  {
+    id: "fallback-maize",
+    title: "Need dry maize for immediate purchase",
+    county: "Machakos",
+    urgencyLabel: "Urgent",
+    budgetLabel: "KES 180,000 - 230,000",
+  },
+  {
+    id: "fallback-onions",
+    title: "Need dry red onions at 35 KES per kg",
+    county: "Machakos",
+    urgencyLabel: "Urgent",
+    budgetLabel: "Negotiable",
+  },
+  {
+    id: "fallback-chicks",
+    title: "Arbor acre chicks",
+    county: "Kiambu",
+    urgencyLabel: "Urgent",
+    budgetLabel: "KES 3,000 - 3,600",
+  },
 ];
 
 const startSteps = [
@@ -151,6 +178,76 @@ const Home: React.FC = () => {
 
   const { content: heroHeadline } = usePageContent("home.hero.headline");
   const { content: heroDescription } = usePageContent("home.hero.description");
+  const [buyerDemandSignals, setBuyerDemandSignals] =
+    useState<BuyerDemandSignal[]>(buyerDemandFallback);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const formatBudget = (budget?: { min?: number; max?: number; currency?: string }) => {
+      if (!budget) return undefined;
+      const currency = budget.currency || "KES";
+      const hasMin = typeof budget.min === "number" && Number.isFinite(budget.min);
+      const hasMax = typeof budget.max === "number" && Number.isFinite(budget.max);
+
+      if (hasMin && hasMax) {
+        return `${currency} ${budget.min!.toLocaleString()} - ${budget.max!.toLocaleString()}`;
+      }
+      if (hasMin) {
+        return `From ${currency} ${budget.min!.toLocaleString()}`;
+      }
+      if (hasMax) {
+        return `Up to ${currency} ${budget.max!.toLocaleString()}`;
+      }
+      return "Negotiable";
+    };
+
+    const formatUrgency = (urgency?: string) => {
+      if (urgency === "high") return "Urgent";
+      if (urgency === "medium") return "Within a week";
+      return "Can wait";
+    };
+
+    const loadBuyerDemand = async () => {
+      try {
+        const params = new URLSearchParams({
+          page: "1",
+          limit: "3",
+          status: "active",
+          marketType: "standard",
+        });
+        const response = await fetch(`${API_BASE_URL}/buyer-requests?${params}`, {
+          cache: "no-store",
+          credentials: "include",
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || !Array.isArray(payload?.data)) return;
+
+        const mapped = payload.data
+          .slice(0, 3)
+          .map((request: any) => ({
+            id: request?._id || request?.id || Math.random().toString(36).slice(2),
+            title: request?.title || "Buyer demand",
+            county: request?.location?.county || "Kenya",
+            urgencyLabel: formatUrgency(request?.urgency),
+            budgetLabel: formatBudget(request?.budget),
+          }))
+          .filter((item: BuyerDemandSignal) => item.title);
+
+        if (!cancelled && mapped.length > 0) {
+          setBuyerDemandSignals(mapped);
+        }
+      } catch {
+        // Keep fallback demand signals.
+      }
+    };
+
+    void loadBuyerDemand();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     try {
@@ -213,25 +310,6 @@ const Home: React.FC = () => {
       if (county) counties.add(county.toLowerCase());
     });
     return counties.size;
-  }, [liveProducts, liveServices]);
-
-  const categoryCounts = useMemo(() => {
-    const counts: Record<MarketCategory, number> = {
-      produce: 0,
-      livestock: 0,
-      inputs: 0,
-      service: 0,
-    };
-
-    liveProducts.forEach((item: any) => {
-      counts[normalizeCategory(item, "product")] += 1;
-    });
-
-    liveServices.forEach((item: any) => {
-      counts[normalizeCategory(item, "service")] += 1;
-    });
-
-    return counts;
   }, [liveProducts, liveServices]);
 
   const latestListings = useMemo(() => {
@@ -414,6 +492,12 @@ const Home: React.FC = () => {
                 <div className="mt-7 flex flex-wrap gap-2">
                   {(Object.keys(categoryMeta) as MarketCategory[]).map((category) => {
                     const meta = categoryMeta[category];
+                    const liveCount =
+                      category === "service"
+                        ? liveServices.filter((item: any) => normalizeCategory(item, "service") === category)
+                            .length
+                        : liveProducts.filter((item: any) => normalizeCategory(item, "product") === category)
+                            .length;
                     return (
                       <Link
                         key={category}
@@ -428,6 +512,9 @@ const Home: React.FC = () => {
                       >
                         <meta.icon className="h-4 w-4 text-[#A0452E]" />
                         {meta.label}
+                        <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-semibold text-stone-600">
+                          {liveCount}
+                        </span>
                       </Link>
                     );
                   })}
@@ -438,7 +525,7 @@ const Home: React.FC = () => {
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="ui-section-kicker">Start in minutes</p>
-                    <h2 className="mt-2 text-2xl text-stone-900">Direct trade, fewer steps</h2>
+                    <h2 className="mt-2 text-2xl text-stone-900">List fast, browse immediately</h2>
                   </div>
                   <div className="rounded-full border border-[#F3C9BE] bg-[#FDF5F3] px-3 py-1.5 text-sm font-semibold text-[#A0452E]">
                     Free now
@@ -462,17 +549,10 @@ const Home: React.FC = () => {
                   ))}
                 </div>
 
-                <div className="mt-6 grid grid-cols-2 gap-3">
-                  <div className="ui-card-soft p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Live market</p>
-                    <p className="mt-2 text-2xl font-semibold text-stone-900">{liveListingCount.toLocaleString()}</p>
-                    <p className="mt-1 text-sm text-stone-600">Listings visible to buyers now.</p>
-                  </div>
-                  <div className="ui-card-soft p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Coverage</p>
-                    <p className="mt-2 text-2xl font-semibold text-stone-900">{liveCountyCount || 47}</p>
-                    <p className="mt-1 text-sm text-stone-600">Counties active on the marketplace.</p>
-                  </div>
+                <div className="mt-6 flex flex-wrap gap-2">
+                  <span className="ui-chip-soft">{liveListingCount.toLocaleString()} live listings</span>
+                  <span className="ui-chip-soft">{liveCountyCount || 47} counties active</span>
+                  <span className="ui-chip-soft">Public browsing</span>
                 </div>
 
                 <Link
@@ -493,50 +573,8 @@ const Home: React.FC = () => {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 py-8 sm:py-10">
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <p className="ui-section-kicker">Explore the marketplace</p>
-              <h2 className="mt-2 text-3xl text-stone-900">Shop by category</h2>
-            </div>
-            <Link to="/browse" className="hidden text-sm font-semibold text-[#A0452E] md:inline-flex">
-              View all listings
-            </Link>
-          </div>
-
-          <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-            {(Object.keys(categoryMeta) as MarketCategory[]).map((category) => {
-              const meta = categoryMeta[category];
-              return (
-                <Link
-                  key={category}
-                  to={getBrowsePathForCategory(category)}
-                  onClick={() =>
-                    trackTrafficClick({
-                      action: `funnel_home_explore_${category}`,
-                      target: getBrowsePathForCategory(category),
-                    })
-                  }
-                  className="card-lift ui-card p-5"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FDF5F3] text-[#A0452E]">
-                      <meta.icon className="h-5 w-5" />
-                    </span>
-                    <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs font-semibold text-stone-700">
-                      {categoryCounts[category]} live
-                    </span>
-                  </div>
-                  <h3 className="mt-4 text-xl font-semibold text-stone-900">{meta.label}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-stone-600">{meta.copy}</p>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-
         <section className="mx-auto max-w-7xl px-4 py-4 sm:py-6">
-          <div className="grid gap-8 xl:grid-cols-[1.4fr_0.6fr]">
+          <div className="grid gap-6 xl:grid-cols-[1.45fr_0.55fr]">
             <div>
               <div className="flex items-end justify-between gap-4">
                 <div>
@@ -609,60 +647,67 @@ const Home: React.FC = () => {
               </div>
             </div>
 
-            <div className="space-y-4">
-              <div className="ui-card p-5">
-                <p className="ui-section-kicker">Buyer demand now</p>
-                <h3 className="mt-2 text-2xl text-stone-900">What buyers are searching for today</h3>
-                <ul className="mt-5 space-y-3">
-                  {buyerDemandSignals.map((signal) => (
-                    <li
-                      key={signal}
-                      className="flex items-start gap-3 border-b border-stone-200 pb-3 text-sm text-stone-700 last:border-b-0 last:pb-0"
-                    >
-                      <Search className="mt-0.5 h-4 w-4 shrink-0 text-[#A0452E]" />
-                      <span>{signal}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  to="/request"
-                  onClick={() =>
-                    trackTrafficClick({
-                      action: "funnel_home_open_buy_requests",
-                      target: "/request",
-                    })
-                  }
-                  className="ui-btn-primary mt-6 w-full justify-between"
-                >
-                  View buy requests
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
+            <div className="ui-card p-5">
+              <p className="ui-section-kicker">Live demand and trust</p>
+              <h3 className="mt-2 text-2xl text-stone-900">What buyers need right now</h3>
+
+              <ul className="mt-5 space-y-3">
+                {buyerDemandSignals.map((signal) => (
+                  <li
+                    key={signal.id}
+                    className="flex items-start gap-3 border-b border-stone-200 pb-3 text-sm text-stone-700 last:border-b-0 last:pb-0"
+                  >
+                    <Search className="mt-0.5 h-4 w-4 shrink-0 text-[#A0452E]" />
+                    <div className="min-w-0">
+                      <p className="font-semibold text-stone-900">{signal.title}</p>
+                      <p className="mt-1 text-xs text-stone-500">
+                        {signal.county}
+                        {signal.budgetLabel ? ` - ${signal.budgetLabel}` : ""}
+                        {signal.urgencyLabel ? ` - ${signal.urgencyLabel}` : ""}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-5 space-y-4 border-t border-stone-200 pt-5">
+                {trustHighlights.map((item) => (
+                  <div key={item.title} className="flex items-start gap-3">
+                    <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#FDF5F3] text-[#A0452E]">
+                      <item.icon className="h-5 w-5" />
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold text-stone-900">{item.title}</p>
+                      <p className="mt-1 text-sm text-stone-600">{item.copy}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
 
-              <div className="ui-card p-5">
-                <p className="ui-section-kicker">Trade with confidence</p>
-                <div className="mt-4 space-y-4">
-                  {trustHighlights.map((item) => (
-                    <div key={item.title} className="flex items-start gap-3">
-                      <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#FDF5F3] text-[#A0452E]">
-                        <item.icon className="h-5 w-5" />
-                      </span>
-                      <div>
-                        <p className="text-sm font-semibold text-stone-900">{item.title}</p>
-                        <p className="mt-1 text-sm text-stone-600">{item.copy}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <Link
+                to="/request"
+                onClick={() =>
+                  trackTrafficClick({
+                    action: "funnel_home_open_buy_requests",
+                    target: "/request",
+                  })
+                }
+                className="ui-btn-primary mt-6 w-full justify-between"
+              >
+                View buy requests
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
           </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 py-2 sm:py-3">
+          <MarketplaceSupportStrip />
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-8 sm:py-10">
           <div className="max-w-4xl">
             <p className="ui-section-kicker">A note from Stephen</p>
-            <h2 className="mt-2 text-3xl text-stone-900">Why we built Agrisoko</h2>
           </div>
 
           <div className="relative mt-6 max-w-4xl rotate-[-0.9deg] rounded-[2rem] border border-[#bfd0b8] bg-[#e6f0e0] px-5 py-6 text-slate-900 shadow-[0_8px_16px_rgba(92,122,99,0.08)] sm:px-7 sm:py-7">

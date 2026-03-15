@@ -1,18 +1,10 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import {
-  AlertCircle,
-  ArrowRight,
-  Clock3,
-  Filter,
-  MapPin,
-  Plus,
-  ShieldCheck,
-  TrendingUp,
-} from "lucide-react";
+import { AlertCircle, ArrowRight, Clock3, Filter, MapPin, Plus, TrendingUp } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { API_BASE_URL, ensureValidAccessToken } from "../config/api";
 import { kenyaCounties } from "../data/kenyaCounties";
+import MarketplaceSupportStrip from "./MarketplaceSupportStrip";
 
 interface BuyerRequest {
   _id: string;
@@ -315,8 +307,6 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
     activeFilters.push(`Urgency: ${URGENCY_LABELS[filters.urgency] || filters.urgency}`);
   }
 
-  const focusLabel = activeFilters.length ? activeFilters.join(" | ") : "All requests";
-
   const sortedRequests = useMemo(() => {
     return [...requests].sort((a, b) => {
       if (sortBy === "newest") {
@@ -385,93 +375,63 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
           )}
 
           <section className="ui-hero-panel p-5 md:p-7">
-            <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
-              <div>
-                <p className="ui-section-kicker">
-                  {isB2B ? "Agrisoko B2B demand board" : "Agrisoko demand board"}
-                </p>
-                <h1 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900 md:text-4xl">
-                  {isB2B ? "Institutional demand from active buyers" : "Find buyers ready to buy across Kenya"}
-                </h1>
-                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-stone-600 md:text-base">
-                  {isB2B
-                    ? "Demand-first procurement for restaurants, schools, processors, and distributors that need reliable supply."
-                    : "Browse active demand, respond quickly, and close direct deals without extra broker friction."}
-                </p>
-                <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-                  <button
-                    onClick={() =>
-                      navigate(
-                        user
-                          ? `/request/new?marketType=${activeMarketType}`
-                          : `/login?mode=signup&next=${encodeURIComponent(
-                              `/request/new?marketType=${activeMarketType}`
-                            )}`
-                      )
-                    }
-                    className="ui-btn-primary gap-2 px-5 py-3 text-sm"
-                  >
-                    <Plus size={18} />
-                    {isB2B ? "Post bulk demand" : "Post demand"}
-                  </button>
-                  <Link to="/browse" className="ui-btn-secondary px-5 py-3 text-sm">
-                    Browse listings
-                  </Link>
-                </div>
-                <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-stone-600">
-                  <span className="ui-chip-soft">{pagination.total} active requests</span>
-                  <span className="ui-chip-soft">{urgentCount} urgent</span>
-                  <span className="ui-chip-soft">{countyCount || 1} counties active</span>
-                </div>
-              </div>
-
-              <div className="ui-card-soft p-4 md:p-5">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#A0452E]">
-                  <TrendingUp className="h-4 w-4" />
-                  Demand focus
-                </div>
-                <p className="mt-3 text-lg font-semibold text-stone-900">
-                  Where buyers need supply now
-                </p>
-                <p className="mt-1 text-sm text-stone-600">
-                  Ranked by urgency, budget, request detail, and freshness so you can respond faster.
-                </p>
-                <div className="mt-4 space-y-3 text-sm text-stone-700">
-                  <div className="flex items-center justify-between gap-3 border-b border-stone-200 pb-3">
-                    <span className="text-stone-500">Current focus</span>
-                    <span className="font-semibold text-stone-900">{focusLabel}</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-3 border-b border-stone-200 pb-3">
-                    <span className="text-stone-500">Sort order</span>
-                    <span className="font-semibold text-stone-900">
-                      {sortBy === "recommended"
-                        ? "Top picks"
-                        : sortBy === "newest"
-                          ? "Newest first"
-                          : sortBy === "urgent"
-                            ? "Urgent first"
-                            : "Highest budget"}
-                    </span>
-                  </div>
-                  <div className="flex items-start gap-2 rounded-2xl border border-[#F3C9BE] bg-white px-3 py-3 text-xs text-stone-600">
-                    <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#A0452E]" />
-                    Reply only when ready. Buyers can review your offer after you sign in and open the request.
-                  </div>
-                </div>
-              </div>
+            <p className="ui-section-kicker">
+              {isB2B ? "Agrisoko B2B demand board" : "Agrisoko demand board"}
+            </p>
+            <h1 className="mt-2 max-w-3xl text-2xl font-semibold tracking-tight text-stone-900 md:text-4xl">
+              {isB2B ? "Institutional demand from active buyers" : "Find buyers ready to buy across Kenya"}
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-stone-600 md:text-base">
+              {isB2B
+                ? "Demand-first procurement for restaurants, schools, processors, and distributors that need reliable supply."
+                : "Browse active demand, respond quickly, and close direct deals without extra broker friction."}
+            </p>
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <button
+                onClick={() =>
+                  navigate(
+                    user
+                      ? `/request/new?marketType=${activeMarketType}`
+                      : `/login?mode=signup&next=${encodeURIComponent(
+                          `/request/new?marketType=${activeMarketType}`
+                        )}`
+                  )
+                }
+                className="ui-btn-primary gap-2 px-5 py-3 text-sm"
+              >
+                <Plus size={18} />
+                {isB2B ? "Post bulk demand" : "Post demand"}
+              </button>
+              <Link to="/browse" className="ui-btn-secondary px-5 py-3 text-sm">
+                Browse listings
+              </Link>
             </div>
+            <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-stone-600">
+              <span className="ui-chip-soft">{pagination.total} active requests</span>
+              <span className="ui-chip-soft">{urgentCount} urgent</span>
+              <span className="ui-chip-soft">{countyCount || 1} counties active</span>
+              <span className="ui-chip-soft">
+                {sortBy === "recommended"
+                  ? "Top picks"
+                  : sortBy === "newest"
+                    ? "Newest first"
+                    : sortBy === "urgent"
+                      ? "Urgent first"
+                      : "Highest budget"}
+              </span>
+            </div>
+            <p className="mt-4 text-sm text-stone-500">
+              Reply only when ready. Buyers can review your offer after you sign in and open the request.
+            </p>
           </section>
 
           <section className="ui-card p-4 md:p-5">
-            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <div>
                 <p className="ui-section-kicker">Filter and sort</p>
                 <h2 className="mt-2 text-xl font-semibold tracking-tight text-stone-900">
-                  Find the best demand to respond to
+                  Narrow the board quickly
                 </h2>
-                <p className="mt-1 text-sm text-stone-500">
-                  Narrow by category, county, urgency, or budget priority.
-                </p>
               </div>
               <div className="inline-flex items-center gap-2 self-start rounded-full border border-stone-200 bg-[#FAF7F2] px-3 py-1.5 text-xs font-semibold text-stone-700">
                 <Filter className="h-4 w-4 text-[#A0452E]" />
@@ -555,6 +515,11 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
               </div>
             )}
           </section>
+
+          <MarketplaceSupportStrip
+            title="Need help before you reply?"
+            subtitle="Support is available on WhatsApp, by email, and through the Agrisoko app."
+          />
 
           {error && (
             <div className="ui-card border-red-200 bg-red-50 px-4 py-4 text-red-700">

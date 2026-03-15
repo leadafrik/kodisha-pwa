@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
@@ -10,6 +10,11 @@ import {
 import { API_BASE_URL, ensureValidAccessToken } from "../config/api";
 import { validatePhone } from "../utils/formValidation";
 import { normalizeKenyanPhone } from "../utils/phone";
+import GooglePlacesInput from "./GooglePlacesInput";
+import {
+  matchLocationCandidate,
+  type GooglePlaceSelection,
+} from "../utils/googleMaps";
 
 const UNITS = ["kg", "tonnes", "bags", "units", "liters", "crates"];
 
@@ -41,6 +46,8 @@ interface BuyerRequestFormData {
     county: string;
     constituency: string;
     ward: string;
+    approximateLocation?: string;
+    coordinates?: { lat: number; lng: number };
   };
   urgency: UrgencyLevel;
   images: string[];
@@ -252,7 +259,12 @@ const getDefaultFormData = (county?: string, phone?: string): BuyerRequestFormDa
   quantity: "",
   unit: "kg",
   contactPhone: phone || "",
-  location: { county: county || "", constituency: "", ward: "" },
+  location: {
+    county: county || "",
+    constituency: "",
+    ward: "",
+    approximateLocation: "",
+  },
   urgency: "medium",
   images: [],
 });
@@ -456,7 +468,12 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
       if (key === "county") {
         return {
           ...prev,
-          location: { county: value, constituency: "", ward: "" },
+          location: {
+            ...prev.location,
+            county: value,
+            constituency: "",
+            ward: "",
+          },
         };
       }
       if (key === "constituency") {
@@ -472,6 +489,49 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
     });
     clearFeedback();
   };
+
+  const handlePlaceSelected = useCallback(
+    (selection: GooglePlaceSelection) => {
+      const matchedCounty = matchLocationCandidate(
+        selection.county,
+        kenyaCounties.map((county) => county.name)
+      );
+      const resolvedCounty = matchedCounty || formData.location.county;
+      const constituencyOptions = resolvedCounty
+        ? getConstituenciesByCounty(resolvedCounty)
+        : [];
+      const matchedConstituency = matchLocationCandidate(
+        selection.constituency,
+        constituencyOptions
+      );
+      const wardOptions =
+        resolvedCounty && matchedConstituency
+          ? getWardsByConstituency(resolvedCounty, matchedConstituency)
+          : [];
+      const matchedWard = matchLocationCandidate(selection.ward, wardOptions);
+
+      setFormData((prev) => ({
+        ...prev,
+        location: {
+          ...prev.location,
+          county: resolvedCounty || prev.location.county,
+          constituency: matchedConstituency || prev.location.constituency,
+          ward: matchedWard || prev.location.ward,
+          approximateLocation:
+            selection.formattedAddress ||
+            selection.approximateLocation ||
+            prev.location.approximateLocation,
+          coordinates: selection.coordinates || prev.location.coordinates,
+        },
+      }));
+      setNotice(
+        "Location auto-filled from Google Maps. Review county, constituency, and ward before posting."
+      );
+      setError("");
+      setFieldErrors((prev) => ({ ...prev, county: undefined }));
+    },
+    [formData.location.county]
+  );
 
   const setBudgetField = (key: "min" | "max", value: string) => {
     if (!/^\d*$/.test(value)) return;
@@ -733,6 +793,8 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
           county: formData.location.county,
           constituency: formData.location.constituency || undefined,
           ward: formData.location.ward || undefined,
+          approximateLocation: formData.location.approximateLocation || undefined,
+          coordinates: formData.location.coordinates || undefined,
         },
         urgency: formData.urgency,
         images: [],
@@ -1142,6 +1204,19 @@ export const CreateBuyerRequest: React.FC<CreateBuyerRequestProps> = ({
                 Location helps match you with nearby sellers.
               </p>
             </div>
+
+            <GooglePlacesInput
+              label="Search exact place"
+              value={formData.location.approximateLocation || ""}
+              onChange={(value) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  location: { ...prev.location, approximateLocation: value },
+                }))
+              }
+              onPlaceSelected={handlePlaceSelected}
+              helperText="Search a market, landmark, or address to auto-fill location, then confirm the county, constituency, and ward."
+            />
 
             <div className="grid gap-4 md:grid-cols-3">
               <div>

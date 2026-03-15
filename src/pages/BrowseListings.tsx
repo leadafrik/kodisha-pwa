@@ -22,6 +22,7 @@ import {
   Truck,
 } from "lucide-react";
 import RaffleCampaign from "../components/RaffleCampaign";
+import MarketplaceSupportStrip from "../components/MarketplaceSupportStrip";
 
 type Category = "all" | "produce" | "livestock" | "inputs" | "service";
 type ServiceSubType = "all" | "equipment" | "professional_services";
@@ -566,70 +567,46 @@ const BrowseListings: React.FC = () => {
           )}
 
           <div className="fade-up rounded-[2rem] border border-stone-200 bg-white/88 p-5 shadow-[0_16px_40px_rgba(28,25,23,0.08)] backdrop-blur">
-            <div className="grid gap-4 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#A0452E]">
-                  Marketplace
-                </p>
-                <h1 className="font-display mt-2 text-2xl md:text-4xl font-semibold text-stone-900 tracking-tight">
-                  Browse and buy with confidence
-                </h1>
-                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-stone-600 md:text-base">
-                  Discover produce, livestock, farm inputs, and agricultural services from verified sellers across Kenya.
-                </p>
-                <div className="mt-4 flex flex-wrap gap-3">
-                  <Link
-                    to={
-                      user
-                        ? "/create-listing?compact=1"
-                        : `/login?mode=signup&next=${encodeURIComponent("/create-listing?compact=1")}`
-                    }
-                    className="ui-btn-primary px-4 py-2 text-sm"
-                  >
-                    List free today
-                  </Link>
-                  <Link
-                    to="/about"
-                    className="ui-btn-secondary px-4 py-2 text-sm"
-                  >
-                    Learn about Agrisoko
-                  </Link>
-                </div>
-                <div className="mt-4 flex flex-wrap items-center gap-2 text-xs font-semibold text-stone-600">
-                  <span className="rounded-full border border-[#F3C9BE] bg-[#FDF5F3] px-3 py-1 text-[#A0452E]">Verified sellers</span>
-                  <span className="rounded-full border border-[#F3C9BE] bg-[#FDF5F3] px-3 py-1 text-[#A0452E]">Boosted listings first</span>
-                  <span className="rounded-full border border-stone-200 bg-stone-50 px-3 py-1">Direct contact</span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2 lg:justify-self-end lg:min-w-[260px]">
-                <div className="rounded-2xl border border-stone-200 bg-[#FAF7F2] px-3 py-3 shadow-sm">
-                  <p className="text-lg font-semibold text-stone-900 stat-num">
-                    {loading ? "--" : stats.total.toLocaleString()}
-                  </p>
-                  <p className="text-[11px] text-stone-500">Listings</p>
-                </div>
-                <div className="rounded-2xl border border-stone-200 bg-[#FAF7F2] px-3 py-3 shadow-sm">
-                  <p className="text-lg font-semibold text-stone-900 stat-num">
-                    {loading ? "--" : stats.verifiedCount.toLocaleString()}
-                  </p>
-                  <p className="text-[11px] text-stone-500">Verified</p>
-                </div>
-                <div className="rounded-2xl border border-stone-200 bg-[#FAF7F2] px-3 py-3 shadow-sm">
-                  <p className="text-lg font-semibold text-stone-900 stat-num">
-                    {loading ? "--" : stats.boostedCount.toLocaleString()}
-                  </p>
-                  <p className="text-[11px] text-stone-500">Boosted</p>
-                </div>
-              </div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#A0452E]">
+              Marketplace
+            </p>
+            <h1 className="font-display mt-2 text-2xl font-semibold tracking-tight text-stone-900 md:text-4xl">
+              Browse and buy with confidence
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-stone-600 md:text-base">
+              Discover produce, livestock, farm inputs, and agricultural services from verified sellers across Kenya.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link
+                to={
+                  user
+                    ? "/create-listing?compact=1"
+                    : `/login?mode=signup&next=${encodeURIComponent("/create-listing?compact=1")}`
+                }
+                className="ui-btn-primary px-4 py-2 text-sm"
+              >
+                List free today
+              </Link>
+              <Link
+                to="/about"
+                className="ui-btn-secondary px-4 py-2 text-sm"
+              >
+                Learn about Agrisoko
+              </Link>
+            </div>
+            <div className="mt-4 flex flex-wrap items-center gap-2 text-xs font-semibold text-stone-600">
+              <span className="ui-chip-soft">{loading ? "--" : stats.total.toLocaleString()} listings</span>
+              <span className="ui-chip-soft">{loading ? "--" : stats.verifiedCount.toLocaleString()} verified</span>
+              <span className="ui-chip-soft">{loading ? "--" : stats.boostedCount.toLocaleString()} boosted</span>
+              <span className="rounded-full border border-stone-200 bg-stone-50 px-3 py-1">Direct contact</span>
             </div>
           </div>
 
-          <div className="fade-up sticky top-24 z-20 overflow-hidden rounded-3xl border border-[#F3C9BE] bg-[#FFF8F1]/92 p-3 md:p-4 shadow-sm backdrop-blur">
+          <div className="fade-up overflow-hidden rounded-3xl border border-[#F3C9BE] bg-[#FFF8F1]/92 p-3 md:p-4 shadow-sm backdrop-blur">
             <button
               type="button"
               onClick={() => setShowRaffle((prev) => !prev)}
-              className="relative flex w-full flex-col gap-3 text-left lg:flex-row lg:items-center lg:justify-between"
+              className="relative flex w-full flex-col gap-2 text-left md:flex-row md:items-center md:justify-between"
             >
               <div className="min-w-0">
                 <p className="inline-flex items-center gap-2 rounded-full border border-[#F3C9BE] bg-white/90 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-[#A0452E]">
@@ -637,28 +614,13 @@ const BrowseListings: React.FC = () => {
                   Campaign live
                 </p>
                 <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <p className="text-base font-extrabold text-stone-900">
+                  <p className="text-sm font-semibold text-stone-900 md:text-base">
                     {showRaffle ? "Hide raffle details" : "Open raffle details"}
                   </p>
-                  <p className="text-sm text-stone-600">
-                    Keep browsing without interruption.
-                  </p>
+                  <p className="text-sm text-stone-600">Free listings. Invite rewards. KSh 20,000 top prize.</p>
                 </div>
               </div>
-              <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-                {!showRaffle && (
-                  <>
-                    <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-stone-700">
-                      KSh 20,000 top prize
-                    </span>
-                    <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-stone-700">
-                      3,000 listing target
-                    </span>
-                    <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-stone-700">
-                      Invite code rewards
-                    </span>
-                  </>
-                )}
+              <div className="flex flex-wrap items-center gap-2 md:justify-end">
                 <span className="inline-flex min-h-[40px] items-center justify-center rounded-xl border border-[#8B3525] bg-[#8B3525] px-4 py-2 text-xs font-bold uppercase tracking-[0.08em] text-white shadow-sm">
                   {showRaffle ? (
                     <>
@@ -681,6 +643,11 @@ const BrowseListings: React.FC = () => {
               </div>
             )}
           </div>
+
+          <MarketplaceSupportStrip
+            title="Need help before you contact a seller?"
+            subtitle="Support is available on WhatsApp, by email, and through the Agrisoko app."
+          />
 
           <div className="fade-up rounded-[2rem] border border-stone-200 bg-white/92 p-4 md:p-5 shadow-sm">
             <div className="space-y-3">
