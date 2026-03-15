@@ -81,7 +81,13 @@ const ensurePlacesLibrary = async (googleMaps: any) => {
   }
 
   if (typeof googleMaps?.maps?.importLibrary === "function") {
-    await googleMaps.maps.importLibrary("places");
+    // With loading=async, importLibrary returns the library object but does NOT
+    // automatically populate google.maps.places. Assign it manually so the
+    // classic google.maps.places.Autocomplete API continues to work.
+    const placesLib = await googleMaps.maps.importLibrary("places");
+    if (placesLib && googleMaps?.maps && !googleMaps.maps.places) {
+      googleMaps.maps.places = placesLib;
+    }
   }
 
   if (googleMaps?.maps?.places) {

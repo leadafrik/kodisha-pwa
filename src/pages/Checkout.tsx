@@ -569,19 +569,9 @@ const Checkout: React.FC = () => {
               </p>
             </div>
 
-            <div className="ui-card-soft p-5 text-sm text-stone-700">
-              <p className="font-semibold text-stone-900">What happens next</p>
-              <ol className="mt-3 space-y-2">
-                <li>1. Pay to till {MARKETPLACE_MPESA_TILL_NUMBER}.</li>
-                <li>2. Confirm the merchant name is {MARKETPLACE_MPESA_MERCHANT_NAME}.</li>
-                <li>3. Submit this order with the same M-Pesa number you used to pay.</li>
-                <li>4. We email your invoice and verify the payment record.</li>
-                <li>5. The seller is released to start delivery.</li>
-              </ol>
-              <p className="mt-4 text-xs text-stone-500">
-                Need help? Reach us at info@leadafrik.com or WhatsApp 0796389192 / 0711454771.
-              </p>
-            </div>
+            <p className="px-1 text-xs text-stone-500">
+              Need help? Email info@leadafrik.com or WhatsApp 0796389192 / 0711454771.
+            </p>
           </div>
         </div>
       </div>

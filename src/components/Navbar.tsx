@@ -422,15 +422,29 @@ const Navbar: React.FC = () => {
               )}
             </div>
 
-            <button
-              type="button"
-              className="inline-flex min-h-[48px] min-w-[48px] items-center justify-center rounded-xl border border-stone-200 text-stone-900 transition hover:bg-[#FDF5F3] lg:hidden"
-              onClick={() => setMobileOpen(true)}
-              aria-label="Open menu"
-              aria-expanded={mobileOpen}
-            >
-              <Menu className="h-6 w-6" />
-            </button>
+            <div className="flex items-center gap-2 lg:hidden">
+              <Link
+                to="/cart"
+                className="relative inline-flex min-h-[48px] min-w-[48px] items-center justify-center rounded-xl border border-stone-200 text-stone-900 transition hover:bg-[#FDF5F3]"
+                aria-label={`Cart${itemCount > 0 ? `, ${itemCount} item${itemCount === 1 ? "" : "s"}` : ""}`}
+              >
+                <ShoppingCart className="h-5 w-5" />
+                {itemCount > 0 && (
+                  <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-[#A0452E] px-1 text-[10px] font-bold leading-none text-white">
+                    {itemCount}
+                  </span>
+                )}
+              </Link>
+              <button
+                type="button"
+                className="inline-flex min-h-[48px] min-w-[48px] items-center justify-center rounded-xl border border-stone-200 text-stone-900 transition hover:bg-[#FDF5F3]"
+                onClick={() => setMobileOpen(true)}
+                aria-label="Open menu"
+                aria-expanded={mobileOpen}
+              >
+                <Menu className="h-6 w-6" />
+              </button>
+            </div>
           </div>
         </div>
       </nav>

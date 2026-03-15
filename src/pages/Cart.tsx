@@ -61,7 +61,7 @@ const Cart: React.FC = () => {
           </div>
         ) : (
           <div className="mt-6 grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
-            <div className="space-y-4">
+            <div className="order-2 space-y-4 lg:order-1">
               {items.map((item) => (
                 <div key={item.listingId} className="ui-card p-4 md:p-5">
                   <div className="flex flex-col gap-4 md:flex-row md:items-start">
@@ -143,7 +143,7 @@ const Cart: React.FC = () => {
               ))}
             </div>
 
-            <div className="space-y-4">
+            <div className="order-1 space-y-4 lg:order-2">
               <div className="ui-card p-5">
                 <p className="ui-section-kicker">Checkout summary</p>
                 <h2 className="mt-2 text-xl font-semibold text-stone-900">Manual M-Pesa checkout</h2>
@@ -208,17 +208,6 @@ const Cart: React.FC = () => {
                 </div>
               </div>
 
-              <div className="ui-card-soft p-5 text-sm text-stone-700">
-                <p className="font-semibold text-stone-900">How this works</p>
-                <ol className="mt-3 space-y-2">
-                  <li>1. Confirm the products and quantities you want.</li>
-                  <li>2. Move to checkout and enter the delivery location.</li>
-                  <li>3. On M-PESA select Lipa na M-PESA, then Buy Goods and Services.</li>
-                  <li>4. Enter till {MARKETPLACE_MPESA_TILL_NUMBER} and confirm merchant name {MARKETPLACE_MPESA_MERCHANT_NAME}.</li>
-                  <li>5. Tell us which M-Pesa number you used so admin can verify the payment.</li>
-                  <li>6. Delivery is coordinated and tracked to completion.</li>
-                </ol>
-              </div>
             </div>
           </div>
         )}
