@@ -16,6 +16,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import WhatsAppFloatingButton from './components/WhatsAppFloatingButton';
 import CookieConsentBanner from './components/CookieConsentBanner';
+import WelcomeModal from './components/WelcomeModal';
 import NotFound from './pages/NotFound';
 import ServerError from './pages/ServerError';
 import Offline from './pages/Offline';
@@ -375,6 +376,7 @@ const AppShell = () => {
       <Footer />
       <WhatsAppFloatingButton />
       <CookieConsentBanner />
+      <WelcomeModal />
     </div>
   );
 };
