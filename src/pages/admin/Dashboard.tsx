@@ -12,6 +12,7 @@ import {
   RefreshCw,
   Building2,
   Megaphone,
+  Mail,
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { adminApiRequest } from "../../config/api";
@@ -481,6 +482,27 @@ const AdminDashboard: React.FC = () => {
                   <li>- Match payer phone and timestamp</li>
                   <li>- Confirm or reject manual payments</li>
                   <li>- Mark processing and delivery completion</li>
+                </ul>
+              </Link>
+
+              <Link
+                to="/admin/broadcast"
+                className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="h-12 w-12 rounded-2xl bg-[#FDF5F3] text-[#A0452E] flex items-center justify-center">
+                    <Mail size={24} />
+                  </div>
+                  <span className="rounded-full bg-[#FDF5F3] px-3 py-1 text-xs font-semibold text-[#A0452E]">Email</span>
+                </div>
+                <h3 className="mt-4 text-xl font-semibold text-slate-900">Email broadcast</h3>
+                <p className="mt-2 text-sm text-slate-600">
+                  Send a message to all users, verified users, sellers, or buyers.
+                </p>
+                <ul className="mt-4 space-y-2 text-sm text-slate-600">
+                  <li>- Target by audience segment</li>
+                  <li>- Auto-personalised with first name</li>
+                  <li>- Plain text, no HTML required</li>
                 </ul>
               </Link>
 

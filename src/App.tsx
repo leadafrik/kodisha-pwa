@@ -62,6 +62,7 @@ const AdminInviteSetup = lazy(() => import('./pages/AdminInviteSetup'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
 const AdminBlogManagement = lazy(() => import('./pages/admin/BlogManagement'));
 const AdminBoostRequests = lazy(() => import('./pages/admin/BoostRequests'));
+const AdminBroadcast = lazy(() => import('./pages/admin/Broadcast'));
 const Cart = lazy(() => import('./pages/Cart'));
 const Checkout = lazy(() => import('./pages/Checkout'));
 const Orders = lazy(() => import('./pages/Orders'));
@@ -358,6 +359,7 @@ const AppShell = () => {
             <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
             <Route path="/admin/bulk-applications" element={<ProtectedRoute><AdminBulkApplications /></ProtectedRoute>} />
             <Route path="/admin/bulk-orders" element={<ProtectedRoute><AdminBulkOrders /></ProtectedRoute>} />
+            <Route path="/admin/broadcast" element={<ProtectedRoute><AdminBroadcast /></ProtectedRoute>} />
             <Route path="/legal/terms" element={<TermsOfService />} />
             <Route path="/legal/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfService />} />
