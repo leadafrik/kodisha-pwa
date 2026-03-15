@@ -2,26 +2,39 @@ import React, { useState } from "react";
 import { Mail, Send, Users, CheckCircle, AlertCircle } from "lucide-react";
 import { adminApiRequest } from "../../config/api";
 
-type Audience = "all" | "verified" | "sellers" | "buyers";
+type Audience = "all" | "verified" | "sellers" | "buyers" | "none";
 
 const AUDIENCE_OPTIONS: { value: Audience; label: string; description: string }[] = [
   { value: "all", label: "All users", description: "Every registered user with an email address" },
   { value: "verified", label: "Verified users", description: "Users who have confirmed their email" },
   { value: "sellers", label: "Sellers only", description: "Users registered as sellers" },
   { value: "buyers", label: "Buyers only", description: "Users registered as buyers" },
+  { value: "none", label: "Extra emails only", description: "Skip the user database — send to the addresses below only" },
 ];
 
 const AdminBroadcast: React.FC = () => {
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [audience, setAudience] = useState<Audience>("all");
+  const [extraEmailsRaw, setExtraEmailsRaw] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ sent: number; failed: number; total: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const parseExtraEmails = (raw: string): string[] =>
+    raw
+      .split(/[,\n;]+/)
+      .map((s) => s.trim().toLowerCase())
+      .filter((s) => s.includes("@"));
+
   const handleSend = async () => {
+    const extraEmails = parseExtraEmails(extraEmailsRaw);
     if (!subject.trim() || !body.trim()) {
       setError("Subject and body are required.");
+      return;
+    }
+    if (audience === "none" && extraEmails.length === 0) {
+      setError("Add at least one email address in the extra emails field.");
       return;
     }
     setLoading(true);
@@ -30,7 +43,7 @@ const AdminBroadcast: React.FC = () => {
     try {
       const data = await adminApiRequest("/api/admin/broadcast", {
         method: "POST",
-        body: JSON.stringify({ subject, body, audience }),
+        body: JSON.stringify({ subject, body, audience, extraEmails }),
       });
       setResult(data.data);
     } catch (err: any) {
@@ -102,6 +115,28 @@ const AdminBroadcast: React.FC = () => {
             />
             <p className="mt-1 text-xs text-slate-400">
               Plain text only. If the message starts with "Hi," it will be personalised with each user's first name automatically.
+            </p>
+          </div>
+
+          {/* Extra emails */}
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-slate-700">
+              Additional email addresses <span className="font-normal text-slate-400">(optional)</span>
+            </label>
+            <textarea
+              rows={4}
+              value={extraEmailsRaw}
+              onChange={(e) => setExtraEmailsRaw(e.target.value)}
+              placeholder={"Paste extra addresses here, one per line or comma-separated:\njohn@example.com\njane@example.com, someone@gmail.com"}
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE]"
+            />
+            {extraEmailsRaw.trim() && (
+              <p className="mt-1 text-xs text-[#A0452E] font-medium">
+                {parseExtraEmails(extraEmailsRaw).length} valid address{parseExtraEmails(extraEmailsRaw).length === 1 ? "" : "es"} detected
+              </p>
+            )}
+            <p className="mt-1 text-xs text-slate-400">
+              These will be merged with the audience above. Duplicates are removed automatically.
             </p>
           </div>
 
