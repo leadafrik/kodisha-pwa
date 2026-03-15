@@ -690,6 +690,17 @@ const AdminDashboard: React.FC = () => {
                     View users
                   </Link>
                 </div>
+                <div className="rounded-2xl border border-[#F3C9BE] bg-[#FDF5F3] p-4">
+                  <p className="text-xs uppercase tracking-[0.3em] text-[#A0452E]">Content</p>
+                  <p className="mt-2 text-lg font-semibold text-slate-900">Publish blog</p>
+                  <p className="mt-2 text-xs text-slate-600">Create or update public blog posts.</p>
+                  <Link
+                    to="/admin/blog"
+                    className="mt-4 inline-flex items-center text-sm font-semibold text-[#A0452E] hover:text-[#8B3525]"
+                  >
+                    Open editor
+                  </Link>
+                </div>
               </div>
             </div>
 

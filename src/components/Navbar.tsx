@@ -14,6 +14,7 @@ import {
   Heart,
   Shield,
   Building2,
+  NotebookText,
   type LucideIcon,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
@@ -39,10 +40,12 @@ const shouldShowTopLevelMobileNav = (pathname: string) =>
   pathname === "/b2b" ||
   pathname === "/bulk" ||
   pathname === "/about" ||
+  pathname === "/blog" ||
   pathname === "/profile" ||
   pathname === "/messages" ||
   pathname === "/favorites" ||
   pathname === "/request" ||
+  pathname.startsWith("/blog/") ||
   pathname.startsWith("/bulk/") ||
   pathname.startsWith("/browse");
 
@@ -77,6 +80,10 @@ const pathMatches = (pathname: string, key: string) => {
 
   if (key === "/about") {
     return pathname === "/about" || pathname === "/contact" || pathname === "/help";
+  }
+
+  if (key === "/blog") {
+    return pathname === "/blog" || pathname.startsWith("/blog/");
   }
 
   if (key === "/b2b") {
@@ -162,6 +169,7 @@ const Navbar: React.FC = () => {
       items.push({ label: "Messages", to: "/messages" });
     }
 
+    items.push({ label: "Blog", to: "/blog" });
     items.push({ label: "About", to: "/about" });
     return items;
   }, [user]);
@@ -446,6 +454,8 @@ const Navbar: React.FC = () => {
                     ? ClipboardList
                     : item.to === "/bulk"
                     ? Building2
+                    : item.to === "/blog"
+                    ? NotebookText
                     : item.label === "Messages"
                     ? MessageSquare
                     : Info;
@@ -500,6 +510,8 @@ const Navbar: React.FC = () => {
                   const Icon =
                     item.label === "Messages"
                       ? MessageSquare
+                      : item.to === "/blog"
+                      ? NotebookText
                       : item.to === "/bulk"
                       ? Building2
                       : Info;
