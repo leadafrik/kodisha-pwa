@@ -8,6 +8,7 @@ import {
   BarChart3,
   Lock,
   FileEdit,
+  NotebookPen,
   RefreshCw,
   Building2,
 } from "lucide-react";
@@ -433,6 +434,29 @@ const AdminDashboard: React.FC = () => {
                   <li>- Listing mix and growth</li>
                   <li>- Report and flag volume</li>
                   <li>- Verification backlog</li>
+                </ul>
+              </Link>
+
+              <Link
+                to="/admin/blog"
+                className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="h-12 w-12 rounded-2xl bg-[#FDF5F3] text-[#A0452E] flex items-center justify-center">
+                    <NotebookPen size={24} />
+                  </div>
+                  <span className="rounded-full bg-[#FDF5F3] px-3 py-1 text-xs font-semibold text-[#A0452E]">
+                    Publish
+                  </span>
+                </div>
+                <h3 className="mt-4 text-xl font-semibold text-slate-900">Blog publishing</h3>
+                <p className="mt-2 text-sm text-slate-600">
+                  Create, edit, and publish Agrisoko articles without touching code.
+                </p>
+                <ul className="mt-4 space-y-2 text-sm text-slate-600">
+                  <li>- Draft and publish posts</li>
+                  <li>- Feature posts on the homepage</li>
+                  <li>- Add market and trust updates</li>
                 </ul>
               </Link>
             </div>

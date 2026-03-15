@@ -9,6 +9,7 @@ import Home from './pages/Home';
 import BrowseListings from './pages/BrowseListings';
 import Login from './pages/Login';
 import AboutUs from './pages/AboutUs';
+import Blog from './pages/Blog';
 import B2B from './pages/B2B';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -57,6 +58,8 @@ const BulkOrderDetails = lazy(() => import('./pages/BulkOrderDetails'));
 const BulkSellerOrders = lazy(() => import('./pages/BulkSellerOrders'));
 const AdminBulkOrders = lazy(() => import('./pages/admin/BulkOrders'));
 const AdminInviteSetup = lazy(() => import('./pages/AdminInviteSetup'));
+const BlogPost = lazy(() => import('./pages/BlogPost'));
+const AdminBlogManagement = lazy(() => import('./pages/admin/BlogManagement'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -86,10 +89,12 @@ const shouldPadForMobileNav = (pathname: string, signedIn: boolean) => {
     pathname === '/b2b' ||
     pathname === '/bulk' ||
     pathname === '/about' ||
+    pathname === '/blog' ||
     pathname === '/profile' ||
     pathname === '/messages' ||
     pathname === '/favorites' ||
     pathname === '/request' ||
+    pathname.startsWith('/blog/') ||
     pathname.startsWith('/browse') ||
     pathname.startsWith('/bulk/') ||
     pathname.startsWith('/seller/') ||
@@ -195,6 +200,8 @@ const AppShell = () => {
               element={<BuyerRequestDetails />}
             />
             <Route path="/about" element={<AboutUs />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/b2b" element={<B2B />} />
             <Route path="/bulk" element={<BulkApplications />} />
             <Route path="/bulk-buyer" element={<Navigate to="/bulk?role=buyer" replace />} />
@@ -235,7 +242,6 @@ const AppShell = () => {
             <Route path="/help" element={<AboutUs />} />
             <Route path="/features" element={<Navigate to="/" replace />} />
             <Route path="/pricing" element={<Navigate to="/" replace />} />
-            <Route path="/blog" element={<Navigate to="/" replace />} />
             <Route path="/careers" element={<Home />} />
             <Route path="/cookies" element={<PrivacyPolicy />} />
             <Route path="/status" element={<Navigate to="/" replace />} />
@@ -300,6 +306,7 @@ const AppShell = () => {
             <Route path="/admin/content-editor" element={<ProtectedRoute><AdminContentEditor /></ProtectedRoute>} />
             <Route path="/admin/listing-management" element={<ProtectedRoute><ListingManagement /></ProtectedRoute>} />
             <Route path="/admin/analytics" element={<ProtectedRoute><AnalyticsReports /></ProtectedRoute>} />
+            <Route path="/admin/blog" element={<ProtectedRoute><AdminBlogManagement /></ProtectedRoute>} />
             <Route path="/admin/bulk-applications" element={<ProtectedRoute><AdminBulkApplications /></ProtectedRoute>} />
             <Route path="/admin/bulk-orders" element={<ProtectedRoute><AdminBulkOrders /></ProtectedRoute>} />
             <Route path="/legal/terms" element={<TermsOfService />} />

@@ -7,7 +7,10 @@ interface Props {
 
 const GoogleMapsLoader: React.FC<Props> = ({ children }) => {
   return (
-    <LoadScript googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY || ""}>
+    <LoadScript
+      googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY || ""}
+      libraries={["places"]}
+    >
       {children}
     </LoadScript>
   );

@@ -4,9 +4,11 @@ import {
   ArrowRight,
   BadgeCheck,
   Beef,
+  Clock3,
   Leaf,
   MapPin,
   MessageCircle,
+  NotebookText,
   Package,
   Search,
   ShieldCheck,
@@ -17,11 +19,12 @@ import { useProperties } from "../contexts/PropertyContext";
 import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
 import { usePageContent } from "../hooks/usePageContent";
 import { PAYMENTS_ENABLED } from "../config/featureFlags";
-import { API_BASE_URL } from "../config/api";
+import { API_BASE_URL, API_ENDPOINTS, apiRequest } from "../config/api";
 import { trackTrafficClick } from "../utils/trafficAnalytics";
 import { handleImageError } from "../utils/imageFallback";
 import { getOptimizedImageUrl } from "../utils/imageOptimization";
 import MarketplaceSupportStrip from "../components/MarketplaceSupportStrip";
+import type { BlogPost } from "../types/blog";
 
 const MILLISECONDS_IN_DAY = 1000 * 60 * 60 * 24;
 const FREE_WINDOW_DAYS = 10;
@@ -180,6 +183,7 @@ const Home: React.FC = () => {
   const { content: heroDescription } = usePageContent("home.hero.description");
   const [buyerDemandSignals, setBuyerDemandSignals] =
     useState<BuyerDemandSignal[]>(buyerDemandFallback);
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -243,6 +247,29 @@ const Home: React.FC = () => {
     };
 
     void loadBuyerDemand();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadBlogPosts = async () => {
+      try {
+        const response = await apiRequest(`${API_ENDPOINTS.blog.list}?limit=3&page=1`);
+        if (!cancelled) {
+          setBlogPosts(Array.isArray(response?.data) ? response.data : []);
+        }
+      } catch {
+        if (!cancelled) {
+          setBlogPosts([]);
+        }
+      }
+    };
+
+    void loadBlogPosts();
 
     return () => {
       cancelled = true;
@@ -405,6 +432,17 @@ const Home: React.FC = () => {
       ? `${daysLeft} day${daysLeft === 1 ? "" : "s"} left at KSh 0`
       : "Free launch window ended"
     : `Free for your first ${FREE_WINDOW_DAYS} days`;
+
+  const formatBlogDate = (value?: string) => {
+    if (!value) return "Draft";
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return "Draft";
+    return parsed.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   return (
     <main className="ui-page-shell pb-28 sm:pb-24">
@@ -703,6 +741,84 @@ const Home: React.FC = () => {
 
         <section className="mx-auto max-w-7xl px-4 py-2 sm:py-3">
           <MarketplaceSupportStrip />
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 py-8 sm:py-10">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="ui-section-kicker">Agrisoko insights</p>
+              <h2 className="mt-2 text-3xl text-stone-900">Market notes and practical guidance</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-stone-600">
+                We use the blog for demand signals, trust guidance, founder updates, and practical
+                field-level notes that help buyers and sellers trade better.
+              </p>
+            </div>
+            <Link to="/blog" className="ui-btn-ghost w-full justify-center md:w-auto">
+              View all insights
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          {blogPosts.length > 0 ? (
+            <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {blogPosts.map((post) => (
+                <Link
+                  key={post._id}
+                  to={`/blog/${post.slug}`}
+                  className="ui-card overflow-hidden transition hover:-translate-y-0.5 hover:shadow-md"
+                >
+                  <div className="aspect-[16/10] bg-stone-100">
+                    {post.coverImage ? (
+                      <img
+                        src={getOptimizedImageUrl(post.coverImage, {
+                          width: 900,
+                          height: 600,
+                          quality: "auto:good",
+                        })}
+                        alt={post.title}
+                        onError={handleImageError}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#FDF5F3] via-[#FAF7F2] to-stone-100">
+                        <NotebookText className="h-10 w-10 text-[#A0452E]" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-5">
+                    <div className="flex flex-wrap gap-2">
+                      {(post.tags || []).slice(0, 2).map((tag) => (
+                        <span
+                          key={tag}
+                          className="rounded-full bg-[#FDF5F3] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#A0452E]"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <h3 className="mt-3 line-clamp-2 text-2xl text-stone-900">{post.title}</h3>
+                    <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-stone-600">
+                      {post.excerpt}
+                    </p>
+                    <div className="mt-4 flex items-center justify-between gap-3 text-sm text-stone-500">
+                      <span>{formatBlogDate(post.publishedAt || post.createdAt)}</span>
+                      <span className="inline-flex items-center gap-1">
+                        <Clock3 className="h-4 w-4" />
+                        {post.readTimeMinutes} min read
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-6 ui-card-soft p-6">
+              <p className="text-sm text-stone-600">
+                The blog section is live. Publish the first article from the admin panel and it
+                will appear here automatically.
+              </p>
+            </div>
+          )}
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-8 sm:py-10">

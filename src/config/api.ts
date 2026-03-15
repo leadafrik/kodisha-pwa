@@ -73,6 +73,17 @@ export const API_ENDPOINTS = {
   config: {
     public: `${API_BASE_URL}/config/public`,
   },
+  blog: {
+    list: `${API_BASE_URL}/blog`,
+    bySlug: (slug: string) => `${API_BASE_URL}/blog/${slug}`,
+    admin: {
+      list: `${API_BASE_URL}/admin/blog`,
+      getById: (id: string) => `${API_BASE_URL}/admin/blog/${id}`,
+      create: `${API_BASE_URL}/admin/blog`,
+      update: (id: string) => `${API_BASE_URL}/admin/blog/${id}`,
+      delete: (id: string) => `${API_BASE_URL}/admin/blog/${id}`,
+    },
+  },
   verification: {
     send: `${API_BASE_URL}/verification/send`,
     verify: `${API_BASE_URL}/verification/verify`,

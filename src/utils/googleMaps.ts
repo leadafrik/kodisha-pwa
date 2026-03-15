@@ -75,6 +75,22 @@ export const matchLocationCandidate = (
 
 export const isGoogleMapsConfigured = () => Boolean(GOOGLE_MAPS_API_KEY);
 
+const ensurePlacesLibrary = async (googleMaps: any) => {
+  if (googleMaps?.maps?.places) {
+    return googleMaps;
+  }
+
+  if (typeof googleMaps?.maps?.importLibrary === "function") {
+    await googleMaps.maps.importLibrary("places");
+  }
+
+  if (googleMaps?.maps?.places) {
+    return googleMaps;
+  }
+
+  throw new Error("Google Maps loaded without Places library.");
+};
+
 export const loadGoogleMapsPlacesApi = async (): Promise<any> => {
   if (typeof window === "undefined") {
     throw new Error("Google Maps is only available in the browser.");
@@ -83,6 +99,10 @@ export const loadGoogleMapsPlacesApi = async (): Promise<any> => {
   const browserWindow = getGoogleMapsWindow();
   if (browserWindow.google?.maps?.places) {
     return browserWindow.google;
+  }
+
+  if (browserWindow.google?.maps) {
+    return ensurePlacesLibrary(browserWindow.google);
   }
 
   if (!GOOGLE_MAPS_API_KEY) {
@@ -98,12 +118,12 @@ export const loadGoogleMapsPlacesApi = async (): Promise<any> => {
       GOOGLE_MAPS_SCRIPT_ID
     ) as HTMLScriptElement | null;
 
-    const handleLoad = () => {
-      if (browserWindow.google?.maps?.places) {
-        resolve(browserWindow.google);
-        return;
+    const handleLoad = async () => {
+      try {
+        resolve(await ensurePlacesLibrary(browserWindow.google));
+      } catch (error) {
+        reject(error);
       }
-      reject(new Error("Google Maps loaded without Places library."));
     };
 
     const handleError = () => reject(new Error("Failed to load Google Maps."));
@@ -176,4 +196,34 @@ export const extractPlaceSelection = (place: any): GooglePlaceSelection => {
           }
         : undefined,
   };
+};
+
+export const reverseGeocodeCoordinates = async (
+  latitude: number,
+  longitude: number
+): Promise<GooglePlaceSelection> => {
+  const googleMaps = await loadGoogleMapsPlacesApi();
+
+  return new Promise((resolve, reject) => {
+    const geocoder = new googleMaps.maps.Geocoder();
+
+    geocoder.geocode(
+      {
+        location: { lat: latitude, lng: longitude },
+        region: "KE",
+      },
+      (results: any, status: any) => {
+        if (status !== "OK" || !Array.isArray(results) || !results.length) {
+          reject(new Error("We could not match your current location to a place in Kenya."));
+          return;
+        }
+
+        const selection = extractPlaceSelection(results[0]);
+        resolve({
+          ...selection,
+          coordinates: { lat: latitude, lng: longitude },
+        });
+      }
+    );
+  });
 };

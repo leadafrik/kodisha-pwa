@@ -69,6 +69,12 @@ const Footer: React.FC = () => {
             >
               Privacy Policy
             </Link>
+            <Link
+              to="/blog"
+              className="text-stone-600 transition hover:text-[#A0452E] hover:underline"
+            >
+              Blog
+            </Link>
             {BULK_FOOTER_LINK_VISIBLE && (
               <Link
                 to="/bulk"

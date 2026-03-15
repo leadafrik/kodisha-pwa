@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import { MapPin } from "lucide-react";
+import { Crosshair, MapPin } from "lucide-react";
 import {
   extractPlaceSelection,
   isGoogleMapsConfigured,
   loadGoogleMapsPlacesApi,
+  reverseGeocodeCoordinates,
   type GooglePlaceSelection,
 } from "../utils/googleMaps";
 
@@ -34,6 +35,7 @@ const GooglePlacesInput: React.FC<GooglePlacesInputProps> = ({
   const onChangeRef = useRef(onChange);
   const onPlaceSelectedRef = useRef(onPlaceSelected);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
 
   useEffect(() => {
     onChangeRef.current = onChange;
@@ -101,9 +103,77 @@ const GooglePlacesInput: React.FC<GooglePlacesInputProps> = ({
     };
   }, [disabled]);
 
+  const handleUseCurrentLocation = () => {
+    if (disabled || isLocating) return;
+
+    if (!navigator.geolocation) {
+      setLoadError("This browser does not support location sharing. Search or use the manual fields below.");
+      return;
+    }
+
+    setIsLocating(true);
+    setLoadError(null);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const selection = await reverseGeocodeCoordinates(
+            position.coords.latitude,
+            position.coords.longitude
+          );
+
+          if (selection.countryCode && selection.countryCode !== "KE") {
+            setLoadError("Please share a location within Kenya.");
+            return;
+          }
+
+          onChangeRef.current(
+            selection.formattedAddress || selection.approximateLocation || ""
+          );
+          onPlaceSelectedRef.current(selection);
+          setLoadError(null);
+        } catch (error: any) {
+          setLoadError(
+            error?.message ||
+              "We could not match your current location. Search or use the manual fields below."
+          );
+        } finally {
+          setIsLocating(false);
+        }
+      },
+      (error) => {
+        const errorMessage =
+          error.code === error.PERMISSION_DENIED
+            ? "Location access was denied. Allow location in your browser to use this shortcut."
+            : error.code === error.POSITION_UNAVAILABLE
+            ? "Your current location is unavailable right now. Search or use the manual fields below."
+            : "Location lookup timed out. Try again or use the manual fields below.";
+
+        setLoadError(errorMessage);
+        setIsLocating(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000,
+      }
+    );
+  };
+
   return (
     <div className={className}>
-      <label className="mb-2 block text-sm font-semibold text-stone-900">{label}</label>
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <label className="block text-sm font-semibold text-stone-900">{label}</label>
+        <button
+          type="button"
+          onClick={handleUseCurrentLocation}
+          disabled={disabled || isLocating}
+          className="inline-flex items-center gap-2 rounded-full border border-stone-200 px-3 py-1.5 text-xs font-semibold text-stone-700 transition hover:border-stone-300 hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <Crosshair className="h-3.5 w-3.5" />
+          {isLocating ? "Getting location..." : "Use my location"}
+        </button>
+      </div>
       <div className="relative">
         <MapPin className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-stone-400" />
         <input
