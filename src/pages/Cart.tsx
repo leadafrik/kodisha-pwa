@@ -6,6 +6,7 @@ import { useAuth } from "../contexts/AuthContext";
 import {
   MARKETPLACE_DELIVERY_FEE,
   MARKETPLACE_ESTIMATED_DELIVERY_DAYS,
+  MARKETPLACE_MPESA_MERCHANT_NAME,
   MARKETPLACE_MPESA_TILL_NUMBER,
   MARKETPLACE_PLATFORM_FEE,
   MARKETPLACE_SUPPORTED_DELIVERY_COUNTIES,
@@ -172,6 +173,7 @@ const Cart: React.FC = () => {
                 <div className="ui-accent-panel mt-4 p-4 text-sm text-stone-700">
                   <p className="font-semibold text-[#8B3525]">Pay to Agrisoko till</p>
                   <p className="mt-2">Till number: <span className="font-semibold">{MARKETPLACE_MPESA_TILL_NUMBER}</span></p>
+                  <p className="mt-1">Merchant name: <span className="font-semibold">{MARKETPLACE_MPESA_MERCHANT_NAME}</span></p>
                   <p className="mt-2 text-xs text-stone-600">
                     After payment, enter the M-Pesa number you used so admin can match it against the till records and timestamp.
                   </p>
@@ -211,9 +213,10 @@ const Cart: React.FC = () => {
                 <ol className="mt-3 space-y-2">
                   <li>1. Confirm the products and quantities you want.</li>
                   <li>2. Move to checkout and enter the delivery location.</li>
-                  <li>3. Pay to the Agrisoko till and tell us which M-Pesa number you used.</li>
-                  <li>4. Admin reviews your payment against the till records and confirms the order.</li>
-                  <li>5. Delivery is coordinated and tracked to completion.</li>
+                  <li>3. On M-PESA select Lipa na M-PESA, then Buy Goods and Services.</li>
+                  <li>4. Enter till {MARKETPLACE_MPESA_TILL_NUMBER} and confirm merchant name {MARKETPLACE_MPESA_MERCHANT_NAME}.</li>
+                  <li>5. Tell us which M-Pesa number you used so admin can verify the payment.</li>
+                  <li>6. Delivery is coordinated and tracked to completion.</li>
                 </ol>
               </div>
             </div>

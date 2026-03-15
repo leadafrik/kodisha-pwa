@@ -5,6 +5,7 @@ import { useAuth } from "../contexts/AuthContext";
 import {
   getMarketplaceOrderById,
   MARKETPLACE_ESTIMATED_DELIVERY_DAYS,
+  MARKETPLACE_MPESA_MERCHANT_NAME,
   ORDER_PAYMENT_STATUS_LABELS,
   ORDER_STATUS_LABELS,
   SELLER_FULFILLMENT_STATUS_LABELS,
@@ -271,6 +272,7 @@ const OrderDetails: React.FC = () => {
                   <div className="ui-accent-panel p-4">
                     <p className="font-semibold text-[#8B3525]">Till reference used</p>
                     <p className="mt-2">Till number: <span className="font-semibold">{order.payment.tillNumber}</span></p>
+                    <p className="mt-1">Merchant name: <span className="font-semibold">{MARKETPLACE_MPESA_MERCHANT_NAME}</span></p>
                   </div>
                 </div>
               </div>

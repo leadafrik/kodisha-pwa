@@ -10,6 +10,7 @@ import {
 } from "../types/orders";
 
 export const MARKETPLACE_MPESA_TILL_NUMBER = "3319295";
+export const MARKETPLACE_MPESA_MERCHANT_NAME = "Purity Valary Akong'ai";
 export const MARKETPLACE_ESTIMATED_DELIVERY_DAYS = 3;
 export const MARKETPLACE_DELIVERY_FEE = 350;
 export const MARKETPLACE_PLATFORM_FEE = 30;

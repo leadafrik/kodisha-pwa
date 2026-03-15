@@ -16,6 +16,7 @@ import {
   getBuyerRequestOfferCheckout,
   MARKETPLACE_DELIVERY_FEE,
   MARKETPLACE_ESTIMATED_DELIVERY_DAYS,
+  MARKETPLACE_MPESA_MERCHANT_NAME,
   MARKETPLACE_MPESA_TILL_NUMBER,
   MARKETPLACE_PLATFORM_FEE,
   MARKETPLACE_SUPPORTED_DELIVERY_COUNTIES,
@@ -495,9 +496,24 @@ const Checkout: React.FC = () => {
               <div className="ui-accent-panel mt-4 p-4 text-sm text-stone-700">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#A0452E]">Till number</p>
                 <p className="mt-2 text-3xl font-bold text-stone-900">{MARKETPLACE_MPESA_TILL_NUMBER}</p>
+                <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Merchant name</p>
+                <p className="mt-1 text-sm font-semibold text-stone-900">{MARKETPLACE_MPESA_MERCHANT_NAME}</p>
                 <p className="mt-3 text-xs text-stone-600">
                   Pay with the same M-Pesa number you entered on this page so we can confirm your order quickly.
                 </p>
+              </div>
+
+              <div className="mt-4 rounded-2xl border border-stone-200 bg-stone-50 px-4 py-4 text-sm text-stone-700">
+                <p className="font-semibold text-stone-900">Steps to pay via M-PESA Till</p>
+                <ol className="mt-3 space-y-2">
+                  <li>1. Go to the M-PESA menu on your phone.</li>
+                  <li>2. Select Lipa na M-PESA.</li>
+                  <li>3. Select Buy Goods and Services.</li>
+                  <li>4. Enter till number {MARKETPLACE_MPESA_TILL_NUMBER}.</li>
+                  <li>5. Enter the amount shown on this page.</li>
+                  <li>6. Enter your M-PESA PIN.</li>
+                  <li>7. Confirm merchant name {MARKETPLACE_MPESA_MERCHANT_NAME} and the amount, then press OK.</li>
+                </ol>
               </div>
 
               {isOfferCheckout && offerSummary && (
@@ -557,9 +573,10 @@ const Checkout: React.FC = () => {
               <p className="font-semibold text-stone-900">What happens next</p>
               <ol className="mt-3 space-y-2">
                 <li>1. Pay to till {MARKETPLACE_MPESA_TILL_NUMBER}.</li>
-                <li>2. Submit this order with the same M-Pesa number you used to pay.</li>
-                <li>3. We email your invoice and verify the payment record.</li>
-                <li>4. The seller is released to start delivery.</li>
+                <li>2. Confirm the merchant name is {MARKETPLACE_MPESA_MERCHANT_NAME}.</li>
+                <li>3. Submit this order with the same M-Pesa number you used to pay.</li>
+                <li>4. We email your invoice and verify the payment record.</li>
+                <li>5. The seller is released to start delivery.</li>
               </ol>
               <p className="mt-4 text-xs text-stone-500">
                 Need help? Reach us at info@leadafrik.com or WhatsApp 0796389192 / 0711454771.
