@@ -743,19 +743,26 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                           )}
                         </div>
 
-                        <button
-                          type="button"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            navigate(`/request/${request._id}`, { state: { request } });
-                          }}
-                          className="mt-auto inline-flex w-full items-center justify-between rounded-xl bg-[#A0452E] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#8B3525]"
-                          style={{ backgroundColor: "#A0452E", color: "#FFFFFF" }}
-                          aria-label={`View details for ${request.title}`}
-                        >
-                          View details
-                          <ArrowRight size={16} />
-                        </button>
+                        <div className="mt-auto border-t border-stone-200 pt-4">
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              navigate(`/request/${request._id}`, { state: { request } });
+                            }}
+                            className="inline-flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#8B3525]"
+                            style={{
+                              backgroundColor: "#A0452E",
+                              color: "#FFFFFF",
+                              border: "1px solid #A0452E",
+                              boxShadow: "0 10px 24px rgba(160, 69, 46, 0.18)",
+                            }}
+                            aria-label={`View details for ${request.title}`}
+                          >
+                            <span>View details</span>
+                            <ArrowRight size={16} />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
