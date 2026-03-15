@@ -670,7 +670,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                   {displayRequests.map((request) => (
                     <div
                       key={request._id}
-                      className="ui-card overflow-hidden transition hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(28,25,23,0.08)]"
+                      className="ui-card flex flex-col overflow-hidden transition hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(28,25,23,0.08)]"
                     >
                       <div className="border-b border-stone-200 bg-[#FAF7F2] px-5 py-4">
                         <div className="flex flex-wrap gap-2">
@@ -692,7 +692,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                       </div>
 
                       <div
-                        className="flex h-full flex-col gap-4 px-5 py-5"
+                        className="flex flex-1 flex-col gap-4 px-5 py-5"
                         onClick={() => onSelectRequest?.(request)}
                       >
                         <p className="line-clamp-3 text-sm leading-relaxed text-stone-600">
