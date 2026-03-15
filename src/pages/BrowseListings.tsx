@@ -1135,6 +1135,9 @@ const BrowseListings: React.FC = () => {
               card.category !== "service" &&
               typeof card.priceValue === "number" &&
               card.priceValue > 0;
+            const normalizedCardPhone = card.contact
+              ? normalizeKenyanPhone(card.contact)
+              : null;
             const engagement = engagementById[card.id] || {
               views: 0,
               saves: 0,
@@ -1290,10 +1293,10 @@ const BrowseListings: React.FC = () => {
                         Add to cart
                       </button>
                     )}
-                    {card.contact && normalizeKenyanPhone(card.contact) && (
+                    {normalizedCardPhone ? (
                       user ? (
                         <a
-                          href={`tel:${normalizeKenyanPhone(card.contact)}`}
+                          href={`tel:${normalizedCardPhone}`}
                           className="ui-btn-ghost flex-1 px-3 py-2.5 text-sm"
                         >
                           Call
@@ -1306,7 +1309,14 @@ const BrowseListings: React.FC = () => {
                           Call
                         </Link>
                       )
-                    )}
+                    ) : !user ? (
+                      <Link
+                        to={`/login?next=${encodeURIComponent(`/listings/${card.id}`)}`}
+                        className="ui-btn-ghost flex-1 px-3 py-2.5 text-sm"
+                      >
+                        Log in to call
+                      </Link>
+                    ) : null}
                   </div>
                 </div>
               </div>

@@ -218,7 +218,11 @@ const FindServices: React.FC = () => {
     const contact =
       service.contact || service.alternativeContact || service.email || "";
     if (!contact) {
-      alert("Provider contact not available.");
+      alert(
+        user
+          ? "Provider contact not available."
+          : "Log in to unlock provider contact details."
+      );
       return;
     }
     if (/^\+?[0-9 ]+$/.test(contact)) {
@@ -526,7 +530,9 @@ const FindServices: React.FC = () => {
 
                       <div className="mt-auto pt-2 flex items-center justify-between">
                         <span className="text-sm font-semibold text-gray-800">
-                          {service.contact || service.email || "Contact on request"}
+                          {service.contact ||
+                            service.email ||
+                            (user ? "Contact on request" : "Log in to unlock contact")}
                         </span>
                         <button
                           type="button"

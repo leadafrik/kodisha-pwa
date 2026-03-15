@@ -746,7 +746,7 @@ export const BrowseBuyerRequests: React.FC<BrowseBuyerRequestsProps> = ({
                         <Link
                           to={`/request/${request._id}`}
                           state={{ request }}
-                          className="ui-btn-primary mt-auto w-full justify-between px-4 py-3 text-sm"
+                          className="mt-auto inline-flex w-full items-center justify-between rounded-xl bg-[#A0452E] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#8B3525]"
                           aria-label={`View details for ${request.title}`}
                         >
                           View details

@@ -136,10 +136,16 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
     setLoading(true);
     setError(null);
     try {
+      const token = await ensureValidAccessToken().catch(() => null);
+      const requestInit: RequestInit = {
+        cache: "no-store",
+        credentials: "include",
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      };
       const [equipmentRes, professionalRes, agrovetRes] = await Promise.all([
-        fetch(API_ENDPOINTS.services.equipment.list, { cache: "no-store" }).catch(() => null),
-        fetch(API_ENDPOINTS.services.professional.list, { cache: "no-store" }).catch(() => null),
-        fetch(API_ENDPOINTS.services.agrovets.list, { cache: "no-store" }).catch(() => null),
+        fetch(API_ENDPOINTS.services.equipment.list, requestInit).catch(() => null),
+        fetch(API_ENDPOINTS.services.professional.list, requestInit).catch(() => null),
+        fetch(API_ENDPOINTS.services.agrovets.list, requestInit).catch(() => null),
       ]);
       const hasAnyServiceResponse = !!equipmentRes?.ok || !!professionalRes?.ok || !!agrovetRes?.ok;
       if (!hasAnyServiceResponse) {
@@ -185,8 +191,11 @@ export const PropertyProvider: React.FC<PropertyProviderProps> = ({
   const refreshProducts = async () => {
     setError(null);
     try {
+      const token = await ensureValidAccessToken().catch(() => null);
       const res = await fetch(API_ENDPOINTS.services.products.list, {
         cache: "no-store",
+        credentials: "include",
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
       if (!res.ok) throw new Error("Failed to fetch products");
       const json = await res.json();

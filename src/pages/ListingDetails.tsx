@@ -155,7 +155,12 @@ const normalizeListingForView = (listing: any) => {
 };
 
 const fetchPublicCollection = async (url: string): Promise<any[]> => {
-  const response = await fetch(url, { cache: "no-store" });
+  const token = getAuthToken();
+  const response = await fetch(url, {
+    cache: "no-store",
+    credentials: "include",
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
   if (!response.ok) return [];
 
   const payload = await response.json().catch(() => ({}));
@@ -522,9 +527,12 @@ const ListingDetails: React.FC = () => {
       const timeout = window.setTimeout(() => controller.abort(), 8000);
       let res: Response;
       try {
+        const token = getAuthToken();
         res = await fetch(`${API_BASE_URL}/unified-listings/${id}`, {
           cache: "no-store",
           signal: controller.signal,
+          credentials: "include",
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         });
       } finally {
         window.clearTimeout(timeout);
@@ -919,6 +927,7 @@ const ListingDetails: React.FC = () => {
   const lastActiveLabel = formatLastActive(owner.lastActive || owner.updatedAt || listing.updatedAt || listing.createdAt);
   const sellerReviews: SellerReview[] = Array.isArray(userRatings?.ratings) ? userRatings.ratings : [];
   const sellerPhone = normalizeKenyanPhone(listing.contact || owner.phone);
+  const hasAuthSession = Boolean(getAuthToken());
   const shareUrl = `${window.location.origin}/l/${listing._id}`;
   const ratingAverage =
     typeof userRatings?.aggregate?.average === "number"
@@ -1580,7 +1589,7 @@ const ListingDetails: React.FC = () => {
 
             <div className="flex gap-2">
               {sellerPhone ? (
-                getAuthToken() ? (
+                hasAuthSession ? (
                   <a
                     href={`tel:${sellerPhone}`}
                     className="ui-btn-primary flex-1 px-3 py-2 text-sm"
@@ -1595,6 +1604,13 @@ const ListingDetails: React.FC = () => {
                     Call
                   </Link>
                 )
+              ) : !hasAuthSession ? (
+                <Link
+                  to={`/login?next=${encodeURIComponent(`/listings/${id}`)}`}
+                  className="ui-btn-primary flex-1 px-3 py-2 text-sm"
+                >
+                  Log in to call
+                </Link>
               ) : (
                 <div className="flex-1 cursor-not-allowed rounded-lg bg-stone-200 px-3 py-2 text-center text-sm font-semibold text-stone-600">
                   Call Unavailable
