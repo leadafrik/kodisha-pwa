@@ -78,6 +78,7 @@ type TrendingCard = {
     views: number;
     saves: number;
     recentInquiries: number;
+    reachOuts: number;
     score: number;
   };
 };
@@ -1118,7 +1119,7 @@ const BrowseListings: React.FC = () => {
                       </span>
                       <span className="inline-flex items-center justify-center gap-1 rounded-lg bg-stone-50 px-2 py-1.5 lg:px-1.5 lg:gap-0.5 whitespace-nowrap text-[9px] lg:text-[8px]">
                         <MessageCircle className="h-3.5 w-3.5 text-stone-400" />
-                        {card.engagement.recentInquiries} reach-outs
+                        {card.engagement.reachOuts} reach-outs
                       </span>
                     </div>
                   </div>
