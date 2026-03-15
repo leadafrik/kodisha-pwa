@@ -79,7 +79,7 @@ const AdminBroadcast: React.FC = () => {
         body: JSON.stringify({ subject, body, audience, extraEmails: extraEmails.join('\n') }),
       });
       const { jobId, total } = data.data;
-      setJob({ jobId, total, sent: 0, failed: 0, status: "running" });
+      setJob({ jobId, total, sent: 0, failed: 0, failedEmails: [], status: "running" });
       startPolling(jobId);
     } catch (err: any) {
       setError(err.message || "Broadcast failed.");
