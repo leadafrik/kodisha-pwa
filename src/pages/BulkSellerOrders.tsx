@@ -109,7 +109,13 @@ const BulkSellerOrders: React.FC = () => {
     getMyBulkAccessStatus()
       .then((status) => {
         if (!active) return;
-        setCanRespond(Boolean(status?.canRespondToB2BDemand || status?.isAdmin));
+        setCanRespond(
+          Boolean(
+            status?.canRespondToB2BDemand ||
+              status?.canOfferToOpenDemand ||
+              status?.isAdmin
+          )
+        );
       })
       .catch((err: any) => {
         if (!active) return;

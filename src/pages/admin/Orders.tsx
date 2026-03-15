@@ -27,6 +27,12 @@ const getStatusTone = (status: string) => {
   return "bg-[#FDF5F3] text-[#A0452E] border-[#F3C9BE]";
 };
 
+const getOrderSourceLabel = (sourceType?: string) => {
+  if (sourceType === "buyer_request_offer") return "Buy request offer";
+  if (sourceType === "bulk_offer") return "Bulk delivery offer";
+  return "Cart checkout";
+};
+
 const paymentStatusOptions = ["", "submitted", "verified", "rejected", "refunded"];
 const orderStatusOptions = ["", "payment_review", "confirmed", "processing", "delivered", "payment_rejected", "cancelled", "refunded"];
 
@@ -259,6 +265,7 @@ const AdminOrders: React.FC = () => {
                       </div>
                       <div className="grid gap-2 text-sm text-stone-600 md:grid-cols-2 xl:grid-cols-3">
                         <p><span className="font-semibold text-stone-900">Invoice:</span> {order.invoice?.invoiceNumber || "Pending"}</p>
+                        <p><span className="font-semibold text-stone-900">Source:</span> {getOrderSourceLabel(order.source?.type)}</p>
                         <p><span className="font-semibold text-stone-900">Buyer:</span> {order.buyerSnapshot.fullName}</p>
                         <p><span className="font-semibold text-stone-900">Contact:</span> {order.contactPhone}</p>
                         <p><span className="font-semibold text-stone-900">Payer phone:</span> {order.payment.payerPhone}</p>

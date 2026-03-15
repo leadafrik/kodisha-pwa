@@ -5,6 +5,7 @@ import {
   MarketplaceOrderPaymentStatus,
   MarketplaceOrderSellerFulfillmentStatus,
   MarketplaceOrderStatus,
+  OfferCheckoutSummary,
   SellerMarketplaceOrder,
 } from "../types/orders";
 
@@ -21,6 +22,54 @@ export const MARKETPLACE_SUPPORTED_DELIVERY_COUNTIES = [
 
 export const checkoutMarketplaceOrder = async (payload: CheckoutPayload) => {
   const response = await apiRequest(API_ENDPOINTS.orders.checkout, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+  return response as {
+    success: boolean;
+    message?: string;
+    data: MarketplaceOrder;
+  };
+};
+
+export const getBuyerRequestOfferCheckout = async (responseId: string) => {
+  const response = await apiRequest(API_ENDPOINTS.orders.requestOfferCheckout.get(responseId));
+  return response as {
+    success: boolean;
+    data: OfferCheckoutSummary;
+  };
+};
+
+export const checkoutBuyerRequestOffer = async (
+  responseId: string,
+  payload: Omit<CheckoutPayload, "items" | "payerPhoneSource">
+) => {
+  const response = await apiRequest(API_ENDPOINTS.orders.requestOfferCheckout.submit(responseId), {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+  return response as {
+    success: boolean;
+    message?: string;
+    data: MarketplaceOrder;
+  };
+};
+
+export const getBulkOfferCheckout = async (orderId: string) => {
+  const response = await apiRequest(API_ENDPOINTS.orders.bulkOfferCheckout.get(orderId));
+  return response as {
+    success: boolean;
+    data: OfferCheckoutSummary;
+  };
+};
+
+export const checkoutBulkOffer = async (
+  orderId: string,
+  payload: Omit<CheckoutPayload, "items" | "payerPhoneSource">
+) => {
+  const response = await apiRequest(API_ENDPOINTS.orders.bulkOfferCheckout.submit(orderId), {
     method: "POST",
     body: JSON.stringify(payload),
   });

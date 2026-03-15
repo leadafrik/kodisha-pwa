@@ -11,6 +11,7 @@ import {
   NotebookPen,
   RefreshCw,
   Building2,
+  Megaphone,
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { adminApiRequest } from "../../config/api";
@@ -482,6 +483,29 @@ const AdminDashboard: React.FC = () => {
                   <li>- Mark processing and delivery completion</li>
                 </ul>
               </Link>
+
+              <Link
+                to="/admin/boosts"
+                className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="h-12 w-12 rounded-2xl bg-[#FDF5F3] text-[#A0452E] flex items-center justify-center">
+                    <Megaphone size={24} />
+                  </div>
+                  <span className="rounded-full bg-[#FDF5F3] px-3 py-1 text-xs font-semibold text-[#A0452E]">
+                    Boosts
+                  </span>
+                </div>
+                <h3 className="mt-4 text-xl font-semibold text-slate-900">Listing boosts</h3>
+                <p className="mt-2 text-sm text-slate-600">
+                  Confirm KES 100 boost payments and activate optional promotion while listings stay free.
+                </p>
+                <ul className="mt-4 space-y-2 text-sm text-slate-600">
+                  <li>- Match payer phone to till records</li>
+                  <li>- Approve, reject, or refund requests</li>
+                  <li>- Turn boosting on only after review</li>
+                </ul>
+              </Link>
             </div>
           </section>
 
@@ -733,6 +757,17 @@ const AdminDashboard: React.FC = () => {
                     className="mt-4 inline-flex items-center text-sm font-semibold text-[#A0452E] hover:text-[#8B3525]"
                   >
                     Open order queue
+                  </Link>
+                </div>
+                <div className="rounded-2xl border border-[#F3C9BE] bg-[#FDF5F3] p-4">
+                  <p className="text-xs uppercase tracking-[0.3em] text-[#A0452E]">Boosts</p>
+                  <p className="mt-2 text-lg font-semibold text-slate-900">Review boosts</p>
+                  <p className="mt-2 text-xs text-slate-600">Approve optional paid promotion while keeping listings free.</p>
+                  <Link
+                    to="/admin/boosts"
+                    className="mt-4 inline-flex items-center text-sm font-semibold text-[#A0452E] hover:text-[#8B3525]"
+                  >
+                    Open boost queue
                   </Link>
                 </div>
               </div>

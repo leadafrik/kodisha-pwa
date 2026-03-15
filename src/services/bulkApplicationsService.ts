@@ -40,6 +40,8 @@ export interface BulkApplicationInput {
 export interface BulkAccessStatusResponse {
   buyerStatus: BulkApplicationStatus;
   sellerStatus: BulkApplicationStatus;
+  hasActiveMarketplaceListings: boolean;
+  canOfferToOpenDemand: boolean;
   canAccessB2BPortal: boolean;
   canPostB2BDemand: boolean;
   canRespondToB2BDemand: boolean;

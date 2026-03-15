@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import GooglePlacesInput from "../components/GooglePlacesInput";
 import { useCart } from "../contexts/CartContext";
 import { useAuth } from "../contexts/AuthContext";
@@ -9,14 +9,18 @@ import {
   kenyaCounties,
 } from "../data/kenyaCounties";
 import {
+  checkoutBulkOffer,
+  checkoutBuyerRequestOffer,
   checkoutMarketplaceOrder,
+  getBulkOfferCheckout,
+  getBuyerRequestOfferCheckout,
   MARKETPLACE_DELIVERY_FEE,
   MARKETPLACE_ESTIMATED_DELIVERY_DAYS,
   MARKETPLACE_MPESA_TILL_NUMBER,
   MARKETPLACE_PLATFORM_FEE,
   MARKETPLACE_SUPPORTED_DELIVERY_COUNTIES,
 } from "../services/ordersService";
-import { CheckoutPayload } from "../types/orders";
+import { CheckoutPayload, OfferCheckoutSummary } from "../types/orders";
 
 const formatCurrency = (value: number) => `KES ${value.toLocaleString()}`;
 const SUPPORTED_COUNTY_HINT =
@@ -26,7 +30,16 @@ const Checkout: React.FC = () => {
   const { user } = useAuth();
   const { items, subtotal, clearCart } = useCart();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const savedAccountPhone = user?.phone?.trim() || "";
+  const checkoutSource = searchParams.get("source");
+  const requestOfferResponseId = searchParams.get("responseId");
+  const bulkOfferOrderId = searchParams.get("orderId");
+  const isRequestOfferCheckout =
+    checkoutSource === "request-offer" && Boolean(requestOfferResponseId);
+  const isBulkOfferCheckout =
+    checkoutSource === "bulk-offer" && Boolean(bulkOfferOrderId);
+  const isOfferCheckout = isRequestOfferCheckout || isBulkOfferCheckout;
   const supportedCountySet = useMemo(
     () => new Set(MARKETPLACE_SUPPORTED_DELIVERY_COUNTIES.map((item) => item.toLowerCase())),
     []
@@ -48,6 +61,8 @@ const Checkout: React.FC = () => {
   const [deliveryNotes, setDeliveryNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [offerSummary, setOfferSummary] = useState<OfferCheckoutSummary | null>(null);
+  const [loadingOfferSummary, setLoadingOfferSummary] = useState(false);
 
   useEffect(() => {
     if (savedAccountPhone) {
@@ -80,6 +95,53 @@ const Checkout: React.FC = () => {
     }
   }, [rememberedAddressKey]);
 
+  useEffect(() => {
+    let active = true;
+
+    const loadOfferSummary = async () => {
+      if (!isOfferCheckout) {
+        setOfferSummary(null);
+        setLoadingOfferSummary(false);
+        return;
+      }
+
+      try {
+        setLoadingOfferSummary(true);
+        setError("");
+        const response = isRequestOfferCheckout && requestOfferResponseId
+          ? await getBuyerRequestOfferCheckout(requestOfferResponseId)
+          : await getBulkOfferCheckout(bulkOfferOrderId || "");
+
+        if (!active) return;
+        const summary = response?.data || null;
+        if (summary?.existingOrderId) {
+          navigate(`/orders/${summary.existingOrderId}`, { replace: true });
+          return;
+        }
+        setOfferSummary(summary);
+      } catch (summaryError: any) {
+        if (!active) return;
+        setOfferSummary(null);
+        setError(summaryError?.message || "Unable to load checkout details.");
+      } finally {
+        if (active) setLoadingOfferSummary(false);
+      }
+    };
+
+    void loadOfferSummary();
+
+    return () => {
+      active = false;
+    };
+  }, [
+    bulkOfferOrderId,
+    isBulkOfferCheckout,
+    isOfferCheckout,
+    isRequestOfferCheckout,
+    navigate,
+    requestOfferResponseId,
+  ]);
+
   const constituencies = useMemo(
     () => (county ? getConstituenciesByCounty(county) : []),
     [county]
@@ -97,14 +159,68 @@ const Checkout: React.FC = () => {
   );
   const deliveryFee = MARKETPLACE_DELIVERY_FEE;
   const platformFee = MARKETPLACE_PLATFORM_FEE;
-  const total = subtotal + deliveryFee + platformFee;
+  const checkoutSubtotal = isOfferCheckout ? offerSummary?.subtotal || 0 : subtotal;
+  const checkoutDeliveryFee = isOfferCheckout ? offerSummary?.deliveryFee || deliveryFee : deliveryFee;
+  const checkoutPlatformFee = isOfferCheckout ? offerSummary?.platformFee || platformFee : platformFee;
+  const total = isOfferCheckout ? offerSummary?.total || 0 : subtotal + deliveryFee + platformFee;
+  const lineItems = isOfferCheckout && offerSummary
+    ? [
+        {
+          listingId: offerSummary.sourceId,
+          title: offerSummary.title,
+          quantity: offerSummary.quantity,
+          unit: offerSummary.unit,
+          sellerName: offerSummary.sellerName,
+          price: offerSummary.subtotal,
+          lineTotal: offerSummary.subtotal,
+        },
+      ]
+    : items.map((item) => ({
+        listingId: item.listingId,
+        title: item.title,
+        quantity: item.quantity,
+        unit: item.unit,
+        sellerName: item.sellerName,
+        price: item.price * item.quantity,
+        lineTotal: item.price * item.quantity,
+      }));
 
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  if (items.length === 0) {
+  if (!isOfferCheckout && items.length === 0) {
     return <Navigate to="/cart" replace />;
+  }
+
+  if (isOfferCheckout && loadingOfferSummary) {
+    return (
+      <div className="ui-page-shell">
+        <div className="mx-auto max-w-4xl px-4 py-12">
+          <div className="ui-card p-8 text-center text-sm text-stone-600">
+            Loading checkout details...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isOfferCheckout && !offerSummary) {
+    return (
+      <div className="ui-page-shell">
+        <div className="mx-auto max-w-4xl px-4 py-12">
+          <div className="ui-card p-8 text-center">
+            <h1 className="text-2xl font-semibold text-stone-900">Unable to open checkout</h1>
+            <p className="mt-3 text-sm text-stone-600">
+              {error || "This accepted offer could not be loaded right now."}
+            </p>
+            <button onClick={() => navigate(-1)} className="ui-btn-primary mt-6 px-4 py-2.5 text-sm">
+              Go back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const handlePlaceSelection = (selection: {
@@ -173,7 +289,21 @@ const Checkout: React.FC = () => {
         },
       };
 
-      const response = await checkoutMarketplaceOrder(payload);
+      const response = isRequestOfferCheckout && requestOfferResponseId
+        ? await checkoutBuyerRequestOffer(requestOfferResponseId, {
+            contactPhone,
+            payerPhone,
+            customerNote: "",
+            delivery: payload.delivery,
+          })
+        : isBulkOfferCheckout && bulkOfferOrderId
+        ? await checkoutBulkOffer(bulkOfferOrderId, {
+            contactPhone,
+            payerPhone,
+            customerNote: "",
+            delivery: payload.delivery,
+          })
+        : await checkoutMarketplaceOrder(payload);
 
       if (typeof window !== "undefined") {
         window.localStorage.setItem(
@@ -188,7 +318,9 @@ const Checkout: React.FC = () => {
         );
       }
 
-      clearCart();
+      if (!isOfferCheckout) {
+        clearCart();
+      }
       navigate(`/orders/${response.data._id}`);
     } catch (submitError: any) {
       setError(submitError?.message || "Unable to submit your order right now.");
@@ -209,8 +341,17 @@ const Checkout: React.FC = () => {
                 Pay to the Agrisoko till, submit the same M-Pesa number here, and we will email you a clean invoice with your order details.
               </p>
             </div>
-            <Link to="/cart" className="ui-btn-ghost px-4 py-2.5">
-              Back to cart
+            <Link
+              to={
+                isRequestOfferCheckout && offerSummary?.requestId
+                  ? `/request/${offerSummary.requestId}`
+                  : isBulkOfferCheckout && offerSummary?.bulkOrderId
+                  ? `/bulk/orders/${offerSummary.bulkOrderId}`
+                  : "/cart"
+              }
+              className="ui-btn-ghost px-4 py-2.5"
+            >
+              {isOfferCheckout ? "Back to offer" : "Back to cart"}
             </Link>
           </div>
         </div>
@@ -359,8 +500,17 @@ const Checkout: React.FC = () => {
                 </p>
               </div>
 
+              {isOfferCheckout && offerSummary && (
+                <div className="mt-4 rounded-2xl border border-stone-200 bg-[#FAF7F2] px-4 py-3 text-sm text-stone-700">
+                  <p className="font-semibold text-stone-900">{offerSummary.heading}</p>
+                  <p className="mt-1">
+                    Buyer protection stays active here as well. If goods are not delivered after verified payment, Agrisoko reviews the case and refunds where due.
+                  </p>
+                </div>
+              )}
+
               <div className="mt-4 space-y-3 text-sm text-stone-700">
-                {items.map((item) => (
+                {lineItems.map((item) => (
                   <div key={item.listingId} className="flex items-start justify-between gap-3 border-b border-stone-100 pb-3 last:border-b-0 last:pb-0">
                     <div>
                       <p className="font-semibold text-stone-900">{item.title}</p>
@@ -368,7 +518,7 @@ const Checkout: React.FC = () => {
                         {item.quantity} {item.unit || "units"} | {item.sellerName || "Seller"}
                       </p>
                     </div>
-                    <p className="font-semibold text-stone-900">{formatCurrency(item.price * item.quantity)}</p>
+                    <p className="font-semibold text-stone-900">{formatCurrency(item.lineTotal)}</p>
                   </div>
                 ))}
               </div>
@@ -376,15 +526,15 @@ const Checkout: React.FC = () => {
               <div className="mt-4 space-y-2 border-t border-stone-200 pt-4 text-sm text-stone-700">
                 <div className="flex items-center justify-between">
                   <span>Items subtotal</span>
-                  <span className="font-semibold text-stone-900">{formatCurrency(subtotal)}</span>
+                  <span className="font-semibold text-stone-900">{formatCurrency(checkoutSubtotal)}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span>Delivery fee</span>
-                  <span className="font-semibold text-stone-900">{formatCurrency(deliveryFee)}</span>
+                  <span className="font-semibold text-stone-900">{formatCurrency(checkoutDeliveryFee)}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span>Agrisoko fee</span>
-                  <span className="font-semibold text-stone-900">{formatCurrency(platformFee)}</span>
+                  <span className="font-semibold text-stone-900">{formatCurrency(checkoutPlatformFee)}</span>
                 </div>
                 <div className="flex items-center justify-between border-t border-stone-200 pt-3 text-base font-semibold text-stone-900">
                   <span>Total payable</span>

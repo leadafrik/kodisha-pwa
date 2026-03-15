@@ -7,6 +7,14 @@ import ProfilePictureUpload from "../components/ProfilePictureUpload";
 import { scheduleAccountDeletion } from "../services/userService";
 import { API_ENDPOINTS, ensureValidAccessToken } from "../config/api";
 import { TRUST_SCORE_VISIBLE } from "../config/featureFlags";
+import {
+  BOOST_PRICE_KES,
+  BOOST_TILL_NUMBER,
+  listMyBoostRequests,
+  submitListingBoostRequest,
+  type BoostListingType,
+  type ListingBoostRequest,
+} from "../services/boostsService";
 
 type ListingsTab = "services" | "agrovets" | "products";
 
@@ -66,6 +74,14 @@ const getListingPath = (item: any, fallbackId?: unknown): string | null => {
   return `/listings/${encodeURIComponent(listingId)}`;
 };
 
+const getBoostStatusFromItem = (item: any) => {
+  if (item?.monetization?.premiumBadge) return true;
+  if (item?.monetization?.boostOption && item.monetization.boostOption !== "none") {
+    return true;
+  }
+  return false;
+};
+
 type ProductEditForm = {
   title: string;
   description: string;
@@ -107,6 +123,16 @@ const Profile: React.FC = () => {
   const [savingProductEdit, setSavingProductEdit] = useState(false);
   const [productEditError, setProductEditError] = useState<string | null>(null);
   const [relistingProductId, setRelistingProductId] = useState<string | null>(null);
+  const [boostRequests, setBoostRequests] = useState<ListingBoostRequest[]>([]);
+  const [boostModal, setBoostModal] = useState<{
+    listingId: string;
+    listingType: BoostListingType;
+    title: string;
+  } | null>(null);
+  const [boostPayerPhone, setBoostPayerPhone] = useState(user?.phone || "");
+  const [boosting, setBoosting] = useState(false);
+  const [boostError, setBoostError] = useState<string | null>(null);
+  const [boostNotice, setBoostNotice] = useState<string | null>(null);
 
   useEffect(() => {
     setUserProfilePicture(user?.profilePicture);
@@ -115,6 +141,27 @@ const Profile: React.FC = () => {
   useEffect(() => {
     refreshUser();
   }, [refreshUser]);
+
+  useEffect(() => {
+    setBoostPayerPhone(user?.phone || "");
+  }, [user?.phone]);
+
+  useEffect(() => {
+    let active = true;
+    listMyBoostRequests()
+      .then((response) => {
+        if (!active) return;
+        setBoostRequests(Array.isArray(response?.data) ? response.data : []);
+      })
+      .catch(() => {
+        if (!active) return;
+        setBoostRequests([]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const safeServiceListings = useMemo(
     () => (Array.isArray(serviceListings) ? serviceListings : []),
@@ -358,12 +405,8 @@ const Profile: React.FC = () => {
     normalizeText(user?.type) === "admin" ||
     normalizeText((user as any)?.userType) === "admin";
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
   const getVerificationBadge = () => {
-    switch (user.verificationStatus) {
+    switch (user?.verificationStatus) {
       case "verified":
         return (
           <span className="rounded-full bg-forest-100 px-3 py-1 text-sm font-semibold text-forest-700">
@@ -386,7 +429,7 @@ const Profile: React.FC = () => {
   };
 
   const getUserTypeLabel = () => {
-    switch (user.type) {
+    switch (user?.type) {
       case "buyer":
         return "Buyer";
       case "seller":
@@ -447,6 +490,57 @@ const Profile: React.FC = () => {
 
   const activeListingGroup = listingGroups[activeTab];
   const visibleItems = activeListingGroup.items.slice(0, 5);
+  const latestBoostByListingId = useMemo(() => {
+    const next = new Map<string, ListingBoostRequest>();
+    boostRequests.forEach((request) => {
+      if (!request?.listingId) return;
+      if (!next.has(request.listingId)) {
+        next.set(request.listingId, request);
+      }
+    });
+    return next;
+  }, [boostRequests]);
+
+  const handleOpenBoostModal = (
+    listingId: string,
+    listingType: BoostListingType,
+    title: string
+  ) => {
+    setBoostError(null);
+    setBoostModal({ listingId, listingType, title });
+  };
+
+  const handleSubmitBoost = async () => {
+    if (!boostModal) return;
+    try {
+      setBoosting(true);
+      setBoostError(null);
+      const response = await submitListingBoostRequest({
+        listingId: boostModal.listingId,
+        listingType: boostModal.listingType,
+        payerPhone: boostPayerPhone,
+      });
+
+      const nextRequest = response?.data as ListingBoostRequest | undefined;
+      if (nextRequest?._id) {
+        setBoostRequests((current) => [
+          nextRequest,
+          ...current.filter((item) => item._id !== nextRequest._id),
+        ]);
+      }
+      setBoostNotice("Boost payment submitted. Admin will review and activate it once confirmed.");
+      setBoostModal(null);
+      window.setTimeout(() => setBoostNotice(null), 3500);
+    } catch (error: any) {
+      setBoostError(error?.message || "Unable to submit boost payment.");
+    } finally {
+      setBoosting(false);
+    }
+  };
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <div className="ui-page-shell">
@@ -644,6 +738,18 @@ const Profile: React.FC = () => {
               </div>
 
               <div className="mt-4 space-y-3">
+                {boostNotice && (
+                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                    {boostNotice}
+                  </div>
+                )}
+                <div className="rounded-xl border border-[#F3C9BE] bg-[#FDF5F3] px-4 py-3 text-sm text-stone-700">
+                  <p className="font-semibold text-stone-900">Listings stay free</p>
+                  <p className="mt-1">
+                    Agrisoko remains free to list. Boosting is optional at KES {BOOST_PRICE_KES} and only goes live after admin confirms your payment.
+                  </p>
+                </div>
+
                 {loading ? (
                   <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
                     Loading listings...
@@ -663,6 +769,12 @@ const Profile: React.FC = () => {
                     const stableListingId = normalizeId(item?._id) || normalizeId(item?.id);
                     const itemKey = stableListingId || `${activeTab}-${index}`;
                     const isProductCard = activeTab === "products";
+                    const boostListingType: BoostListingType =
+                      activeTab === "products"
+                        ? "product"
+                        : activeTab === "agrovets"
+                        ? "agrovet"
+                        : "service";
                     const title = item?.title || item?.name || "Untitled listing";
                     const location =
                       item?.county ||
@@ -672,6 +784,10 @@ const Profile: React.FC = () => {
                     const category = item?.category || item?.type || item?.listingType || "Listing";
                     const price = formatPrice(item?.price);
                     const listingPath = getListingPath(item, stableListingId);
+                    const isBoosted = getBoostStatusFromItem(item);
+                    const latestBoostRequest = stableListingId
+                      ? latestBoostByListingId.get(stableListingId)
+                      : undefined;
 
                     return (
                       <div
@@ -696,6 +812,38 @@ const Profile: React.FC = () => {
                           ) : (
                             <p className="text-sm font-semibold text-slate-500">Listing link unavailable</p>
                           )}
+
+                          {isBoosted ? (
+                            <span className="rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                              Boosted
+                            </span>
+                          ) : latestBoostRequest?.status === "approved" ? (
+                            <span className="rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                              Boost approved
+                            </span>
+                          ) : latestBoostRequest?.status === "submitted" ? (
+                            <span className="rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                              Boost pending review
+                            </span>
+                          ) : latestBoostRequest?.status === "rejected" ? (
+                            <span className="rounded-md border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700">
+                              Boost rejected
+                            </span>
+                          ) : latestBoostRequest?.status === "refunded" ? (
+                            <span className="rounded-md border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-700">
+                              Boost refunded
+                            </span>
+                          ) : stableListingId ? (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleOpenBoostModal(stableListingId, boostListingType, title)
+                              }
+                              className="rounded-md border border-[#F3C9BE] bg-[#FDF5F3] px-2.5 py-1 text-xs font-semibold text-[#A0452E] transition hover:bg-[#FAE9E4]"
+                            >
+                              Boost KES {BOOST_PRICE_KES}
+                            </button>
+                          ) : null}
 
                           {isProductCard && stableListingId && (
                             <>
@@ -739,6 +887,117 @@ const Profile: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {boostModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <button
+                type="button"
+                onClick={() => {
+                  if (!boosting) {
+                    setBoostModal(null);
+                    setBoostError(null);
+                  }
+                }}
+                className="absolute inset-0 bg-slate-900/50"
+                aria-label="Close boost dialog"
+              />
+              <div className="relative z-10 w-full max-w-lg rounded-[28px] border border-stone-200 bg-white p-5 shadow-2xl">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="ui-section-kicker">Optional listing boost</p>
+                    <h3 className="mt-2 text-2xl font-bold text-slate-900">{boostModal.title}</h3>
+                    <p className="mt-2 text-sm text-stone-600">
+                      Listings stay free on Agrisoko. If you want extra visibility, pay KES{" "}
+                      {BOOST_PRICE_KES.toLocaleString()} to till {BOOST_TILL_NUMBER} and submit the
+                      M-Pesa number you will use so admin can confirm the payment and activate the
+                      boost.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!boosting) {
+                        setBoostModal(null);
+                        setBoostError(null);
+                      }
+                    }}
+                    disabled={boosting}
+                    className="rounded-md border border-slate-300 px-2.5 py-1 text-sm font-semibold text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Close
+                  </button>
+                </div>
+
+                <div className="mt-5 rounded-2xl border border-[#F3C9BE] bg-[#FDF5F3] px-4 py-4 text-sm text-stone-700">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#A0452E]">
+                        Pay to Agrisoko till
+                      </p>
+                      <p className="mt-2 text-2xl font-bold text-stone-900">{BOOST_TILL_NUMBER}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
+                        Amount
+                      </p>
+                      <p className="mt-2 text-lg font-bold text-[#A0452E]">
+                        KES {BOOST_PRICE_KES.toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <label className="mt-5 block">
+                  <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-600">
+                    M-Pesa number you will use to pay
+                  </span>
+                  <input
+                    type="tel"
+                    value={boostPayerPhone}
+                    onChange={(event) => setBoostPayerPhone(event.target.value)}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                    placeholder="07XXXXXXXX"
+                    disabled={boosting}
+                  />
+                </label>
+
+                <p className="mt-3 text-xs leading-5 text-stone-500">
+                  Once the payment is matched in admin, your boost goes live. If admin has not
+                  reviewed it yet, the listing remains free and live as normal.
+                </p>
+
+                {boostError && (
+                  <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
+                    {boostError}
+                  </div>
+                )}
+
+                <div className="mt-5 flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!boosting) {
+                        setBoostModal(null);
+                        setBoostError(null);
+                      }
+                    }}
+                    disabled={boosting}
+                    className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void handleSubmitBoost()}
+                    disabled={boosting}
+                    className="ui-btn-primary px-4 py-2"
+                  >
+                    {boosting ? "Submitting..." : "I have paid - submit boost"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {editingProduct && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

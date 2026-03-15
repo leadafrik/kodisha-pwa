@@ -14,6 +14,11 @@ import {
 import { MarketplaceOrder } from "../types/orders";
 
 const formatCurrency = (value: number) => `KES ${value.toLocaleString()}`;
+const getOrderSourceLabel = (sourceType?: string) => {
+  if (sourceType === "buyer_request_offer") return "Buy request offer";
+  if (sourceType === "bulk_offer") return "Bulk delivery offer";
+  return "Cart checkout";
+};
 
 const getStatusTone = (status: string) => {
   if (status === "delivered" || status === "verified" || status === "confirmed") {
@@ -147,10 +152,16 @@ const OrderDetails: React.FC = () => {
                     {ORDER_PAYMENT_STATUS_LABELS[order.paymentStatus]}
                   </span>
                 </div>
-                <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Invoice</p>
                     <p className="mt-1 text-sm font-semibold text-stone-900">{order.invoice?.invoiceNumber || "Pending"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Source</p>
+                    <p className="mt-1 text-sm font-semibold text-stone-900">
+                      {getOrderSourceLabel(order.source?.type)}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Total</p>

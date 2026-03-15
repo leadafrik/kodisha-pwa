@@ -128,7 +128,9 @@ const BulkApplications: React.FC = () => {
   const roleReviewNote =
     role === "buyer" ? status?.reviewNotes?.buyer : status?.reviewNotes?.seller;
   const canPostB2B = Boolean(status?.canPostB2BDemand || status?.isAdmin);
-  const canRespondB2B = Boolean(status?.canRespondToB2BDemand || status?.isAdmin);
+  const canRespondB2B = Boolean(
+    status?.canRespondToB2BDemand || status?.canOfferToOpenDemand || status?.isAdmin
+  );
   const constituencyOptions = useMemo(
     () => (form.address.county ? getConstituenciesByCounty(form.address.county) : []),
     [form.address.county]

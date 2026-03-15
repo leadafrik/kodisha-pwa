@@ -84,7 +84,7 @@ const Orders: React.FC = () => {
             </div>
             <h2 className="mt-4 text-xl font-semibold text-stone-900">No checkout orders yet</h2>
             <p className="mt-2 text-sm text-stone-600">
-              When you pay through the cart checkout, your orders will appear here with manual verification and delivery tracking.
+              Orders from cart checkout, accepted demand offers, and bulk delivery payments appear here with manual verification and delivery tracking.
             </p>
             <Link to="/browse" className="ui-btn-primary mt-5 px-5 py-2.5">
               Start shopping

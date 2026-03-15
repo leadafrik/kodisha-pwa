@@ -124,6 +124,7 @@ export interface BulkOrder {
   status: BulkOrderStatus;
   acceptedBidId?: string;
   awardedAt?: string;
+  checkoutOrderId?: string;
   sellerAcceptedAt?: string;
   sellerAcceptanceNote?: string;
   buyerMarkedCompleteAt?: string;

@@ -15,6 +15,12 @@ type AdminBulkOrder = {
   deliveryLocation?: { county?: string };
   budget?: { min?: number; max?: number };
   buyerId?: { fullName?: string; email?: string; phone?: string };
+  acceptedBid?: {
+    _id: string;
+    quoteAmount?: number;
+    deliveryDate?: string;
+    sellerId?: { fullName?: string; name?: string; email?: string; phone?: string };
+  } | null;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -189,6 +195,28 @@ const BulkOrdersAdmin: React.FC = () => {
                       {order.budget?.max ? `to KES ${order.budget.max.toLocaleString()}` : ""}
                     </span>
                   </div>
+                  {order.acceptedBid?.sellerId && (
+                    <div className="mt-3 rounded-2xl border border-[#F3C9BE] bg-[#FDF5F3] px-4 py-3 text-sm text-stone-700">
+                      <p className="font-semibold text-stone-900">
+                        Fulfilling seller:{" "}
+                        {order.acceptedBid.sellerId.fullName ||
+                          order.acceptedBid.sellerId.name ||
+                          "Seller"}
+                      </p>
+                      <p className="mt-1">
+                        Quote:{" "}
+                        {typeof order.acceptedBid.quoteAmount === "number"
+                          ? `KES ${order.acceptedBid.quoteAmount.toLocaleString()}`
+                          : "-"}
+                      </p>
+                      <p className="mt-1">
+                        Delivery date:{" "}
+                        {order.acceptedBid.deliveryDate
+                          ? new Date(order.acceptedBid.deliveryDate).toLocaleDateString()
+                          : "Flexible"}
+                      </p>
+                    </div>
+                  )}
                   <div className="mt-4">
                     <Link
                       to={`/bulk/orders/${order._id}`}

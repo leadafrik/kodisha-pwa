@@ -61,6 +61,7 @@ const AdminBulkOrders = lazy(() => import('./pages/admin/BulkOrders'));
 const AdminInviteSetup = lazy(() => import('./pages/AdminInviteSetup'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
 const AdminBlogManagement = lazy(() => import('./pages/admin/BlogManagement'));
+const AdminBoostRequests = lazy(() => import('./pages/admin/BoostRequests'));
 const Cart = lazy(() => import('./pages/Cart'));
 const Checkout = lazy(() => import('./pages/Checkout'));
 const Orders = lazy(() => import('./pages/Orders'));
@@ -353,6 +354,7 @@ const AppShell = () => {
             <Route path="/admin/listing-management" element={<ProtectedRoute><ListingManagement /></ProtectedRoute>} />
             <Route path="/admin/analytics" element={<ProtectedRoute><AnalyticsReports /></ProtectedRoute>} />
             <Route path="/admin/blog" element={<ProtectedRoute><AdminBlogManagement /></ProtectedRoute>} />
+            <Route path="/admin/boosts" element={<ProtectedRoute><AdminBoostRequests /></ProtectedRoute>} />
             <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
             <Route path="/admin/bulk-applications" element={<ProtectedRoute><AdminBulkApplications /></ProtectedRoute>} />
             <Route path="/admin/bulk-orders" element={<ProtectedRoute><AdminBulkOrders /></ProtectedRoute>} />

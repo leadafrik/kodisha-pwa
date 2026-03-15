@@ -137,6 +137,17 @@ export const API_ENDPOINTS = {
   raffle: {
     me: `${API_BASE_URL}/raffle/me`,
   },
+  buyerRequests: {
+    list: `${API_BASE_URL}/buyer-requests`,
+    byId: (id: string) => `${API_BASE_URL}/buyer-requests/${id}`,
+    create: `${API_BASE_URL}/buyer-requests`,
+    respond: (id: string) => `${API_BASE_URL}/buyer-requests/${id}/respond`,
+    deliveryOffers: {
+      create: (id: string) => `${API_BASE_URL}/buyer-requests/${id}/delivery-offers`,
+      accept: (requestId: string, responseId: string) =>
+        `${API_BASE_URL}/buyer-requests/${requestId}/offers/${responseId}/accept`,
+    },
+  },
   bulkApplications: {
     apply: `${API_BASE_URL}/bulk-applications/apply`,
     myStatus: `${API_BASE_URL}/bulk-applications/me/status`,
@@ -168,6 +179,14 @@ export const API_ENDPOINTS = {
   },
   orders: {
     checkout: `${API_BASE_URL}/orders/checkout`,
+    requestOfferCheckout: {
+      get: (responseId: string) => `${API_BASE_URL}/orders/request-offers/${responseId}/checkout`,
+      submit: (responseId: string) => `${API_BASE_URL}/orders/request-offers/${responseId}/checkout`,
+    },
+    bulkOfferCheckout: {
+      get: (orderId: string) => `${API_BASE_URL}/orders/bulk-orders/${orderId}/checkout`,
+      submit: (orderId: string) => `${API_BASE_URL}/orders/bulk-orders/${orderId}/checkout`,
+    },
     my: `${API_BASE_URL}/orders/my`,
     seller: {
       list: `${API_BASE_URL}/orders/seller/my`,
@@ -180,6 +199,14 @@ export const API_ENDPOINTS = {
       byId: (id: string) => `${API_BASE_URL}/admin/orders/${id}`,
       payment: (id: string) => `${API_BASE_URL}/admin/orders/${id}/payment`,
       status: (id: string) => `${API_BASE_URL}/admin/orders/${id}/status`,
+    },
+  },
+  boosts: {
+    create: `${API_BASE_URL}/boosts`,
+    my: `${API_BASE_URL}/boosts/my`,
+    admin: {
+      list: `${API_BASE_URL}/admin/boosts`,
+      review: (id: string) => `${API_BASE_URL}/admin/boosts/${id}/review`,
     },
   },
   messages: {

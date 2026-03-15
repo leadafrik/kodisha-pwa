@@ -1,11 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import {
   BulkOrderInvoice,
   BulkOrder,
   BulkOrderBid,
-  acceptAwardedBulkOrder,
   acceptBulkOrderBid,
   closeBulkOrder,
   getBulkOrderDetails,
@@ -13,6 +12,7 @@ import {
   placeBulkOrderBid,
   rejectBulkOrderBid,
 } from "../services/bulkOrdersService";
+import DeliveryOfferModal from "../components/DeliveryOfferModal";
 
 interface BulkOrderDetailsPayload {
   order: BulkOrder;
@@ -61,15 +61,15 @@ const completionMeta = (status?: string) => {
 
 const BulkOrderDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [payload, setPayload] = useState<BulkOrderDetailsPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [submittingBid, setSubmittingBid] = useState(false);
-  const [quoteAmount, setQuoteAmount] = useState("");
-  const [deliveryDate, setDeliveryDate] = useState("");
-  const [note, setNote] = useState("");
+  const [offerModalOpen, setOfferModalOpen] = useState(false);
+  const [acceptingBidId, setAcceptingBidId] = useState<string | null>(null);
 
   const order = payload?.order || null;
   const isOwner = Boolean(payload?.isOwner);
@@ -88,14 +88,6 @@ const BulkOrderDetails: React.FC = () => {
         order.completionStatus !== "completed" &&
         order.completionStatus !== "presumed_complete"
     );
-  const canAcceptAwardedOrder =
-    Boolean(
-      !isOwner &&
-        order?.status === "awarded" &&
-        myBid?.status === "accepted" &&
-        !order?.sellerAcceptedAt
-    );
-
   const budgetLabel = useMemo(() => {
     if (!order?.budget) return "Not set";
     if (typeof order.budget.min === "number" && typeof order.budget.max === "number") {
@@ -125,34 +117,26 @@ const BulkOrderDetails: React.FC = () => {
     loadDetails();
   }, [loadDetails]);
 
-  const handlePlaceBid = async (event: React.FormEvent) => {
-    event.preventDefault();
+  const handlePlaceBid = async (payload: {
+    quoteAmount: number;
+    deliveryDate: string;
+    message: string;
+  }) => {
     if (!id) return;
-    const amount = Number(quoteAmount);
-    if (!Number.isFinite(amount) || amount <= 0) {
-      setError("Quote amount must be greater than zero.");
-      return;
-    }
-    if (!deliveryDate) {
-      setError("Delivery date is required.");
-      return;
-    }
     try {
       setSubmittingBid(true);
       setError("");
       setNotice("");
       await placeBulkOrderBid(id, {
-        quoteAmount: amount,
-        deliveryDate,
-        note: note.trim() || undefined,
+        quoteAmount: payload.quoteAmount,
+        deliveryDate: payload.deliveryDate,
+        note: payload.message.trim() || undefined,
       });
-      setNotice("Bid submitted successfully.");
-      setQuoteAmount("");
-      setDeliveryDate("");
-      setNote("");
+      setOfferModalOpen(false);
+      setNotice("Delivery offer submitted successfully.");
       await loadDetails();
     } catch (err: any) {
-      setError(err?.message || "Unable to submit bid.");
+      setError(err?.message || "Unable to submit delivery offer.");
     } finally {
       setSubmittingBid(false);
     }
@@ -160,18 +144,16 @@ const BulkOrderDetails: React.FC = () => {
 
   const handleAcceptBid = async (bidId: string) => {
     if (!id) return;
-    const reason = window.prompt("Reason for acceptance (optional):") || undefined;
-    const rejectReason =
-      window.prompt("Reason for non-selected bids (optional):") ||
-      "Another bid was accepted.";
     try {
+      setAcceptingBidId(bidId);
       setError("");
       setNotice("");
-      await acceptBulkOrderBid(id, bidId, reason, rejectReason);
-      setNotice("Bid accepted and order awarded.");
-      await loadDetails();
+      await acceptBulkOrderBid(id, bidId, "Offer accepted for payment.", "Another offer was selected.");
+      navigate(`/checkout?source=bulk-offer&orderId=${encodeURIComponent(id)}`);
     } catch (err: any) {
       setError(err?.message || "Unable to accept bid.");
+    } finally {
+      setAcceptingBidId(null);
     }
   };
 
@@ -202,20 +184,6 @@ const BulkOrderDetails: React.FC = () => {
       await loadDetails();
     } catch (err: any) {
       setError(err?.message || "Unable to update order status.");
-    }
-  };
-
-  const handleAcceptAwardedOrder = async () => {
-    if (!id) return;
-    const note = window.prompt("Optional note before accepting this order:");
-    try {
-      setError("");
-      setNotice("");
-      await acceptAwardedBulkOrder(id, note || undefined);
-      setNotice("Order accepted. Invoice has been issued and emailed as PDF.");
-      await loadDetails();
-    } catch (err: any) {
-      setError(err?.message || "Unable to accept awarded order.");
     }
   };
 
@@ -365,6 +333,26 @@ const BulkOrderDetails: React.FC = () => {
                 </div>
               )}
 
+              {order.checkoutOrderId && (
+                <div className="mt-4 rounded-xl border border-[#F3C9BE] bg-[#FDF5F3] p-4 text-sm text-stone-700">
+                  <p className="font-semibold text-stone-900">Payment order already opened</p>
+                  <p className="mt-2">
+                    The accepted delivery offer is already in checkout with Agrisoko money-back guarantee cover.
+                  </p>
+                  {isOwner && (
+                    <div className="mt-4">
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/orders/${order.checkoutOrderId}`)}
+                        className="ui-btn-primary px-4 py-2 text-sm"
+                      >
+                        Open payment order
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="mt-4 rounded-xl border border-stone-200 bg-[#FAF7F2] p-3 text-sm text-stone-700">
                 <p>
                   <strong>Buyer confirmation:</strong>{" "}
@@ -418,40 +406,17 @@ const BulkOrderDetails: React.FC = () => {
 
             {canBid && (
               <section className="ui-card p-6">
-                <h2 className="text-lg font-semibold text-stone-900">Place your bid</h2>
+                <h2 className="text-lg font-semibold text-stone-900">Offer delivery</h2>
                 <p className="mt-1 text-sm text-stone-600">
-                  Quote total amount (include delivery) and proposed delivery date.
+                  Send one clear delivery offer with your total price, delivery date, and notes.
                 </p>
-                <form onSubmit={handlePlaceBid} className="mt-4 grid gap-3 md:grid-cols-3">
-                  <input
-                    type="number"
-                    min={1}
-                    value={quoteAmount}
-                    onChange={(event) => setQuoteAmount(event.target.value)}
-                    placeholder="Quote amount (KES)"
-                    className="ui-input"
-                  />
-                  <input
-                    type="date"
-                    value={deliveryDate}
-                    onChange={(event) => setDeliveryDate(event.target.value)}
-                    className="ui-input"
-                  />
-                  <button
-                    type="submit"
-                    disabled={submittingBid}
-                    className="ui-btn-primary px-4 py-3 text-sm disabled:bg-stone-300"
-                  >
-                    {submittingBid ? "Submitting..." : "Submit bid"}
-                  </button>
-                  <textarea
-                    value={note}
-                    onChange={(event) => setNote(event.target.value)}
-                    placeholder="Optional note"
-                    className="ui-input md:col-span-3"
-                    rows={3}
-                  />
-                </form>
+                <button
+                  type="button"
+                  onClick={() => setOfferModalOpen(true)}
+                  className="ui-btn-primary mt-4 px-4 py-3 text-sm"
+                >
+                  I can deliver
+                </button>
               </section>
             )}
 
@@ -469,16 +434,10 @@ const BulkOrderDetails: React.FC = () => {
                     <p><strong>Buyer note:</strong> {payload.myBid.buyerDecisionReason}</p>
                   )}
                 </div>
-                {canAcceptAwardedOrder && (
-                  <div className="mt-4">
-                    <button
-                      type="button"
-                      onClick={handleAcceptAwardedOrder}
-                      className="ui-btn-primary px-4 py-2 text-sm"
-                    >
-                      Accept order and issue invoice
-                    </button>
-                  </div>
+                {payload.myBid.status === "accepted" && !order?.checkoutOrderId && (
+                  <p className="mt-4 text-sm text-[#A0452E]">
+                    The buyer selected your offer. Agrisoko is waiting for payment before delivery starts.
+                  </p>
                 )}
                 {canMarkComplete && order?.sellerAcceptedAt && (
                   <div className="mt-3">
@@ -535,9 +494,12 @@ const BulkOrderDetails: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => handleAcceptBid(bid._id)}
+                              disabled={acceptingBidId === bid._id}
                               className="ui-btn-primary px-3 py-1.5 text-xs"
                             >
-                              Accept bid
+                              {acceptingBidId === bid._id
+                                ? "Opening payment..."
+                                : "Accept and proceed to payment"}
                             </button>
                             <button
                               type="button"
@@ -559,6 +521,15 @@ const BulkOrderDetails: React.FC = () => {
           </>
         )}
       </div>
+      <DeliveryOfferModal
+        open={offerModalOpen}
+        title="Send your delivery offer"
+        description="Quote the full amount you want the buyer to pay, set your delivery date, and explain how you will fulfill this bulk demand."
+        submitLabel="Send delivery offer"
+        submitting={submittingBid}
+        onClose={() => setOfferModalOpen(false)}
+        onSubmit={handlePlaceBid}
+      />
     </main>
   );
 };

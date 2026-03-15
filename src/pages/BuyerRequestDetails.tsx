@@ -5,6 +5,11 @@ import { API_BASE_URL, ensureValidAccessToken } from "../config/api";
 import * as Sentry from "@sentry/react";
 import { handleImageError } from "../utils/imageFallback";
 import { normalizeKenyanPhone } from "../utils/phone";
+import DeliveryOfferModal from "../components/DeliveryOfferModal";
+import {
+  acceptBuyerRequestDeliveryOffer,
+  submitBuyerRequestDeliveryOffer,
+} from "../services/buyerRequestsService";
 
 interface BuyerRequest {
   _id: string;
@@ -37,12 +42,22 @@ interface BuyerRequest {
   createdAt: string;
   updatedAt: string;
   canViewDirectContact?: boolean;
+  canSendDeliveryOffer?: boolean;
   isOwner?: boolean;
+  acceptedResponseId?: string;
+  checkoutOrderId?: string;
   responses?: Array<{
     _id: string;
     sellerId: string;
     sellerName: string;
     message: string;
+    responseType?: "message" | "delivery_offer";
+    quoteAmount?: number;
+    deliveryDate?: string;
+    offerStatus?: "pending" | "accepted" | "rejected";
+    checkoutOrderId?: string;
+    acceptedAt?: string;
+    rejectedAt?: string;
     createdAt: string;
   }>;
 }
@@ -74,6 +89,11 @@ const formatBudgetRange = (budget?: { min?: number; max?: number; currency?: str
   return `${currency} ${min} - ${max}`;
 };
 
+const formatCurrency = (value?: number) =>
+  typeof value === "number" && Number.isFinite(value)
+    ? `KES ${value.toLocaleString()}`
+    : "Negotiable";
+
 const BuyerRequestDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -82,11 +102,12 @@ const BuyerRequestDetails: React.FC = () => {
   const [request, setRequest] = useState<BuyerRequest | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [replyMessage, setReplyMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [markingFulfilled, setMarkingFulfilled] = useState(false);
   const [shareFeedback, setShareFeedback] = useState("");
+  const [offerModalOpen, setOfferModalOpen] = useState(false);
+  const [acceptingOfferId, setAcceptingOfferId] = useState<string | null>(null);
 
   const initialRequest = (location.state as { request?: BuyerRequest } | null)?.request;
   const getAuthToken = async (): Promise<string | null> => ensureValidAccessToken();
@@ -98,8 +119,6 @@ const BuyerRequestDetails: React.FC = () => {
 
         if (initialRequest) {
           setRequest(initialRequest);
-          setLoading(false);
-          return;
         }
 
         if (!id) {
@@ -153,14 +172,11 @@ const BuyerRequestDetails: React.FC = () => {
     }
   };
 
-  const handleReplySubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!replyMessage.trim()) {
-      setError("Please enter a message");
-      return;
-    }
-
+  const handleDeliveryOfferSubmit = async (payload: {
+    quoteAmount: number;
+    deliveryDate: string;
+    message: string;
+  }) => {
     if (!request?._id) {
       setError("Request ID is missing");
       return;
@@ -169,37 +185,36 @@ const BuyerRequestDetails: React.FC = () => {
     try {
       setSubmitting(true);
       setError(null);
-      const token = await getAuthToken();
-      if (!token) {
-        throw new Error("Please log in again to respond.");
-      }
-
-      const response = await fetch(`${API_BASE_URL}/buyer-requests/${request._id}/respond`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          message: replyMessage.trim(),
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `Failed to submit reply: ${response.statusText}`);
-      }
-
+      await submitBuyerRequestDeliveryOffer(request._id, payload);
+      setOfferModalOpen(false);
       setSubmitted(true);
-      setReplyMessage("");
       window.setTimeout(() => setSubmitted(false), 3000);
       await refreshRequest(request._id);
     } catch (err) {
-      console.error("Error submitting reply:", err);
-      setError(err instanceof Error ? err.message : "Failed to submit reply");
+      console.error("Error submitting delivery offer:", err);
+      setError(err instanceof Error ? err.message : "Failed to submit delivery offer");
       Sentry.captureException(err);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleAcceptOffer = async (responseId: string) => {
+    if (!request?._id) return;
+
+    try {
+      setAcceptingOfferId(responseId);
+      setError(null);
+      const response = await acceptBuyerRequestDeliveryOffer(request._id, responseId);
+      const checkoutResponseId =
+        response?.data?.acceptedResponseId || response?.data?.response?._id || responseId;
+      navigate(`/checkout?source=request-offer&responseId=${encodeURIComponent(checkoutResponseId)}`);
+    } catch (err) {
+      console.error("Error accepting delivery offer:", err);
+      setError(err instanceof Error ? err.message : "Failed to accept delivery offer");
+      Sentry.captureException(err);
+    } finally {
+      setAcceptingOfferId(null);
     }
   };
 
@@ -277,6 +292,12 @@ const BuyerRequestDetails: React.FC = () => {
   const directContactPhone = normalizeKenyanPhone(request.contactPhone || request.userId.phone);
   const signInNext = `/login?next=${encodeURIComponent(`/request/${request._id}`)}`;
   const shareUrl = `${window.location.origin}/r/${request._id}`;
+  const deliveryOffers = (request.responses || []).filter(
+    (item) => item.responseType === "delivery_offer"
+  );
+  const messageResponses = (request.responses || []).filter(
+    (item) => item.responseType !== "delivery_offer"
+  );
 
   const handleShareRequest = async () => {
     try {
@@ -406,7 +427,7 @@ const BuyerRequestDetails: React.FC = () => {
                 </div>
               ) : (
                 <div className="mt-4 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-600">
-                  Buyer phone is not available yet. Use the reply form to connect.
+                  Buyer phone is not available yet. Use the delivery offer flow to connect.
                 </div>
               )}
             </section>
@@ -428,12 +449,119 @@ const BuyerRequestDetails: React.FC = () => {
               </section>
             )}
 
-            {request.responses && request.responses.length > 0 && (
+            {request.checkoutOrderId && (
+              <section className="ui-success-panel p-5 text-sm text-forest-700">
+                <p className="font-semibold">Payment is now attached to this request.</p>
+                <p className="mt-2">
+                  The accepted delivery offer is already in checkout with money-back guarantee cover.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => navigate(`/orders/${request.checkoutOrderId}`)}
+                  className="ui-btn-primary mt-4 px-4 py-2 text-sm"
+                >
+                  Open payment order
+                </button>
+              </section>
+            )}
+
+            {deliveryOffers.length > 0 && (
               <section className="ui-card p-5">
-                <p className="ui-section-kicker">Responses</p>
-                <h2 className="mt-2 text-xl font-semibold text-stone-900">Seller replies ({request.responses.length})</h2>
+                <p className="ui-section-kicker">Delivery offers</p>
+                <h2 className="mt-2 text-xl font-semibold text-stone-900">
+                  Suppliers ready to deliver ({deliveryOffers.length})
+                </h2>
                 <div className="mt-4 space-y-3">
-                  {request.responses.map((response) => (
+                  {deliveryOffers.map((response) => (
+                    <div key={response._id} className="ui-card-soft p-4">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold text-stone-900">{response.sellerName}</p>
+                          <p className="mt-1 text-xs text-stone-500">
+                            {new Date(response.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-stone-700">
+                            {formatCurrency(response.quoteAmount)}
+                          </span>
+                          <span
+                            className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                              response.offerStatus === "accepted"
+                                ? "bg-[#FDF5F3] text-[#A0452E]"
+                                : response.offerStatus === "rejected"
+                                ? "bg-stone-200 text-stone-600"
+                                : "bg-emerald-100 text-emerald-700"
+                            }`}
+                          >
+                            {response.offerStatus === "accepted"
+                              ? "Accepted"
+                              : response.offerStatus === "rejected"
+                              ? "Not selected"
+                              : "Pending review"}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                        <div className="rounded-2xl border border-white/80 bg-white/80 px-4 py-3 text-sm text-stone-700">
+                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
+                            Proposed delivery
+                          </p>
+                          <p className="mt-2 font-semibold text-stone-900">
+                            {response.deliveryDate
+                              ? new Date(response.deliveryDate).toLocaleDateString()
+                              : "Flexible"}
+                          </p>
+                        </div>
+                        <div className="rounded-2xl border border-white/80 bg-white/80 px-4 py-3 text-sm text-stone-700">
+                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
+                            Payment protection
+                          </p>
+                          <p className="mt-2 font-semibold text-stone-900">
+                            Money-back guarantee applies
+                          </p>
+                        </div>
+                      </div>
+                      <p className="mt-3 text-sm leading-6 text-stone-700">{response.message}</p>
+                      {isOwnRequest && response.offerStatus === "pending" && !request.checkoutOrderId && (
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={() => void handleAcceptOffer(response._id)}
+                            disabled={acceptingOfferId === response._id}
+                            className="ui-btn-primary px-4 py-2 text-sm"
+                          >
+                            {acceptingOfferId === response._id
+                              ? "Opening payment..."
+                              : "Accept and proceed to payment"}
+                          </button>
+                        </div>
+                      )}
+                      {response.checkoutOrderId && (
+                        <div className="mt-4">
+                          <button
+                            type="button"
+                            onClick={() => navigate(`/orders/${response.checkoutOrderId}`)}
+                            className="ui-btn-secondary px-4 py-2 text-sm"
+                          >
+                            Open payment order
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {messageResponses.length > 0 && (
+              <section className="ui-card p-5">
+                <p className="ui-section-kicker">Messages</p>
+                <h2 className="mt-2 text-xl font-semibold text-stone-900">
+                  Other responses ({messageResponses.length})
+                </h2>
+                <div className="mt-4 space-y-3">
+                  {messageResponses.map((response) => (
                     <div key={response._id} className="ui-card-soft p-4">
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <p className="text-sm font-semibold text-stone-900">{response.sellerName}</p>
@@ -458,15 +586,15 @@ const BuyerRequestDetails: React.FC = () => {
               </section>
             ) : (
               <section className="ui-card sticky top-24 p-5">
-                <p className="ui-section-kicker">Reply to buyer</p>
-                <h2 className="mt-2 text-xl font-semibold text-stone-900">Send your offer</h2>
+                <p className="ui-section-kicker">Offer delivery</p>
+                <h2 className="mt-2 text-xl font-semibold text-stone-900">Can you fulfill this demand?</h2>
                 <p className="mt-2 text-sm leading-6 text-stone-600">
-                  Reply when you are ready to confirm pricing, availability, and delivery.
+                  Send a full delivery offer with price, delivery date, and notes. If the buyer accepts, they move into the secure payment page with money-back guarantee cover.
                 </p>
 
                 {submitted && (
                   <div className="mt-4 rounded-2xl border border-[#F3C9BE] bg-[#FDF5F3] px-4 py-3">
-                    <p className="text-sm font-semibold text-[#A0452E]">Reply submitted successfully.</p>
+                    <p className="text-sm font-semibold text-[#A0452E]">Delivery offer submitted successfully.</p>
                   </div>
                 )}
 
@@ -479,43 +607,47 @@ const BuyerRequestDetails: React.FC = () => {
                 {!user ? (
                   <div className="mt-5 space-y-4">
                     <p className="text-sm text-stone-700">
-                      Sign in to respond to this request and unlock direct buyer contact.
+                      Sign in to review the request and submit a delivery offer.
                     </p>
                     <button onClick={() => navigate(signInNext)} className="ui-btn-primary w-full">
-                      Sign In to Reply
+                      Sign In to Continue
                     </button>
                     <p className="text-center text-xs text-stone-500">
-                      Request details stay public. Direct contact unlocks after sign-in.
+                      Direct contact and payment stay inside the platform after sign-in.
+                    </p>
+                  </div>
+                ) : request.canSendDeliveryOffer ? (
+                  <div className="mt-5 space-y-4">
+                    <button
+                      type="button"
+                      onClick={() => setOfferModalOpen(true)}
+                      className="ui-btn-primary w-full"
+                    >
+                      I can deliver
+                    </button>
+                    <p className="text-center text-xs text-stone-500">
+                      Submit one clear offer. The buyer can accept it and move straight to payment.
                     </p>
                   </div>
                 ) : (
-                  <form onSubmit={handleReplySubmit} className="mt-5 space-y-4">
-                    <div>
-                      <label className="ui-label">Your Message</label>
-                      <textarea
-                        value={replyMessage}
-                        onChange={(e) => setReplyMessage(e.target.value)}
-                        placeholder="Tell the buyer about your product, pricing, availability, and delivery terms."
-                        className="ui-input min-h-[160px] resize-y"
-                        rows={6}
-                        disabled={submitting}
-                      />
-                    </div>
-
-                    <button type="submit" disabled={submitting || !replyMessage.trim()} className="ui-btn-primary w-full">
-                      {submitting ? "Submitting..." : "Submit Reply"}
-                    </button>
-
-                    <p className="text-center text-xs text-stone-500">
-                      The buyer will review your message and can contact you directly.
-                    </p>
-                  </form>
+                  <div className="mt-5 rounded-2xl border border-stone-200 bg-[#FAF7F2] px-4 py-4 text-sm text-stone-600">
+                    Keep at least one live Agrisoko listing, or build at least 30 days of account history, to unlock delivery offers on buyer demand.
+                  </div>
                 )}
               </section>
             )}
           </aside>
         </div>
       </div>
+      <DeliveryOfferModal
+        open={offerModalOpen}
+        title="Send a delivery offer"
+        description="Quote the total amount you want the buyer to pay for this request, choose your delivery date, and add the notes that help them decide quickly."
+        submitLabel="Send delivery offer"
+        submitting={submitting}
+        onClose={() => setOfferModalOpen(false)}
+        onSubmit={handleDeliveryOfferSubmit}
+      />
     </div>
   );
 };

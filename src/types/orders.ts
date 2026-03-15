@@ -39,7 +39,7 @@ export interface CartItem {
 
 export interface MarketplaceOrderItem {
   listingId: string;
-  listingType: "product";
+  listingType: "product" | "buyer_request_offer" | "bulk_offer";
   title: string;
   image?: string;
   category?: string;
@@ -68,6 +68,13 @@ export interface MarketplaceOrder {
   _id: string;
   orderNumber: string;
   buyerId: string;
+  source?: {
+    type: "cart" | "buyer_request_offer" | "bulk_offer";
+    requestId?: string;
+    responseId?: string;
+    bulkOrderId?: string;
+    bidId?: string;
+  };
   buyerSnapshot: {
     fullName: string;
     email?: string;
@@ -116,6 +123,32 @@ export interface MarketplaceOrder {
   adminNote?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface OfferCheckoutSummary {
+  sourceType: "buyer_request_offer" | "bulk_offer";
+  sourceId: string;
+  heading: string;
+  title: string;
+  sellerId: string;
+  sellerName: string;
+  sellerEmail?: string;
+  quantity: number;
+  unit: string;
+  price: number;
+  subtotal: number;
+  deliveryFee: number;
+  platformFee: number;
+  total: number;
+  county: string;
+  category?: string;
+  deliveryScope?: "countrywide" | "within_county" | "negotiable";
+  estimatedDeliveryDate?: string;
+  existingOrderId?: string;
+  requestId?: string;
+  responseId?: string;
+  bulkOrderId?: string;
+  bidId?: string;
 }
 
 export interface SellerMarketplaceOrder

@@ -58,7 +58,13 @@ const BulkOrdersBoard: React.FC = () => {
       .then((status) => {
         if (!active) return;
         setCanPost(Boolean(status?.canPostB2BDemand || status?.isAdmin));
-        setCanRespond(Boolean(status?.canRespondToB2BDemand || status?.isAdmin));
+        setCanRespond(
+          Boolean(
+            status?.canRespondToB2BDemand ||
+              status?.canOfferToOpenDemand ||
+              status?.isAdmin
+          )
+        );
       })
       .catch((err: any) => {
         if (!active) return;
@@ -122,7 +128,7 @@ const BulkOrdersBoard: React.FC = () => {
         <div className="mx-auto max-w-2xl rounded-3xl border border-amber-200 bg-amber-50 p-8 shadow-sm">
           <h1 className="text-2xl font-semibold text-amber-900">Bulk access required</h1>
           <p className="mt-2 text-sm text-amber-800">
-            Apply as a bulk buyer or bulk seller first, then this board unlocks after admin approval.
+            Apply as a bulk buyer or bulk seller first. Approved bulk sellers, users with live listings, and trusted accounts older than 30 days can offer delivery here.
           </p>
           <Link
             to="/bulk"
