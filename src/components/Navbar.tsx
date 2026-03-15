@@ -15,9 +15,11 @@ import {
   Shield,
   Building2,
   NotebookText,
+  ShoppingCart,
   type LucideIcon,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import { useCart } from "../contexts/CartContext";
 import NotificationCenter from "./NotificationCenter";
 import { BULK_NAV_LINK_VISIBLE } from "../config/featureFlags";
 
@@ -41,13 +43,17 @@ const shouldShowTopLevelMobileNav = (pathname: string) =>
   pathname === "/bulk" ||
   pathname === "/about" ||
   pathname === "/blog" ||
+  pathname === "/cart" ||
+  pathname === "/checkout" ||
+  pathname === "/orders" ||
   pathname === "/profile" ||
   pathname === "/messages" ||
   pathname === "/favorites" ||
   pathname === "/request" ||
   pathname.startsWith("/blog/") ||
   pathname.startsWith("/bulk/") ||
-  pathname.startsWith("/browse");
+  pathname.startsWith("/browse") ||
+  pathname.startsWith("/orders/");
 
 const pathMatches = (pathname: string, key: string) => {
   if (key === "/browse") {
@@ -70,6 +76,8 @@ const pathMatches = (pathname: string, key: string) => {
     return (
       pathname === "/profile" ||
       pathname === "/favorites" ||
+      pathname === "/orders" ||
+      pathname.startsWith("/orders/") ||
       pathname === "/notifications" ||
       pathname === "/profile/notifications" ||
       pathname === "/verify-phone" ||
@@ -94,6 +102,10 @@ const pathMatches = (pathname: string, key: string) => {
     return pathname === "/bulk" || pathname.startsWith("/bulk/");
   }
 
+  if (key === "/cart") {
+    return pathname === "/cart" || pathname === "/checkout";
+  }
+
   return pathname === key;
 };
 
@@ -114,6 +126,7 @@ const getNavLinkClass = (active: boolean, accent = false) => {
 
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
+  const { itemCount } = useCart();
   const location = useLocation();
   const navigate = useNavigate();
   const desktopNavRef = useRef<HTMLDivElement | null>(null);
@@ -320,6 +333,15 @@ const Navbar: React.FC = () => {
             <div className="hidden lg:flex lg:items-center lg:gap-3">
               {user ? (
                 <>
+                  <Link to="/cart" className={getNavLinkClass(pathMatches(location.pathname, "/cart"))}>
+                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    Cart
+                    {itemCount > 0 && (
+                      <span className="ml-2 inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-[#FDF5F3] px-2 py-0.5 text-xs font-bold text-[#A0452E]">
+                        {itemCount}
+                      </span>
+                    )}
+                  </Link>
                   <NotificationCenter />
                   <div ref={accountMenuRef} className="relative">
                     <button
@@ -353,6 +375,9 @@ const Navbar: React.FC = () => {
                         <Link to="/favorites" className="block border-t border-stone-100 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
                           Saved Listings
                         </Link>
+                        <Link to="/orders" className="block border-t border-stone-100 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
+                          Orders
+                        </Link>
                         {isAdmin && (
                           <Link to="/admin" className="block border-t border-stone-100 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
                             Admin Console
@@ -372,6 +397,15 @@ const Navbar: React.FC = () => {
                 </>
               ) : (
                 <>
+                  <Link to="/cart" className={getNavLinkClass(pathMatches(location.pathname, "/cart"))}>
+                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    Cart
+                    {itemCount > 0 && (
+                      <span className="ml-2 inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-[#FDF5F3] px-2 py-0.5 text-xs font-bold text-[#A0452E]">
+                        {itemCount}
+                      </span>
+                    )}
+                  </Link>
                   <Link to="/login" className={getNavLinkClass(pathMatches(location.pathname, "/login"))}>
                     Login
                   </Link>
@@ -548,6 +582,14 @@ const Navbar: React.FC = () => {
                   <Heart className="h-5 w-5" />
                   Saved Listings
                 </Link>
+                <Link to="/orders" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
+                  <ClipboardList className="h-5 w-5" />
+                  Orders
+                </Link>
+                <Link to="/cart" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
+                  <ShoppingCart className="h-5 w-5" />
+                  Cart {itemCount > 0 ? `(${itemCount})` : ""}
+                </Link>
                 {isAdmin && (
                   <Link to="/admin" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
                     <Shield className="h-5 w-5" />
@@ -568,6 +610,9 @@ const Navbar: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-2">
+                <Link to="/cart" className="flex min-h-[52px] items-center justify-center rounded-2xl border border-stone-200 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
+                  Cart {itemCount > 0 ? `(${itemCount})` : ""}
+                </Link>
                 <Link to={signupTarget} className="flex min-h-[52px] items-center justify-center rounded-2xl bg-[#A0452E] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#8B3525]">
                   Create Free Account
                 </Link>

@@ -166,6 +166,17 @@ export const API_ENDPOINTS = {
       list: `${API_BASE_URL}/admin/bulk-orders`,
     },
   },
+  orders: {
+    checkout: `${API_BASE_URL}/orders/checkout`,
+    my: `${API_BASE_URL}/orders/my`,
+    byId: (id: string) => `${API_BASE_URL}/orders/${id}`,
+    admin: {
+      list: `${API_BASE_URL}/admin/orders`,
+      byId: (id: string) => `${API_BASE_URL}/admin/orders/${id}`,
+      payment: (id: string) => `${API_BASE_URL}/admin/orders/${id}/payment`,
+      status: (id: string) => `${API_BASE_URL}/admin/orders/${id}/status`,
+    },
+  },
   messages: {
     send: `${API_BASE_URL}/messages`,
     threads: `${API_BASE_URL}/messages/threads`,

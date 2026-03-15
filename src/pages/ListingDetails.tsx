@@ -15,6 +15,7 @@ import { getAuthToken } from "../utils/auth";
 import { Star } from "lucide-react";
 import { useProperties } from "../contexts/PropertyContext";
 import { useAuth } from "../contexts/AuthContext";
+import { useCart } from "../contexts/CartContext";
 import { buildMarketplaceCards, getMarketplaceCardScore } from "../utils/marketplaceCards";
 import {
   getSellerFollowStats,
@@ -414,6 +415,7 @@ const ListingDetails: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const { addItem } = useCart();
   const { productListings, serviceListings } = useProperties();
   const [listing, setListing] = useState<any>(null);
   const [markingSold, setMarkingSold] = useState(false);
@@ -944,6 +946,13 @@ const ListingDetails: React.FC = () => {
   );
   const hasMapCoordinates = Boolean(coords?.lat && coords?.lng);
   const isOwnListing = !!user?._id && !!owner?._id && String(user._id) === String(owner._id);
+  const isCheckoutEligible =
+    listingType === "product" &&
+    !isOwnListing &&
+    !listing.sold &&
+    typeof listing.price === "number" &&
+    listing.price > 0 &&
+    (typeof listing.quantity !== "number" || listing.quantity > 0);
   const publishShareFeedback = (message: string) => {
     setShareFeedback(message);
     if (shareFeedbackTimeoutRef.current) {
@@ -952,6 +961,34 @@ const ListingDetails: React.FC = () => {
     shareFeedbackTimeoutRef.current = setTimeout(() => {
       setShareFeedback("");
     }, 2200);
+  };
+  const addCurrentListingToCart = (nextPath?: string) => {
+    if (!isCheckoutEligible) return;
+
+    addItem({
+      listingId: String(listing._id),
+      listingType: "product",
+      title: listing.title || listing.name || "Listing",
+      image: Array.isArray(listing.images) ? listing.images[0] : undefined,
+      category: listing.category,
+      county: listing.location?.county,
+      deliveryScope: listing.deliveryScope,
+      sellerId: owner?._id ? String(owner._id) : undefined,
+      sellerName: owner?.fullName || owner?.name || "Seller",
+      unit: listing.unit,
+      price: Number(listing.price),
+      quantity: 1,
+      maxQuantity:
+        typeof listing.quantity === "number" && Number.isFinite(listing.quantity)
+          ? Number(listing.quantity)
+          : undefined,
+    });
+
+    publishShareFeedback("Added to cart.");
+
+    if (nextPath) {
+      navigate(nextPath);
+    }
   };
   const handleBackToListings = () => {
     if (
@@ -1152,6 +1189,28 @@ const ListingDetails: React.FC = () => {
 
           {/* Quick action CTAs */}
           <div className="mb-6 flex flex-wrap gap-3">
+            {isCheckoutEligible && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => addCurrentListingToCart()}
+                  className="ui-btn-primary px-5 py-2"
+                >
+                  Add to cart
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    addCurrentListingToCart(
+                      user ? "/checkout" : `/login?next=${encodeURIComponent("/checkout")}`
+                    )
+                  }
+                  className="ui-btn-secondary px-5 py-2"
+                >
+                  Buy now
+                </button>
+              </>
+            )}
             <button
               onClick={() => void handleShare()}
               className="ui-btn-ghost px-5 py-2"
@@ -1201,6 +1260,11 @@ const ListingDetails: React.FC = () => {
               </span>
             )}
           </div>
+          {listingType === "product" && !isCheckoutEligible && !isOwnListing && (
+            <p className="mb-4 text-sm font-medium text-stone-500">
+              Online checkout is available only for active product listings with a numeric price.
+            </p>
+          )}
           {shareFeedback && (
             <p className="mb-4 text-sm font-medium text-[#A0452E]">{shareFeedback}</p>
           )}

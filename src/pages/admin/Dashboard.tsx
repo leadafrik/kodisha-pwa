@@ -459,6 +459,29 @@ const AdminDashboard: React.FC = () => {
                   <li>- Add market and trust updates</li>
                 </ul>
               </Link>
+
+              <Link
+                to="/admin/orders"
+                className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="h-12 w-12 rounded-2xl bg-[#FDF5F3] text-[#A0452E] flex items-center justify-center">
+                    <Building2 size={24} />
+                  </div>
+                  <span className="rounded-full bg-[#FDF5F3] px-3 py-1 text-xs font-semibold text-[#A0452E]">
+                    Checkout
+                  </span>
+                </div>
+                <h3 className="mt-4 text-xl font-semibold text-slate-900">Marketplace orders</h3>
+                <p className="mt-2 text-sm text-slate-600">
+                  Verify M-Pesa till payments, track payer phones, and move paid orders into delivery.
+                </p>
+                <ul className="mt-4 space-y-2 text-sm text-slate-600">
+                  <li>- Match payer phone and timestamp</li>
+                  <li>- Confirm or reject manual payments</li>
+                  <li>- Mark processing and delivery completion</li>
+                </ul>
+              </Link>
             </div>
           </section>
 
@@ -699,6 +722,17 @@ const AdminDashboard: React.FC = () => {
                     className="mt-4 inline-flex items-center text-sm font-semibold text-[#A0452E] hover:text-[#8B3525]"
                   >
                     Open editor
+                  </Link>
+                </div>
+                <div className="rounded-2xl border border-[#F3C9BE] bg-[#FDF5F3] p-4">
+                  <p className="text-xs uppercase tracking-[0.3em] text-[#A0452E]">Checkout</p>
+                  <p className="mt-2 text-lg font-semibold text-slate-900">Review orders</p>
+                  <p className="mt-2 text-xs text-slate-600">Verify till payments and release orders to delivery.</p>
+                  <Link
+                    to="/admin/orders"
+                    className="mt-4 inline-flex items-center text-sm font-semibold text-[#A0452E] hover:text-[#8B3525]"
+                  >
+                    Open order queue
                   </Link>
                 </div>
               </div>

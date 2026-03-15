@@ -2,6 +2,7 @@ import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import { PropertyProvider } from './contexts/PropertyContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { CartProvider } from './contexts/CartContext';
 import { VerificationProvider } from './contexts/VerificationContext';
 import { NotificationsProvider } from './contexts/NotificationsContext';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -60,6 +61,11 @@ const AdminBulkOrders = lazy(() => import('./pages/admin/BulkOrders'));
 const AdminInviteSetup = lazy(() => import('./pages/AdminInviteSetup'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
 const AdminBlogManagement = lazy(() => import('./pages/admin/BlogManagement'));
+const Cart = lazy(() => import('./pages/Cart'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const Orders = lazy(() => import('./pages/Orders'));
+const OrderDetails = lazy(() => import('./pages/OrderDetails'));
+const AdminOrders = lazy(() => import('./pages/admin/Orders'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -93,10 +99,14 @@ const shouldPadForMobileNav = (pathname: string, signedIn: boolean) => {
     pathname === '/profile' ||
     pathname === '/messages' ||
     pathname === '/favorites' ||
+    pathname === '/cart' ||
+    pathname === '/checkout' ||
+    pathname === '/orders' ||
     pathname === '/request' ||
     pathname.startsWith('/blog/') ||
     pathname.startsWith('/browse') ||
     pathname.startsWith('/bulk/') ||
+    pathname.startsWith('/orders/') ||
     pathname.startsWith('/seller/') ||
     pathname.startsWith('/sellers/')
   );
@@ -108,11 +118,13 @@ function App() {
       <AuthProvider>
         <NotificationsProvider>
           <PropertyProvider>
-            <VerificationProvider>
-              <Router>
-                <AppShell />
-              </Router>
-            </VerificationProvider>
+            <CartProvider>
+              <VerificationProvider>
+                <Router>
+                  <AppShell />
+                </Router>
+              </VerificationProvider>
+            </CartProvider>
           </PropertyProvider>
         </NotificationsProvider>
       </AuthProvider>
@@ -184,6 +196,31 @@ const AppShell = () => {
             <Route path="/browse" element={<BrowseListings />} />
             <Route path="/browse/:category" element={<BrowseListings />} />
             <Route path="/listings" element={<Navigate to="/browse" replace />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route
+              path="/checkout"
+              element={
+                <ProtectedRoute>
+                  <Checkout />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/orders"
+              element={
+                <ProtectedRoute>
+                  <Orders />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/orders/:orderId"
+              element={
+                <ProtectedRoute>
+                  <OrderDetails />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/marketplace" element={<Navigate to="/browse" replace />} />
             <Route path="/find-services" element={<Navigate to="/browse/services" replace />} />
             <Route path="/request" element={<BrowseBuyerRequestsPage />} />
@@ -307,6 +344,7 @@ const AppShell = () => {
             <Route path="/admin/listing-management" element={<ProtectedRoute><ListingManagement /></ProtectedRoute>} />
             <Route path="/admin/analytics" element={<ProtectedRoute><AnalyticsReports /></ProtectedRoute>} />
             <Route path="/admin/blog" element={<ProtectedRoute><AdminBlogManagement /></ProtectedRoute>} />
+            <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
             <Route path="/admin/bulk-applications" element={<ProtectedRoute><AdminBulkApplications /></ProtectedRoute>} />
             <Route path="/admin/bulk-orders" element={<ProtectedRoute><AdminBulkOrders /></ProtectedRoute>} />
             <Route path="/legal/terms" element={<TermsOfService />} />

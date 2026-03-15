@@ -537,6 +537,12 @@ const Profile: React.FC = () => {
                   >
                     Saved listings
                   </Link>
+                  <Link
+                    to="/orders"
+                    className="ui-btn-ghost justify-start bg-stone-50 px-4 py-3"
+                  >
+                    My orders
+                  </Link>
                   {isAdmin && (
                     <Link
                       to="/admin"

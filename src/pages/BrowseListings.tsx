@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useProperties } from "../contexts/PropertyContext";
 import { useAuth } from "../contexts/AuthContext";
+import { useCart } from "../contexts/CartContext";
 import { API_ENDPOINTS, apiRequest } from "../config/api";
 import { kenyaCounties } from "../data/kenyaCounties";
 import { handleImageError } from "../utils/imageFallback";
@@ -220,6 +221,7 @@ const BrowseListings: React.FC = () => {
   const { category: categoryParam } = useParams<{ category?: string }>();
   const { serviceListings, productListings, loading } = useProperties();
   const { user } = useAuth();
+  const { addItem } = useCart();
   const { isCompact } = useAdaptiveLayout();
 
   const category = useMemo(() => normalizeRouteCategory(categoryParam), [categoryParam]);
@@ -1129,6 +1131,10 @@ const BrowseListings: React.FC = () => {
         {!loading && (
           <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filtered.map((card, index) => {
+            const canCheckoutOnline =
+              card.category !== "service" &&
+              typeof card.priceValue === "number" &&
+              card.priceValue > 0;
             const engagement = engagementById[card.id] || {
               views: 0,
               saves: 0,
@@ -1254,13 +1260,36 @@ const BrowseListings: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="mt-3 flex gap-2">
+                  <div className="mt-3 flex flex-wrap gap-2">
                     <Link
                       to={`/listings/${card.id}`}
                       className="ui-btn-primary flex-1 px-3 py-2.5 text-sm"
                     >
                       View details
                     </Link>
+                    {canCheckoutOnline && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          addItem({
+                            listingId: card.id,
+                            listingType: "product",
+                            title: card.title,
+                            image: card.image,
+                            category: card.category,
+                            county: card.county,
+                            deliveryScope: card.deliveryScope,
+                            sellerId: card.ownerId,
+                            sellerName: card.ownerName,
+                            price: Number(card.priceValue),
+                            quantity: 1,
+                          })
+                        }
+                        className="ui-btn-secondary flex-1 px-3 py-2.5 text-sm"
+                      >
+                        Add to cart
+                      </button>
+                    )}
                     {card.contact && normalizeKenyanPhone(card.contact) && (
                       user ? (
                         <a
