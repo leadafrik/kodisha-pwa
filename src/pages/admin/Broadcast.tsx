@@ -9,6 +9,7 @@ interface BroadcastJob {
   total: number;
   sent: number;
   failed: number;
+  failedEmails: string[];
   status: "running" | "done" | "error";
 }
 
@@ -28,6 +29,7 @@ const AdminBroadcast: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [job, setJob] = useState<BroadcastJob | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Stop polling when job is done
@@ -204,12 +206,35 @@ const AdminBroadcast: React.FC = () => {
                 />
               </div>
               {isDone && (
-                <div className="flex items-center gap-2 pt-1 text-sm text-emerald-700">
-                  <CheckCircle size={15} className="flex-shrink-0" />
-                  <span>
-                    Sent to <strong>{job.sent}</strong> of <strong>{job.total}</strong> recipients.
-                    {job.failed > 0 && ` ${job.failed} failed.`}
-                  </span>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 pt-1 text-sm text-emerald-700">
+                    <CheckCircle size={15} className="flex-shrink-0" />
+                    <span>
+                      Sent to <strong>{job.sent}</strong> of <strong>{job.total}</strong> recipients.
+                      {job.failed > 0 && ` ${job.failed} failed.`}
+                    </span>
+                  </div>
+                  {job.failedEmails?.length > 0 && (
+                    <div className="rounded-xl border border-rose-100 bg-rose-50 p-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-xs font-semibold text-rose-700">{job.failedEmails.length} failed addresses — paste these into the extra emails field to retry</p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(job.failedEmails.join('\n'));
+                            setCopied(true);
+                            setTimeout(() => setCopied(false), 2000);
+                          }}
+                          className="text-xs font-semibold text-rose-600 hover:text-rose-800 transition"
+                        >
+                          {copied ? "Copied!" : "Copy all"}
+                        </button>
+                      </div>
+                      <pre className="max-h-40 overflow-y-auto text-xs text-rose-700 whitespace-pre-wrap break-all">
+                        {job.failedEmails.join('\n')}
+                      </pre>
+                    </div>
+                  )}
                 </div>
               )}
               {isRunning && (
