@@ -136,10 +136,7 @@ const Login: React.FC = () => {
     newPassword: "",
     confirmPassword: "",
   });
-  const signupDefaultNext = "/browse";
-  const redirectTo =
-    searchParams.get("next") ||
-    (mode === "signup" || mode === "otp-verify" ? signupDefaultNext : "/profile");
+  const redirectTo = searchParams.get("next") || "/browse";
   const requiredSignupConsentsAccepted =
     signupConsents.termsAccepted &&
     signupConsents.privacyAccepted &&
