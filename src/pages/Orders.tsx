@@ -5,6 +5,7 @@ import {
   listMyMarketplaceOrders,
   ORDER_PAYMENT_STATUS_LABELS,
   ORDER_STATUS_LABELS,
+  SELLER_FULFILLMENT_STATUS_LABELS,
 } from "../services/ordersService";
 import { MarketplaceOrder } from "../types/orders";
 
@@ -105,7 +106,7 @@ const Orders: React.FC = () => {
                       </span>
                     </div>
                     <p className="mt-2 text-sm text-stone-600">
-                      Submitted {new Date(order.payment.submittedAt).toLocaleString()} | Payer phone {order.payment.payerPhone}
+                      Invoice {order.invoice?.invoiceNumber || "Pending"} | Submitted {new Date(order.payment.submittedAt).toLocaleString()}
                     </p>
                     <p className="mt-1 text-sm text-stone-600">
                       Delivery target {new Date(order.delivery.estimatedDeliveryDate).toLocaleDateString()} | {order.items.length} item{order.items.length === 1 ? "" : "s"}
@@ -128,6 +129,19 @@ const Orders: React.FC = () => {
                     </div>
                   ))}
                 </div>
+
+                {Array.isArray(order.sellerFulfillment) && order.sellerFulfillment.length > 0 && (
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {order.sellerFulfillment.map((seller) => (
+                      <span
+                        key={`${order._id}-${seller.sellerId}`}
+                        className={`rounded-full border px-3 py-1 text-xs font-semibold ${getStatusTone(seller.status)}`}
+                      >
+                        {seller.sellerName}: {SELLER_FULFILLMENT_STATUS_LABELS[seller.status]}
+                      </span>
+                    ))}
+                  </div>
+                )}
 
                 <div className="mt-4 flex flex-wrap gap-3">
                   <Link to={`/orders/${order._id}`} className="ui-btn-primary px-4 py-2.5">

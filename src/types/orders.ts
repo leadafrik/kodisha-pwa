@@ -13,6 +13,12 @@ export type MarketplaceOrderStatus =
   | "cancelled"
   | "refunded";
 
+export type MarketplaceOrderSellerFulfillmentStatus =
+  | "awaiting_payment_confirmation"
+  | "ready_to_ship"
+  | "delivery_in_progress"
+  | "delivered";
+
 export type PayerPhoneSource = "account" | "different";
 
 export interface CartItem {
@@ -47,6 +53,17 @@ export interface MarketplaceOrderItem {
   lineTotal: number;
 }
 
+export interface MarketplaceOrderSellerFulfillmentEntry {
+  sellerId: string;
+  sellerName: string;
+  itemIds: string[];
+  status: MarketplaceOrderSellerFulfillmentStatus;
+  note?: string;
+  updatedAt: string;
+  deliveryStartedAt?: string;
+  deliveredAt?: string;
+}
+
 export interface MarketplaceOrder {
   _id: string;
   orderNumber: string;
@@ -76,6 +93,13 @@ export interface MarketplaceOrder {
     refundedAt?: string;
     verifiedBy?: string;
   };
+  invoice: {
+    invoiceNumber: string;
+    issuedAt: string;
+    buyerEmailSentAt?: string;
+    adminEmailSentAt?: string;
+  };
+  sellerFulfillment: MarketplaceOrderSellerFulfillmentEntry[];
   delivery: {
     county: string;
     constituency?: string;
@@ -90,6 +114,13 @@ export interface MarketplaceOrder {
   adminNote?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface SellerMarketplaceOrder
+  extends Omit<MarketplaceOrder, "items" | "sellerFulfillment"> {
+  items: MarketplaceOrderItem[];
+  sellerFulfillment: MarketplaceOrderSellerFulfillmentEntry | null;
+  sellerSubtotal: number;
 }
 
 export interface CheckoutPayload {

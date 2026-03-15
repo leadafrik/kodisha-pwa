@@ -169,6 +169,11 @@ export const API_ENDPOINTS = {
   orders: {
     checkout: `${API_BASE_URL}/orders/checkout`,
     my: `${API_BASE_URL}/orders/my`,
+    seller: {
+      list: `${API_BASE_URL}/orders/seller/my`,
+      byId: (id: string) => `${API_BASE_URL}/orders/seller/${id}`,
+      fulfillment: (id: string) => `${API_BASE_URL}/orders/seller/${id}/fulfillment`,
+    },
     byId: (id: string) => `${API_BASE_URL}/orders/${id}`,
     admin: {
       list: `${API_BASE_URL}/admin/orders`,

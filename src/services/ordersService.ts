@@ -3,7 +3,9 @@ import {
   CheckoutPayload,
   MarketplaceOrder,
   MarketplaceOrderPaymentStatus,
+  MarketplaceOrderSellerFulfillmentStatus,
   MarketplaceOrderStatus,
+  SellerMarketplaceOrder,
 } from "../types/orders";
 
 export const MARKETPLACE_MPESA_STORE_NUMBER = "4511909";
@@ -36,6 +38,42 @@ export const getMarketplaceOrderById = async (orderId: string) => {
   return response as {
     success: boolean;
     data: MarketplaceOrder;
+  };
+};
+
+export const listSellerMarketplaceOrders = async () => {
+  const response = await apiRequest(API_ENDPOINTS.orders.seller.list);
+  return response as {
+    success: boolean;
+    data: SellerMarketplaceOrder[];
+  };
+};
+
+export const getSellerMarketplaceOrderById = async (orderId: string) => {
+  const response = await apiRequest(API_ENDPOINTS.orders.seller.byId(orderId));
+  return response as {
+    success: boolean;
+    data: SellerMarketplaceOrder;
+  };
+};
+
+export const updateSellerMarketplaceOrderFulfillment = async (
+  orderId: string,
+  status: Extract<
+    MarketplaceOrderSellerFulfillmentStatus,
+    "delivery_in_progress" | "delivered"
+  >,
+  note?: string
+) => {
+  const response = await apiRequest(API_ENDPOINTS.orders.seller.fulfillment(orderId), {
+    method: "PUT",
+    body: JSON.stringify({ status, note }),
+  });
+
+  return response as {
+    success: boolean;
+    message?: string;
+    data: SellerMarketplaceOrder;
   };
 };
 
@@ -115,4 +153,14 @@ export const ORDER_STATUS_LABELS: Record<MarketplaceOrderStatus, string> = {
   payment_rejected: "Payment rejected",
   cancelled: "Cancelled",
   refunded: "Refunded",
+};
+
+export const SELLER_FULFILLMENT_STATUS_LABELS: Record<
+  MarketplaceOrderSellerFulfillmentStatus,
+  string
+> = {
+  awaiting_payment_confirmation: "Awaiting payment review",
+  ready_to_ship: "Ready to ship",
+  delivery_in_progress: "Delivery in progress",
+  delivered: "Delivered",
 };

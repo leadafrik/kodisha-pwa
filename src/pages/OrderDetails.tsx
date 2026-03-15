@@ -7,6 +7,7 @@ import {
   MARKETPLACE_ESTIMATED_DELIVERY_DAYS,
   ORDER_PAYMENT_STATUS_LABELS,
   ORDER_STATUS_LABELS,
+  SELLER_FULFILLMENT_STATUS_LABELS,
   updateAdminMarketplaceOrderPayment,
   updateAdminMarketplaceOrderStatus,
 } from "../services/ordersService";
@@ -146,7 +147,11 @@ const OrderDetails: React.FC = () => {
                     {ORDER_PAYMENT_STATUS_LABELS[order.paymentStatus]}
                   </span>
                 </div>
-                <div className="mt-4 grid gap-4 md:grid-cols-3">
+                <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Invoice</p>
+                    <p className="mt-1 text-sm font-semibold text-stone-900">{order.invoice?.invoiceNumber || "Pending"}</p>
+                  </div>
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Total</p>
                     <p className="mt-1 text-2xl font-bold text-[#A0452E]">{formatCurrency(order.total)}</p>
@@ -164,6 +169,9 @@ const OrderDetails: React.FC = () => {
                     </p>
                   </div>
                 </div>
+                <p className="mt-4 text-sm text-stone-600">
+                  If your account has an email address, Agrisoko sends a letterheaded invoice PDF when checkout is submitted.
+                </p>
               </div>
 
               <div className="ui-card p-5">
@@ -262,6 +270,31 @@ const OrderDetails: React.FC = () => {
                   </div>
                 )}
               </div>
+
+              {Array.isArray(order.sellerFulfillment) && order.sellerFulfillment.length > 0 && (
+                <div className="ui-card p-5">
+                  <p className="ui-section-kicker">Seller progress</p>
+                  <h2 className="mt-2 text-xl font-semibold text-stone-900">Delivery status by seller</h2>
+                  <div className="mt-4 space-y-3">
+                    {order.sellerFulfillment.map((entry) => (
+                      <div key={`${order._id}-${entry.sellerId}`} className="rounded-2xl border border-stone-200 bg-stone-50 px-4 py-4">
+                        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                          <div>
+                            <p className="font-semibold text-stone-900">{entry.sellerName}</p>
+                            <p className="mt-1 text-xs text-stone-500">
+                              Updated {new Date(entry.updatedAt).toLocaleString()}
+                            </p>
+                          </div>
+                          <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${getStatusTone(entry.status)}`}>
+                            {SELLER_FULFILLMENT_STATUS_LABELS[entry.status]}
+                          </span>
+                        </div>
+                        {entry.note && <p className="mt-3 text-sm text-stone-700">{entry.note}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {isAdmin && (
                 <div className="ui-card p-5">

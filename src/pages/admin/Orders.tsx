@@ -6,6 +6,7 @@ import {
   listAdminMarketplaceOrders,
   ORDER_PAYMENT_STATUS_LABELS,
   ORDER_STATUS_LABELS,
+  SELLER_FULFILLMENT_STATUS_LABELS,
   updateAdminMarketplaceOrderPayment,
   updateAdminMarketplaceOrderStatus,
 } from "../../services/ordersService";
@@ -257,6 +258,7 @@ const AdminOrders: React.FC = () => {
                         </span>
                       </div>
                       <div className="grid gap-2 text-sm text-stone-600 md:grid-cols-2 xl:grid-cols-3">
+                        <p><span className="font-semibold text-stone-900">Invoice:</span> {order.invoice?.invoiceNumber || "Pending"}</p>
                         <p><span className="font-semibold text-stone-900">Buyer:</span> {order.buyerSnapshot.fullName}</p>
                         <p><span className="font-semibold text-stone-900">Contact:</span> {order.contactPhone}</p>
                         <p><span className="font-semibold text-stone-900">Payer phone:</span> {order.payment.payerPhone}</p>
@@ -271,6 +273,18 @@ const AdminOrders: React.FC = () => {
                           </span>
                         ))}
                       </div>
+                      {Array.isArray(order.sellerFulfillment) && order.sellerFulfillment.length > 0 && (
+                        <div className="flex flex-wrap gap-2 text-xs font-semibold">
+                          {order.sellerFulfillment.map((entry) => (
+                            <span
+                              key={`${order._id}-${entry.sellerId}`}
+                              className={`rounded-full border px-3 py-1 ${getStatusTone(entry.status)}`}
+                            >
+                              {entry.sellerName}: {SELLER_FULFILLMENT_STATUS_LABELS[entry.status]}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     <div className="w-full max-w-xl space-y-3 xl:w-[420px]">

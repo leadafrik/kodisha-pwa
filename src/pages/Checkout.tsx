@@ -125,7 +125,7 @@ const Checkout: React.FC = () => {
             <div>
               <h1 className="text-3xl font-bold text-stone-900">Complete your order with manual M-Pesa verification</h1>
               <p className="mt-2 max-w-3xl text-sm text-stone-600">
-                Pay to the Agrisoko till, tell us which M-Pesa number you used, and admin will verify the payment against the till records before fulfillment starts.
+                Pay to the Agrisoko till, tell us which M-Pesa number you used, and admin will verify the payment against the till records before fulfillment starts. If your account has an email address, we also send a letterheaded invoice after checkout.
               </p>
             </div>
             <Link to="/cart" className="ui-btn-ghost px-4 py-2.5">
@@ -370,7 +370,7 @@ const Checkout: React.FC = () => {
                 <li>1. Confirm the delivery location and contact phone.</li>
                 <li>2. Choose whether you are paying with your saved phone or a different M-Pesa number.</li>
                 <li>3. Pay to store {MARKETPLACE_MPESA_STORE_NUMBER} / till {MARKETPLACE_MPESA_TILL_NUMBER}.</li>
-                <li>4. Submit checkout so the system records the payer phone and timestamp.</li>
+                <li>4. Submit checkout so the system records the payer phone and timestamp and emails your invoice.</li>
                 <li>5. Admin verifies manually, confirms the order, and delivery starts.</li>
               </ol>
             </div>

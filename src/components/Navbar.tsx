@@ -16,6 +16,7 @@ import {
   Building2,
   NotebookText,
   ShoppingCart,
+  Truck,
   type LucideIcon,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
@@ -53,6 +54,7 @@ const shouldShowTopLevelMobileNav = (pathname: string) =>
   pathname.startsWith("/blog/") ||
   pathname.startsWith("/bulk/") ||
   pathname.startsWith("/browse") ||
+  pathname.startsWith("/seller/") ||
   pathname.startsWith("/orders/");
 
 const pathMatches = (pathname: string, key: string) => {
@@ -77,6 +79,7 @@ const pathMatches = (pathname: string, key: string) => {
       pathname === "/profile" ||
       pathname === "/favorites" ||
       pathname === "/orders" ||
+      pathname === "/seller/orders" ||
       pathname.startsWith("/orders/") ||
       pathname === "/notifications" ||
       pathname === "/profile/notifications" ||
@@ -378,6 +381,9 @@ const Navbar: React.FC = () => {
                         <Link to="/orders" className="block border-t border-stone-100 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
                           Orders
                         </Link>
+                        <Link to="/seller/orders" className="block border-t border-stone-100 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
+                          Seller fulfillment
+                        </Link>
                         {isAdmin && (
                           <Link to="/admin" className="block border-t border-stone-100 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
                             Admin Console
@@ -585,6 +591,10 @@ const Navbar: React.FC = () => {
                 <Link to="/orders" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
                   <ClipboardList className="h-5 w-5" />
                   Orders
+                </Link>
+                <Link to="/seller/orders" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
+                  <Truck className="h-5 w-5" />
+                  Seller fulfillment
                 </Link>
                 <Link to="/cart" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
                   <ShoppingCart className="h-5 w-5" />

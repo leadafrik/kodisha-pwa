@@ -543,6 +543,12 @@ const Profile: React.FC = () => {
                   >
                     My orders
                   </Link>
+                  <Link
+                    to="/seller/orders"
+                    className="ui-btn-ghost justify-start bg-stone-50 px-4 py-3"
+                  >
+                    Seller fulfillment
+                  </Link>
                   {isAdmin && (
                     <Link
                       to="/admin"

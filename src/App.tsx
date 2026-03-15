@@ -65,6 +65,7 @@ const Cart = lazy(() => import('./pages/Cart'));
 const Checkout = lazy(() => import('./pages/Checkout'));
 const Orders = lazy(() => import('./pages/Orders'));
 const OrderDetails = lazy(() => import('./pages/OrderDetails'));
+const SellerOrders = lazy(() => import('./pages/SellerOrders'));
 const AdminOrders = lazy(() => import('./pages/admin/Orders'));
 
 // Loading fallback component
@@ -202,6 +203,14 @@ const AppShell = () => {
               element={
                 <ProtectedRoute>
                   <Checkout />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/seller/orders"
+              element={
+                <ProtectedRoute>
+                  <SellerOrders />
                 </ProtectedRoute>
               }
             />
