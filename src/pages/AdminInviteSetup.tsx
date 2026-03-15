@@ -25,6 +25,15 @@ const AdminInviteSetup: React.FC = () => {
   const requiredConsentsAccepted =
     consents.termsAccepted && consents.privacyAccepted && consents.dataProcessingConsent;
 
+  const setRequiredConsents = (checked: boolean) => {
+    setConsents((current) => ({
+      ...current,
+      termsAccepted: checked,
+      privacyAccepted: checked,
+      dataProcessingConsent: checked,
+    }));
+  };
+
   const passwordRuleStatus = useMemo(
     () => ({
       minLength: password.length >= 8,
@@ -185,29 +194,22 @@ const AdminInviteSetup: React.FC = () => {
 
               <div className="space-y-3 rounded-2xl border border-[#efe2d6] bg-[#fffaf4] px-4 py-4">
                 <ConsentCheckbox
-                  checked={consents.termsAccepted}
+                  checked={requiredConsentsAccepted}
                   label={
                     <>
-                      I agree to the <Link className="text-[#8f5135] underline" to="/terms">Terms of Service</Link>.
+                      I agree to the{" "}
+                      <Link className="text-[#8f5135] underline" to="/terms">
+                        Terms of Service
+                      </Link>{" "}
+                      and{" "}
+                      <Link className="text-[#8f5135] underline" to="/privacy">
+                        Privacy Policy
+                      </Link>
+                      , and I consent to Agrisoko processing my account data to operate the
+                      marketplace.
                     </>
                   }
-                  onChange={(checked) => setConsents((current) => ({ ...current, termsAccepted: checked }))}
-                />
-                <ConsentCheckbox
-                  checked={consents.privacyAccepted}
-                  label={
-                    <>
-                      I have read the <Link className="text-[#8f5135] underline" to="/privacy">Privacy Policy</Link>.
-                    </>
-                  }
-                  onChange={(checked) => setConsents((current) => ({ ...current, privacyAccepted: checked }))}
-                />
-                <ConsentCheckbox
-                  checked={consents.dataProcessingConsent}
-                  label="I consent to Agrisoko processing my account data to operate the marketplace."
-                  onChange={(checked) =>
-                    setConsents((current) => ({ ...current, dataProcessingConsent: checked }))
-                  }
+                  onChange={setRequiredConsents}
                 />
                 <ConsentCheckbox
                   checked={consents.marketingConsent}
