@@ -8,9 +8,16 @@ import {
   SellerMarketplaceOrder,
 } from "../types/orders";
 
-export const MARKETPLACE_MPESA_STORE_NUMBER = "4511909";
 export const MARKETPLACE_MPESA_TILL_NUMBER = "3319295";
 export const MARKETPLACE_ESTIMATED_DELIVERY_DAYS = 3;
+export const MARKETPLACE_DELIVERY_FEE = 350;
+export const MARKETPLACE_PLATFORM_FEE = 30;
+export const MARKETPLACE_SUPPORTED_DELIVERY_COUNTIES = [
+  "Kiambu",
+  "Nairobi",
+  "Kakamega",
+  "Narok",
+];
 
 export const checkoutMarketplaceOrder = async (payload: CheckoutPayload) => {
   const response = await apiRequest(API_ENDPOINTS.orders.checkout, {

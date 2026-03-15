@@ -76,6 +76,8 @@ export interface MarketplaceOrder {
   contactPhone: string;
   items: MarketplaceOrderItem[];
   subtotal: number;
+  deliveryFee: number;
+  platformFee: number;
   total: number;
   currency: "KES";
   paymentStatus: MarketplaceOrderPaymentStatus;

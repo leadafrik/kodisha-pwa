@@ -4,9 +4,11 @@ import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
 import { useAuth } from "../contexts/AuthContext";
 import {
+  MARKETPLACE_DELIVERY_FEE,
   MARKETPLACE_ESTIMATED_DELIVERY_DAYS,
-  MARKETPLACE_MPESA_STORE_NUMBER,
   MARKETPLACE_MPESA_TILL_NUMBER,
+  MARKETPLACE_PLATFORM_FEE,
+  MARKETPLACE_SUPPORTED_DELIVERY_COUNTIES,
 } from "../services/ordersService";
 
 const formatCurrency = (value: number) => `KES ${value.toLocaleString()}`;
@@ -14,6 +16,9 @@ const formatCurrency = (value: number) => `KES ${value.toLocaleString()}`;
 const Cart: React.FC = () => {
   const { items, subtotal, setItemQuantity, removeItem, clearCart } = useCart();
   const { user } = useAuth();
+  const deliveryFee = MARKETPLACE_DELIVERY_FEE;
+  const platformFee = MARKETPLACE_PLATFORM_FEE;
+  const total = subtotal + deliveryFee + platformFee;
 
   return (
     <div className="ui-page-shell">
@@ -150,16 +155,23 @@ const Cart: React.FC = () => {
                     <span>Subtotal</span>
                     <span className="font-semibold">{formatCurrency(subtotal)}</span>
                   </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span>Delivery fee</span>
+                    <span className="font-semibold">{formatCurrency(deliveryFee)}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span>Agrisoko fee</span>
+                    <span className="font-semibold">{formatCurrency(platformFee)}</span>
+                  </div>
                   <div className="flex items-center justify-between gap-3 border-t border-stone-200 pt-3 text-base font-semibold text-stone-900">
                     <span>Total</span>
-                    <span>{formatCurrency(subtotal)}</span>
+                    <span>{formatCurrency(total)}</span>
                   </div>
                 </div>
 
                 <div className="ui-accent-panel mt-4 p-4 text-sm text-stone-700">
                   <p className="font-semibold text-[#8B3525]">Pay to Agrisoko till</p>
-                  <p className="mt-2">Store number: <span className="font-semibold">{MARKETPLACE_MPESA_STORE_NUMBER}</span></p>
-                  <p>Till number: <span className="font-semibold">{MARKETPLACE_MPESA_TILL_NUMBER}</span></p>
+                  <p className="mt-2">Till number: <span className="font-semibold">{MARKETPLACE_MPESA_TILL_NUMBER}</span></p>
                   <p className="mt-2 text-xs text-stone-600">
                     After payment, enter the M-Pesa number you used so admin can match it against the till records and timestamp.
                   </p>
@@ -189,7 +201,7 @@ const Cart: React.FC = () => {
                     </Link>
                   )}
                   <p className="text-xs text-stone-500">
-                    Checkout records your payer phone, delivery location, and payment submission time for manual review.
+                    Delivery is currently available in {MARKETPLACE_SUPPORTED_DELIVERY_COUNTIES.join(", ")}. Checkout records your payer phone and delivery details for review.
                   </p>
                 </div>
               </div>

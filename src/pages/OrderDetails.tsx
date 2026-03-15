@@ -172,6 +172,20 @@ const OrderDetails: React.FC = () => {
                 <p className="mt-4 text-sm text-stone-600">
                   If your account has an email address, Agrisoko sends a letterheaded invoice PDF when checkout is submitted.
                 </p>
+                <div className="mt-4 grid gap-2 rounded-2xl border border-stone-200 bg-stone-50 p-4 text-sm text-stone-700">
+                  <div className="flex items-center justify-between">
+                    <span>Items subtotal</span>
+                    <span className="font-semibold text-stone-900">{formatCurrency(order.subtotal || 0)}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Delivery fee</span>
+                    <span className="font-semibold text-stone-900">{formatCurrency(order.deliveryFee || 0)}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Agrisoko fee</span>
+                    <span className="font-semibold text-stone-900">{formatCurrency(order.platformFee || 0)}</span>
+                  </div>
+                </div>
               </div>
 
               <div className="ui-card p-5">
@@ -245,8 +259,7 @@ const OrderDetails: React.FC = () => {
                   </div>
                   <div className="ui-accent-panel p-4">
                     <p className="font-semibold text-[#8B3525]">Till reference used</p>
-                    <p className="mt-2">Store number: <span className="font-semibold">{order.payment.storeNumber}</span></p>
-                    <p className="mt-1">Till number: <span className="font-semibold">{order.payment.tillNumber}</span></p>
+                    <p className="mt-2">Till number: <span className="font-semibold">{order.payment.tillNumber}</span></p>
                   </div>
                 </div>
               </div>

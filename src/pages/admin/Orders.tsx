@@ -263,8 +263,10 @@ const AdminOrders: React.FC = () => {
                         <p><span className="font-semibold text-stone-900">Contact:</span> {order.contactPhone}</p>
                         <p><span className="font-semibold text-stone-900">Payer phone:</span> {order.payment.payerPhone}</p>
                         <p><span className="font-semibold text-stone-900">Submitted:</span> {new Date(order.payment.submittedAt).toLocaleString()}</p>
-                        <p><span className="font-semibold text-stone-900">Store/Till:</span> {order.payment.storeNumber} / {order.payment.tillNumber}</p>
+                        <p><span className="font-semibold text-stone-900">Till:</span> {order.payment.tillNumber}</p>
                         <p><span className="font-semibold text-stone-900">Delivery target:</span> {new Date(order.delivery.estimatedDeliveryDate).toLocaleDateString()}</p>
+                        <p><span className="font-semibold text-stone-900">Items subtotal:</span> {formatCurrency(order.subtotal || 0)}</p>
+                        <p><span className="font-semibold text-stone-900">Fees:</span> {formatCurrency((order.deliveryFee || 0) + (order.platformFee || 0))}</p>
                       </div>
                       <div className="flex flex-wrap gap-2 text-xs font-semibold text-stone-500">
                         {order.items.map((item) => (

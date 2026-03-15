@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import GooglePlacesInput from "../components/GooglePlacesInput";
 import { useCart } from "../contexts/CartContext";
@@ -10,35 +10,75 @@ import {
 } from "../data/kenyaCounties";
 import {
   checkoutMarketplaceOrder,
+  MARKETPLACE_DELIVERY_FEE,
   MARKETPLACE_ESTIMATED_DELIVERY_DAYS,
-  MARKETPLACE_MPESA_STORE_NUMBER,
   MARKETPLACE_MPESA_TILL_NUMBER,
+  MARKETPLACE_PLATFORM_FEE,
+  MARKETPLACE_SUPPORTED_DELIVERY_COUNTIES,
 } from "../services/ordersService";
 import { CheckoutPayload } from "../types/orders";
 
 const formatCurrency = (value: number) => `KES ${value.toLocaleString()}`;
+const SUPPORTED_COUNTY_HINT =
+  "Delivery is currently available only in Kiambu, Nairobi, Kakamega, and Narok.";
 
 const Checkout: React.FC = () => {
   const { user } = useAuth();
   const { items, subtotal, clearCart } = useCart();
   const navigate = useNavigate();
   const savedAccountPhone = user?.phone?.trim() || "";
-  const hasSavedAccountPhone = !!savedAccountPhone;
+  const supportedCountySet = useMemo(
+    () => new Set(MARKETPLACE_SUPPORTED_DELIVERY_COUNTIES.map((item) => item.toLowerCase())),
+    []
+  );
+  const rememberedAddressKey = useMemo(
+    () =>
+      `agrisoko.checkout.address.${
+        user?._id || user?.id || user?.email || user?.phone || "guest"
+      }`,
+    [user?._id, user?.id, user?.email, user?.phone]
+  );
 
   const [contactPhone, setContactPhone] = useState(savedAccountPhone);
-  const [payerPhoneSource, setPayerPhoneSource] = useState<"account" | "different">(
-    hasSavedAccountPhone ? "account" : "different"
-  );
-  const [payerPhone, setPayerPhone] = useState("");
+  const [payerPhone, setPayerPhone] = useState(savedAccountPhone);
   const [county, setCounty] = useState("");
   const [constituency, setConstituency] = useState("");
   const [ward, setWard] = useState("");
   const [approximateLocation, setApproximateLocation] = useState("");
   const [deliveryNotes, setDeliveryNotes] = useState("");
-  const [customerNote, setCustomerNote] = useState("");
-  const [confirmedPaymentStep, setConfirmedPaymentStep] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (savedAccountPhone) {
+      setContactPhone((current) => current || savedAccountPhone);
+      setPayerPhone((current) => current || savedAccountPhone);
+    }
+  }, [savedAccountPhone]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem(rememberedAddressKey);
+    if (!stored) return;
+
+    try {
+      const parsed = JSON.parse(stored) as {
+        county?: string;
+        constituency?: string;
+        ward?: string;
+        approximateLocation?: string;
+        deliveryNotes?: string;
+      };
+
+      if (parsed.county) setCounty(parsed.county);
+      if (parsed.constituency) setConstituency(parsed.constituency);
+      if (parsed.ward) setWard(parsed.ward);
+      if (parsed.approximateLocation) setApproximateLocation(parsed.approximateLocation);
+      if (parsed.deliveryNotes) setDeliveryNotes(parsed.deliveryNotes);
+    } catch {
+      // Ignore invalid local cache.
+    }
+  }, [rememberedAddressKey]);
 
   const constituencies = useMemo(
     () => (county ? getConstituenciesByCounty(county) : []),
@@ -48,6 +88,16 @@ const Checkout: React.FC = () => {
     () => (county && constituency ? getWardsByConstituency(county, constituency) : []),
     [county, constituency]
   );
+  const supportedCounties = useMemo(
+    () =>
+      kenyaCounties.filter((item) =>
+        supportedCountySet.has(item.name.toLowerCase())
+      ),
+    [supportedCountySet]
+  );
+  const deliveryFee = MARKETPLACE_DELIVERY_FEE;
+  const platformFee = MARKETPLACE_PLATFORM_FEE;
+  const total = subtotal + deliveryFee + platformFee;
 
   if (!user) {
     return <Navigate to="/login" replace />;
@@ -64,8 +114,22 @@ const Checkout: React.FC = () => {
     approximateLocation?: string;
     formattedAddress?: string;
   }) => {
-    if (selection.county) {
-      setCounty(selection.county);
+    const nextCounty = selection.county?.trim() || "";
+    const nextApproximateLocation =
+      selection.approximateLocation || selection.formattedAddress || "";
+
+    setApproximateLocation(nextApproximateLocation);
+
+    if (nextCounty && !supportedCountySet.has(nextCounty.toLowerCase())) {
+      setCounty("");
+      setConstituency("");
+      setWard("");
+      setError(SUPPORTED_COUNTY_HINT);
+      return;
+    }
+
+    if (nextCounty) {
+      setCounty(nextCounty);
     }
     if (selection.constituency) {
       setConstituency(selection.constituency);
@@ -73,9 +137,7 @@ const Checkout: React.FC = () => {
     if (selection.ward) {
       setWard(selection.ward);
     }
-    setApproximateLocation(
-      selection.approximateLocation || selection.formattedAddress || ""
-    );
+    setError("");
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -84,8 +146,14 @@ const Checkout: React.FC = () => {
     setError("");
 
     try {
-      if (!confirmedPaymentStep) {
-        throw new Error("Confirm that you will pay to the Agrisoko till before submitting checkout.");
+      if (!payerPhone.trim()) {
+        throw new Error("Enter the M-Pesa number you will use to pay.");
+      }
+      if (!county.trim()) {
+        throw new Error("Select a delivery county.");
+      }
+      if (!supportedCountySet.has(county.trim().toLowerCase())) {
+        throw new Error(SUPPORTED_COUNTY_HINT);
       }
 
       const payload: CheckoutPayload = {
@@ -94,9 +162,8 @@ const Checkout: React.FC = () => {
           quantity: item.quantity,
         })),
         contactPhone,
-        payerPhoneSource,
-        payerPhone: payerPhoneSource === "different" ? payerPhone : undefined,
-        customerNote,
+        payerPhoneSource: "different",
+        payerPhone,
         delivery: {
           county,
           constituency,
@@ -107,6 +174,20 @@ const Checkout: React.FC = () => {
       };
 
       const response = await checkoutMarketplaceOrder(payload);
+
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(
+          rememberedAddressKey,
+          JSON.stringify({
+            county,
+            constituency,
+            ward,
+            approximateLocation,
+            deliveryNotes,
+          })
+        );
+      }
+
       clearCart();
       navigate(`/orders/${response.data._id}`);
     } catch (submitError: any) {
@@ -123,9 +204,9 @@ const Checkout: React.FC = () => {
           <p className="ui-section-kicker">Checkout</p>
           <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-stone-900">Complete your order with manual M-Pesa verification</h1>
+              <h1 className="text-3xl font-bold text-stone-900">Finish your Agrisoko order</h1>
               <p className="mt-2 max-w-3xl text-sm text-stone-600">
-                Pay to the Agrisoko till, tell us which M-Pesa number you used, and admin will verify the payment against the till records before fulfillment starts. If your account has an email address, we also send a letterheaded invoice after checkout.
+                Pay to the Agrisoko till, submit the same M-Pesa number here, and we will email you a clean invoice with your order details.
               </p>
             </div>
             <Link to="/cart" className="ui-btn-ghost px-4 py-2.5">
@@ -134,7 +215,7 @@ const Checkout: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="mt-6 grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
               <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
@@ -143,8 +224,8 @@ const Checkout: React.FC = () => {
             )}
 
             <div className="ui-card p-5">
-              <p className="ui-section-kicker">Contact and payment match</p>
-              <h2 className="mt-2 text-xl font-semibold text-stone-900">Who should we verify this payment against?</h2>
+              <p className="ui-section-kicker">Payment details</p>
+              <h2 className="mt-2 text-xl font-semibold text-stone-900">Use the same number you will pay with</h2>
               <div className="mt-4 grid gap-4 md:grid-cols-2">
                 <label>
                   <span className="ui-label">Contact phone</span>
@@ -154,71 +235,32 @@ const Checkout: React.FC = () => {
                     className="ui-input"
                     placeholder="07xx xxx xxx"
                   />
-                  <p className="ui-helper">We use this for delivery coordination and order updates.</p>
+                  <p className="ui-helper">We use this for delivery updates and order coordination.</p>
                 </label>
-                <div>
-                  <span className="ui-label">M-Pesa number used to pay</span>
-                  <div className="space-y-3">
-                    <label className={`flex items-start gap-3 rounded-2xl border px-4 py-3 ${hasSavedAccountPhone ? "border-stone-200 bg-stone-50" : "border-stone-200 bg-stone-100 text-stone-500"}`}>
-                      <input
-                        type="radio"
-                        name="payerPhoneSource"
-                        checked={payerPhoneSource === "account"}
-                        disabled={!hasSavedAccountPhone}
-                        onChange={() => setPayerPhoneSource("account")}
-                        className="mt-1"
-                      />
-                      <span>
-                        <span className="block text-sm font-semibold text-stone-900">Use account phone</span>
-                        <span className="block text-xs text-stone-500">
-                          {hasSavedAccountPhone
-                            ? `Match against ${savedAccountPhone}`
-                            : "No saved phone on this account."}
-                        </span>
-                      </span>
-                    </label>
-
-                    <label className="flex items-start gap-3 rounded-2xl border border-stone-200 bg-white px-4 py-3">
-                      <input
-                        type="radio"
-                        name="payerPhoneSource"
-                        checked={payerPhoneSource === "different"}
-                        onChange={() => setPayerPhoneSource("different")}
-                        className="mt-1"
-                      />
-                      <span>
-                        <span className="block text-sm font-semibold text-stone-900">Use a different M-Pesa number</span>
-                        <span className="block text-xs text-stone-500">
-                          Choose this if someone else is paying on your behalf.
-                        </span>
-                      </span>
-                    </label>
-                  </div>
-
-                  {payerPhoneSource === "different" && (
-                    <div className="mt-3">
-                      <input
-                        value={payerPhone}
-                        onChange={(event) => setPayerPhone(event.target.value)}
-                        className="ui-input"
-                        placeholder="Enter the paying M-Pesa number"
-                      />
-                    </div>
-                  )}
-                </div>
+                <label>
+                  <span className="ui-label">M-Pesa number you will use to pay</span>
+                  <input
+                    value={payerPhone}
+                    onChange={(event) => setPayerPhone(event.target.value)}
+                    className="ui-input"
+                    placeholder="Enter the paying M-Pesa number"
+                  />
+                  <p className="ui-helper">This is the number we will match against your payment record.</p>
+                </label>
               </div>
             </div>
 
             <div className="ui-card p-5">
-              <p className="ui-section-kicker">Delivery</p>
-              <h2 className="mt-2 text-xl font-semibold text-stone-900">Where should the order go?</h2>
+              <p className="ui-section-kicker">Delivery address</p>
+              <h2 className="mt-2 text-xl font-semibold text-stone-900">Where should we deliver?</h2>
+              <p className="mt-2 text-sm text-stone-600">{SUPPORTED_COUNTY_HINT}</p>
               <div className="mt-4 space-y-4">
                 <GooglePlacesInput
                   label="Search delivery location"
                   value={approximateLocation}
                   onChange={setApproximateLocation}
                   onPlaceSelected={handlePlaceSelection}
-                  helperText="Search once to pull county, constituency, ward, and the exact drop-off area. You can still adjust the fields below."
+                  helperText="Search a market, estate, road, or landmark. We remember your last delivery address on this device to make the next checkout faster."
                 />
 
                 <div className="grid gap-4 md:grid-cols-3">
@@ -230,11 +272,12 @@ const Checkout: React.FC = () => {
                         setCounty(event.target.value);
                         setConstituency("");
                         setWard("");
+                        setError("");
                       }}
                       className="ui-input"
                     >
                       <option value="">Select county</option>
-                      {kenyaCounties.map((item) => (
+                      {supportedCounties.map((item) => (
                         <option key={item.code} value={item.name}>
                           {item.name}
                         </option>
@@ -286,52 +329,33 @@ const Checkout: React.FC = () => {
                     value={deliveryNotes}
                     onChange={(event) => setDeliveryNotes(event.target.value)}
                     className="ui-input min-h-[100px]"
-                    placeholder="Estate, road, market gate, preferred drop-off instructions, or anything the admin team should know."
-                  />
-                </label>
-
-                <label>
-                  <span className="ui-label">Customer note for Agrisoko</span>
-                  <textarea
-                    value={customerNote}
-                    onChange={(event) => setCustomerNote(event.target.value)}
-                    className="ui-input min-h-[100px]"
-                    placeholder="Optional note about substitutions, call-ahead timing, or order coordination."
+                    placeholder="Estate, road, market gate, building name, or delivery instructions."
                   />
                 </label>
               </div>
             </div>
 
             <div className="ui-card p-5">
-              <p className="ui-section-kicker">Submit for review</p>
-              <h2 className="mt-2 text-xl font-semibold text-stone-900">Confirm the payment workflow</h2>
-              <label className="mt-4 flex items-start gap-3 rounded-2xl border border-stone-200 bg-stone-50 px-4 py-4 text-sm text-stone-700">
-                <input
-                  type="checkbox"
-                  checked={confirmedPaymentStep}
-                  onChange={(event) => setConfirmedPaymentStep(event.target.checked)}
-                  className="mt-1"
-                />
-                <span>
-                  I understand I should pay to the Agrisoko till, then submit this checkout so admin can verify the payer phone, timestamp, and till record before confirming the order.
-                </span>
-              </label>
-
+              <p className="ui-section-kicker">Final step</p>
+              <h2 className="mt-2 text-xl font-semibold text-stone-900">Pay first, then submit</h2>
+              <p className="mt-2 text-sm text-stone-600">
+                Once you have paid to the till below, click submit. We will verify the payment and send your order into delivery.
+              </p>
               <button type="submit" disabled={submitting} className="ui-btn-primary mt-4 w-full px-4 py-3">
-                {submitting ? "Submitting order..." : "I have paid - submit for verification"}
+                {submitting ? "Submitting order..." : "I have paid - submit order"}
               </button>
             </div>
           </form>
 
           <div className="space-y-4">
             <div className="ui-card p-5">
-              <p className="ui-section-kicker">Pay here</p>
-              <h2 className="mt-2 text-xl font-semibold text-stone-900">Agrisoko till details</h2>
+              <p className="ui-section-kicker">Pay to this till</p>
+              <h2 className="mt-2 text-xl font-semibold text-stone-900">Agrisoko till number</h2>
               <div className="ui-accent-panel mt-4 p-4 text-sm text-stone-700">
-                <p>Store number: <span className="font-semibold">{MARKETPLACE_MPESA_STORE_NUMBER}</span></p>
-                <p className="mt-1">Till number: <span className="font-semibold">{MARKETPLACE_MPESA_TILL_NUMBER}</span></p>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#A0452E]">Till number</p>
+                <p className="mt-2 text-3xl font-bold text-stone-900">{MARKETPLACE_MPESA_TILL_NUMBER}</p>
                 <p className="mt-3 text-xs text-stone-600">
-                  Use the exact M-Pesa number you plan to submit here so admin can verify cleanly against the till records.
+                  Pay with the same M-Pesa number you entered on this page so we can confirm your order quickly.
                 </p>
               </div>
 
@@ -349,30 +373,47 @@ const Checkout: React.FC = () => {
                 ))}
               </div>
 
-              <div className="mt-4 border-t border-stone-200 pt-4 text-base font-semibold text-stone-900">
-                Total payable: {formatCurrency(subtotal)}
+              <div className="mt-4 space-y-2 border-t border-stone-200 pt-4 text-sm text-stone-700">
+                <div className="flex items-center justify-between">
+                  <span>Items subtotal</span>
+                  <span className="font-semibold text-stone-900">{formatCurrency(subtotal)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Delivery fee</span>
+                  <span className="font-semibold text-stone-900">{formatCurrency(deliveryFee)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Agrisoko fee</span>
+                  <span className="font-semibold text-stone-900">{formatCurrency(platformFee)}</span>
+                </div>
+                <div className="flex items-center justify-between border-t border-stone-200 pt-3 text-base font-semibold text-stone-900">
+                  <span>Total payable</span>
+                  <span>{formatCurrency(total)}</span>
+                </div>
               </div>
             </div>
 
             <div className="ui-success-panel p-5 text-sm text-forest-700">
-              <p className="font-semibold">Money-back guarantee</p>
+              <p className="font-semibold">Buyer protection</p>
               <p className="mt-2">
-                If the verified order is not delivered, Agrisoko can review the case and return the money.
+                If your verified order is not delivered, Agrisoko will review the case and arrange a refund where due.
               </p>
               <p className="mt-2 text-xs">
-                Estimated delivery target: within {MARKETPLACE_ESTIMATED_DELIVERY_DAYS} days after payment review is cleared.
+                Estimated delivery target: within {MARKETPLACE_ESTIMATED_DELIVERY_DAYS} days after payment confirmation.
               </p>
             </div>
 
             <div className="ui-card-soft p-5 text-sm text-stone-700">
-              <p className="font-semibold text-stone-900">How checkout works</p>
+              <p className="font-semibold text-stone-900">What happens next</p>
               <ol className="mt-3 space-y-2">
-                <li>1. Confirm the delivery location and contact phone.</li>
-                <li>2. Choose whether you are paying with your saved phone or a different M-Pesa number.</li>
-                <li>3. Pay to store {MARKETPLACE_MPESA_STORE_NUMBER} / till {MARKETPLACE_MPESA_TILL_NUMBER}.</li>
-                <li>4. Submit checkout so the system records the payer phone and timestamp and emails your invoice.</li>
-                <li>5. Admin verifies manually, confirms the order, and delivery starts.</li>
+                <li>1. Pay to till {MARKETPLACE_MPESA_TILL_NUMBER}.</li>
+                <li>2. Submit this order with the same M-Pesa number you used to pay.</li>
+                <li>3. We email your invoice and verify the payment record.</li>
+                <li>4. The seller is released to start delivery.</li>
               </ol>
+              <p className="mt-4 text-xs text-stone-500">
+                Need help? Reach us at info@leadafrik.com or WhatsApp 0796389192 / 0711454771.
+              </p>
             </div>
           </div>
         </div>
