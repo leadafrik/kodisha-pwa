@@ -36,9 +36,6 @@ type MarketCategory = "produce" | "livestock" | "inputs" | "service";
 
 const founderLetterParagraphs = [
   "When I started Agrisoko, many people told me it would not work.",
-  "They said Kenyans do not trust digital platforms because of scammers. They said marketplaces fail because buyers find no sellers and sellers find no buyers. They said farmers and buyers would eventually trade outside the platform.",
-  "Those are real challenges. But they underestimated what Kenyans can build when we believe in something together.",
-  "I chose to trust farmers who wake up before sunrise to feed our nation. I chose to trust buyers who want fair prices and reliable supply. And I chose to trust people like you.",
   "Agrisoko is building a future where farmers keep more of what they earn, buyers trade with confidence, and agriculture in Kenya becomes more direct, more trusted, and more connected.",
   "If you believe in that vision, join us. Sign up today. Tell a friend to tell a friend. And together, let us build the future of agriculture in Kenya.",
 ];
@@ -524,7 +521,6 @@ const Home: React.FC = () => {
                   <span className="ui-chip-soft">{launchWindowLabel}</span>
                   <span className="ui-chip-soft">{liveListingCount.toLocaleString()} listings live</span>
                   <span className="ui-chip-soft">{countyCoverageLabel}</span>
-                  <span className="ui-chip-soft">Verified profiles</span>
                 </div>
 
                 <div className="mt-7 flex flex-wrap gap-2">
@@ -565,9 +561,6 @@ const Home: React.FC = () => {
                     <p className="ui-section-kicker">Start in minutes</p>
                     <h2 className="mt-2 text-2xl text-stone-900">List fast, browse immediately</h2>
                   </div>
-                  <div className="rounded-full border border-[#F3C9BE] bg-[#FDF5F3] px-3 py-1.5 text-sm font-semibold text-[#A0452E]">
-                    Free now
-                  </div>
                 </div>
 
                 <div className="mt-5 space-y-4">
@@ -585,12 +578,6 @@ const Home: React.FC = () => {
                       </div>
                     </div>
                   ))}
-                </div>
-
-                <div className="mt-6 flex flex-wrap gap-2">
-                  <span className="ui-chip-soft">{liveListingCount.toLocaleString()} live listings</span>
-                  <span className="ui-chip-soft">{liveCountyCount || 47} counties active</span>
-                  <span className="ui-chip-soft">Public browsing</span>
                 </div>
 
                 <Link

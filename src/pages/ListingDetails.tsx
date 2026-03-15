@@ -1373,14 +1373,6 @@ const ListingDetails: React.FC = () => {
                     More active listings from {owner.fullName || owner.name || "this seller"}
                   </h2>
                 </div>
-                {owner._id && (
-                  <Link
-                    to={`/sellers/${owner._id}`}
-                    className="text-sm font-semibold text-[#A0452E] hover:text-[#8B3525]"
-                  >
-                    View full seller profile
-                  </Link>
-                )}
               </div>
 
               <div className="grid gap-4 md:grid-cols-3">
@@ -1458,10 +1450,6 @@ const ListingDetails: React.FC = () => {
                     <ListingMap lat={coords.lat} lng={coords.lng} />
                   </div>
                 </GoogleMapsLoader>
-
-                <p className="mt-2 text-xs text-stone-500">
-                  Coordinates: {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
-                </p>
 
                 <a
                   href={`https://www.google.com/maps?q=${coords.lat},${coords.lng}`}
@@ -1741,10 +1729,6 @@ const ListingDetails: React.FC = () => {
               >
                 {sending ? 'Sending...' : 'Send Message'}
               </button>
-
-              <p className="mt-2 text-center text-xs text-stone-500">
-                {getAuthToken() ? 'Messages are private and secure.' : 'Log in to send and receive messages.'}
-              </p>
             </div>
           )}
         </div>
