@@ -41,7 +41,7 @@ const AdminBroadcast: React.FC = () => {
     setError(null);
     setResult(null);
     try {
-      const data = await adminApiRequest("/api/admin/broadcast", {
+      const data = await adminApiRequest("/admin/broadcast", {
         method: "POST",
         body: JSON.stringify({ subject, body, audience, extraEmails }),
       });
