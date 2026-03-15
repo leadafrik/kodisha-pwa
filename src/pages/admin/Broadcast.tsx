@@ -1,8 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Mail, Send, Users, CheckCircle, AlertCircle } from "lucide-react";
 import { adminApiRequest } from "../../config/api";
 
 type Audience = "all" | "verified" | "sellers" | "buyers" | "none";
+
+interface BroadcastJob {
+  jobId: string;
+  total: number;
+  sent: number;
+  failed: number;
+  status: "running" | "done" | "error";
+}
 
 const AUDIENCE_OPTIONS: { value: Audience; label: string; description: string }[] = [
   { value: "all", label: "All users", description: "Every registered user with an email address" },
@@ -18,14 +26,37 @@ const AdminBroadcast: React.FC = () => {
   const [audience, setAudience] = useState<Audience>("all");
   const [extraEmailsRaw, setExtraEmailsRaw] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<{ sent: number; failed: number; total: number } | null>(null);
+  const [job, setJob] = useState<BroadcastJob | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Stop polling when job is done
+  useEffect(() => {
+    if (job?.status === "done" || job?.status === "error") {
+      if (pollRef.current) clearInterval(pollRef.current);
+      setLoading(false);
+    }
+  }, [job?.status]);
+
+  // Clean up on unmount
+  useEffect(() => () => { if (pollRef.current) clearInterval(pollRef.current); }, []);
 
   const parseExtraEmails = (raw: string): string[] =>
     raw
       .split(/[,\n;]+/)
       .map((s) => s.trim().toLowerCase())
       .filter((s) => s.includes("@"));
+
+  const startPolling = (jobId: string) => {
+    pollRef.current = setInterval(async () => {
+      try {
+        const res = await adminApiRequest(`/admin/broadcast/${jobId}`);
+        setJob(res.data);
+      } catch {
+        // ignore transient poll errors
+      }
+    }, 2000);
+  };
 
   const handleSend = async () => {
     const extraEmails = parseExtraEmails(extraEmailsRaw);
@@ -39,19 +70,24 @@ const AdminBroadcast: React.FC = () => {
     }
     setLoading(true);
     setError(null);
-    setResult(null);
+    setJob(null);
     try {
       const data = await adminApiRequest("/admin/broadcast", {
         method: "POST",
         body: JSON.stringify({ subject, body, audience, extraEmails }),
       });
-      setResult(data.data);
+      const { jobId, total } = data.data;
+      setJob({ jobId, total, sent: 0, failed: 0, status: "running" });
+      startPolling(jobId);
     } catch (err: any) {
       setError(err.message || "Broadcast failed.");
-    } finally {
       setLoading(false);
     }
   };
+
+  const pct = job ? Math.round(((job.sent + job.failed) / job.total) * 100) : 0;
+  const isDone = job?.status === "done";
+  const isRunning = job?.status === "running";
 
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-10">
@@ -78,11 +114,12 @@ const AdminBroadcast: React.FC = () => {
                   key={opt.value}
                   type="button"
                   onClick={() => setAudience(opt.value)}
+                  disabled={loading}
                   className={`rounded-2xl border p-3 text-left text-sm transition ${
                     audience === opt.value
                       ? "border-[#A0452E] bg-[#FDF5F3] text-[#A0452E]"
                       : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                  }`}
+                  } disabled:opacity-50`}
                 >
                   <p className="font-semibold">{opt.label}</p>
                   <p className="mt-0.5 text-xs opacity-70">{opt.description}</p>
@@ -98,8 +135,9 @@ const AdminBroadcast: React.FC = () => {
               type="text"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
+              disabled={loading}
               placeholder="e.g. Try the Agrisoko Android app"
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE]"
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE] disabled:opacity-50"
             />
           </div>
 
@@ -110,8 +148,9 @@ const AdminBroadcast: React.FC = () => {
               rows={10}
               value={body}
               onChange={(e) => setBody(e.target.value)}
+              disabled={loading}
               placeholder={"Hi,\n\nWrite your message here...\n\nThe Agrisoko Team"}
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE]"
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE] disabled:opacity-50"
             />
             <p className="mt-1 text-xs text-slate-400">
               Plain text only. If the message starts with "Hi," it will be personalised with each user's first name automatically.
@@ -127,8 +166,9 @@ const AdminBroadcast: React.FC = () => {
               rows={4}
               value={extraEmailsRaw}
               onChange={(e) => setExtraEmailsRaw(e.target.value)}
+              disabled={loading}
               placeholder={"Paste extra addresses here, one per line or comma-separated:\njohn@example.com\njane@example.com, someone@gmail.com"}
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE]"
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE] disabled:opacity-50"
             />
             {extraEmailsRaw.trim() && (
               <p className="mt-1 text-xs text-[#A0452E] font-medium">
@@ -148,14 +188,33 @@ const AdminBroadcast: React.FC = () => {
             </div>
           )}
 
-          {/* Success */}
-          {result && (
-            <div className="flex items-start gap-2 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-              <CheckCircle size={16} className="mt-0.5 flex-shrink-0" />
-              <span>
-                Sent to <strong>{result.sent}</strong> of <strong>{result.total}</strong> recipients.
-                {result.failed > 0 && ` ${result.failed} failed.`}
-              </span>
+          {/* Live progress */}
+          {job && (
+            <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-4 space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-semibold text-slate-700">
+                  {isDone ? "Done" : `Sending… ${job.sent + job.failed} / ${job.total}`}
+                </span>
+                <span className="text-slate-400">{pct}%</span>
+              </div>
+              <div className="h-2 w-full rounded-full bg-slate-200 overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${isDone ? "bg-emerald-500" : "bg-[#A0452E]"}`}
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+              {isDone && (
+                <div className="flex items-center gap-2 pt-1 text-sm text-emerald-700">
+                  <CheckCircle size={15} className="flex-shrink-0" />
+                  <span>
+                    Sent to <strong>{job.sent}</strong> of <strong>{job.total}</strong> recipients.
+                    {job.failed > 0 && ` ${job.failed} failed.`}
+                  </span>
+                </div>
+              )}
+              {isRunning && (
+                <p className="text-xs text-slate-400">The page is safe to leave — sending continues in the background.</p>
+              )}
             </div>
           )}
 
@@ -171,7 +230,7 @@ const AdminBroadcast: React.FC = () => {
             ) : (
               <Send size={16} />
             )}
-            {loading ? "Sending…" : "Send broadcast"}
+            {loading ? "Sending in background…" : "Send broadcast"}
           </button>
         </div>
       </div>
