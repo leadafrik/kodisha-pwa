@@ -1270,14 +1270,22 @@ const CreateListing: React.FC = () => {
                           <label className="block text-sm font-semibold text-stone-900 mb-2">
                             {form.category === "service" || form.category === "inputs" ? "Quantity" : "Quantity *"}
                           </label>
-                          <div className="flex gap-2">
+                          <div className="flex flex-col gap-1.5">
                             <input
                               type="number"
                               min="0"
                               placeholder={form.category === "livestock" ? "e.g. 5" : form.category === "service" ? "e.g. 1" : "Amount"}
                               value={form.quantity}
                               onChange={(e) => setForm((prev) => ({ ...prev, quantity: e.target.value }))}
-                              className="w-20 min-w-0 rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm font-semibold text-stone-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE]"
+                              className="ui-input font-semibold"
+                            />
+                            <input
+                              type="text"
+                              list="unit-suggestions"
+                              placeholder="unit (kg, head, hour…)"
+                              value={form.unit}
+                              onChange={(e) => setForm((prev) => ({ ...prev, unit: e.target.value }))}
+                              className="ui-input"
                             />
                           </div>
                           {(form.quantity || form.unit) && (
@@ -1367,7 +1375,7 @@ const CreateListing: React.FC = () => {
                               <label className="mb-2 block text-sm font-semibold text-stone-900">
                                 {form.category === "service" || form.category === "inputs" ? "Quantity" : "Quantity *"}
                               </label>
-                              <div className="flex gap-2">
+                              <div className="flex flex-col gap-1.5">
                                 <input
                                   type="number"
                                   min="0"
@@ -1379,17 +1387,17 @@ const CreateListing: React.FC = () => {
                                       quantity: e.target.value,
                                     }))
                                   }
-                                  className="w-20 min-w-0 rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm font-semibold text-stone-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE]"
+                                  className="ui-input font-semibold"
                                 />
                                 <input
                                   type="text"
                                   list="unit-suggestions"
-                                  placeholder="unit"
+                                  placeholder="unit (kg, head, hour…)"
                                   value={item.unit}
                                   onChange={(e) =>
                                     updateBatchItem(item.id, (current) => ({ ...current, unit: e.target.value }))
                                   }
-                                  className="w-20 rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE]"
+                                  className="ui-input"
                                 />
                               </div>
                               {(item.quantity || item.unit) && (
