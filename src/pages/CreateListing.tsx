@@ -1277,15 +1277,7 @@ const CreateListing: React.FC = () => {
                               placeholder={form.category === "livestock" ? "e.g. 5" : form.category === "service" ? "e.g. 1" : "Amount"}
                               value={form.quantity}
                               onChange={(e) => setForm((prev) => ({ ...prev, quantity: e.target.value }))}
-                              className="flex-1 rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm font-semibold text-stone-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE]"
-                            />
-                            <input
-                              type="text"
-                              list="unit-suggestions"
-                              placeholder="unit"
-                              value={form.unit}
-                              onChange={(e) => setForm((prev) => ({ ...prev, unit: e.target.value }))}
-                              className="w-24 rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE]"
+                              className="w-20 min-w-0 rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm font-semibold text-stone-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE]"
                             />
                           </div>
                           {(form.quantity || form.unit) && (
@@ -1387,7 +1379,7 @@ const CreateListing: React.FC = () => {
                                       quantity: e.target.value,
                                     }))
                                   }
-                                  className="flex-1 rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm font-semibold text-stone-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE]"
+                                  className="w-20 min-w-0 rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm font-semibold text-stone-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE]"
                                 />
                                 <input
                                   type="text"
