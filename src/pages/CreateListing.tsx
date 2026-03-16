@@ -68,12 +68,20 @@ const DELIVERY_SCOPE_OPTIONS: Array<{ value: DeliveryScope; label: string; helpe
   { value: "negotiable", label: "Negotiable", helper: "Delivery can be discussed with buyer." },
 ];
 
-const UNITS = ["kg", "bag", "ton", "bunch", "dozen", "piece", "liter", "gallon", "box", "crate"];
+const UNIT_SUGGESTIONS_BY_CATEGORY: Record<ListingCategory, string[]> = {
+  produce: ["kg", "bag", "ton", "bunch", "dozen", "crate", "box", "liter", "piece"],
+  livestock: ["head", "animal", "pair", "herd", "piece"],
+  inputs: ["bag", "kg", "ton", "liter", "gallon", "piece", "box", "crate"],
+  service: ["hour", "day", "session", "job", "month", "acre", "piece"],
+};
+const ALL_UNIT_SUGGESTIONS = Array.from(
+  new Set(Object.values(UNIT_SUGGESTIONS_BY_CATEGORY).flat())
+);
 const RECOMMENDED_UNIT_BY_CATEGORY: Record<ListingCategory, string> = {
   produce: "kg",
-  livestock: "piece",
+  livestock: "head",
   inputs: "bag",
-  service: "piece",
+  service: "hour",
 };
 
 const CATEGORY_DESCRIPTIONS = {
@@ -431,7 +439,7 @@ const CreateListing: React.FC = () => {
         item.title.trim().length >= 6 &&
         item.description.trim().length >= 20 &&
         !!item.price;
-      const hasQuantity = form.category === "inputs" ? true : !!item.quantity;
+      const hasQuantity = (form.category === "inputs" || form.category === "service") ? true : !!item.quantity;
       const hasImages = item.images.length > 0;
       return hasBaseFields && hasQuantity && hasImages;
     }).length;
@@ -590,7 +598,7 @@ const CreateListing: React.FC = () => {
           setError("Please enter a price");
           return false;
         }
-        if (form.category !== "inputs" && !form.quantity) {
+        if (form.category !== "inputs" && form.category !== "service" && !form.quantity) {
           setError("Please enter a quantity");
           return false;
         }
@@ -624,7 +632,7 @@ const CreateListing: React.FC = () => {
           setError(`${itemLabel}: add a price.`);
           return false;
         }
-        if (form.category !== "inputs" && !item.quantity) {
+        if (form.category !== "inputs" && form.category !== "service" && !item.quantity) {
           setError(`${itemLabel}: add a quantity.`);
           return false;
         }
@@ -1245,6 +1253,16 @@ const CreateListing: React.FC = () => {
                   </p>
                 </div>
 
+                {/* Unit datalist — shared by single and batch unit inputs */}
+                <datalist id="unit-suggestions">
+                  {(form.category
+                    ? UNIT_SUGGESTIONS_BY_CATEGORY[form.category]
+                    : ALL_UNIT_SUGGESTIONS
+                  ).map((u) => (
+                    <option key={u} value={u} />
+                  ))}
+                </datalist>
+
                 {entryMode === "single" ? (
                   <>
                     {/* Title */}
@@ -1290,42 +1308,37 @@ const CreateListing: React.FC = () => {
 
                       {form.category !== "inputs" && (
                         <div>
-                          <label className="block text-sm font-semibold text-stone-900 mb-2">Quantity *</label>
+                          <label className="block text-sm font-semibold text-stone-900 mb-2">
+                            {form.category === "service" ? "Quantity" : "Quantity *"}
+                          </label>
                           <div className="flex gap-2">
                             <input
                               type="number"
-                              placeholder="Amount"
+                              placeholder={form.category === "livestock" ? "e.g. 5" : form.category === "service" ? "e.g. 1" : "Amount"}
                               value={form.quantity}
                               onChange={(e) => setForm((prev) => ({ ...prev, quantity: e.target.value }))}
                               className="flex-1 ui-input"
                             />
-                            <select
+                            <input
+                              type="text"
+                              list="unit-suggestions"
+                              placeholder={form.category === "livestock" ? "head" : form.category === "service" ? "hour" : "unit"}
                               value={form.unit}
                               onChange={(e) => setForm((prev) => ({ ...prev, unit: e.target.value }))}
-                              className="ui-input"
-                            >
-                              {UNITS.map((u) => (
-                                <option key={u} value={u}>
-                                  {u}
-                                </option>
-                              ))}
-                            </select>
+                              className="w-24 ui-input"
+                            />
                           </div>
-                          {recommendedUnit && (
-                            <div className="mt-2 flex flex-wrap items-center gap-2">
-                              <p className="text-xs text-stone-600">
-                                Recommended unit for this category: <span className="font-semibold">{recommendedUnit}</span>
-                              </p>
-                              {form.unit !== recommendedUnit && (
-                                <button
-                                  type="button"
-                                  onClick={() => setForm((prev) => ({ ...prev, unit: recommendedUnit }))}
-                                  className="rounded-full border border-[#E8A08E] bg-[#FDF5F3] px-3 py-1 text-xs font-semibold text-[#A0452E] hover:bg-[#FAE9E4]"
-                                >
-                                  Use recommended
-                                </button>
-                              )}
-                            </div>
+                          {recommendedUnit && form.unit && form.unit !== recommendedUnit && (
+                            <button
+                              type="button"
+                              onClick={() => setForm((prev) => ({ ...prev, unit: recommendedUnit }))}
+                              className="mt-2 rounded-full border border-[#E8A08E] bg-[#FDF5F3] px-3 py-1 text-xs font-semibold text-[#A0452E] hover:bg-[#FAE9E4]"
+                            >
+                              Use "{recommendedUnit}"
+                            </button>
+                          )}
+                          {form.category === "service" && (
+                            <p className="mt-1 text-xs text-stone-500">Optional — skip if not applicable.</p>
                           )}
                         </div>
                       )}
@@ -1404,11 +1417,13 @@ const CreateListing: React.FC = () => {
                             </div>
                             {form.category !== "inputs" && (
                               <div>
-                                <label className="mb-2 block text-sm font-semibold text-stone-900">Quantity *</label>
+                                <label className="mb-2 block text-sm font-semibold text-stone-900">
+                                  {form.category === "service" ? "Quantity" : "Quantity *"}
+                                </label>
                                 <div className="flex gap-2">
                                   <input
                                     type="number"
-                                    placeholder="Amount"
+                                    placeholder={form.category === "livestock" ? "e.g. 5" : form.category === "service" ? "e.g. 1" : "Amount"}
                                     value={item.quantity}
                                     onChange={(e) =>
                                       updateBatchItem(item.id, (current) => ({
@@ -1418,19 +1433,16 @@ const CreateListing: React.FC = () => {
                                     }
                                     className="flex-1 ui-input"
                                   />
-                                  <select
+                                  <input
+                                    type="text"
+                                    list="unit-suggestions"
+                                    placeholder={form.category === "livestock" ? "head" : form.category === "service" ? "hour" : "unit"}
                                     value={item.unit}
                                     onChange={(e) =>
                                       updateBatchItem(item.id, (current) => ({ ...current, unit: e.target.value }))
                                     }
-                                    className="ui-input px-3 py-2"
-                                  >
-                                    {UNITS.map((unit) => (
-                                      <option key={unit} value={unit}>
-                                        {unit}
-                                      </option>
-                                    ))}
-                                  </select>
+                                    className="w-24 ui-input"
+                                  />
                                 </div>
                               </div>
                             )}
