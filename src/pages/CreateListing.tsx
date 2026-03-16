@@ -449,55 +449,6 @@ const CreateListing: React.FC = () => {
     return { itemCount, readyCount };
   }, [batchItems, form.category]);
 
-  const trustSignals = useMemo(
-    () => [
-      {
-        label: "Clear title",
-        done:
-          entryMode === "batch"
-            ? batchReadiness.readyCount > 0
-            : form.title.trim().length >= 12,
-      },
-      {
-        label: "Detailed description",
-        done:
-          entryMode === "batch"
-            ? batchItems.some((item) => item.description.trim().length >= 50)
-            : form.description.trim().length >= 80,
-      },
-      { label: "Complete location", done: !!form.county && !!form.constituency && !!form.ward },
-      { label: "Public contact added", done: !!form.contact.trim() },
-      {
-        label: "At least 3 photos",
-        done:
-          form.listingType === "buy"
-            ? true
-            : entryMode === "batch"
-            ? batchItems.reduce((total, item) => total + item.images.length, 0) >= 3
-            : form.images.length >= 3,
-      },
-      { label: "ID + selfie verified", done: idVerified && selfieVerified },
-    ],
-    [
-      entryMode,
-      batchReadiness.readyCount,
-      batchItems,
-      form.title,
-      form.description,
-      form.county,
-      form.constituency,
-      form.ward,
-      form.contact,
-      form.listingType,
-      form.images.length,
-      idVerified,
-      selfieVerified,
-    ]
-  );
-
-  const trustCompletedCount = trustSignals.filter((signal) => signal.done).length;
-  const trustScore = Math.round((trustCompletedCount / trustSignals.length) * 100);
-  const trustNextAction = trustSignals.find((signal) => !signal.done)?.label;
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -1640,42 +1591,6 @@ const CreateListing: React.FC = () => {
                     )}
                   </div>
                 )}
-
-                <div className="rounded-xl border border-[#F3C9BE] bg-[#FDF5F3] p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-semibold text-[#72281A]">
-                      Listings with these details get more buyer chats
-                    </p>
-                    {TRUST_SCORE_VISIBLE ? (
-                      <p className="text-sm font-bold text-[#8B3525]">{trustScore}%</p>
-                    ) : null}
-                  </div>
-                  {TRUST_SCORE_VISIBLE ? (
-                    <div className="mt-2 h-2 rounded-full bg-white overflow-hidden">
-                      <div
-                        className="h-full bg-[#A0452E] transition-all"
-                        style={{ width: `${trustScore}%` }}
-                      />
-                    </div>
-                  ) : null}
-                  <p className="mt-3 text-xs text-[#8B3525]">
-                    {trustNextAction
-                      ? `Next high-impact action: ${trustNextAction}.`
-                      : "Great setup. Your listing has strong trust signals."}
-                  </p>
-                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                    {trustSignals.map((signal) => (
-                      <p
-                        key={signal.label}
-                        className={`text-xs font-semibold ${
-                          signal.done ? "text-[#A0452E]" : "text-slate-600"
-                        }`}
-                      >
-                        [{signal.done ? "x" : " "}] {signal.label}
-                      </p>
-                    ))}
-                  </div>
-                </div>
 
                 <div className="rounded-xl border border-[#F3C9BE] bg-[#FDF5F3] p-4 text-sm text-[#72281A]">
                   {idVerified && selfieVerified ? (
