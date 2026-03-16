@@ -1326,7 +1326,7 @@ const CreateListing: React.FC = () => {
                               placeholder={form.category === "livestock" ? "e.g. 5" : form.category === "service" ? "e.g. 1" : "Amount"}
                               value={form.quantity}
                               onChange={(e) => setForm((prev) => ({ ...prev, quantity: e.target.value }))}
-                              className="flex-1 rounded-xl border border-stone-300 bg-white px-4 py-3 text-base font-semibold text-stone-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE]"
+                              className="flex-1 rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm font-semibold text-stone-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE]"
                             />
                             <input
                               type="text"
@@ -1334,7 +1334,7 @@ const CreateListing: React.FC = () => {
                               placeholder="unit"
                               value={form.unit}
                               onChange={(e) => setForm((prev) => ({ ...prev, unit: e.target.value }))}
-                              className="w-28 rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE]"
+                              className="w-24 rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE]"
                             />
                           </div>
                           {(form.quantity || form.unit) && (
@@ -1420,44 +1420,44 @@ const CreateListing: React.FC = () => {
                                 className="ui-input"
                               />
                             </div>
-                              <div>
-                                <label className="mb-2 block text-sm font-semibold text-stone-900">
-                                  {form.category === "service" || form.category === "inputs" ? "Quantity" : "Quantity *"}
-                                </label>
-                                <div className="flex gap-2">
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    placeholder={form.category === "livestock" ? "e.g. 5" : form.category === "service" ? "e.g. 1" : "Amount"}
-                                    value={item.quantity}
-                                    onChange={(e) =>
-                                      updateBatchItem(item.id, (current) => ({
-                                        ...current,
-                                        quantity: e.target.value,
-                                      }))
-                                    }
-                                    className="flex-1 rounded-xl border border-stone-300 bg-white px-4 py-3 text-base font-semibold text-stone-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE]"
-                                  />
-                                  <input
-                                    type="text"
-                                    list="unit-suggestions"
-                                    placeholder="unit"
-                                    value={item.unit}
-                                    onChange={(e) =>
-                                      updateBatchItem(item.id, (current) => ({ ...current, unit: e.target.value }))
-                                    }
-                                    className="w-28 rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE]"
-                                  />
-                                </div>
-                                {(item.quantity || item.unit) && (
-                                  <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-stone-100 px-3 py-1 text-sm font-semibold text-stone-800">
-                                    {item.quantity || "?"}&nbsp;{item.unit || "?"}
-                                  </div>
-                                )}
-                                {(form.category === "service" || form.category === "inputs") && (
-                                  <p className="mt-1 text-xs text-stone-500">Optional — skip if not applicable.</p>
-                                )}
+                            <div>
+                              <label className="mb-2 block text-sm font-semibold text-stone-900">
+                                {form.category === "service" || form.category === "inputs" ? "Quantity" : "Quantity *"}
+                              </label>
+                              <div className="flex gap-2">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  placeholder={form.category === "livestock" ? "e.g. 5" : form.category === "service" ? "e.g. 1" : "Amount"}
+                                  value={item.quantity}
+                                  onChange={(e) =>
+                                    updateBatchItem(item.id, (current) => ({
+                                      ...current,
+                                      quantity: e.target.value,
+                                    }))
+                                  }
+                                  className="flex-1 rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm font-semibold text-stone-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE]"
+                                />
+                                <input
+                                  type="text"
+                                  list="unit-suggestions"
+                                  placeholder="unit"
+                                  value={item.unit}
+                                  onChange={(e) =>
+                                    updateBatchItem(item.id, (current) => ({ ...current, unit: e.target.value }))
+                                  }
+                                  className="w-20 rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE]"
+                                />
                               </div>
+                              {(item.quantity || item.unit) && (
+                                <div className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-semibold text-stone-800">
+                                  {item.quantity || "?"}&nbsp;{item.unit || "?"}
+                                </div>
+                              )}
+                              {(form.category === "service" || form.category === "inputs") && (
+                                <p className="mt-1 text-xs text-stone-500">Optional.</p>
+                              )}
+                            </div>
                           </div>
 
                           <div>
