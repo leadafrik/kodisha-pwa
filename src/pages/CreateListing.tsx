@@ -4,7 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useAdaptiveLayout } from "../hooks/useAdaptiveLayout";
 import { kenyaCounties, getConstituenciesByCounty, getWardsByConstituency } from "../data/kenyaCounties";
 import { API_BASE_URL, ensureValidAccessToken } from "../config/api";
-import { PAYMENTS_ENABLED, TRUST_SCORE_VISIBLE } from "../config/featureFlags";
+import { PAYMENTS_ENABLED } from "../config/featureFlags";
 import { CheckCircle2, MapPin, Tag, Calendar, Camera } from "lucide-react";
 import { ErrorAlert } from "../components/ui";
 import { trackTrafficClick } from "../utils/trafficAnalytics";
