@@ -1326,7 +1326,7 @@ const CreateListing: React.FC = () => {
                               placeholder={form.category === "livestock" ? "e.g. 5" : form.category === "service" ? "e.g. 1" : "Amount"}
                               value={form.quantity}
                               onChange={(e) => setForm((prev) => ({ ...prev, quantity: e.target.value }))}
-                              className="flex-1 ui-input"
+                              className="flex-1 rounded-xl border border-stone-300 bg-white px-4 py-3 text-base font-semibold text-stone-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE]"
                             />
                             <input
                               type="text"
@@ -1334,7 +1334,7 @@ const CreateListing: React.FC = () => {
                               placeholder="unit"
                               value={form.unit}
                               onChange={(e) => setForm((prev) => ({ ...prev, unit: e.target.value }))}
-                              className="w-28 ui-input"
+                              className="w-28 rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE]"
                             />
                           </div>
                           {(form.quantity || form.unit) && (
@@ -1436,7 +1436,7 @@ const CreateListing: React.FC = () => {
                                         quantity: e.target.value,
                                       }))
                                     }
-                                    className="flex-1 ui-input"
+                                    className="flex-1 rounded-xl border border-stone-300 bg-white px-4 py-3 text-base font-semibold text-stone-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE]"
                                   />
                                   <input
                                     type="text"
@@ -1446,7 +1446,7 @@ const CreateListing: React.FC = () => {
                                     onChange={(e) =>
                                       updateBatchItem(item.id, (current) => ({ ...current, unit: e.target.value }))
                                     }
-                                    className="w-28 ui-input"
+                                    className="w-28 rounded-xl border border-stone-300 bg-white px-4 py-3 text-base text-stone-900 shadow-sm outline-none transition focus:border-[#A0452E] focus:ring-2 focus:ring-[#F3C9BE]"
                                   />
                                 </div>
                                 {(item.quantity || item.unit) && (
