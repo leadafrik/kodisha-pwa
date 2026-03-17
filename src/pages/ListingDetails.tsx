@@ -26,7 +26,6 @@ import { normalizeKenyanPhone } from "../utils/phone";
 import { getMarketTrustScore } from "../utils/trustScore";
 import { TRUST_SCORE_VISIBLE } from "../config/featureFlags";
 
-const GoogleMapsLoader = lazy(() => import("../components/GoogleMapsLoader"));
 const ListingMap = lazy(() => import("../components/ListingMap"));
 
 // Helper: Check if user is admin by checking role in stored user data
@@ -1445,11 +1444,9 @@ const ListingDetails: React.FC = () => {
                   </div>
                 }
               >
-                <GoogleMapsLoader>
-                  <div className="overflow-hidden rounded-3xl border border-stone-200 shadow-sm">
-                    <ListingMap lat={coords.lat} lng={coords.lng} />
-                  </div>
-                </GoogleMapsLoader>
+                <div className="overflow-hidden rounded-3xl border border-stone-200 shadow-sm">
+                  <ListingMap lat={coords.lat} lng={coords.lng} />
+                </div>
 
                 <a
                   href={`https://www.google.com/maps?q=${coords.lat},${coords.lng}`}
