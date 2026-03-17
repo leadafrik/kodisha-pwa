@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { FilePlus2, PencilLine, RefreshCw, Save, Trash2 } from "lucide-react";
+import { FilePlus2, ImagePlus, PencilLine, RefreshCw, Save, Trash2, X } from "lucide-react";
 import { API_ENDPOINTS, adminApiRequest } from "../../config/api";
 import { useAuth } from "../../contexts/AuthContext";
 import type { BlogPost, BlogPostStatus } from "../../types/blog";
@@ -15,6 +15,11 @@ type BlogFormState = {
   featured: boolean;
   authorName: string;
   authorRole: string;
+};
+
+type CoverImageState = {
+  file: File | null;
+  preview: string | null; // object URL for new file, or existing URL
 };
 
 const defaultForm = (): BlogFormState => ({
@@ -62,6 +67,8 @@ const BlogManagement: React.FC = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [form, setForm] = useState<BlogFormState>(() => defaultForm());
+  const [coverImg, setCoverImg] = useState<CoverImageState>({ file: null, preview: null });
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -103,6 +110,7 @@ const BlogManagement: React.FC = () => {
   const resetEditor = () => {
     setSelectedId(null);
     setForm(defaultForm());
+    setCoverImg({ file: null, preview: null });
     setError("");
     setSuccess("");
   };
@@ -110,9 +118,24 @@ const BlogManagement: React.FC = () => {
   const selectPost = (post: BlogPost) => {
     setSelectedId(post._id);
     setForm(mapPostToForm(post));
+    setCoverImg({ file: null, preview: post.coverImage || null });
     setError("");
     setSuccess("");
   };
+
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const preview = URL.createObjectURL(file);
+    setCoverImg({ file, preview });
+  }, []);
+
+  const clearCoverImage = useCallback(() => {
+    if (coverImg.file && coverImg.preview) URL.revokeObjectURL(coverImg.preview);
+    setCoverImg({ file: null, preview: null });
+    setForm((current) => ({ ...current, coverImage: "" }));
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }, [coverImg]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -120,31 +143,46 @@ const BlogManagement: React.FC = () => {
     setSuccess("");
 
     try {
-      const payload = {
-        ...form,
-        tags: form.tags,
-      };
+      let body: FormData | string;
+
+      if (coverImg.file) {
+        const fd = new FormData();
+        fd.append("title", form.title);
+        fd.append("excerpt", form.excerpt);
+        fd.append("content", form.content);
+        fd.append("status", form.status);
+        fd.append("tags", form.tags);
+        fd.append("featured", String(form.featured));
+        fd.append("authorName", form.authorName);
+        fd.append("authorRole", form.authorRole);
+        fd.append("coverImage", coverImg.file);
+        body = fd;
+      } else {
+        body = JSON.stringify({ ...form, coverImage: coverImg.preview ?? form.coverImage });
+      }
 
       if (selectedId) {
         const response = await adminApiRequest(API_ENDPOINTS.blog.admin.update(selectedId), {
           method: "PUT",
-          body: JSON.stringify(payload),
+          body,
         });
         const updated = response?.data as BlogPost;
         setPosts((current) =>
           current.map((post) => (post._id === updated._id ? updated : post))
         );
         setForm(mapPostToForm(updated));
+        setCoverImg({ file: null, preview: updated.coverImage || null });
         setSuccess("Blog post updated.");
       } else {
         const response = await adminApiRequest(API_ENDPOINTS.blog.admin.create, {
           method: "POST",
-          body: JSON.stringify(payload),
+          body,
         });
         const created = response?.data as BlogPost;
         setPosts((current) => [created, ...current]);
         setSelectedId(created._id);
         setForm(mapPostToForm(created));
+        setCoverImg({ file: null, preview: created.coverImage || null });
         setSuccess("Blog post created.");
       }
     } catch (err: any) {
@@ -373,13 +411,50 @@ const BlogManagement: React.FC = () => {
 
               <div className="md:col-span-2">
                 <label className="mb-2 block text-sm font-semibold text-stone-900">
-                  Cover image URL
+                  Cover image
                 </label>
+                {coverImg.preview ? (
+                  <div className="relative overflow-hidden rounded-2xl border border-stone-200">
+                    <img
+                      src={coverImg.preview}
+                      alt="Cover preview"
+                      className="h-48 w-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={clearCoverImage}
+                      className="absolute right-2 top-2 rounded-full bg-white/90 p-1.5 shadow-sm transition hover:bg-white"
+                      title="Remove image"
+                    >
+                      <X className="h-4 w-4 text-stone-700" />
+                    </button>
+                    <div className="absolute bottom-2 left-2">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-stone-700 shadow-sm transition hover:bg-white"
+                      >
+                        Replace
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-stone-200 bg-stone-50 py-10 text-sm text-stone-500 transition hover:border-[#A0452E] hover:bg-[#FDF5F3] hover:text-[#A0452E]"
+                  >
+                    <ImagePlus className="h-7 w-7" />
+                    <span>Click to upload cover image</span>
+                    <span className="text-xs text-stone-400">PNG or JPEG, max 5 MB</span>
+                  </button>
+                )}
                 <input
-                  className={INPUT_CLASS}
-                  value={form.coverImage}
-                  onChange={(event) => setForm((current) => ({ ...current, coverImage: event.target.value }))}
-                  placeholder="https://..."
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  onChange={handleFileChange}
                 />
               </div>
 
