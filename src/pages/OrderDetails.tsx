@@ -117,7 +117,7 @@ const OrderDetails: React.FC = () => {
               <p className="ui-section-kicker">Order details</p>
               <h1 className="text-3xl font-bold text-stone-900">{order?.orderNumber || "Marketplace order"}</h1>
               <p className="mt-2 max-w-2xl text-sm text-stone-600">
-                Checkout orders stay in payment review until admin matches the payer phone and submission time against the Agrisoko till records.
+                Your order is in payment review. Once your M-PESA payment is matched to this order, it will be released for fulfilment.
               </p>
             </div>
             <div className="flex gap-2">
@@ -182,7 +182,7 @@ const OrderDetails: React.FC = () => {
                   </div>
                 </div>
                 <p className="mt-4 text-sm text-stone-600">
-                  If your account has an email address, Agrisoko sends a letterheaded invoice PDF when checkout is submitted.
+                  An invoice PDF has been sent to your email address.
                 </p>
                 <div className="mt-4 grid gap-2 rounded-2xl border border-stone-200 bg-stone-50 p-4 text-sm text-stone-700">
                   <div className="flex items-center justify-between">
