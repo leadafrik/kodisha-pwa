@@ -13,6 +13,7 @@ interface AdminListing {
   isVerified?: boolean;
   createdAt?: string;
   price?: number;
+  category?: string;
   contact?: string;
   location?: {
     county?: string;
@@ -26,6 +27,15 @@ interface AdminListing {
   };
 }
 
+interface EditForm {
+  title: string;
+  description: string;
+  price: string;
+  category: string;
+}
+
+const PRODUCT_CATEGORIES = ["produce", "livestock", "inputs", "service"] as const;
+
 const ListingManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"pending" | "active">("pending");
   const [listings, setListings] = useState<AdminListing[]>([]);
@@ -33,6 +43,10 @@ const ListingManagement: React.FC = () => {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [error, setError] = useState("");
+  const [editTarget, setEditTarget] = useState<AdminListing | null>(null);
+  const [editForm, setEditForm] = useState<EditForm>({ title: "", description: "", price: "", category: "" });
+  const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState("");
 
   const loadListings = async (tab: "pending" | "active") => {
     try {
@@ -103,7 +117,52 @@ const ListingManagement: React.FC = () => {
     }
   };
 
-  return (
+  const openEdit = (item: AdminListing) => {
+    setEditTarget(item);
+    setEditForm({
+      title: item.title || "",
+      description: item.description || "",
+      price: item.price !== undefined ? String(item.price) : "",
+      category: item.category || "",
+    });
+    setEditError("");
+  };
+
+  const handleEditSave = async () => {
+    if (!editTarget) return;
+    setEditSaving(true);
+    setEditError("");
+    try {
+      const body: Record<string, any> = {};
+      if (editForm.title.trim()) body.title = editForm.title.trim();
+      if (editForm.description.trim()) body.description = editForm.description.trim();
+      if (editForm.price !== "") body.price = Number(editForm.price);
+      if (editForm.category) body.category = editForm.category;
+
+      await adminApiRequest(`/admin/listings/${editTarget._id}`, {
+        method: "PATCH",
+        body: JSON.stringify(body),
+      });
+      setListings((prev) =>
+        prev.map((item) =>
+          item._id === editTarget._id
+            ? {
+                ...item,
+                title: body.title ?? item.title,
+                description: body.description ?? item.description,
+                price: body.price ?? item.price,
+                category: body.category ?? item.category,
+              }
+            : item
+        )
+      );
+      setEditTarget(null);
+    } catch (err: any) {
+      setEditError(err?.message || "Failed to save changes.");
+    } finally {
+      setEditSaving(false);
+    }
+  };
     <div className="min-h-screen bg-slate-50 text-slate-900 px-6 py-10">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-start justify-between flex-wrap gap-4">
@@ -215,6 +274,15 @@ const ListingManagement: React.FC = () => {
                         </button>
                       </>
                     )}
+                    {item.listingType === "product" && (
+                      <button
+                        onClick={() => openEdit(item)}
+                        disabled={actionLoading === item._id}
+                        className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                      >
+                        Edit
+                      </button>
+                    )}
                     <button
                       onClick={() => handleDelete(item._id)}
                       disabled={actionLoading === item._id}
@@ -229,6 +297,85 @@ const ListingManagement: React.FC = () => {
           </div>
         )}
       </div>
+      </div>
+
+      {/* Edit listing modal */}
+      {editTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+            <h2 className="text-lg font-bold text-slate-900">Edit listing</h2>
+            <p className="mt-1 text-sm text-slate-500">Only product listings can be edited. Changes take effect immediately.</p>
+
+            {editError && (
+              <div className="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+                {editError}
+              </div>
+            )}
+
+            <div className="mt-4 space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Category</label>
+                <select
+                  value={editForm.category}
+                  onChange={(e) => setEditForm((f) => ({ ...f, category: e.target.value }))}
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                >
+                  <option value="">— select category —</option>
+                  {PRODUCT_CATEGORIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c === "produce" ? "Produce" : c === "livestock" ? "Livestock" : c === "inputs" ? "Inputs" : "Services"}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Title</label>
+                <input
+                  value={editForm.title}
+                  onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Description</label>
+                <textarea
+                  rows={4}
+                  value={editForm.description}
+                  onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Price (KES)</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={editForm.price}
+                  onChange={(e) => setEditForm((f) => ({ ...f, price: e.target.value }))}
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="mt-5 flex justify-end gap-3">
+              <button
+                onClick={() => setEditTarget(null)}
+                disabled={editSaving}
+                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleEditSave}
+                disabled={editSaving}
+                className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+              >
+                {editSaving ? "Saving…" : "Save changes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
