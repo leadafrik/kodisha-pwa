@@ -137,7 +137,7 @@ const normalizeCategory = (item: any, kind: "product" | "service"): MarketCatego
   }
 
   const category = String(item?.category || item?.propertyType || "").toLowerCase();
-  if (category === "livestock" || category === "inputs") return category;
+  if (category === "livestock" || category === "inputs" || category === "service") return category;
   return "produce";
 };
 
@@ -524,6 +524,8 @@ const Home: React.FC = () => {
                     const liveCount =
                       category === "service"
                         ? liveServices.filter((item: any) => normalizeCategory(item, "service") === category)
+                            .length +
+                          liveProducts.filter((item: any) => normalizeCategory(item, "product") === category)
                             .length
                         : liveProducts.filter((item: any) => normalizeCategory(item, "product") === category)
                             .length;
