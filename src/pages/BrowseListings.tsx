@@ -56,6 +56,7 @@ type UnifiedCard = {
   ownerRatingAverage?: number;
   ownerRatingCount?: number;
   ownerCreatedAt?: Date;
+  ownerBadges?: string[];
   image?: string;
   deliveryScope: DeliveryScope;
 };
@@ -230,6 +231,8 @@ const BrowseListings: React.FC = () => {
   const [county, setCounty] = useState<string>("");
   const [search, setSearch] = useState<string>("");
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [minPrice, setMinPrice] = useState<string>("");
+  const [maxPrice, setMaxPrice] = useState<string>("");
   const [sortBy, setSortBy] = useState<SortOption>("recommended");
   const [showRaffle, setShowRaffle] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -342,6 +345,7 @@ const BrowseListings: React.FC = () => {
           ownerRatingCount:
             typeof p.owner?.ratings?.count === "number" ? p.owner.ratings.count : undefined,
           ownerCreatedAt: p.owner?.createdAt ? new Date(p.owner.createdAt) : undefined,
+          ownerBadges: Array.isArray(p.owner?.badges) ? p.owner.badges : undefined,
           deliveryScope: normalizeDeliveryScope(p.deliveryScope),
         } as UnifiedCard;
       }) || [];
@@ -395,6 +399,7 @@ const BrowseListings: React.FC = () => {
           ownerRatingCount:
             typeof s.owner?.ratings?.count === "number" ? s.owner.ratings.count : undefined,
           ownerCreatedAt: s.owner?.createdAt ? new Date(s.owner.createdAt) : undefined,
+          ownerBadges: Array.isArray(s.owner?.badges) ? s.owner.badges : undefined,
           deliveryScope: normalizeDeliveryScope(s.deliveryScope),
         } as UnifiedCard;
       }) || [];
@@ -452,6 +457,12 @@ const BrowseListings: React.FC = () => {
         if (verifiedOnly && !card.verified) return false;
         if (county && card.county?.toLowerCase() !== county.toLowerCase())
           return false;
+        if (minPrice !== "" && typeof card.priceValue === "number") {
+          if (card.priceValue < Number(minPrice)) return false;
+        }
+        if (maxPrice !== "" && typeof card.priceValue === "number") {
+          if (card.priceValue > Number(maxPrice)) return false;
+        }
         if (searchTerm) {
           const haystack = `${card.title} ${card.description} ${card.locationLabel}`.toLowerCase();
           if (!haystack.includes(searchTerm)) return false;
@@ -489,7 +500,7 @@ const BrowseListings: React.FC = () => {
       const timeB = b.createdAt ? b.createdAt.getTime() : 0;
       return timeB - timeA;
     });
-  }, [cards, category, serviceSub, county, search, sortBy, verifiedOnly]);
+  }, [cards, category, serviceSub, county, search, sortBy, verifiedOnly, minPrice, maxPrice]);
 
   const stats = useMemo(() => {
     const total = cards.length;
@@ -498,7 +509,7 @@ const BrowseListings: React.FC = () => {
     return { total, verifiedCount, boostedCount };
   }, [cards]);
   const hasActiveFilters = Boolean(
-    county || search || category !== "all" || serviceSub !== "all" || verifiedOnly
+    county || search || category !== "all" || serviceSub !== "all" || verifiedOnly || minPrice || maxPrice
   );
   const activeFilterCount = [
     Boolean(county),
@@ -506,6 +517,7 @@ const BrowseListings: React.FC = () => {
     serviceSub !== "all",
     verifiedOnly,
     sortBy !== "recommended",
+    Boolean(minPrice || maxPrice),
   ].filter(Boolean).length;
   const sortSummary = useMemo(() => {
     switch (sortBy) {
@@ -797,6 +809,30 @@ const BrowseListings: React.FC = () => {
                         Verified only
                       </label>
 
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold uppercase tracking-widest text-stone-500">
+                          Price range (KSh)
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <input
+                            type="number"
+                            min={0}
+                            value={minPrice}
+                            onChange={(e) => setMinPrice(e.target.value)}
+                            placeholder="Min"
+                            className="ui-input py-2.5 text-sm"
+                          />
+                          <input
+                            type="number"
+                            min={0}
+                            value={maxPrice}
+                            onChange={(e) => setMaxPrice(e.target.value)}
+                            placeholder="Max"
+                            className="ui-input py-2.5 text-sm"
+                          />
+                        </div>
+                      </div>
+
                       {hasActiveFilters && (
                         <button
                           onClick={() => {
@@ -805,6 +841,8 @@ const BrowseListings: React.FC = () => {
                             navigate("/browse");
                             setServiceSub("all");
                             setVerifiedOnly(false);
+                            setMinPrice("");
+                            setMaxPrice("");
                             setSortBy("recommended");
                           }}
                           className="w-full rounded-lg border border-stone-200 px-3 py-2 text-xs font-semibold text-stone-600 hover:bg-white transition"
@@ -890,7 +928,7 @@ const BrowseListings: React.FC = () => {
                     })}
                   </div>
 
-                  <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-stone-500">
+                  <div className="mt-4 flex flex-wrap items-center gap-3">
                     <label className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-3 py-2 text-sm font-semibold text-stone-700">
                       <input
                         type="checkbox"
@@ -900,6 +938,25 @@ const BrowseListings: React.FC = () => {
                       />
                       Verified only
                     </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min={0}
+                        value={minPrice}
+                        onChange={(e) => setMinPrice(e.target.value)}
+                        placeholder="Min KSh"
+                        className="ui-input w-28 py-2 text-sm"
+                      />
+                      <span className="text-xs text-stone-400">–</span>
+                      <input
+                        type="number"
+                        min={0}
+                        value={maxPrice}
+                        onChange={(e) => setMaxPrice(e.target.value)}
+                        placeholder="Max KSh"
+                        className="ui-input w-28 py-2 text-sm"
+                      />
+                    </div>
                   </div>
 
                   {hasActiveFilters && (
@@ -915,6 +972,8 @@ const BrowseListings: React.FC = () => {
                           navigate("/browse");
                           setServiceSub("all");
                           setVerifiedOnly(false);
+                          setMinPrice("");
+                          setMaxPrice("");
                           setSortBy("recommended");
                         }}
                         className="rounded-lg border border-stone-200 px-3 py-2 text-xs font-semibold text-stone-600 hover:bg-stone-50 transition"
@@ -1250,6 +1309,22 @@ const BrowseListings: React.FC = () => {
                       <p className="mt-1 text-xs text-stone-500">
                         {[card.ownerResponseTime, card.ownerLastActive].filter(Boolean).join(" · ")}
                       </p>
+                    )}
+                    {card.ownerBadges && card.ownerBadges.length > 0 && (
+                      <div className="mt-1.5 flex flex-wrap gap-1">
+                        {card.ownerBadges.slice(0, 3).map((badge) => (
+                          <span
+                            key={badge}
+                            className="inline-flex items-center rounded-full bg-[#FDF5F3] px-2 py-0.5 text-[10px] font-semibold text-[#A0452E]"
+                          >
+                            {badge === "fast_responder" && "⚡ Fast responder"}
+                            {badge === "top_rated" && "★ Top rated"}
+                            {badge === "reliable_seller" && "✓ Reliable"}
+                            {badge === "verified_id" && "ID Verified"}
+                            {badge === "experienced" && "Experienced"}
+                          </span>
+                        ))}
+                      </div>
                     )}
                     <div className="mt-2 flex flex-wrap items-center gap-3 text-xs font-semibold text-stone-600">
                       <span className="inline-flex items-center gap-1">

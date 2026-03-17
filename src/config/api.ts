@@ -166,12 +166,17 @@ export const API_ENDPOINTS = {
     markComplete: (id: string) => `${API_BASE_URL}/bulk-orders/${id}/mark-complete`,
     invoice: (id: string) => `${API_BASE_URL}/bulk-orders/${id}/invoice`,
     close: (id: string) => `${API_BASE_URL}/bulk-orders/${id}/close`,
+    markInvoicePaid: (id: string) => `${API_BASE_URL}/bulk-orders/${id}/invoice/mark-paid`,
     bids: {
       create: (orderId: string) => `${API_BASE_URL}/bulk-orders/${orderId}/bids`,
       accept: (orderId: string, bidId: string) =>
         `${API_BASE_URL}/bulk-orders/${orderId}/bids/${bidId}/accept`,
       reject: (orderId: string, bidId: string) =>
         `${API_BASE_URL}/bulk-orders/${orderId}/bids/${bidId}/reject`,
+      counter: (orderId: string, bidId: string) =>
+        `${API_BASE_URL}/bulk-orders/${orderId}/bids/${bidId}/counter`,
+      counterRespond: (orderId: string, bidId: string) =>
+        `${API_BASE_URL}/bulk-orders/${orderId}/bids/${bidId}/counter/respond`,
     },
     admin: {
       list: `${API_BASE_URL}/admin/bulk-orders`,

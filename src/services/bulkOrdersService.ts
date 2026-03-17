@@ -57,6 +57,10 @@ export interface BulkOrderBid {
   status: BulkBidStatus;
   buyerDecisionReason?: string;
   decidedAt?: string;
+  counterOfferAmount?: number;
+  counterOfferNote?: string;
+  counterOfferedAt?: string;
+  counterOfferStatus?: "pending" | "accepted" | "rejected";
   createdAt: string;
   updatedAt: string;
 }
@@ -230,6 +234,33 @@ export const markBulkOrderComplete = async (orderId: string) =>
 
 export const getBulkOrderInvoice = async (orderId: string) =>
   apiRequest(API_ENDPOINTS.bulkOrders.invoice(orderId));
+
+export const sendBulkOrderCounterOffer = async (
+  orderId: string,
+  bidId: string,
+  counterOfferAmount: number,
+  counterOfferNote?: string
+) =>
+  apiRequest(API_ENDPOINTS.bulkOrders.bids.counter(orderId, bidId), {
+    method: "PUT",
+    body: JSON.stringify({ counterOfferAmount, counterOfferNote }),
+  });
+
+export const respondToBulkOrderCounterOffer = async (
+  orderId: string,
+  bidId: string,
+  decision: "accepted" | "rejected"
+) =>
+  apiRequest(API_ENDPOINTS.bulkOrders.bids.counterRespond(orderId, bidId), {
+    method: "PUT",
+    body: JSON.stringify({ decision }),
+  });
+
+export const markBulkOrderInvoicePaid = async (orderId: string) =>
+  apiRequest(API_ENDPOINTS.bulkOrders.markInvoicePaid(orderId), {
+    method: "PUT",
+    body: JSON.stringify({}),
+  });
 
 export const listAdminBulkOrders = async (params?: {
   status?: BulkOrderStatus | "";

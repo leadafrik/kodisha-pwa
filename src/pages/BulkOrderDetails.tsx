@@ -11,6 +11,8 @@ import {
   markBulkOrderComplete,
   placeBulkOrderBid,
   rejectBulkOrderBid,
+  sendBulkOrderCounterOffer,
+  respondToBulkOrderCounterOffer,
 } from "../services/bulkOrdersService";
 import DeliveryOfferModal from "../components/DeliveryOfferModal";
 
@@ -70,6 +72,11 @@ const BulkOrderDetails: React.FC = () => {
   const [submittingBid, setSubmittingBid] = useState(false);
   const [offerModalOpen, setOfferModalOpen] = useState(false);
   const [acceptingBidId, setAcceptingBidId] = useState<string | null>(null);
+  const [counterOfferBidId, setCounterOfferBidId] = useState<string | null>(null);
+  const [counterOfferAmount, setCounterOfferAmount] = useState<string>("");
+  const [counterOfferNote, setCounterOfferNote] = useState<string>("");
+  const [sendingCounter, setSendingCounter] = useState(false);
+  const [respondingCounterId, setRespondingCounterId] = useState<string | null>(null);
 
   const order = payload?.order || null;
   const isOwner = Boolean(payload?.isOwner);
@@ -169,6 +176,46 @@ const BulkOrderDetails: React.FC = () => {
       await loadDetails();
     } catch (err: any) {
       setError(err?.message || "Unable to reject bid.");
+    }
+  };
+
+  const handleSendCounterOffer = async (bidId: string) => {
+    if (!id) return;
+    const amount = Number(counterOfferAmount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setError("Please enter a valid counter-offer amount.");
+      return;
+    }
+    try {
+      setSendingCounter(true);
+      setError("");
+      setNotice("");
+      await sendBulkOrderCounterOffer(id, bidId, amount, counterOfferNote.trim() || undefined);
+      setCounterOfferBidId(null);
+      setCounterOfferAmount("");
+      setCounterOfferNote("");
+      setNotice("Counter-offer sent to seller.");
+      await loadDetails();
+    } catch (err: any) {
+      setError(err?.message || "Unable to send counter-offer.");
+    } finally {
+      setSendingCounter(false);
+    }
+  };
+
+  const handleCounterOfferResponse = async (bidId: string, decision: "accepted" | "rejected") => {
+    if (!id) return;
+    try {
+      setRespondingCounterId(bidId);
+      setError("");
+      setNotice("");
+      await respondToBulkOrderCounterOffer(id, bidId, decision);
+      setNotice(decision === "accepted" ? "Counter-offer accepted. The buyer can now accept your bid." : "Counter-offer declined.");
+      await loadDetails();
+    } catch (err: any) {
+      setError(err?.message || "Unable to respond to counter-offer.");
+    } finally {
+      setRespondingCounterId(null);
     }
   };
 
@@ -434,6 +481,36 @@ const BulkOrderDetails: React.FC = () => {
                     <p><strong>Buyer note:</strong> {payload.myBid.buyerDecisionReason}</p>
                   )}
                 </div>
+
+                {/* Counter-offer response for seller */}
+                {payload.myBid.counterOfferStatus === "pending" && payload.myBid.counterOfferAmount && (
+                  <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm">
+                    <p className="font-semibold text-amber-800">Buyer sent a counter-offer</p>
+                    <p className="mt-1 text-amber-700">
+                      Proposed amount: <strong>{formatCurrency(payload.myBid.counterOfferAmount)}</strong>
+                      {payload.myBid.counterOfferNote && ` — "${payload.myBid.counterOfferNote}"`}
+                    </p>
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleCounterOfferResponse(payload.myBid!._id, "accepted")}
+                        disabled={respondingCounterId === payload.myBid._id}
+                        className="ui-btn-primary px-3 py-1.5 text-xs"
+                      >
+                        Accept counter-offer
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleCounterOfferResponse(payload.myBid!._id, "rejected")}
+                        disabled={respondingCounterId === payload.myBid._id}
+                        className="rounded-lg border border-stone-300 px-3 py-1.5 text-xs font-semibold text-stone-700 hover:bg-stone-50"
+                      >
+                        Decline
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {payload.myBid.status === "accepted" && !order?.checkoutOrderId && (
                   <p className="mt-4 text-sm text-[#A0452E]">
                     The buyer selected your offer. Agrisoko is waiting for payment before delivery starts.
@@ -489,6 +566,14 @@ const BulkOrderDetails: React.FC = () => {
                           <p><strong>Decision note:</strong> {bid.buyerDecisionReason}</p>
                         )}
 
+                        {/* Counter-offer status display */}
+                        {bid.counterOfferAmount && (
+                          <p className="mt-2 text-xs text-amber-700">
+                            Counter-offer sent: <strong>{formatCurrency(bid.counterOfferAmount)}</strong>
+                            {" "}— {bid.counterOfferStatus === "pending" ? "awaiting seller response" : bid.counterOfferStatus}
+                          </p>
+                        )}
+
                         {order.status === "open" && bid.status === "pending" && (
                           <div className="mt-3 flex flex-wrap gap-2">
                             <button
@@ -501,6 +586,16 @@ const BulkOrderDetails: React.FC = () => {
                                 ? "Opening payment..."
                                 : "Accept and proceed to payment"}
                             </button>
+                            {/* Counter-offer — only if no pending counter-offer yet */}
+                            {(!bid.counterOfferStatus || bid.counterOfferStatus === "rejected") && (
+                              <button
+                                type="button"
+                                onClick={() => setCounterOfferBidId(counterOfferBidId === bid._id ? null : bid._id)}
+                                className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-100"
+                              >
+                                Counter-offer
+                              </button>
+                            )}
                             <button
                               type="button"
                               onClick={() => handleRejectBid(bid._id)}
@@ -508,6 +603,45 @@ const BulkOrderDetails: React.FC = () => {
                             >
                               Reject with reason
                             </button>
+                          </div>
+                        )}
+
+                        {/* Inline counter-offer form */}
+                        {counterOfferBidId === bid._id && (
+                          <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 space-y-2">
+                            <p className="text-xs font-semibold text-amber-800">Propose a different price</p>
+                            <input
+                              type="number"
+                              min={1}
+                              value={counterOfferAmount}
+                              onChange={(e) => setCounterOfferAmount(e.target.value)}
+                              placeholder="Your offer (KES)"
+                              className="ui-input py-2 text-sm w-full"
+                            />
+                            <input
+                              type="text"
+                              value={counterOfferNote}
+                              onChange={(e) => setCounterOfferNote(e.target.value)}
+                              placeholder="Optional note to seller"
+                              className="ui-input py-2 text-sm w-full"
+                            />
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                onClick={() => handleSendCounterOffer(bid._id)}
+                                disabled={sendingCounter}
+                                className="ui-btn-primary px-3 py-1.5 text-xs"
+                              >
+                                {sendingCounter ? "Sending..." : "Send counter-offer"}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setCounterOfferBidId(null)}
+                                className="rounded-lg border border-stone-300 px-3 py-1.5 text-xs font-semibold text-stone-700 hover:bg-stone-50"
+                              >
+                                Cancel
+                              </button>
+                            </div>
                           </div>
                         )}
                       </article>
