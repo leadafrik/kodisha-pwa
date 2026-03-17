@@ -301,6 +301,9 @@ const BrowseListings: React.FC = () => {
         } else if (p.category === "inputs") {
           categoryLabel = "inputs";
           typeLabel = "Inputs";
+        } else if (p.category === "service") {
+          categoryLabel = "service";
+          typeLabel = "Services";
         }
         
         const ownerLastActive =
