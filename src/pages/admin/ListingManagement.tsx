@@ -163,6 +163,8 @@ const ListingManagement: React.FC = () => {
       setEditSaving(false);
     }
   };
+
+  return (
     <div className="min-h-screen bg-slate-50 text-slate-900 px-6 py-10">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-start justify-between flex-wrap gap-4">
@@ -296,7 +298,6 @@ const ListingManagement: React.FC = () => {
             ))}
           </div>
         )}
-      </div>
       </div>
 
       {/* Edit listing modal */}
