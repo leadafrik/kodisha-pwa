@@ -36,6 +36,20 @@ interface EditForm {
 
 const PRODUCT_CATEGORIES = ["produce", "livestock", "inputs", "service"] as const;
 
+const CATEGORY_LABELS: Record<string, string> = {
+  produce: "Produce",
+  livestock: "Livestock",
+  inputs: "Inputs",
+  service: "Services",
+};
+
+const CATEGORY_COLORS: Record<string, string> = {
+  produce: "bg-orange-50 text-orange-700 border-orange-200",
+  livestock: "bg-rose-50 text-rose-700 border-rose-200",
+  inputs: "bg-sky-50 text-sky-700 border-sky-200",
+  service: "bg-emerald-50 text-emerald-700 border-emerald-200",
+};
+
 const ListingManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"pending" | "active">("pending");
   const [listings, setListings] = useState<AdminListing[]>([]);
@@ -229,11 +243,16 @@ const ListingManagement: React.FC = () => {
               >
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="flex-1 min-w-[240px]">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="text-lg font-semibold">{item.title || "Listing"}</h3>
                       {item.listingType && (
                         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold capitalize">
                           {item.listingType.replace("_", " ")}
+                        </span>
+                      )}
+                      {item.category && (
+                        <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${CATEGORY_COLORS[item.category] || "bg-slate-100 text-slate-700 border-slate-200"}`}>
+                          {CATEGORY_LABELS[item.category] || item.category}
                         </span>
                       )}
                     </div>
