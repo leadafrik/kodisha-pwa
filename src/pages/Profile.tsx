@@ -354,7 +354,7 @@ const Profile: React.FC = () => {
         setSavingProductEdit(false);
       }
     },
-    [editingProduct, productEditForm, refreshProducts]
+    [editingProduct, productEditForm, refreshProducts, addToast]
   );
 
   const listProductAgain = useCallback(
