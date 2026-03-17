@@ -438,7 +438,7 @@ const Checkout: React.FC = () => {
                       className="ui-input"
                       disabled={!county}
                     >
-                      <option value="">Select constituency</option>
+                      <option value="">{county ? "Select constituency" : "Select county first"}</option>
                       {constituencies.map((item) => (
                         <option key={item.value} value={item.value}>
                           {item.label}
@@ -455,7 +455,7 @@ const Checkout: React.FC = () => {
                       className="ui-input"
                       disabled={!constituency}
                     >
-                      <option value="">Select ward</option>
+                      <option value="">{constituency ? "Select ward" : "Select constituency first"}</option>
                       {wards.map((item) => (
                         <option key={item.value} value={item.value}>
                           {item.label}

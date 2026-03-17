@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useToast } from "../contexts/ToastContext";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { Shield, UserCheck, UserX } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
@@ -112,6 +113,7 @@ const Profile: React.FC = () => {
   const { user, logout, updateProfile, refreshUser } = useAuth();
   const { serviceListings, productListings, loading, refreshProducts } = useProperties();
   const navigate = useNavigate();
+  const { addToast } = useToast();
 
   const [userProfilePicture, setUserProfilePicture] = useState<string | undefined>(user?.profilePicture);
   const [activeTab, setActiveTab] = useState<ListingsTab>("products");
@@ -345,6 +347,7 @@ const Profile: React.FC = () => {
         await refreshProducts();
         setEditingProduct(null);
         setProductEditForm(EMPTY_PRODUCT_EDIT_FORM);
+        addToast("Listing updated successfully.");
       } catch (error: any) {
         setProductEditError(error?.message || "Failed to update listing.");
       } finally {

@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { VerificationProvider } from './contexts/VerificationContext';
 import { NotificationsProvider } from './contexts/NotificationsContext';
+import { ToastProvider } from './contexts/ToastContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import Home from './pages/Home';
 import BrowseListings from './pages/BrowseListings';
@@ -124,9 +125,11 @@ function App() {
           <PropertyProvider>
             <CartProvider>
               <VerificationProvider>
-                <Router>
-                  <AppShell />
-                </Router>
+                <ToastProvider>
+                  <Router>
+                    <AppShell />
+                  </Router>
+                </ToastProvider>
               </VerificationProvider>
             </CartProvider>
           </PropertyProvider>
