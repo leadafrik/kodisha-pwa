@@ -63,6 +63,19 @@ const getEmailTypoSuggestion = (email: string): string | null => {
   return `${local}@${correctedDomain}`;
 };
 
+/**
+ * Normalizes Kenyan phone numbers to +254XXXXXXXXX format.
+ * Handles: 07xx, 01xx, 2547xx, 2541xx, +2547xx, +2541xx
+ * Returns null if the input doesn't look like a valid Kenyan number.
+ */
+const normalizeKenyanPhone = (raw: string): string | null => {
+  const cleaned = raw.replace(/[\s\-()]/g, "");
+  if (/^\+254[17]\d{8}$/.test(cleaned)) return cleaned;
+  if (/^254[17]\d{8}$/.test(cleaned)) return "+" + cleaned;
+  if (/^0[17]\d{8}$/.test(cleaned)) return "+254" + cleaned.substring(1);
+  return null;
+};
+
 const Login: React.FC = () => {
   const {
     login,
@@ -270,7 +283,7 @@ const Login: React.FC = () => {
     }
 
     if (!signupData.emailOrPhone.trim()) {
-      setError("Email is required.");
+      setError("Email or phone number is required.");
       return;
     }
 
@@ -292,59 +305,90 @@ const Login: React.FC = () => {
     }
 
     const input = signupData.emailOrPhone.trim();
-    if (!input.includes("@")) {
-      setError("Please enter a valid email address.");
-      return;
-    }
-    const email = input.toLowerCase();
+    const isPhoneInput = !input.includes("@") && /^[+\d\s\-()]+$/.test(input);
 
-    if (emailTypoSuggestion && emailTypoSuggestion !== email) {
-      setError(`Possible typo detected. Did you mean ${emailTypoSuggestion}?`);
-      return;
-    }
-
-    try {
-      await register({
-        name: signupData.name,
-        email: email,
-        phone: undefined,
-        password: signupData.password,
-        type: defaultUserType,
-        inviteCode: signupData.inviteCode.trim() || undefined,
-        legalConsents: signupConsents,
-      });
-      trackGoogleEvent("sign_up", { method: "email" });
-      trackTrafficClick({
-        action: "funnel_signup_complete_email",
-        target: "/login",
-      });
-
-      try {
-        await login(email, signupData.password);
-        navigate(redirectTo);
+    if (isPhoneInput) {
+      const normalizedPhone = normalizeKenyanPhone(input);
+      if (!normalizedPhone) {
+        setError("Enter a valid Kenyan phone number (e.g. 0712345678 or +254712345678).");
         return;
-      } catch {
-        // Fallback to OTP verification if immediate login is unavailable.
+      }
+      try {
+        await register({
+          name: signupData.name,
+          phone: normalizedPhone,
+          email: undefined,
+          password: signupData.password,
+          type: defaultUserType,
+          inviteCode: signupData.inviteCode.trim() || undefined,
+          legalConsents: signupConsents,
+        });
+        trackGoogleEvent("sign_up", { method: "phone" });
+        trackTrafficClick({ action: "funnel_signup_complete_phone", target: "/login" });
+        try {
+          await login(normalizedPhone, signupData.password);
+          navigate(redirectTo);
+          return;
+        } catch {
+          // Fallback — show success and let user log in manually
+        }
+        setInfo("Account created! Sign in with your phone number to continue.");
+        setMode("login");
+      } catch (err: any) {
+        setError(err?.message || "Signup failed. Please try again.");
+      }
+    } else {
+      if (!input.includes("@")) {
+        setError("Please enter a valid email address or phone number.");
+        return;
+      }
+      const email = input.toLowerCase();
+
+      if (emailTypoSuggestion && emailTypoSuggestion !== email) {
+        setError(`Possible typo detected. Did you mean ${emailTypoSuggestion}?`);
+        return;
       }
 
-      setOtpEmail(email);
-      setInfo("Account created. Enter the verification code from your email to continue.");
-      setMode("otp-verify");
-      startOtpTimer();
-    } catch (err: any) {
-      const message = err?.message || "Signup failed. Please try again.";
+      try {
+        await register({
+          name: signupData.name,
+          email: email,
+          phone: undefined,
+          password: signupData.password,
+          type: defaultUserType,
+          inviteCode: signupData.inviteCode.trim() || undefined,
+          legalConsents: signupConsents,
+        });
+        trackGoogleEvent("sign_up", { method: "email" });
+        trackTrafficClick({ action: "funnel_signup_complete_email", target: "/login" });
 
-      if (/verification|otp|code|created/i.test(message)) {
         try {
           await login(email, signupData.password);
           navigate(redirectTo);
           return;
         } catch {
-          // Keep original error if fallback login fails.
+          // Fallback to OTP verification if immediate login is unavailable.
         }
-      }
 
-      setError(err?.message || "Signup failed. Please try again.");
+        setOtpEmail(email);
+        setInfo("Account created. Enter the verification code from your email to continue.");
+        setMode("otp-verify");
+        startOtpTimer();
+      } catch (err: any) {
+        const message = err?.message || "Signup failed. Please try again.";
+
+        if (/verification|otp|code|created/i.test(message)) {
+          try {
+            await login(email, signupData.password);
+            navigate(redirectTo);
+            return;
+          } catch {
+            // Keep original error if fallback login fails.
+          }
+        }
+
+        setError(err?.message || "Signup failed. Please try again.");
+      }
     }
   };
 
@@ -625,7 +669,7 @@ const Login: React.FC = () => {
           <div className="w-full border-t border-stone-200"></div>
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-white px-2 text-stone-500">Or use email (about 10 seconds)</span>
+          <span className="bg-white px-2 text-stone-500">Or use email or phone (about 10 seconds)</span>
         </div>
       </div>
 
@@ -642,15 +686,15 @@ const Login: React.FC = () => {
         </div>
 
         <div>
-          <label className="ui-label">Email *</label>
+          <label className="ui-label">Email or phone *</label>
           <input
-            type="email"
+            type="text"
             value={signupData.emailOrPhone}
             onChange={(e) =>
               setSignupData({ ...signupData, emailOrPhone: e.target.value })
             }
             className="ui-input"
-            placeholder="your.email@example.com"
+            placeholder="email@example.com or 0712345678"
           />
         </div>
 
@@ -676,7 +720,7 @@ const Login: React.FC = () => {
         </div>
       </div>
 
-      {emailTypoSuggestion && emailTypoSuggestion !== normalizedSignupEmail && (
+      {signupData.emailOrPhone.includes("@") && emailTypoSuggestion && emailTypoSuggestion !== normalizedSignupEmail && (
         <div className="ui-accent-panel px-3 py-2.5 text-sm text-stone-800">
           <p className="font-semibold">Possible typo in email domain.</p>
           <button
@@ -870,13 +914,13 @@ const Login: React.FC = () => {
   const renderForgot = () => (
     <form onSubmit={handleForgotRequest} className="space-y-4">
       <div>
-        <label className="ui-label">Email or phone number</label>
+        <label className="ui-label">Enter phone or email</label>
         <input
           type="text"
           value={resetData.emailOrPhone}
           onChange={(e) => setResetData({ ...resetData, emailOrPhone: e.target.value })}
           className="ui-input"
-          placeholder="you@example.com or 07XXXXXXXX"
+          placeholder="Enter phone or email"
         />
         <p className="mt-2 text-xs text-stone-500">
           Enter your email to receive a code by email, or your registered phone number to receive an SMS.
