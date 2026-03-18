@@ -83,6 +83,7 @@ const Login: React.FC = () => {
     requestEmailOtp,
     requestSmsOtp,
     verifyEmailOtp,
+    verifySmsOtp,
     resetPasswordWithEmail,
     loading,
   } = useAuth();
@@ -137,9 +138,10 @@ const Login: React.FC = () => {
     facebook: 0,
   });
 
-  // OTP State (email only for now)
+  // OTP State
   const [otpCode, setOtpCode] = useState("");
-  const [otpEmail, setOtpEmail] = useState("");
+  const [otpEmail, setOtpEmail] = useState(""); // holds email OR phone depending on flow
+  const [otpIsPhone, setOtpIsPhone] = useState(false);
   const [resetViaPhone, setResetViaPhone] = useState(false);
   const [otpTimer, setOtpTimer] = useState(0);
   const [canResendOtp, setCanResendOtp] = useState(true);
@@ -259,7 +261,7 @@ const Login: React.FC = () => {
     resetMessages();
 
     if (!loginData.emailOrPhone.trim() || !loginData.password.trim()) {
-      setError("Enter your email and password.");
+      setError("Enter your email or phone number and password.");
       return;
     }
 
@@ -267,7 +269,13 @@ const Login: React.FC = () => {
       await login(loginData.emailOrPhone, loginData.password);
       navigate(redirectTo);
     } catch (err: any) {
-      setError(err?.message || "Login failed. Please try again.");
+      const input = loginData.emailOrPhone.trim();
+      const isPhoneInput = !input.includes("@") && /^[+\d\s\-()]+$/.test(input);
+      const base = err?.message || "Login failed. Please try again.";
+      const suggestion = isPhoneInput
+        ? "If you signed up with an email address, try that instead."
+        : "If you signed up with a phone number, try that instead.";
+      setError(`${base} ${suggestion}`);
     }
   };
 
@@ -325,17 +333,24 @@ const Login: React.FC = () => {
         });
         trackGoogleEvent("sign_up", { method: "phone" });
         trackTrafficClick({ action: "funnel_signup_complete_phone", target: "/login" });
-        try {
-          await login(normalizedPhone, signupData.password);
-          navigate(redirectTo);
-          return;
-        } catch {
-          // Fallback — show success and let user log in manually
-        }
-        setInfo("Account created! Sign in with your phone number to continue.");
-        setMode("login");
+        setOtpEmail(normalizedPhone);
+        setOtpIsPhone(true);
+        setOtpCode("");
+        setInfo("Account created! Enter the verification code sent to your phone.");
+        setMode("otp-verify");
+        startOtpTimer();
       } catch (err: any) {
-        setError(err?.message || "Signup failed. Please try again.");
+        const msg = err?.message || "";
+        // User was created but SMS failed — still show OTP screen so they can resend
+        if (/unable to send otp|otp/i.test(msg)) {
+          setOtpEmail(normalizedPhone);
+          setOtpIsPhone(true);
+          setOtpCode("");
+          setInfo("Account created. We had trouble sending the code — tap Resend Code to try again.");
+          setMode("otp-verify");
+        } else {
+          setError(msg || "Signup failed. Please try again.");
+        }
       }
     } else {
       if (!input.includes("@")) {
@@ -403,8 +418,11 @@ const Login: React.FC = () => {
     }
 
     try {
-      await verifyEmailOtp(otpEmail, otpCode.trim());
-
+      if (otpIsPhone) {
+        await verifySmsOtp(otpEmail, otpCode.trim());
+      } else {
+        await verifyEmailOtp(otpEmail, otpCode.trim());
+      }
       navigate(redirectTo);
     } catch (err: any) {
       setError(err?.message || "Invalid code. Please try again.");
@@ -415,8 +433,13 @@ const Login: React.FC = () => {
     resetMessages();
 
     try {
-      await requestEmailOtp(otpEmail);
-      setInfo("Code resent to your email.");
+      if (otpIsPhone) {
+        await requestSmsOtp(otpEmail);
+        setInfo("New code sent to your phone via SMS.");
+      } else {
+        await requestEmailOtp(otpEmail);
+        setInfo("Code resent to your email.");
+      }
       startOtpTimer();
     } catch (err: any) {
       setError(err?.message || "Failed to resend code.");
@@ -535,19 +558,19 @@ const Login: React.FC = () => {
           <div className="w-full border-t border-stone-200"></div>
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-white px-2 text-stone-500">Or use email and password</span>
+          <span className="bg-white px-2 text-stone-500">Or use email or phone</span>
         </div>
       </div>
 
       {/* Email */}
       <div>
-        <label className="ui-label">Email</label>
+        <label className="ui-label">Email or phone</label>
         <input
           type="text"
           value={loginData.emailOrPhone}
-          onChange={(e) => setLoginData({ ...loginData, emailOrPhone: e.target.value })}
+          onChange={(e) => { setLoginData({ ...loginData, emailOrPhone: e.target.value }); setError(null); }}
           className="ui-input placeholder:text-stone-400"
-          placeholder="name@example.com"
+          placeholder="email@example.com or 0712345678"
         />
       </div>
 
@@ -877,8 +900,9 @@ const Login: React.FC = () => {
     <form onSubmit={handleOtpVerify} className="space-y-4">
       <div className="text-center mb-4">
         <p className="text-stone-700">
-          Verification code sent to <strong>{otpEmail}</strong>
+          Verification code sent to your <strong>{otpIsPhone ? "phone" : "email"}</strong>
         </p>
+        <p className="text-sm text-stone-500 mt-1">{otpEmail}</p>
       </div>
 
       <div>
