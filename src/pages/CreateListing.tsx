@@ -287,10 +287,8 @@ const CreateListing: React.FC = () => {
           parsed?.subcategory ||
           parsed?.title ||
           parsed?.description ||
-          parsed?.county ||
           parsed?.price ||
           parsed?.quantity ||
-          parsed?.contact ||
           hasBatchContent
       );
     } catch {
