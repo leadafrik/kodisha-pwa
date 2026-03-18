@@ -25,20 +25,8 @@ const BlogPost: React.FC = () => {
   const [copied, setCopied] = useState(false);
 
   const postUrl = `https://www.agrisoko254.com/blog/${slug}`;
+  const shareUrl = `https://www.agrisoko254.com/share/blog/${slug}`;
 
-  const handleShare = async (title: string, excerpt: string) => {
-    if (navigator.share) {
-      try {
-        await navigator.share({ title, text: excerpt, url: postUrl });
-        return;
-      } catch {
-        // User cancelled or share failed — fall through to clipboard
-      }
-    }
-    await navigator.clipboard.writeText(postUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
-  };
 
   useEffect(() => {
     let active = true;
@@ -131,7 +119,14 @@ const BlogPost: React.FC = () => {
                 {/* Native share / copy link */}
                 <button
                   type="button"
-                  onClick={() => handleShare(post.title, post.excerpt || "")}
+                  onClick={async () => {
+                    if (navigator.share) {
+                      try { await navigator.share({ title: post.title, text: post.excerpt || "", url: shareUrl }); return; } catch {}
+                    }
+                    await navigator.clipboard.writeText(shareUrl);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2500);
+                  }}
                   className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 transition hover:bg-stone-50"
                 >
                   {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Share2 className="h-3.5 w-3.5" />}
@@ -139,7 +134,7 @@ const BlogPost: React.FC = () => {
                 </button>
                 {/* WhatsApp */}
                 <a
-                  href={`https://wa.me/?text=${encodeURIComponent(`${post.title} — ${postUrl}`)}`}
+                  href={`https://wa.me/?text=${encodeURIComponent(`${post.title} — ${shareUrl}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 transition hover:bg-stone-50"
@@ -154,7 +149,7 @@ const BlogPost: React.FC = () => {
                 <button
                   type="button"
                   onClick={async () => {
-                    await navigator.clipboard.writeText(postUrl);
+                    await navigator.clipboard.writeText(shareUrl);
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2500);
                   }}

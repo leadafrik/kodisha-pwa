@@ -114,6 +114,10 @@
     {
       "source": "/share/listing/(.*)",
       "destination": "/api/share/listing/$1"
+    },
+    {
+      "source": "/share/blog/(.*)",
+      "destination": "/api/share/blog/$1"
     }
   ],
   "headers": [

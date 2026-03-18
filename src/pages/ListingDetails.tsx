@@ -927,7 +927,7 @@ const ListingDetails: React.FC = () => {
   const sellerReviews: SellerReview[] = Array.isArray(userRatings?.ratings) ? userRatings.ratings : [];
   const sellerPhone = normalizeKenyanPhone(listing.contact || owner.phone);
   const hasAuthSession = Boolean(getAuthToken());
-  const shareUrl = `${window.location.origin}/l/${listing._id}`;
+  const shareUrl = `https://www.agrisoko254.com/share/listing/${listing._id}`;
   const ratingAverage =
     typeof userRatings?.aggregate?.average === "number"
       ? userRatings.aggregate.average
