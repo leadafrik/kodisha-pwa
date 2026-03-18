@@ -941,6 +941,17 @@ const CreateListing: React.FC = () => {
         <div className="mx-auto max-w-5xl px-0 pt-6 pb-16">
           <p className="mb-6 text-sm text-stone-500">Drafts save automatically on this device.</p>
 
+          {!user?.listings?.length && (
+            <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4">
+              <p className="text-sm font-semibold text-amber-900">
+                Earn KES 50 on your first listing
+              </p>
+              <p className="mt-1 text-sm text-amber-800">
+                Publish this listing and complete your ID verification. Once our team reviews and approves, KES 50 will be sent directly to your M-Pesa.
+              </p>
+            </div>
+          )}
+
           {showVerificationNudge && (
             <div className="ui-accent-panel mb-6 flex flex-wrap items-center gap-3 p-4">
               <div className="flex-1">
