@@ -328,7 +328,7 @@ const AdminUserManagement: React.FC = () => {
     const payload: any = {
       accessType: createForm.accessType,
       fullName: createForm.fullName.trim(),
-      email: createForm.email.trim().toLowerCase(),
+      email: createForm.email.trim() ? createForm.email.trim().toLowerCase() : undefined,
       phone: createForm.phone.trim() || undefined,
     };
 
@@ -370,8 +370,8 @@ const AdminUserManagement: React.FC = () => {
       return;
     }
 
-    if (!createForm.email.trim()) {
-      setCreateError("Email is required.");
+    if (!createForm.email.trim() && !createForm.phone.trim()) {
+      setCreateError("Email or phone number is required.");
       return;
     }
 
@@ -756,7 +756,7 @@ const AdminUserManagement: React.FC = () => {
                         placeholder="Full name"
                       />
                     </FormField>
-                    <FormField label="Email" required>
+                    <FormField label={createForm.phone.trim() ? "Email (optional)" : "Email"} required={!createForm.phone.trim()}>
                       <input
                         value={createForm.email}
                         onChange={(event) => setCreateForm((current) => ({ ...current, email: event.target.value }))}
@@ -765,7 +765,7 @@ const AdminUserManagement: React.FC = () => {
                         type="email"
                       />
                     </FormField>
-                    <FormField label={isBulkAccess ? "Phone number" : "Phone number (optional)"} required={isBulkAccess}>
+                    <FormField label={isBulkAccess ? "Phone number" : createForm.email.trim() ? "Phone number (optional)" : "Phone number"} required={isBulkAccess}>
                       <input
                         value={createForm.phone}
                         onChange={(event) => setCreateForm((current) => ({ ...current, phone: event.target.value }))}
@@ -993,8 +993,8 @@ const AdminUserManagement: React.FC = () => {
                   </>
                 ) : (
                   <section className="rounded-[1.5rem] border border-[#eadccf] bg-[#fbf7f2] p-5 text-sm leading-7 text-stone-600">
-                    Regular users stay simple. Admin only needs name, email, and phone when available.
-                    The invite email will send a setup link so the user can set their password and enter the system.
+                    Regular users stay simple. Admin only needs name and either an email or phone number.
+                    If email is provided, a setup link is sent so the user can set their password. Phone-only users can log in with their number.
                   </section>
                 )}
 
