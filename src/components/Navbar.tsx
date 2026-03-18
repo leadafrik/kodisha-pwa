@@ -69,11 +69,7 @@ const pathMatches = (pathname: string, key: string) => {
       pathname.startsWith("/listings/")
     );
   }
-
-  if (key === "/request") {
-    return pathname === "/request" || pathname.startsWith("/request/");
-  }
-
+  if (key === "/request") return pathname === "/request" || pathname.startsWith("/request/");
   if (key === "/profile") {
     return (
       pathname === "/profile" ||
@@ -88,27 +84,11 @@ const pathMatches = (pathname: string, key: string) => {
       pathname === "/verify-id"
     );
   }
-
-  if (key === "/about") {
-    return pathname === "/about" || pathname === "/contact" || pathname === "/help";
-  }
-
-  if (key === "/blog") {
-    return pathname === "/blog" || pathname.startsWith("/blog/");
-  }
-
-  if (key === "/b2b") {
-    return pathname === "/b2b" || pathname.startsWith("/b2b/");
-  }
-
-  if (key === "/bulk") {
-    return pathname === "/bulk" || pathname.startsWith("/bulk/");
-  }
-
-  if (key === "/cart") {
-    return pathname === "/cart" || pathname === "/checkout";
-  }
-
+  if (key === "/about") return pathname === "/about" || pathname === "/contact" || pathname === "/help";
+  if (key === "/blog") return pathname === "/blog" || pathname.startsWith("/blog/");
+  if (key === "/b2b") return pathname === "/b2b" || pathname.startsWith("/b2b/");
+  if (key === "/bulk") return pathname === "/bulk" || pathname.startsWith("/bulk/");
+  if (key === "/cart") return pathname === "/cart" || pathname === "/checkout";
   return pathname === key;
 };
 
@@ -121,10 +101,13 @@ const getNavLinkClass = (active: boolean, accent = false) => {
       ? "inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-xl bg-[#8B3525] px-4 py-2 text-sm font-semibold text-white shadow-sm"
       : "inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-xl bg-[#A0452E] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#8B3525]";
   }
-
   return active
     ? "inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-xl bg-[#FDF5F3] px-4 py-2 text-sm font-semibold text-[#A0452E]"
     : "inline-flex min-h-[44px] items-center justify-center whitespace-nowrap rounded-xl px-4 py-2 text-sm font-semibold text-stone-600 transition hover:bg-[#FDF5F3] hover:text-[#A0452E]";
+};
+
+const userDisplayLine = (user: { name?: string | null; email?: string | null; phone?: string | null }) => {
+  return user.email || user.phone || "";
 };
 
 const Navbar: React.FC = () => {
@@ -134,7 +117,9 @@ const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const desktopNavRef = useRef<HTMLDivElement | null>(null);
   const accountMenuRef = useRef<HTMLDivElement | null>(null);
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [drawerVisible, setDrawerVisible] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [openNavMenu, setOpenNavMenu] = useState<NavDropdownKey | null>(null);
   const [mobileExpandedMenu, setMobileExpandedMenu] = useState<NavDropdownKey | null>(null);
@@ -142,6 +127,7 @@ const Navbar: React.FC = () => {
 
   const isAdmin = user?.role === "admin" || user?.type === "admin";
   const signupTarget = getSignupTarget("/browse");
+
   const browseMenuItems = useMemo<NavDropdownItem[]>(
     () => [
       { label: "All Listings", to: "/browse" },
@@ -152,45 +138,27 @@ const Navbar: React.FC = () => {
     ],
     []
   );
+
   const sellMenuItems = useMemo<NavDropdownItem[]>(
     () => [
-      {
-        label: "List Produce",
-        to: user ? "/create-listing?category=produce" : getSignupTarget("/create-listing?category=produce"),
-      },
-      {
-        label: "List Livestock",
-        to: user ? "/create-listing?category=livestock" : getSignupTarget("/create-listing?category=livestock"),
-      },
-      {
-        label: "List Inputs",
-        to: user ? "/create-listing?category=inputs" : getSignupTarget("/create-listing?category=inputs"),
-      },
-      {
-        label: "List Service",
-        to: user ? "/create-listing?category=service" : getSignupTarget("/create-listing?category=service"),
-      },
+      { label: "List Produce", to: user ? "/create-listing?category=produce" : getSignupTarget("/create-listing?category=produce") },
+      { label: "List Livestock", to: user ? "/create-listing?category=livestock" : getSignupTarget("/create-listing?category=livestock") },
+      { label: "List Inputs", to: user ? "/create-listing?category=inputs" : getSignupTarget("/create-listing?category=inputs") },
+      { label: "List Service", to: user ? "/create-listing?category=service" : getSignupTarget("/create-listing?category=service") },
     ],
     [user]
   );
 
   const desktopNavItems = useMemo<NavItem[]>(() => {
     const items: NavItem[] = [{ label: "Buy Requests", to: "/request" }];
-
-    if (BULK_NAV_LINK_VISIBLE) {
-      items.push({ label: "Bulk Buying", to: "/bulk" });
-    }
-
-    if (user) {
-      items.push({ label: "Messages", to: "/messages" });
-    }
-
+    if (BULK_NAV_LINK_VISIBLE) items.push({ label: "Bulk Buying", to: "/bulk" });
+    if (user) items.push({ label: "Messages", to: "/messages" });
     items.push({ label: "Blog", to: "/blog" });
     items.push({ label: "About", to: "/about" });
     return items;
   }, [user]);
 
-  const mobileBottomItems = useMemo<NavItem[]>(() => {
+  const loggedInBottomItems = useMemo<NavItem[]>(() => {
     if (!user) return [];
     return [
       { label: "Listings", to: "/browse", icon: LayoutGrid },
@@ -201,8 +169,27 @@ const Navbar: React.FC = () => {
     ];
   }, [user]);
 
-  const showMobileBottomNav =
-    !!user && shouldShowTopLevelMobileNav(location.pathname) && !mobileOpen;
+  const guestBottomItems = useMemo<NavItem[]>(() => {
+    if (user) return [];
+    return [
+      { label: "Browse", to: "/browse", icon: LayoutGrid },
+      { label: "Requests", to: "/request", icon: ClipboardList },
+      { label: "Blog", to: "/blog", icon: NotebookText },
+      { label: "Login", to: "/login", icon: User },
+    ];
+  }, [user]);
+
+  const showMobileBottomNav = shouldShowTopLevelMobileNav(location.pathname) && !mobileOpen;
+
+  // Animate drawer open/close
+  useEffect(() => {
+    if (mobileOpen) {
+      setDrawerVisible(false);
+      requestAnimationFrame(() => requestAnimationFrame(() => setDrawerVisible(true)));
+    } else {
+      setDrawerVisible(false);
+    }
+  }, [mobileOpen]);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -213,34 +200,34 @@ const Navbar: React.FC = () => {
   }, [location.pathname]);
 
   useEffect(() => {
-    if (!accountOpen) return undefined;
-
+    if (!accountOpen && openNavMenu === null) return undefined;
     const handleClickOutside = (event: MouseEvent) => {
       if (!(event.target instanceof Node)) return;
-
-      if (accountMenuRef.current && !accountMenuRef.current.contains(event.target)) {
-        setAccountOpen(false);
-      }
-
-      if (desktopNavRef.current && !desktopNavRef.current.contains(event.target)) {
-        setOpenNavMenu(null);
-      }
+      if (accountMenuRef.current && !accountMenuRef.current.contains(event.target)) setAccountOpen(false);
+      if (desktopNavRef.current && !desktopNavRef.current.contains(event.target)) setOpenNavMenu(null);
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [accountOpen]);
+  }, [accountOpen, openNavMenu]);
 
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
-    if (mobileOpen) {
-      document.body.style.overflow = "hidden";
-    }
-
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
+    if (mobileOpen) document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = originalOverflow; };
   }, [mobileOpen]);
+
+  useEffect(() => {
+    return () => { if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current); };
+  }, []);
+
+  const openDropdown = (key: NavDropdownKey) => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    setOpenNavMenu(key);
+  };
+
+  const closeDropdownDelayed = () => {
+    hoverTimeoutRef.current = setTimeout(() => setOpenNavMenu(null), 150);
+  };
 
   return (
     <>
@@ -253,8 +240,14 @@ const Navbar: React.FC = () => {
               <span className="font-display text-2xl font-bold tracking-tight text-stone-900">Agrisoko</span>
             </Link>
 
+            {/* Desktop nav */}
             <div ref={desktopNavRef} className="hidden lg:flex lg:items-center lg:gap-2">
-              <div className="relative">
+              {/* Listings dropdown — opens on hover or click */}
+              <div
+                className="relative"
+                onMouseEnter={() => openDropdown("browse")}
+                onMouseLeave={closeDropdownDelayed}
+              >
                 <button
                   type="button"
                   onClick={() => setOpenNavMenu((prev) => (prev === "browse" ? null : "browse"))}
@@ -263,37 +256,39 @@ const Navbar: React.FC = () => {
                   aria-haspopup="menu"
                 >
                   <span>Listings</span>
-                  <ChevronDown className={`ml-2 h-4 w-4 transition ${openNavMenu === "browse" ? "rotate-180" : ""}`} />
+                  <ChevronDown className={`ml-2 h-4 w-4 transition-transform duration-200 ${openNavMenu === "browse" ? "rotate-180" : ""}`} />
                 </button>
-                {openNavMenu === "browse" && (
-                  <div className="absolute left-0 mt-2 w-60 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-xl">
-                    {browseMenuItems.map((item, index) => (
-                      <Link
-                        key={item.to}
-                        to={item.to}
-                        className={`block px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3] ${
-                          index > 0 ? "border-t border-stone-100" : ""
-                        }`}
-                      >
-                        {item.label}
-                      </Link>
-                    ))}
-                  </div>
-                )}
+                <div
+                  className={`absolute left-0 mt-2 w-60 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-xl transition-all duration-150 origin-top ${
+                    openNavMenu === "browse" ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
+                  }`}
+                >
+                  {browseMenuItems.map((item, index) => (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      className={`block px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3] hover:text-[#A0452E] ${index > 0 ? "border-t border-stone-100" : ""}`}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
               </div>
 
               {desktopNavItems
                 .filter((item) => item.to === "/request" || item.to === "/bulk")
-                .map((item) => {
-                const active = pathMatches(location.pathname, item.to);
-                return (
-                  <Link key={item.label} to={item.to} className={getNavLinkClass(active, item.accent)}>
+                .map((item) => (
+                  <Link key={item.label} to={item.to} className={getNavLinkClass(pathMatches(location.pathname, item.to), item.accent)}>
                     {item.label}
                   </Link>
-                );
-              })}
+                ))}
 
-              <div className="relative">
+              {/* Sell dropdown — opens on hover or click */}
+              <div
+                className="relative"
+                onMouseEnter={() => openDropdown("sell")}
+                onMouseLeave={closeDropdownDelayed}
+              >
                 <button
                   type="button"
                   onClick={() => setOpenNavMenu((prev) => (prev === "sell" ? null : "sell"))}
@@ -302,37 +297,35 @@ const Navbar: React.FC = () => {
                   aria-haspopup="menu"
                 >
                   <span>Sell</span>
-                  <ChevronDown className={`ml-2 h-4 w-4 transition ${openNavMenu === "sell" ? "rotate-180" : ""}`} />
+                  <ChevronDown className={`ml-2 h-4 w-4 transition-transform duration-200 ${openNavMenu === "sell" ? "rotate-180" : ""}`} />
                 </button>
-                {openNavMenu === "sell" && (
-                  <div className="absolute left-0 mt-2 w-64 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-xl">
-                    {sellMenuItems.map((item, index) => (
-                      <Link
-                        key={item.to}
-                        to={item.to}
-                        className={`block px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3] ${
-                          index > 0 ? "border-t border-stone-100" : ""
-                        }`}
-                      >
-                        {item.label}
-                      </Link>
-                    ))}
-                  </div>
-                )}
+                <div
+                  className={`absolute left-0 mt-2 w-64 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-xl transition-all duration-150 origin-top ${
+                    openNavMenu === "sell" ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
+                  }`}
+                >
+                  {sellMenuItems.map((item, index) => (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      className={`block px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3] hover:text-[#A0452E] ${index > 0 ? "border-t border-stone-100" : ""}`}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
               </div>
 
               {desktopNavItems
                 .filter((item) => item.to !== "/request" && item.to !== "/bulk")
-                .map((item) => {
-                  const active = pathMatches(location.pathname, item.to);
-                  return (
-                    <Link key={item.label} to={item.to} className={getNavLinkClass(active, item.accent)}>
-                      {item.label}
-                    </Link>
-                  );
-                })}
+                .map((item) => (
+                  <Link key={item.label} to={item.to} className={getNavLinkClass(pathMatches(location.pathname, item.to), item.accent)}>
+                    {item.label}
+                  </Link>
+                ))}
             </div>
 
+            {/* Desktop right */}
             <div className="hidden lg:flex lg:items-center lg:gap-3">
               {user ? (
                 <>
@@ -358,47 +351,36 @@ const Navbar: React.FC = () => {
                         {user.profilePicture ? (
                           <img src={user.profilePicture} alt={user.name} className="h-full w-full object-cover" />
                         ) : (
-                          <span className="font-semibold text-stone-700">
-                            {user.name ? user.name[0].toUpperCase() : "U"}
-                          </span>
+                          <span className="font-semibold text-stone-700">{user.name ? user.name[0].toUpperCase() : "U"}</span>
                         )}
                       </span>
                       Account
                     </button>
-
-                    {accountOpen && (
-                      <div className="absolute right-0 mt-2 w-64 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-xl">
-                        <div className="border-b border-stone-200 bg-[#FAF7F2] px-4 py-3">
-                          <p className="truncate text-sm font-semibold text-stone-900">{user.name || "User"}</p>
-                          <p className="truncate text-xs text-stone-500">{user.email}</p>
-                        </div>
-                        <Link to="/profile" className="block px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
-                          Account
-                        </Link>
-                        <Link to="/favorites" className="block border-t border-stone-100 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
-                          Saved Listings
-                        </Link>
-                        <Link to="/orders" className="block border-t border-stone-100 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
-                          Orders
-                        </Link>
-                        <Link to="/seller/orders" className="block border-t border-stone-100 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
-                          Seller fulfillment
-                        </Link>
-                        {isAdmin && (
-                          <Link to="/admin" className="block border-t border-stone-100 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
-                            Admin Console
-                          </Link>
-                        )}
-                        <button
-                          type="button"
-                          onClick={logout}
-                          className="flex w-full items-center gap-2 border-t border-stone-100 px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
-                        >
-                          <LogOut className="h-4 w-4" />
-                          Logout
-                        </button>
+                    <div
+                      className={`absolute right-0 mt-2 w-64 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-xl transition-all duration-150 origin-top-right ${
+                        accountOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
+                      }`}
+                    >
+                      <div className="border-b border-stone-200 bg-[#FAF7F2] px-4 py-3">
+                        <p className="truncate text-sm font-semibold text-stone-900">{user.name || "User"}</p>
+                        <p className="truncate text-xs text-stone-500">{userDisplayLine(user)}</p>
                       </div>
-                    )}
+                      <Link to="/profile" className="block px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">Account</Link>
+                      <Link to="/favorites" className="block border-t border-stone-100 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">Saved Listings</Link>
+                      <Link to="/orders" className="block border-t border-stone-100 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">Orders</Link>
+                      <Link to="/seller/orders" className="block border-t border-stone-100 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">Seller fulfillment</Link>
+                      {isAdmin && (
+                        <Link to="/admin" className="block border-t border-stone-100 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">Admin Console</Link>
+                      )}
+                      <button
+                        type="button"
+                        onClick={logout}
+                        className="flex w-full items-center gap-2 border-t border-stone-100 px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Logout
+                      </button>
+                    </div>
                   </div>
                 </>
               ) : (
@@ -412,16 +394,13 @@ const Navbar: React.FC = () => {
                       </span>
                     )}
                   </Link>
-                  <Link to="/login" className={getNavLinkClass(pathMatches(location.pathname, "/login"))}>
-                    Login
-                  </Link>
-                  <Link to={signupTarget} className={getNavLinkClass(false, true)}>
-                    Create Free Account
-                  </Link>
+                  <Link to="/login" className={getNavLinkClass(pathMatches(location.pathname, "/login"))}>Login</Link>
+                  <Link to={signupTarget} className={getNavLinkClass(false, true)}>Create Free Account</Link>
                 </>
               )}
             </div>
 
+            {/* Mobile top-right */}
             <div className="flex items-center gap-2 lg:hidden">
               <Link
                 to="/cart"
@@ -449,11 +428,19 @@ const Navbar: React.FC = () => {
         </div>
       </nav>
 
+      {/* Mobile drawer — animated slide-in */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-50 bg-stone-950/40 lg:hidden" onClick={() => setMobileOpen(false)}>
+        <div
+          className="fixed inset-0 z-50 lg:hidden"
+          onClick={() => setMobileOpen(false)}
+        >
+          {/* Backdrop */}
+          <div className={`absolute inset-0 bg-stone-950/40 transition-opacity duration-300 ${drawerVisible ? "opacity-100" : "opacity-0"}`} />
+
+          {/* Panel */}
           <div
-            className="absolute left-0 top-0 h-full w-80 max-w-[88vw] overflow-y-auto bg-white p-5 shadow-2xl"
-            onClick={(event) => event.stopPropagation()}
+            className={`absolute left-0 top-0 h-full w-80 max-w-[88vw] overflow-y-auto bg-white p-5 shadow-2xl transition-transform duration-300 ease-out ${drawerVisible ? "translate-x-0" : "-translate-x-full"}`}
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-6 flex items-center justify-between">
               <div>
@@ -471,6 +458,7 @@ const Navbar: React.FC = () => {
             </div>
 
             <div className="space-y-2">
+              {/* Listings accordion */}
               <div className="rounded-2xl border border-stone-200 bg-[#FAF7F2]">
                 <button
                   type="button"
@@ -479,20 +467,13 @@ const Navbar: React.FC = () => {
                     pathMatches(location.pathname, "/browse") ? "bg-[#FDF5F3] text-[#A0452E]" : "text-stone-700 hover:bg-[#FDF5F3]"
                   }`}
                 >
-                  <span className="flex items-center gap-3">
-                    <LayoutGrid className="h-5 w-5" />
-                    Listings
-                  </span>
-                  <ChevronDown className={`h-4 w-4 transition ${mobileExpandedMenu === "browse" ? "rotate-180" : ""}`} />
+                  <span className="flex items-center gap-3"><LayoutGrid className="h-5 w-5" />Listings</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${mobileExpandedMenu === "browse" ? "rotate-180" : ""}`} />
                 </button>
                 {mobileExpandedMenu === "browse" && (
                   <div className="border-t border-stone-200 px-3 py-2">
                     {browseMenuItems.map((item) => (
-                      <Link
-                        key={item.to}
-                        to={item.to}
-                        className="block rounded-xl px-3 py-2 text-sm font-semibold text-stone-700 transition hover:bg-white"
-                      >
+                      <Link key={item.to} to={item.to} className="block rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-700 transition hover:bg-white hover:text-[#A0452E]">
                         {item.label}
                       </Link>
                     ))}
@@ -500,35 +481,22 @@ const Navbar: React.FC = () => {
                 )}
               </div>
 
-              {desktopNavItems
-                .filter((item) => item.to === "/request" || item.to === "/bulk")
-                .map((item) => {
-                const Icon =
-                  item.to === "/request"
-                    ? ClipboardList
-                    : item.to === "/bulk"
-                    ? Building2
-                    : item.to === "/blog"
-                    ? NotebookText
-                    : item.label === "Messages"
-                    ? MessageSquare
-                    : Info;
-                const active = pathMatches(location.pathname, item.to);
-
+              {desktopNavItems.filter((item) => item.to === "/request" || item.to === "/bulk").map((item) => {
+                const Icon = item.to === "/request" ? ClipboardList : Building2;
                 return (
                   <Link
                     key={item.label}
                     to={item.to}
                     className={`flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-                      active ? "bg-[#FDF5F3] text-[#A0452E]" : "text-stone-700 hover:bg-[#FDF5F3]"
+                      pathMatches(location.pathname, item.to) ? "bg-[#FDF5F3] text-[#A0452E]" : "text-stone-700 hover:bg-[#FDF5F3]"
                     }`}
                   >
-                    <Icon className="h-5 w-5" />
-                    {item.label}
+                    <Icon className="h-5 w-5" />{item.label}
                   </Link>
                 );
               })}
 
+              {/* Sell accordion */}
               <div className="rounded-2xl border border-stone-200 bg-[#FAF7F2]">
                 <button
                   type="button"
@@ -537,20 +505,13 @@ const Navbar: React.FC = () => {
                     pathMatches(location.pathname, "/create-listing") ? "bg-[#FDF5F3] text-[#A0452E]" : "text-stone-700 hover:bg-[#FDF5F3]"
                   }`}
                 >
-                  <span className="flex items-center gap-3">
-                    <CirclePlus className="h-5 w-5" />
-                    Sell
-                  </span>
-                  <ChevronDown className={`h-4 w-4 transition ${mobileExpandedMenu === "sell" ? "rotate-180" : ""}`} />
+                  <span className="flex items-center gap-3"><CirclePlus className="h-5 w-5" />Sell</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${mobileExpandedMenu === "sell" ? "rotate-180" : ""}`} />
                 </button>
                 {mobileExpandedMenu === "sell" && (
                   <div className="border-t border-stone-200 px-3 py-2">
                     {sellMenuItems.map((item) => (
-                      <Link
-                        key={item.to}
-                        to={item.to}
-                        className="block rounded-xl px-3 py-2 text-sm font-semibold text-stone-700 transition hover:bg-white"
-                      >
+                      <Link key={item.to} to={item.to} className="block rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-700 transition hover:bg-white hover:text-[#A0452E]">
                         {item.label}
                       </Link>
                     ))}
@@ -558,32 +519,20 @@ const Navbar: React.FC = () => {
                 )}
               </div>
 
-              {desktopNavItems
-                .filter((item) => item.to !== "/request" && item.to !== "/bulk")
-                .map((item) => {
-                  const Icon =
-                    item.label === "Messages"
-                      ? MessageSquare
-                      : item.to === "/blog"
-                      ? NotebookText
-                      : item.to === "/bulk"
-                      ? Building2
-                      : Info;
-                  const active = pathMatches(location.pathname, item.to);
-
-                  return (
-                    <Link
-                      key={item.label}
-                      to={item.to}
-                      className={`flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-                      active ? "bg-[#FDF5F3] text-[#A0452E]" : "text-stone-700 hover:bg-[#FDF5F3]"
-                      }`}
-                    >
-                      <Icon className="h-5 w-5" />
-                      {item.label}
-                    </Link>
-                  );
-                })}
+              {desktopNavItems.filter((item) => item.to !== "/request" && item.to !== "/bulk").map((item) => {
+                const Icon = item.label === "Messages" ? MessageSquare : item.to === "/blog" ? NotebookText : Info;
+                return (
+                  <Link
+                    key={item.label}
+                    to={item.to}
+                    className={`flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                      pathMatches(location.pathname, item.to) ? "bg-[#FDF5F3] text-[#A0452E]" : "text-stone-700 hover:bg-[#FDF5F3]"
+                    }`}
+                  >
+                    <Icon className="h-5 w-5" />{item.label}
+                  </Link>
+                );
+              })}
             </div>
 
             <div className="my-6 border-t border-stone-200" />
@@ -592,63 +541,36 @@ const Navbar: React.FC = () => {
               <div className="space-y-2">
                 <div className="rounded-2xl bg-[#FAF7F2] px-4 py-3">
                   <p className="truncate text-sm font-semibold text-stone-900">{user.name || "User"}</p>
-                  <p className="truncate text-xs text-stone-500">{user.email}</p>
+                  <p className="truncate text-xs text-stone-500">{userDisplayLine(user)}</p>
                 </div>
-                <Link to="/profile" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
-                  <User className="h-5 w-5" />
-                  Account
-                </Link>
-                <Link to="/favorites" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
-                  <Heart className="h-5 w-5" />
-                  Saved Listings
-                </Link>
-                <Link to="/orders" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
-                  <ClipboardList className="h-5 w-5" />
-                  Orders
-                </Link>
-                <Link to="/seller/orders" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
-                  <Truck className="h-5 w-5" />
-                  Seller fulfillment
-                </Link>
-                <Link to="/cart" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
-                  <ShoppingCart className="h-5 w-5" />
-                  Cart {itemCount > 0 ? `(${itemCount})` : ""}
-                </Link>
+                <Link to="/profile" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]"><User className="h-5 w-5" />Account</Link>
+                <Link to="/favorites" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]"><Heart className="h-5 w-5" />Saved Listings</Link>
+                <Link to="/orders" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]"><ClipboardList className="h-5 w-5" />Orders</Link>
+                <Link to="/seller/orders" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]"><Truck className="h-5 w-5" />Seller fulfillment</Link>
+                <Link to="/cart" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]"><ShoppingCart className="h-5 w-5" />Cart {itemCount > 0 ? `(${itemCount})` : ""}</Link>
                 {isAdmin && (
-                  <Link to="/admin" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
-                    <Shield className="h-5 w-5" />
-                    Admin Console
-                  </Link>
+                  <Link to="/admin" className="flex min-h-[52px] items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]"><Shield className="h-5 w-5" />Admin Console</Link>
                 )}
                 <button
                   type="button"
-                  onClick={() => {
-                    logout();
-                    setMobileOpen(false);
-                  }}
+                  onClick={() => { logout(); setMobileOpen(false); }}
                   className="flex min-h-[52px] w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
                 >
-                  <LogOut className="h-5 w-5" />
-                  Logout
+                  <LogOut className="h-5 w-5" />Logout
                 </button>
               </div>
             ) : (
               <div className="space-y-2">
-                <Link to="/cart" className="flex min-h-[52px] items-center justify-center rounded-2xl border border-stone-200 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
-                  Cart {itemCount > 0 ? `(${itemCount})` : ""}
-                </Link>
-                <Link to={signupTarget} className="flex min-h-[52px] items-center justify-center rounded-2xl bg-[#A0452E] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#8B3525]">
-                  Create Free Account
-                </Link>
-                <Link to="/login" className="flex min-h-[52px] items-center justify-center rounded-2xl border border-stone-200 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">
-                  Login
-                </Link>
+                <Link to="/cart" className="flex min-h-[52px] items-center justify-center rounded-2xl border border-stone-200 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">Cart {itemCount > 0 ? `(${itemCount})` : ""}</Link>
+                <Link to={signupTarget} className="flex min-h-[52px] items-center justify-center rounded-2xl bg-[#A0452E] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#8B3525]">Create Free Account</Link>
+                <Link to="/login" className="flex min-h-[52px] items-center justify-center rounded-2xl border border-stone-200 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-[#FDF5F3]">Login</Link>
               </div>
             )}
           </div>
         </div>
       )}
 
+      {/* Mobile bottom nav — shown for both logged-in and guest users */}
       {showMobileBottomNav && (
         <>
           {mobileSellSheetOpen && (
@@ -675,10 +597,7 @@ const Navbar: React.FC = () => {
                   <button
                     key={item.to}
                     type="button"
-                    onClick={() => {
-                      setMobileSellSheetOpen(false);
-                      navigate(item.to);
-                    }}
+                    onClick={() => { setMobileSellSheetOpen(false); navigate(item.to); }}
                     className="flex min-h-[48px] items-center rounded-2xl border border-stone-200 px-4 py-3 text-left text-sm font-semibold text-stone-800 transition hover:border-[#E8A08E] hover:bg-[#FDF5F3]"
                   >
                     {item.label}
@@ -687,42 +606,39 @@ const Navbar: React.FC = () => {
               </div>
             </div>
           )}
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-white/95 shadow-[0_-12px_28px_-24px_rgba(28,25,23,0.4)] backdrop-blur-md lg:hidden">
-          <div className="mx-auto grid max-w-md grid-cols-5 px-2 py-2">
-            {mobileBottomItems.map((item) => {
-              const Icon = item.icon || LayoutGrid;
-              const isSell = item.label === "Sell";
-              const active = isSell ? mobileSellSheetOpen : pathMatches(location.pathname, item.to);
-              if (isSell) {
+
+          <div className="fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-white/95 shadow-[0_-12px_28px_-24px_rgba(28,25,23,0.4)] backdrop-blur-md lg:hidden">
+            <div className={`mx-auto grid max-w-md px-2 py-2 ${user ? "grid-cols-5" : "grid-cols-4"}`}>
+              {(user ? loggedInBottomItems : guestBottomItems).map((item) => {
+                const Icon = item.icon || LayoutGrid;
+                const isSell = item.label === "Sell";
+                const active = isSell ? mobileSellSheetOpen : pathMatches(location.pathname, item.to);
+                if (isSell) {
+                  return (
+                    <button
+                      key={item.label}
+                      type="button"
+                      onClick={() => setMobileSellSheetOpen((prev) => !prev)}
+                      className={`flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-xl px-1 text-[11px] font-semibold transition ${active ? "text-[#A0452E]" : "text-stone-500"}`}
+                    >
+                      <Icon className={`h-5 w-5 ${active ? "text-[#A0452E]" : "text-stone-400"}`} />
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                }
                 return (
-                  <button
+                  <Link
                     key={item.label}
-                    type="button"
-                    onClick={() => setMobileSellSheetOpen((prev) => !prev)}
-                    className={`flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-xl px-1 text-[11px] font-semibold transition ${
-                      active ? "text-[#A0452E]" : "text-stone-500"
-                    }`}
+                    to={item.to}
+                    className={`flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-xl px-1 text-[11px] font-semibold transition ${active ? "text-[#A0452E]" : "text-stone-500"}`}
                   >
                     <Icon className={`h-5 w-5 ${active ? "text-[#A0452E]" : "text-stone-400"}`} />
                     <span>{item.label}</span>
-                  </button>
+                  </Link>
                 );
-              }
-              return (
-                <Link
-                  key={item.label}
-                  to={item.to}
-                  className={`flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-xl px-1 text-[11px] font-semibold transition ${
-                    active ? "text-[#A0452E]" : "text-stone-500"
-                  }`}
-                >
-                  <Icon className={`h-5 w-5 ${active ? "text-[#A0452E]" : "text-stone-400"}`} />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
+              })}
+            </div>
           </div>
-        </div>
         </>
       )}
     </>
