@@ -24,7 +24,6 @@ const BlogPost: React.FC = () => {
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
 
-  const postUrl = `https://www.agrisoko254.com/blog/${slug}`;
   const shareUrl = `https://www.agrisoko254.com/share/blog/${slug}`;
 
 
