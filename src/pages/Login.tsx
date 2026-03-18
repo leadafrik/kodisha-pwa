@@ -690,9 +690,10 @@ const Login: React.FC = () => {
           <input
             type="text"
             value={signupData.emailOrPhone}
-            onChange={(e) =>
-              setSignupData({ ...signupData, emailOrPhone: e.target.value })
-            }
+            onChange={(e) => {
+              setSignupData({ ...signupData, emailOrPhone: e.target.value });
+              setError(null);
+            }}
             className="ui-input"
             placeholder="email@example.com or 0712345678"
           />
