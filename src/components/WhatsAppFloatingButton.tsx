@@ -26,7 +26,6 @@ const WhatsAppFloatingButton: React.FC = () => {
   const [position, setPosition] = useState<Position | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
-  const [flashMessage, setFlashMessage] = useState('');
 
   const getBounds = useCallback(() => {
     const width = buttonRef.current?.offsetWidth || 56;
@@ -184,22 +183,10 @@ const WhatsAppFloatingButton: React.FC = () => {
     navigate('/login?mode=signup&next=/browse');
   };
 
-  const handleNoThanks = () => {
+  const handleSkip = () => {
     setShowSignupPrompt(false);
     openWhatsappGroup();
   };
-
-  const handleLater = () => {
-    setShowSignupPrompt(false);
-    setFlashMessage('See you soon.');
-    openWhatsappGroup();
-  };
-
-  useEffect(() => {
-    if (!flashMessage) return;
-    const timer = window.setTimeout(() => setFlashMessage(''), 2000);
-    return () => window.clearTimeout(timer);
-  }, [flashMessage]);
 
   return (
     <>
@@ -244,45 +231,34 @@ const WhatsAppFloatingButton: React.FC = () => {
             onClick={() => setShowSignupPrompt(false)}
             aria-label="Close prompt"
           />
-          <div className="relative z-10 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl">
-            <p className="text-sm font-semibold text-slate-900">
-              Would you like to create an account first?
+          <div className="relative z-10 w-full max-w-sm rounded-2xl border border-stone-200 bg-white p-6 shadow-xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#A0452E]">
+              One quick step
             </p>
-            <p className="mt-2 text-sm text-slate-600">
-              It helps you save listings, message faster, and build trust before joining WhatsApp.
+            <h2 className="mt-2 text-lg font-bold text-stone-900">
+              Create a free account first
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-stone-600">
+              Members get faster responses from sellers and can save listings they find in the group. Takes 30 seconds — just your phone number.
             </p>
-            <div className="mt-4 grid gap-2 sm:grid-cols-3">
-              <button
-                type="button"
-                onClick={handleCreateAccount}
-                className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
-              >
-                Yes
-              </button>
-              <button
-                type="button"
-                onClick={handleNoThanks}
-                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                No
-              </button>
-              <button
-                type="button"
-                onClick={handleLater}
-                className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100"
-              >
-                Later
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={handleCreateAccount}
+              className="mt-5 w-full rounded-xl bg-[#A0452E] py-3 text-sm font-semibold text-white transition hover:bg-[#8B3525] active:scale-[0.98]"
+            >
+              Create free account →
+            </button>
+            <button
+              type="button"
+              onClick={handleSkip}
+              className="mt-3 w-full text-center text-xs text-stone-400 hover:text-stone-600"
+            >
+              Continue to WhatsApp without an account
+            </button>
           </div>
         </div>
       )}
 
-      {flashMessage && (
-        <div className="fixed bottom-24 left-1/2 z-[70] -translate-x-1/2 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-lg">
-          {flashMessage}
-        </div>
-      )}
     </>
   );
 };
