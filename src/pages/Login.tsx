@@ -269,6 +269,17 @@ const Login: React.FC = () => {
       await login(loginData.emailOrPhone, loginData.password);
       navigate(redirectTo);
     } catch (err: any) {
+      // Backend sent an OTP — open the verification screen
+      if (err.requiresVerification) {
+        const isPhone = err.verificationMethod === "sms";
+        setOtpEmail(err.verificationTarget || loginData.emailOrPhone.trim());
+        setOtpIsPhone(isPhone);
+        setOtpCode("");
+        setInfo(err.message);
+        setMode("otp-verify");
+        startOtpTimer();
+        return;
+      }
       const input = loginData.emailOrPhone.trim();
       const isPhoneInput = !input.includes("@") && /^[+\d\s\-()]+$/.test(input);
       const base = err?.message || "Login failed. Please try again.";
@@ -1056,7 +1067,7 @@ const Login: React.FC = () => {
       : mode === "forgot"
         ? "Reset your password"
         : mode === "otp-verify"
-          ? "Verify your email"
+          ? `Verify your ${otpIsPhone ? "phone" : "email"}`
           : mode === "otp-reset"
             ? "Set a new password"
             : "Welcome back";
@@ -1069,7 +1080,7 @@ const Login: React.FC = () => {
       : mode === "forgot" || mode === "otp-reset"
         ? "Use your email or registered phone number to regain secure access."
         : mode === "otp-verify"
-          ? "Enter the code we sent to complete your account setup."
+          ? `Enter the code we sent to your ${otpIsPhone ? "phone" : "email"} to continue.`
           : "Sign in securely to continue.";
 
   return (
