@@ -125,6 +125,7 @@ const DESCRIPTION_HINTS: Record<ListingCategory, { helper: string; placeholder: 
 };
 
 const DRAFT_STORAGE_KEY = "kodisha_listing_draft_v1";
+const LAST_LOCATION_KEY = "agrisoko_last_listing_location_v1";
 const LISTING_STARTED_TRACK_KEY = "agrisoko_funnel_listing_started_v2";
 const MIN_FLOW_STEP = 2;
 const MAX_FLOW_STEP = 3;
@@ -208,6 +209,27 @@ const CreateListing: React.FC = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.county]);
+
+  // Prefill location from last listing (only when no draft is active)
+  useEffect(() => {
+    if (hasDraft) return;
+    try {
+      const raw = localStorage.getItem(LAST_LOCATION_KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw);
+      if (!saved?.county) return;
+      setForm((prev) => ({
+        ...prev,
+        county: prev.county || saved.county || "",
+        constituency: prev.constituency || saved.constituency || "",
+        ward: prev.ward || saved.ward || "",
+        approximateLocation: prev.approximateLocation || saved.approximateLocation || "",
+      }));
+    } catch {
+      // ignore
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasDraft]);
 
   useEffect(() => {
     if (user?._id) {
@@ -713,6 +735,14 @@ const CreateListing: React.FC = () => {
 
         localStorage.removeItem(DRAFT_STORAGE_KEY);
         setHasDraft(false);
+        try {
+          localStorage.setItem(LAST_LOCATION_KEY, JSON.stringify({
+            county: form.county,
+            constituency: form.constituency,
+            ward: form.ward,
+            approximateLocation: form.approximateLocation,
+          }));
+        } catch { /* ignore */ }
         trackTrafficClick({
           action:
             singleResult.publishStatus === "active"
@@ -786,6 +816,14 @@ const CreateListing: React.FC = () => {
 
       localStorage.removeItem(DRAFT_STORAGE_KEY);
       setHasDraft(false);
+      try {
+        localStorage.setItem(LAST_LOCATION_KEY, JSON.stringify({
+          county: form.county,
+          constituency: form.constituency,
+          ward: form.ward,
+          approximateLocation: form.approximateLocation,
+        }));
+      } catch { /* ignore */ }
       trackTrafficClick({
         action:
           activeCount > 0
