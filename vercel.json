@@ -85,11 +85,6 @@
       "permanent": true
     },
     {
-      "source": "/blog",
-      "destination": "/",
-      "permanent": true
-    },
-    {
       "source": "/careers",
       "destination": "/",
       "permanent": true
