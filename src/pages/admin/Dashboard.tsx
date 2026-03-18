@@ -13,6 +13,7 @@ import {
   Building2,
   Megaphone,
   Mail,
+  Banknote,
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { adminApiRequest } from "../../config/api";
@@ -526,6 +527,29 @@ const AdminDashboard: React.FC = () => {
                   <li>- Match payer phone to till records</li>
                   <li>- Approve, reject, or refund requests</li>
                   <li>- Turn boosting on only after review</li>
+                </ul>
+              </Link>
+
+              <Link
+                to="/admin/bonuses/first-listing"
+                className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="h-12 w-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                    <Banknote size={24} />
+                  </div>
+                  <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+                    Payouts
+                  </span>
+                </div>
+                <h3 className="mt-4 text-xl font-semibold text-slate-900">KES 50 first-listing bonus</h3>
+                <p className="mt-2 text-sm text-slate-600">
+                  Track and pay out KES 50 to sellers who completed ID verification and published their first listing.
+                </p>
+                <ul className="mt-4 space-y-2 text-sm text-slate-600">
+                  <li>- Only shows verified, approved sellers</li>
+                  <li>- Record M-Pesa ref when paid</li>
+                  <li>- Separate tabs for pending and paid</li>
                 </ul>
               </Link>
             </div>
