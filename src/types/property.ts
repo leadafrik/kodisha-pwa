@@ -254,7 +254,7 @@ export interface AuthContextType {
    verifyEmailOtp: (email: string, code: string) => Promise<void>;
   requestSmsOtp: (phone: string) => Promise<void>;
   verifySmsOtp: (phone: string, code: string) => Promise<void>;
-  resetPasswordWithEmail: (params: { email: string; code: string; newPassword: string }) => Promise<void>;
+  resetPasswordWithEmail: (params: { email?: string; phone?: string; code: string; newPassword: string }) => Promise<void>;
   loginWithFacebook: (
     accessToken: string,
     fbUserId: string,

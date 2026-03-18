@@ -428,10 +428,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const resetPasswordWithEmail = async ({
     email,
+    phone,
     code,
     newPassword,
   }: {
-    email: string;
+    email?: string;
+    phone?: string;
     code: string;
     newPassword: string;
   }) => {
@@ -439,7 +441,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const res: any = await apiRequest(API_ENDPOINTS.auth.passwordReset, {
         method: "POST",
-        body: JSON.stringify({ email, code, newPassword }),
+        body: JSON.stringify({ email, phone, code, newPassword }),
       });
 
       if (!res.success || !res.user || !(res.accessToken || res.token)) {

@@ -68,6 +68,7 @@ const Login: React.FC = () => {
     login,
     register,
     requestEmailOtp,
+    requestSmsOtp,
     verifyEmailOtp,
     resetPasswordWithEmail,
     loading,
@@ -126,6 +127,7 @@ const Login: React.FC = () => {
   // OTP State (email only for now)
   const [otpCode, setOtpCode] = useState("");
   const [otpEmail, setOtpEmail] = useState("");
+  const [resetViaPhone, setResetViaPhone] = useState(false);
   const [otpTimer, setOtpTimer] = useState(0);
   const [canResendOtp, setCanResendOtp] = useState(true);
 
@@ -383,21 +385,29 @@ const Login: React.FC = () => {
     resetMessages();
 
     if (!resetData.emailOrPhone.trim()) {
-      setError("Enter your email address.");
+      setError("Enter your email or phone number.");
       return;
     }
 
     try {
       const input = resetData.emailOrPhone.trim();
-      if (!input.includes("@")) {
-        setError("Password reset is available by email only right now.");
-        return;
+      const isPhone = !input.includes("@");
+
+      if (isPhone) {
+        await requestSmsOtp(input);
+        setOtpEmail(input);
+        setResetViaPhone(true);
+        setMode("otp-reset");
+        startOtpTimer();
+        setInfo("Reset code sent to your phone via SMS.");
+      } else {
+        await requestEmailOtp(input);
+        setOtpEmail(input.toLowerCase());
+        setResetViaPhone(false);
+        setMode("otp-reset");
+        startOtpTimer();
+        setInfo("Reset code sent. Check your email.");
       }
-      await requestEmailOtp(input);
-      setOtpEmail(input.toLowerCase());
-      setMode("otp-reset");
-      startOtpTimer();
-      setInfo("Reset code sent. Check your email.");
     } catch (err: any) {
       setError(err?.message || "Failed to send reset code.");
     }
@@ -424,11 +434,12 @@ const Login: React.FC = () => {
 
     try {
       await resetPasswordWithEmail({
-        email: otpEmail,
+        ...(resetViaPhone ? { phone: otpEmail } : { email: otpEmail }),
         code: resetData.code.trim(),
         newPassword: resetData.newPassword,
       });
       setMode("login");
+      setResetViaPhone(false);
       setInfo("Password reset successfully. Please log in.");
       setResetData({ emailOrPhone: "", code: "", newPassword: "", confirmPassword: "" });
     } catch (err: any) {
@@ -859,16 +870,16 @@ const Login: React.FC = () => {
   const renderForgot = () => (
     <form onSubmit={handleForgotRequest} className="space-y-4">
       <div>
-        <label className="ui-label">Email</label>
+        <label className="ui-label">Email or phone number</label>
         <input
-          type="email"
+          type="text"
           value={resetData.emailOrPhone}
           onChange={(e) => setResetData({ ...resetData, emailOrPhone: e.target.value })}
           className="ui-input"
-          placeholder="you@example.com"
+          placeholder="you@example.com or 07XXXXXXXX"
         />
         <p className="mt-2 text-xs text-stone-500">
-          For now, password resets are sent by email only.
+          Enter your email to receive a code by email, or your registered phone number to receive an SMS.
         </p>
       </div>
 
@@ -987,7 +998,7 @@ const Login: React.FC = () => {
         ? "About 10 seconds, then browse live listings."
         : "Create your account in about 10 seconds, then browse live listings."
       : mode === "forgot" || mode === "otp-reset"
-        ? "Use your email address to regain secure access."
+        ? "Use your email or registered phone number to regain secure access."
         : mode === "otp-verify"
           ? "Enter the code we sent to complete your account setup."
           : "Sign in securely to continue.";
