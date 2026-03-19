@@ -16,6 +16,7 @@ import B2B from './pages/B2B';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import WhatsAppFloatingButton from './components/WhatsAppFloatingButton';
+import ChatbotWidget from './components/ChatbotWidget';
 import CookieConsentBanner from './components/CookieConsentBanner';
 import WelcomeModal from './components/WelcomeModal';
 import NotFound from './pages/NotFound';
@@ -380,6 +381,7 @@ const AppShell = () => {
       </div>
       <Footer />
       <WhatsAppFloatingButton />
+      <ChatbotWidget />
       <CookieConsentBanner />
       <WelcomeModal />
     </div>
