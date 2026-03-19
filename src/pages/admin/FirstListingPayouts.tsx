@@ -1,9 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { RefreshCw, CheckCircle } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
-import { getAuthHeaders } from "../../services/authService";
-
-const API_BASE = process.env.REACT_APP_API_URL || "";
+import { adminApiRequest } from "../../config/api";
 
 interface BonusUser {
   _id: string;
@@ -47,13 +45,9 @@ const FirstListingPayouts: React.FC = () => {
     setLoading(true);
     setError("");
     try {
-      const headers = getAuthHeaders();
-      const res = await fetch(
-        `${API_BASE}/api/admin/bonuses/first-listing?paid=${tab === "paid"}`,
-        { headers }
+      const { data } = await adminApiRequest(
+        `/api/admin/bonuses/first-listing?paid=${tab === "paid"}`
       );
-      if (!res.ok) throw new Error(`Server error ${res.status}`);
-      const data = await res.json();
       setItems(Array.isArray(data.users) ? data.users : []);
     } catch (err: any) {
       setError(err?.message || "Unable to load payouts.");
@@ -71,15 +65,10 @@ const FirstListingPayouts: React.FC = () => {
     setSubmitting(true);
     setSubmitError("");
     try {
-      const headers = { ...getAuthHeaders(), "Content-Type": "application/json" };
-      const res = await fetch(
-        `${API_BASE}/api/admin/bonuses/first-listing/${markingUser._id}/mark-paid`,
-        { method: "POST", headers, body: JSON.stringify({ mpesaRef: mpesaRef.trim() }) }
+      await adminApiRequest(
+        `/api/admin/bonuses/first-listing/${markingUser._id}/mark-paid`,
+        { method: "POST", body: JSON.stringify({ mpesaRef: mpesaRef.trim() }) }
       );
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body?.error || `Server error ${res.status}`);
-      }
       setMarkingUser(null);
       setMpesaRef("");
       void loadItems();
