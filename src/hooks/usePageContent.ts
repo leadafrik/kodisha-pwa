@@ -16,7 +16,7 @@ export const usePageContent = (pageKey: string) => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`/api/content/public/${pageKey}`);
+        const response = await fetch(`/api/admin/content/public/${pageKey}`);
         if (!response.ok) throw new Error('Failed to fetch content');
         
         const data = await response.json();
