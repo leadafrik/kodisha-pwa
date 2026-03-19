@@ -14,7 +14,6 @@ interface ChatSession {
 }
 
 const BRAND = '#A0452E';
-const BRAND_DARK = '#8B3525';
 
 const ChatbotWidget: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
