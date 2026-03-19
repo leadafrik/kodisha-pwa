@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.agrisoko254.www.twa",
+      "sha256_cert_fingerprints": [
+        "B8:97:7C:EA:FE:06:DB:51:00:25:B7:D1:38:E9:0B:47:EA:16:6A:84:36:AC:AF:B7:4C:EB:1C:48:57:A6:D9:9C"
+      ]
+    }
+  }
+]
