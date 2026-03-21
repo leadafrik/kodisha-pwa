@@ -67,7 +67,7 @@ const NotificationCenter: React.FC = () => {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-2xl z-50 max-h-96 overflow-y-auto">
           {/* Header */}
-          <div className="sticky top-0 bg-gradient-to-r from-green-50 to-blue-50 border-b border-gray-200 p-4 flex justify-between items-center">
+          <div className="sticky top-0 bg-gradient-to-r from-terra-50 to-amber-sun-50 border-b border-gray-200 p-4 flex justify-between items-center">
             <h3 className="text-lg font-bold text-gray-900">Notifications</h3>
             <div className="flex gap-2">
               <button
@@ -132,7 +132,7 @@ const NotificationCenter: React.FC = () => {
                 <div
                   key={notification.id}
                   className={`p-4 hover:bg-gray-50 transition cursor-pointer ${
-                    !notification.read ? 'bg-blue-50' : ''
+                    !notification.read ? 'bg-terra-50' : ''
                   }`}
                   onClick={() => handleNotificationClick(notification)}
                 >
@@ -149,7 +149,7 @@ const NotificationCenter: React.FC = () => {
                       </p>
                     </div>
                     {!notification.read && (
-                      <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0" />
+                      <div className="w-2 h-2 bg-terra-500 rounded-full mt-2 flex-shrink-0" />
                     )}
                   </div>
                 </div>

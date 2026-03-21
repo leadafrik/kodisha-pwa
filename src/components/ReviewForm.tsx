@@ -130,7 +130,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
           onChange={(e) => setComment(e.target.value)}
           placeholder="Share your experience (minimum 10 characters)"
           rows={5}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-terra-500"
         />
         <p className="text-xs text-gray-500 mt-1">
           {comment.length} / 500 characters
@@ -141,7 +141,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       <button
         type="submit"
         disabled={submitMutation.isPending || comment.length < 10}
-        className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 font-medium"
+        className="w-full px-4 py-2 bg-terra-500 text-white rounded-lg hover:bg-terra-600 disabled:opacity-50 font-medium"
       >
         {submitMutation.isPending ? 'Submitting...' : 'Submit Review'}
       </button>

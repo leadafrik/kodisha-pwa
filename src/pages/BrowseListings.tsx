@@ -23,7 +23,6 @@ import {
   Truck,
 } from "lucide-react";
 import RaffleCampaign from "../components/RaffleCampaign";
-import MarketplaceSupportStrip from "../components/MarketplaceSupportStrip";
 
 type Category = "all" | "produce" | "livestock" | "inputs" | "service";
 type ServiceSubType = "all" | "equipment" | "professional_services";
@@ -662,10 +661,6 @@ const BrowseListings: React.FC = () => {
             )}
           </div>
 
-          <MarketplaceSupportStrip
-            title="Need help before you contact a seller?"
-            subtitle="Support is available on WhatsApp, by email, and through the Agrisoko app."
-          />
 
           <div className="fade-up rounded-[2rem] border border-stone-200 bg-white/92 p-4 md:p-5 shadow-sm">
             <div className="space-y-3">

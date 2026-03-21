@@ -122,7 +122,7 @@ const NotificationBell: React.FC = () => {
   const priorityColors = {
     urgent: 'bg-red-50 border-l-4 border-red-500',
     high: 'bg-orange-50 border-l-4 border-orange-500',
-    normal: 'bg-blue-50 border-l-4 border-blue-500',
+    normal: 'bg-terra-50 border-l-4 border-terra-400',
   };
 
   return (
@@ -201,7 +201,7 @@ const NotificationBell: React.FC = () => {
             <div className="p-3 border-t text-center">
               <a
                 href="/notifications"
-                className="text-blue-500 hover:text-blue-600 text-sm font-medium"
+                className="text-terra-500 hover:text-terra-600 text-sm font-medium"
               >
                 View All Notifications
               </a>

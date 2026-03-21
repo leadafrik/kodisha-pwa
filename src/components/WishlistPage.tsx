@@ -80,7 +80,7 @@ const WishlistPage: React.FC = () => {
                 </h3>
 
                 <div className="mb-3">
-                  <p className="text-2xl font-bold text-blue-600">
+                  <p className="text-2xl font-bold text-terra-500">
                     KES {item.listing.price?.toLocaleString()}
                   </p>
                   <p className="text-sm text-gray-500">
@@ -102,7 +102,7 @@ const WishlistPage: React.FC = () => {
 
                 {/* Notes */}
                 {item.notes && (
-                  <div className="mb-3 bg-blue-50 p-2 rounded text-sm text-gray-700">
+                  <div className="mb-3 bg-terra-50 p-2 rounded text-sm text-gray-700">
                     <p className="font-medium text-gray-600">Your note:</p>
                     <p>{item.notes}</p>
                   </div>
@@ -115,10 +115,10 @@ const WishlistPage: React.FC = () => {
 
                 {/* Action Buttons */}
                 <div className="mt-4 space-y-2">
-                  <button className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium">
+                  <button className="w-full px-4 py-2 bg-terra-500 text-white rounded-lg hover:bg-terra-600 font-medium">
                     View Details
                   </button>
-                  <button className="w-full px-4 py-2 border border-blue-500 text-blue-500 rounded-lg hover:bg-blue-50 font-medium">
+                  <button className="w-full px-4 py-2 border border-terra-500 text-terra-500 rounded-lg hover:bg-terra-50 font-medium">
                     Message Seller
                   </button>
                 </div>
