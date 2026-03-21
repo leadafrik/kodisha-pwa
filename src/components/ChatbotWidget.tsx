@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 interface Message {
   id: string;
@@ -14,6 +14,8 @@ interface ChatSession {
 }
 
 const BRAND = '#A0452E';
+const BUTTON_SIZE = 52;
+const MARGIN = 24;
 
 const ChatbotWidget: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,6 +26,20 @@ const ChatbotWidget: React.FC = () => {
   const [error, setError] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const [position, setPosition] = useState<{ x: number; y: number }>(() => {
+    try {
+      const saved = localStorage.getItem('chatbot-btn-position');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return {
+      x: window.innerWidth - BUTTON_SIZE - MARGIN,
+      y: window.innerHeight - BUTTON_SIZE - MARGIN,
+    };
+  });
+  const isDragging = useRef(false);
+  const hasMoved = useRef(false);
+  const dragOffset = useRef({ x: 0, y: 0 });
 
   const API_URL = process.env.REACT_APP_API_URL || 'https://kodisha-backend-vjr9.onrender.com/api';
 
@@ -36,6 +52,75 @@ const ChatbotWidget: React.FC = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging.current) return;
+      hasMoved.current = true;
+      setPosition({
+        x: Math.max(0, Math.min(window.innerWidth - BUTTON_SIZE, e.clientX - dragOffset.current.x)),
+        y: Math.max(0, Math.min(window.innerHeight - BUTTON_SIZE, e.clientY - dragOffset.current.y)),
+      });
+    };
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isDragging.current) return;
+      hasMoved.current = true;
+      const touch = e.touches[0];
+      setPosition({
+        x: Math.max(0, Math.min(window.innerWidth - BUTTON_SIZE, touch.clientX - dragOffset.current.x)),
+        y: Math.max(0, Math.min(window.innerHeight - BUTTON_SIZE, touch.clientY - dragOffset.current.y)),
+      });
+      e.preventDefault();
+    };
+    const stopDrag = () => {
+      if (!isDragging.current) return;
+      isDragging.current = false;
+      setPosition(prev => {
+        localStorage.setItem('chatbot-btn-position', JSON.stringify(prev));
+        return prev;
+      });
+    };
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', stopDrag);
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchend', stopDrag);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', stopDrag);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', stopDrag);
+    };
+  }, []);
+
+  const handleButtonMouseDown = useCallback((e: React.MouseEvent) => {
+    isDragging.current = true;
+    hasMoved.current = false;
+    dragOffset.current = { x: e.clientX - position.x, y: e.clientY - position.y };
+    e.preventDefault();
+  }, [position]);
+
+  const handleButtonTouchStart = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    isDragging.current = true;
+    hasMoved.current = false;
+    dragOffset.current = { x: touch.clientX - position.x, y: touch.clientY - position.y };
+  }, [position]);
+
+  const handleButtonClick = () => {
+    if (!hasMoved.current) setIsOpen(true);
+  };
+
+  const getChatWindowStyle = (): React.CSSProperties => {
+    const winW = 360;
+    const winH = Math.min(540, window.innerHeight - 48);
+    const gap = 10;
+    let left = position.x + BUTTON_SIZE - winW;
+    let top = position.y - winH - gap;
+    if (top < MARGIN) top = position.y + BUTTON_SIZE + gap;
+    left = Math.max(MARGIN, Math.min(window.innerWidth - winW - MARGIN, left));
+    top = Math.max(MARGIN, Math.min(window.innerHeight - winH - MARGIN, top));
+    return { left, top, width: Math.min(winW, window.innerWidth - MARGIN * 2), height: winH };
+  };
 
   const startChat = async () => {
     try {
@@ -140,19 +225,21 @@ const ChatbotWidget: React.FC = () => {
       {/* Floating button */}
       {!isOpen && (
         <button
-          onClick={() => setIsOpen(true)}
+          onMouseDown={handleButtonMouseDown}
+          onTouchStart={handleButtonTouchStart}
+          onClick={handleButtonClick}
           aria-label="Open chat"
           style={{
             position: 'fixed',
-            bottom: 24,
-            right: 24,
-            width: 52,
-            height: 52,
+            left: position.x,
+            top: position.y,
+            width: BUTTON_SIZE,
+            height: BUTTON_SIZE,
             borderRadius: '50%',
             backgroundColor: BRAND,
             border: 'none',
             color: 'white',
-            cursor: 'pointer',
+            cursor: 'grab',
             boxShadow: '0 4px 16px rgba(160,69,46,0.4)',
             display: 'flex',
             alignItems: 'center',
@@ -176,12 +263,7 @@ const ChatbotWidget: React.FC = () => {
           aria-label="Soko — Agrisoko assistant"
           style={{
             position: 'fixed',
-            bottom: 24,
-            right: 24,
-            width: 360,
-            maxWidth: 'calc(100vw - 32px)',
-            height: 540,
-            maxHeight: 'calc(100vh - 40px)',
+            ...getChatWindowStyle(),
             background: 'white',
             borderRadius: 16,
             boxShadow: '0 8px 40px rgba(0,0,0,0.18)',
