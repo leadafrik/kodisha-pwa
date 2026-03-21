@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { adminApiRequest, API_BASE_URL } from '../config/api';
 
 export interface PageContentItem {
   key: string;
@@ -16,7 +17,7 @@ export const usePageContent = (pageKey: string) => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`/api/admin/content/public/${pageKey}`);
+        const response = await fetch(`${API_BASE_URL}/content/public/${pageKey}`);
         if (!response.ok) throw new Error('Failed to fetch content');
         
         const data = await response.json();
@@ -47,7 +48,7 @@ export const usePageContents = (pageName: string) => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`/api/content/page/${pageName}`);
+        const response = await fetch(`${API_BASE_URL}/content/page/${pageName}`);
         if (!response.ok) throw new Error('Failed to fetch page content');
         
         const data = await response.json();
@@ -68,34 +69,13 @@ export const usePageContents = (pageName: string) => {
   return { contents, loading, error };
 };
 
-export const updatePageContent = async (key: string, content: string, token: string) => {
-  const response = await fetch(`/api/admin/content/${key}`, {
+export const updatePageContent = async (key: string, content: string, _token: string) => {
+  return adminApiRequest(`${API_BASE_URL}/admin/content/${key}`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
     body: JSON.stringify({ content }),
   });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to update content');
-  }
-
-  return response.json();
 };
 
-export const fetchAllContent = async (token: string) => {
-  const response = await fetch('/api/admin/content', {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch content');
-  }
-
-  return response.json();
+export const fetchAllContent = async (_token: string) => {
+  return adminApiRequest(`${API_BASE_URL}/admin/content`);
 };
