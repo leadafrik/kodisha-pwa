@@ -5,9 +5,12 @@ import {
   Copy,
   Flag,
   Lock,
+  Pencil,
   Plus,
   Search,
+  Shield,
   ShieldCheck,
+  Trash2,
   UserPlus,
   X,
 } from "lucide-react";
@@ -305,6 +308,61 @@ const AdminUserManagement: React.FC = () => {
       setShowUserDetail(false);
     } catch (err: any) {
       setError(err?.message || "Failed to clear flags.");
+    }
+  };
+
+  const handleUpdateEmail = async (userId: string, email: string) => {
+    try {
+      await adminApiRequest(`${API_BASE_ADMIN_USERS}/${userId}/email`, {
+        method: "PUT",
+        body: JSON.stringify({ email }),
+      });
+      setError("");
+      void handleSearch(page);
+      setShowUserDetail(false);
+    } catch (err: any) {
+      setError(err?.message || "Failed to update email.");
+    }
+  };
+
+  const handleUpdatePhone = async (userId: string, phone: string) => {
+    try {
+      await adminApiRequest(`${API_BASE_ADMIN_USERS}/${userId}/phone`, {
+        method: "PUT",
+        body: JSON.stringify({ phone }),
+      });
+      setError("");
+      void handleSearch(page);
+      setShowUserDetail(false);
+    } catch (err: any) {
+      setError(err?.message || "Failed to update phone.");
+    }
+  };
+
+  const handleUpdateRole = async (userId: string, role: string) => {
+    try {
+      await adminApiRequest(`${API_BASE_ADMIN_USERS}/${userId}/role`, {
+        method: "PUT",
+        body: JSON.stringify({ role }),
+      });
+      setError("");
+      void handleSearch(page);
+      setShowUserDetail(false);
+    } catch (err: any) {
+      setError(err?.message || "Failed to update role.");
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      await adminApiRequest(`${API_BASE_ADMIN_USERS}/${userId}`, {
+        method: "DELETE",
+      });
+      setError("");
+      void handleSearch(page);
+      setShowUserDetail(false);
+    } catch (err: any) {
+      setError(err?.message || "Failed to delete user.");
     }
   };
 
@@ -652,6 +710,10 @@ const AdminUserManagement: React.FC = () => {
           onUnsuspend={handleUnsuspend}
           onFlag={handleFlagUser}
           onClearFlags={handleClearFlags}
+          onUpdateEmail={handleUpdateEmail}
+          onUpdatePhone={handleUpdatePhone}
+          onUpdateRole={handleUpdateRole}
+          onDelete={handleDeleteUser}
         />
       ) : null}
 
@@ -1076,7 +1138,18 @@ interface UserDetailModalProps {
   onUnsuspend: (userId: string) => void;
   onFlag: (userId: string, reason: string) => void;
   onClearFlags: (userId: string) => void;
+  onUpdateEmail: (userId: string, email: string) => void;
+  onUpdatePhone: (userId: string, phone: string) => void;
+  onUpdateRole: (userId: string, role: string) => void;
+  onDelete: (userId: string) => void;
 }
+
+const ROLE_OPTIONS = [
+  { value: "user", label: "User" },
+  { value: "moderator", label: "Moderator" },
+  { value: "admin", label: "Admin" },
+  { value: "super_admin", label: "Super Admin" },
+];
 
 const UserDetailModal: React.FC<UserDetailModalProps> = ({
   user,
@@ -1085,10 +1158,18 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
   onUnsuspend,
   onFlag,
   onClearFlags,
+  onUpdateEmail,
+  onUpdatePhone,
+  onUpdateRole,
+  onDelete,
 }) => {
   const [suspendReason, setSuspendReason] = useState("");
   const [flagReason, setFlagReason] = useState("");
-  const [action, setAction] = useState<"view" | "suspend" | "flag">("view");
+  const [newEmail, setNewEmail] = useState(user.email || "");
+  const [newPhone, setNewPhone] = useState(user.phone || "");
+  const [newRole, setNewRole] = useState(user.role || "user");
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [action, setAction] = useState<"view" | "suspend" | "flag" | "edit-email" | "edit-phone" | "edit-role" | "delete">("view");
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm">
@@ -1127,33 +1208,69 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
           ) : null}
 
           {action === "view" ? (
-            <div className="grid gap-3 sm:grid-cols-3">
-              <button
-                type="button"
-                onClick={() => setAction("suspend")}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-100"
-              >
-                <Lock className="h-4 w-4" />
-                {user.accountStatus === "suspended" ? "Unsuspend" : "Suspend account"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setAction("flag")}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700 transition hover:bg-amber-100"
-              >
-                <Flag className="h-4 w-4" />
-                Flag for fraud
-              </button>
-              {user.fraudFlags && user.fraudFlags > 0 ? (
+            <div className="space-y-3">
+              <div className="grid gap-3 sm:grid-cols-3">
                 <button
                   type="button"
-                  onClick={() => onClearFlags(user._id)}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-700 transition hover:bg-sky-100"
+                  onClick={() => setAction("edit-email")}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-stone-50 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-stone-100"
                 >
-                  <CheckCircle2 className="h-4 w-4" />
-                  Clear flags
+                  <Pencil className="h-4 w-4" />
+                  Edit email
                 </button>
-              ) : null}
+                <button
+                  type="button"
+                  onClick={() => setAction("edit-phone")}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-stone-50 px-4 py-3 text-sm font-semibold text-stone-700 transition hover:bg-stone-100"
+                >
+                  <Pencil className="h-4 w-4" />
+                  Edit phone
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAction("edit-role")}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-50 px-4 py-3 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100"
+                >
+                  <Shield className="h-4 w-4" />
+                  Change role
+                </button>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <button
+                  type="button"
+                  onClick={() => setAction("suspend")}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-100"
+                >
+                  <Lock className="h-4 w-4" />
+                  {user.accountStatus === "suspended" ? "Unsuspend" : "Suspend account"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAction("flag")}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700 transition hover:bg-amber-100"
+                >
+                  <Flag className="h-4 w-4" />
+                  Flag for fraud
+                </button>
+                {user.fraudFlags && user.fraudFlags > 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => onClearFlags(user._id)}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-700 transition hover:bg-sky-100"
+                  >
+                    <CheckCircle2 className="h-4 w-4" />
+                    Clear flags
+                  </button>
+                ) : null}
+              </div>
+              <button
+                type="button"
+                onClick={() => setAction("delete")}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-700"
+              >
+                <Trash2 className="h-4 w-4" />
+                Permanently delete account
+              </button>
             </div>
           ) : null}
 
@@ -1217,6 +1334,119 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                   onClick={() => setAction("view")}
                   className="ui-btn-secondary rounded-2xl px-5 py-3 text-sm font-semibold"
                 >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : null}
+
+          {action === "edit-email" ? (
+            <div className="space-y-3 rounded-[1.5rem] border border-[#eadccf] bg-[#fbf7f2] p-5">
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-stone-700">New email address</span>
+                <input
+                  type="email"
+                  value={newEmail}
+                  onChange={(event) => setNewEmail(event.target.value)}
+                  className={INPUT_CLASS}
+                  placeholder="new@email.com"
+                />
+              </label>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => onUpdateEmail(user._id, newEmail)}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#8f5135] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#6f3d27]"
+                >
+                  Save email
+                </button>
+                <button type="button" onClick={() => setAction("view")} className="ui-btn-secondary rounded-2xl px-5 py-3 text-sm font-semibold">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : null}
+
+          {action === "edit-phone" ? (
+            <div className="space-y-3 rounded-[1.5rem] border border-[#eadccf] bg-[#fbf7f2] p-5">
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-stone-700">New phone number</span>
+                <input
+                  type="tel"
+                  value={newPhone}
+                  onChange={(event) => setNewPhone(event.target.value)}
+                  className={INPUT_CLASS}
+                  placeholder="07XXXXXXXX"
+                />
+              </label>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => onUpdatePhone(user._id, newPhone)}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#8f5135] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#6f3d27]"
+                >
+                  Save phone
+                </button>
+                <button type="button" onClick={() => setAction("view")} className="ui-btn-secondary rounded-2xl px-5 py-3 text-sm font-semibold">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : null}
+
+          {action === "edit-role" ? (
+            <div className="space-y-3 rounded-[1.5rem] border border-[#eadccf] bg-[#fbf7f2] p-5">
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-stone-700">Role</span>
+                <select
+                  value={newRole}
+                  onChange={(event) => setNewRole(event.target.value)}
+                  className={INPUT_CLASS}
+                >
+                  {ROLE_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </label>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => onUpdateRole(user._id, newRole)}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                >
+                  Save role
+                </button>
+                <button type="button" onClick={() => setAction("view")} className="ui-btn-secondary rounded-2xl px-5 py-3 text-sm font-semibold">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : null}
+
+          {action === "delete" ? (
+            <div className="space-y-3 rounded-[1.5rem] border border-red-200 bg-red-50 p-5">
+              <div className="text-sm font-semibold text-red-700">This cannot be undone. The account and all associated data will be permanently removed.</div>
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-stone-700">Type <strong>{user.fullName}</strong> to confirm</span>
+                <input
+                  type="text"
+                  value={deleteConfirm}
+                  onChange={(event) => setDeleteConfirm(event.target.value)}
+                  className={INPUT_CLASS}
+                  placeholder={user.fullName}
+                />
+              </label>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  disabled={deleteConfirm !== user.fullName}
+                  onClick={() => onDelete(user._id)}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Permanently delete
+                </button>
+                <button type="button" onClick={() => setAction("view")} className="ui-btn-secondary rounded-2xl px-5 py-3 text-sm font-semibold">
                   Cancel
                 </button>
               </div>
